@@ -135,12 +135,14 @@ endif()
 
 message("Building with LUA_SRC_DIR ${LUA_SRC_DIR}")
 
-set_source_files_properties(
-	${LUA_SRC_DIR}/lundump.c 
-	PROPERTIES
-	COMPILE_FLAGS -Wno-string-plus-int
-)
+#set_source_files_properties(
+#	${LUA_SRC_DIR}/lundump.c 
+#	PROPERTIES
+#	COMPILE_FLAGS -Wno-string-plus-int
+#)
+
 aux_source_directory(${LUA_SRC_DIR} LUA_CORE_SRC_LIST)
+list(FILTER LUA_CORE_SRC_LIST EXCLUDE REGEX "\/onelua.c$")
 
 # not currently using lua_user_cfg.h, loading my library manually in C instead
 #include_directories(${SRC_DIR}/main)
@@ -185,8 +187,9 @@ add_library(alexgames_varint STATIC
 add_library(alexgames_utf8 STATIC
 	cpp_libs/utils/utf8.c)
 
+add_library(lua ${LUA_CORE_SRC_LIST})
 
-add_library(alexgames_core STATIC ${LUA_CORE_SRC_LIST}
+add_library(alexgames_core STATIC
 	lua_api/lua_api.c
 	lua_api/lua_api_dict.c
 	lua_api/lua_api_utils.c
@@ -209,6 +212,7 @@ add_library(alexgames_core STATIC ${LUA_CORE_SRC_LIST}
 )
 
 
+target_include_directories(alexgames_core PRIVATE ${LUA_SRC_DIR})
 target_include_directories(alexgames_core PRIVATE cpp_libs/utils)
 target_include_directories(alexgames_core PRIVATE ${ZIPCONF_H_PATH})
 target_include_directories(alexgames_core PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
@@ -219,6 +223,8 @@ target_include_directories(alexgames_core PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 if (ENABLE_WORD_DICT)
 #list(APPEND libs alexgames_dict)
 endif()
+
+list(APPEND libs "lua")
 
 if( WIN32 )
 else()
@@ -241,7 +247,6 @@ target_link_libraries(alexgames_core ${libs})
 else()
 target_link_libraries(alexgames_core ${libs})
 endif()
-target_include_directories(alexgames_core PUBLIC ${LUA_SRC_DIR})
 target_include_directories(alexgames_core PUBLIC lua_api)
 target_include_directories(alexgames_core PUBLIC game_api)
 target_include_directories(alexgames_core PUBLIC cpp_libs/history_browse_ui)
