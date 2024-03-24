@@ -23822,14 +23822,25 @@ function core.life_increment(state)
 	local new_board = copy_board(state.game.board)
 	for y=1,#state.game.board do
 		for x=1,#state.game.board[y] do
-			local mine = state.game.board[y][x].has_mine
+			local prev_mine_state = state.game.board[y][x].has_mine
 			local neighbour_count = count_neighbours(state, {y=y, x=x})
-			if mine and 2 <= neighbour_count and neighbour_count <= 3 then
-				new_board[y][x].has_mine = true
-			elseif not mine and neighbour_count == 3 then
-				new_board[y][x].has_mine = true
+
+			local new_mine_state
+			if prev_mine_state and 2 <= neighbour_count and neighbour_count <= 3 then
+				new_mine_state = true
+			elseif not prev_mine_state and neighbour_count == 3 then
+				new_mine_state = true
 			else
-				new_board[y][x].has_mine = false
+				new_mine_state = false
+			end
+
+			new_board[y][x].has_mine = new_mine_state
+			-- when a mine goes away, leave an unrevealed cell in its wake
+			-- I'm not sure if this will be too hard yet, or if
+			-- it would be better to have separate states for "explicitly revealed by player"
+			-- and "was revealed from the start", and only un-reveal the latter
+			if prev_mine_state and not new_mine_state then
+				new_board[y][x].revealed = false
 			end
 		end
 	end
@@ -23865,26 +23876,54 @@ function core.remove_flags_if_no_longer_valid(state)
 			local cell = state.game.board[y][x]
 			if not cell.has_mine and cell.flagged_by_player ~= nil then
 				cell.flagged_by_player = nil
+				cell.revealed = true
 			end
 		end
 	end
 end
 
-function core.handle_move(state, player, move, y, x)
-	local rc
+local function is_valid_move(move, cell_prev_state, cell_current_state, y, x)
 	if move == core.MOVE_FLAG_CELL then
-		rc = core.flag_cell(state, player, y, x)
-	elseif move == core.MOVE_CLICK_CELL then
-		rc = core.clicked_cell(state, player, y, x)
-	else
-		error(string.format("unhandled move type %s", move))
-	end
+		if not cell_current_state.revealed then
+			return true
+		end
 
-	-- NOTE: this is basically the only difference between this game ("minesweeper_life")
-	-- and "minesweeper"
-	if rc == core.RC_SUCCESS then
+		if not cell_prev_state.has_mine and cell_current_state.has_mine then
+			return true
+		end
+
+		return false
+	elseif move == core.MOVE_CLICK_CELL then
+		return not cell_current_state.revealed
+	else
+		error(string.format("Unhandled move type %s", move))
+	end
+end
+
+function core.handle_move(state, player, move, y, x)
+
+	local cell_prev_state = state.game.board[y][x]
+
+	-- kind of a hack, I should modify the life_increment function to 
+	-- take in a board, rather than do this
+	local state2 = {
+		game = {
+			height = state.game.height,
+			width  = state.game.width,
+			board  = copy_board(state.game.board),
+		},
+	}
+	core.life_increment(state2)
+
+	print(string.format("On copy of state, incremented life state and found cell %d %d is revealed=%s, has_mine=%s prev_has_mine=%s (move=%s)", y, x, state2.game.board[y][x].revealed, state2.game.board[y][x].has_mine, cell_prev_state.has_mine, move))
+
+	local rc
+	-- if flagging, only support flagging cells that previously were not mines,
+	-- and have become one since the life update-- or cells that were unrevealed.
+	-- if revealing, only support unrevealed cells
+	if is_valid_move(move, cell_prev_state, state2.game.board[y][x], y, x) then
 		-- TODO maybe only do this every 10 moves or so
-		rc = core.life_increment(state)
+		core.life_increment(state)
 
 		-- I'm not sure if this takes too much of the fun out of it.
 		--core.autoreveal_empty_cells(state, player)
@@ -23895,7 +23934,21 @@ function core.handle_move(state, player, move, y, x)
 		core.calc_state_vals(state)
 		if state.game.cells_unrevealed == 0 then
 		end
+
+		if move == core.MOVE_FLAG_CELL then
+			rc = core.flag_cell(state, player, y, x)
+		elseif move == core.MOVE_CLICK_CELL then
+			rc = core.clicked_cell(state, player, y, x)
+		else
+			error(string.format("unhandled move type %s", move))
+		end
+
+		if rc ~= core.RC_SUCCESS then
+			error(string.format("Received rc %s?", rc))
+		end
+
 	end
+
 
 	return rc
 end
@@ -23965,7 +24018,11 @@ function core.reveal_cell(state, player, y, x)
 		else
 			score_change = REVEAL_CELL_SCORE
 		end
-		state.players[player].score = state.players[player].score + score_change
+
+		-- for the case where cells are revealed initially, on puzzle creation
+		if player ~= 0 then
+			state.players[player].score = state.players[player].score + score_change
+		end
 
 		if visited[pos.y] == nil then
 			visited[pos.y] = {}
@@ -23997,9 +24054,9 @@ function core.flag_cell(state, player, y, x)
 		return core.RC_OUT_OF_RANGE
 	end
 
-	if state.game.board[y][x].revealed then
-		return core.RC_INVALID_MOVE
-	end
+	--if state.game.board[y][x].revealed then
+	--	return core.RC_INVALID_MOVE
+	--end
 
 	-- in single player, remove your own flag, if desired
 	if #state.players == 1 and state.game.board[y][x].flagged_by_player == player then
@@ -24024,6 +24081,20 @@ function core.flag_cell(state, player, y, x)
 			end
 			state.game.cells_unrevealed = state.game.cells_unrevealed - 1
 			state.players[player].score = state.players[player].score + score_change
+		end
+
+		-- Now that Conway's game of life is introduced,
+		-- it is possible to flag cells that were previously revealed, but will
+		-- contain a mine on the next life update.
+		-- TODO: it would be better to simply make the UI code render revealed and flagged
+		-- cells as flagged instead of revealed, but I don't want to
+		-- make that change just yet in case it turns out to be more complicated
+		if state.game.board[y][x].has_mine then
+			state.game.board[y][x].revealed = false
+		else
+			-- though if the user flagged a cell with no mine,
+			-- reveal it anyway
+			state.game.board[y][x].revealed = true
 		end
 	end
 
@@ -24177,8 +24248,10 @@ local DIFFICULTY_MEDIUM = 1
 local DIFFICULTY_HARD = 2
 
 local levels = {
-	{ label = "", premade = 1 },
-	{ label = "", premade = 2 },
+	{ label = "Single moving structure", premade = 1 },
+	{ label = "Many moving structures", premade = 5 },
+	{ label = "Single High entropy shape", premade = 6 },
+	{ label = "Many high entropy shapes", premade = 2 },
 	{ label = "Five period oscillator", premade = 3 },
 	{ label = "16 period oscillator", premade = 4 },
 
@@ -24448,7 +24521,7 @@ function new_game(player_count, level)
 		print(string.format("Initializing game with mine portion %.0f%% (level idx %d)", mine_portion*100, level))
 		alex_c_api.set_status_msg(string.format("Initializing game with mine portion %.0f%%", mine_portion*100))
 		state = core.new_state(player_count, game_size_y, game_size_x, cell_size, mine_portion)
-	elseif puzzle_info.premade == 1 then
+	elseif puzzle_info.premade == 1 or puzzle_info.premade == 5 then
 		state = core.new_state(player_count, game_size_y, game_size_x, cell_size, 0)
 		local shape1 = {
 			{ 1, 0, 0},
@@ -24456,29 +24529,33 @@ function new_game(player_count, level)
 			{ 1, 1, 0},
 		}
 
-		local delta = 5
-		for i=0,8 do
-			for y=1,game_size_y,delta do
-				apply_shape(state, shape1, y + delta*i, 2 + delta*i)
+		if puzzle_info.premade == 1 then
+			apply_shape(state, shape1, 2, 2)
+		elseif puzzle_info.premade == 5 then
+			local delta = 5
+			for i=0,8 do
+				for y=1,game_size_y,delta do
+					apply_shape(state, shape1, y + delta*i, 2 + delta*i)
+				end
+			end
+	
+			local shape2 = {
+				{ 0, 1, 1},
+				{ 1, 1, 0},
+				{ 0, 0, 1},
+			}
+	
+			local delta = 5
+			for i=0,8 do
+				apply_shape(state, shape2, 2 + delta*i, 16 + delta*i)
+				apply_shape(state, shape2, 2 + delta*i, 11 + delta*i)
 			end
 		end
 
-		local shape2 = {
-			{ 0, 1, 1},
-			{ 1, 1, 0},
-			{ 0, 0, 1},
-		}
-
-		local delta = 5
-		for i=0,8 do
-			apply_shape(state, shape2, 2 + delta*i, 16 + delta*i)
-			apply_shape(state, shape2, 2 + delta*i, 11 + delta*i)
-		end
-
-		core.reveal_cell(state, 1, game_size_y, game_size_x)
+		core.reveal_cell(state, 0, game_size_y, game_size_x)
 
 		core.get_touching_mine_count(state)
-	elseif puzzle_info.premade == 2 then
+	elseif puzzle_info.premade == 2 or puzzle_info.premade == 6 then
 		state = core.new_state(player_count, 30, 30, cell_size, 0)
 		shape = {
 			{ 0, 1, 1},
@@ -24486,13 +24563,17 @@ function new_game(player_count, level)
 			{ 0, 1, 0},
 		}
 
-		for y=4,state.game.height,8 do
-			for x=4,state.game.width,8 do
-				apply_shape(state, shape, y, x)
+		if puzzle_info.premade == 6 then
+				apply_shape(state, shape, 13, 13)
+		elseif puzzle_info.premade == 2 then
+			for y=4,state.game.height,8 do
+				for x=4,state.game.width,8 do
+					apply_shape(state, shape, y, x)
+				end
 			end
 		end
 
-		core.reveal_cell(state, 1, 30, 1)
+		core.reveal_cell(state, 0, 30, 1)
 
 		core.get_touching_mine_count(state)
 	elseif puzzle_info.premade == 3 then
@@ -24513,7 +24594,7 @@ function new_game(player_count, level)
 
 		apply_shape(state, shape, 3, 3)
 
-		--core.reveal_cell(state, 1, game_size_y, game_size_x)
+		--core.reveal_cell(state, 0, game_size_y, game_size_x)
 
 		core.get_touching_mine_count(state)
 
@@ -24538,7 +24619,7 @@ function new_game(player_count, level)
 
 		apply_shape(state, shape, 2, 2)
 
-		core.reveal_cell(state, 1, game_size_y, game_size_x)
+		core.reveal_cell(state, 0, game_size_y, game_size_x)
 
 		core.get_touching_mine_count(state)
 
