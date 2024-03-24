@@ -58,6 +58,7 @@
 	<li><strong>Emscripten</strong> (<a href="#emscripten-license">license</a>) (<a href="https://emscripten.org">web site</a>): Compiles C/C++ code into webassembly (WASM). This is invaluable to this project both for compiling my own C/C++ code, but also the Lua interpreter. It also packages my Lua files in a convenient filesystem-like way, and makes it easy for me to upload zip bundles of Lua files to the browser.</li>
 	<li><strong>libzip</strong> (<a href="#libzip-license">license</a>) (<a href="https://libzip.org">web site</a>): Handles unzipping user uploaded bundles of Lua scripts, to allow users to play their own games without having to build this project.</li>
 	<li><strong>zlib</strong> (<a href="#zlib-license">license</a>) (<a href="https://zlib.net">web site</a>): Dependency of libzip.</li>
+	<li>Python <strong>websockets</strong> library: (<a href="#websockets-license">license</a>) (<a href="https://github.com/python-websockets/websockets">web site</a>): Used for websocket multiplayer server.
 	<li>Android application:
 	<ul>
 		<li><strong>nanohttpd</strong>: (<a href="#nanohttpd-license">license</a>) (<a href="https://github.com/NanoHttpd/nanohttpd">web site</a>): Lightweight HTTP and websocket server, used for hosting an AlexGames server on your phone.</li>
@@ -277,6 +278,35 @@ All rights reserved.</p>
 <p class="license">THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
 
 </div>
+
+<h3 id="websockets-license">websockets</h3>
+
+<pre>
+Copyright (c) Aymeric Augustin and contributors
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+      and/or other materials provided with the distribution.
+    * Neither the name of the copyright holder nor the names of its contributors
+      may be used to endorse or promote products derived from this software
+      without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</pre>
 
 <script>
 	let user_colour_pref = get_user_colour_pref();
