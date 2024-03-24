@@ -16,6 +16,29 @@ Install emscripten following [these instructions](https://emscripten.org/docs/ge
 
 Alternatively, install it anywhere, but update `build/wasm/setup_env.sh`.
 
+### Prerequisite: Install virtualenv and python dependencies
+
+Install virtualenv with your package manager.
+
+	virtualenv venv
+	source venv/bin/activate
+
+Now install python dependencies
+
+	# for generating the word dictionary
+	pip3 install wordfreq
+
+	# for hosting the websocket server
+	pip3 install websocket
+
+Now you are ready to build the web version and host the websocket server in
+the next steps.
+
+Once you want to stop hosting the websocket server, and exit the virtual
+python environment, you can run this command:
+
+	deactivate
+
 ### Building AlexGames web
 
 Simply run:
@@ -33,18 +56,16 @@ and you are mostly done. (See next section for guidance).
 
 ## How to run server
 
-Host websocket server
+Host websocket server (make sure you installed the `websocket` dependency
+already from a previous step):
 
-	# dependency
-	pip install websockets
-
-	python src/server/ws/ws_server.py
+	python3 src/server/ws/ws_server.py
 
 And in another terminal, host the HTTP server (note: don't do this on a
 public server, this is for development only):
 
 	cd build/wasm/out/http_out
-	python -m http.server 1234
+	python3 -m http.server 1234
 
 (Where 1234 is a port. You can choose a different number.)
 

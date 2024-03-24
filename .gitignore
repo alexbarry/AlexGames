@@ -1,6 +1,7 @@
 cscope.out
 third_party/
 old/
+logs/
 out/
 .*.swp
 .*.swo
@@ -9,3 +10,5 @@ __pycache__
 
 # LibreOffice spreadsheets in plaintext (to be git-friendly)
 .~lock.*.fods#
+
+venv
