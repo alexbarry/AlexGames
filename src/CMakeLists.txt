@@ -19,6 +19,11 @@ set(SQLITE_DIR "${PROJECT_ROOT}/third_party/sqlite/")
 set(LUA_DL_DIR "${PROJECT_ROOT}/third_party/lua/")
 set(WORDLIST_DL_DIR "${PROJECT_ROOT}/third_party/wordlist/")
 
+# Uncomment these lines if you wish to link to the libz.a that
+# you built earlier (see README.md for more info)
+#get_filename_component(ZLIB_LIBRARY "${PROJECT_ROOT}/third_party/zlib/libz.a" ABSOLUTE)
+#get_filename_component(ZLIB_INCLUDE_DIR "${PROJECT_ROOT}/third_party/zlib" ABSOLUTE)
+
 # Originally I had made this different for wxWidgets in visual studio, but I think a symlink 
 # called "preload" in the build directory, pointing to `src`, has mitigated this.
 set(ALEXGAMES_LUA_SCRIPT_ROOT_DIR "" CACHE STRING "Root directory to look for lua scripts. This can be left blank unless your IDE requires you to run the executable from a specific path. Alternatively, you can place a symlink there.")

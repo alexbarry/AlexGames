@@ -2,6 +2,8 @@
 
 A collection of simple Lua games, and a web engine for playing them including an English dictionary (for word puzzles), websocket multiplayer, state sharing via URL, and auto saving with undo/redo. You can also upload your own games and play in the public web version.
 
+Try the web version here: https://alexbarry.github.io/AlexGames
+
 ## How to build
 
 ### Prerequisite: Install Emscripten
@@ -72,6 +74,32 @@ public server, this is for development only):
 Then navigate to this in a browser:
 
 	http://localhost:1234
+
+### Troubleshooting: Build zlib for wasm
+
+I'm not sure why this is sometimes necessary, I thought emscripten was supposed
+to include zlib. On some computers that I have tried building this project on,
+I did not need to perform these steps.
+
+I would recommend only following these if you get an error like
+"can't find zlib, set `ZLIB_LIBRARY` and `ZLIB_INCLUDE_DIR`".
+
+```
+cd third_party/zlib
+emconfigure ./configure
+emcmake cmake .
+# omitting emcmake below seemed to be necessary
+cmake --build .
+```
+
+Then uncomment these two lines in `src/CMakeLists.txt`:
+
+```
+get_filename_component(ZLIB_LIBRARY "${PROJECT_ROOT}/third_party/zlib/libz.a" ABSOLUTE)
+get_filename_component(ZLIB_INCLUDE_DIR "${PROJECT_ROOT}/third_party/zlib" ABSOLUTE)
+```
+
+Then try building again.
 
 ## Contact
 

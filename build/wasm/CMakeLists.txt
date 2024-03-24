@@ -50,7 +50,8 @@ option(WASM_USE_C_DICT_API "Use the C implementation of the dictionary API. The 
 #        ]")
 list(APPEND EXPORTED_FUNCTIONS_WASM
      "[ \
-        \"_malloc\" \
+        \"_malloc\", \
+        \"_free\" \
         ]")
 
 
@@ -94,6 +95,8 @@ list(APPEND EMCC_LINK_OPTS "-s USE_ZLIB=1")
 # large in that case
 list(APPEND EMCC_LINK_OPTS "-s WASM_BIGINT")
 list(APPEND EMCC_LINK_OPTS "-sSUPPORT_LONGJMP=emscripten")
+list(APPEND EMCC_LINK_OPTS "-Wno-unused-main")
+
 list(APPEND EMCC_LINK_OPTS
 	"-Werror"
 	"-s ALLOW_MEMORY_GROWTH=1"
