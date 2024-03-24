@@ -101,6 +101,12 @@ if(EXISTS ${LUA_DL_DIR}/lua.h)
 #good
 else()
 execute_process(COMMAND git clone https://github.com/lua/lua.git ${LUA_DL_DIR})
+message("Switching to v5.4.6 of lua repo.")
+execute_process(
+       COMMAND git checkout v5.4.6
+       WORKING_DIRECTORY ${LUA_DL_DIR}
+)
+
 endif()
 
 set(LUA_SRC_DIR ${LUA_DL_DIR})
