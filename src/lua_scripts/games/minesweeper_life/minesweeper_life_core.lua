@@ -275,6 +275,7 @@ function core.remove_flags_if_no_longer_valid(state)
 			local cell = state.game.board[y][x]
 			if not cell.has_mine and cell.flagged_by_player ~= nil then
 				cell.flagged_by_player = nil
+				cell.revealed = true
 			end
 		end
 	end
