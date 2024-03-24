@@ -129,6 +129,11 @@ endif()
 
 message("Building with LUA_SRC_DIR ${LUA_SRC_DIR}")
 
+set_source_files_properties(
+	${LUA_SRC_DIR}/lundump.c 
+	PROPERTIES
+	COMPILE_FLAGS -Wno-string-plus-int
+)
 aux_source_directory(${LUA_SRC_DIR} LUA_CORE_SRC_LIST)
 
 # not currently using lua_user_cfg.h, loading my library manually in C instead
