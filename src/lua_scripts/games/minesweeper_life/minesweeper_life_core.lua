@@ -282,20 +282,30 @@ function core.remove_flags_if_no_longer_valid(state)
 end
 
 function core.handle_move(state, player, move, y, x)
-	local rc
-	if move == core.MOVE_FLAG_CELL then
-		rc = core.flag_cell(state, player, y, x)
-	elseif move == core.MOVE_CLICK_CELL then
-		rc = core.clicked_cell(state, player, y, x)
-	else
-		error(string.format("unhandled move type %s", move))
-	end
 
-	-- NOTE: this is basically the only difference between this game ("minesweeper_life")
-	-- and "minesweeper"
-	if rc == core.RC_SUCCESS then
+	local prev_cell_state = state.game.board[y][x]
+
+	-- kind of a hack, I should modify the life_increment function to 
+	-- take in a board, rather than do this
+	local state2 = {
+		game = {
+			height = state.game.height,
+			width  = state.game.width,
+			board  = copy_board(state.game.board),
+		},
+	}
+	core.life_increment(state2)
+
+	print(string.format("On copy of state, incremented life state and found cell %d %d is revealed=%s, has_mine=%s prev_has_mine=%s (move=%s)", y, x, state2.game.board[y][x].revealed, state2.game.board[y][x].has_mine, prev_cell_state.has_mine, move))
+
+	local rc
+	-- if flagging, only support flagging cells that previously were not mines,
+	-- and have become one since the life update.
+	-- if revealing, only support unrevealed cells
+	if (move == core.MOVE_FLAG_CELL and not prev_cell_state.has_mine and state2.game.board[y][x].has_mine) or
+	   (move == core.MOVE_CLICK_CELL and not prev_cell_state.revealed) then
 		-- TODO maybe only do this every 10 moves or so
-		rc = core.life_increment(state)
+		core.life_increment(state)
 
 		-- I'm not sure if this takes too much of the fun out of it.
 		--core.autoreveal_empty_cells(state, player)
@@ -306,7 +316,17 @@ function core.handle_move(state, player, move, y, x)
 		core.calc_state_vals(state)
 		if state.game.cells_unrevealed == 0 then
 		end
+
+		if move == core.MOVE_FLAG_CELL then
+			rc = core.flag_cell(state, player, y, x)
+		elseif move == core.MOVE_CLICK_CELL then
+			rc = core.clicked_cell(state, player, y, x)
+		else
+			error(string.format("unhandled move type %s", move))
+		end
+
 	end
+
 
 	return rc
 end
@@ -408,9 +428,9 @@ function core.flag_cell(state, player, y, x)
 		return core.RC_OUT_OF_RANGE
 	end
 
-	if state.game.board[y][x].revealed then
-		return core.RC_INVALID_MOVE
-	end
+	--if state.game.board[y][x].revealed then
+	--	return core.RC_INVALID_MOVE
+	--end
 
 	-- in single player, remove your own flag, if desired
 	if #state.players == 1 and state.game.board[y][x].flagged_by_player == player then
@@ -436,6 +456,13 @@ function core.flag_cell(state, player, y, x)
 			state.game.cells_unrevealed = state.game.cells_unrevealed - 1
 			state.players[player].score = state.players[player].score + score_change
 		end
+		-- Now that Conway's game of life is introduced,
+		-- it is possible to flag cells that were previously revealed, but will
+		-- contain a mine on the next life update.
+		-- TODO: it would be better to simply make the UI code render revealed and flagged
+		-- cells as flagged instead of revealed, but I don't want to
+		-- make that change just yet in case it turns out to be more complicated
+		state.game.board[y][x].revealed = false
 	end
 
 	return core.RC_SUCCESS
