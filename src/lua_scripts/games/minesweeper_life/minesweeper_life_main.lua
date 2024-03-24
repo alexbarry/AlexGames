@@ -77,8 +77,10 @@ local DIFFICULTY_MEDIUM = 1
 local DIFFICULTY_HARD = 2
 
 local levels = {
-	{ label = "", premade = 1 },
-	{ label = "", premade = 2 },
+	{ label = "Single moving structure", premade = 1 },
+	{ label = "Many moving structures", premade = 5 },
+	{ label = "Single High entropy shape", premade = 6 },
+	{ label = "Many high entropy shapes", premade = 2 },
 	{ label = "Five period oscillator", premade = 3 },
 	{ label = "16 period oscillator", premade = 4 },
 
@@ -348,7 +350,7 @@ function new_game(player_count, level)
 		print(string.format("Initializing game with mine portion %.0f%% (level idx %d)", mine_portion*100, level))
 		alex_c_api.set_status_msg(string.format("Initializing game with mine portion %.0f%%", mine_portion*100))
 		state = core.new_state(player_count, game_size_y, game_size_x, cell_size, mine_portion)
-	elseif puzzle_info.premade == 1 then
+	elseif puzzle_info.premade == 1 or puzzle_info.premade == 5 then
 		state = core.new_state(player_count, game_size_y, game_size_x, cell_size, 0)
 		local shape1 = {
 			{ 1, 0, 0},
@@ -356,29 +358,33 @@ function new_game(player_count, level)
 			{ 1, 1, 0},
 		}
 
-		local delta = 5
-		for i=0,8 do
-			for y=1,game_size_y,delta do
-				apply_shape(state, shape1, y + delta*i, 2 + delta*i)
+		if puzzle_info.premade == 1 then
+			apply_shape(state, shape1, 2, 2)
+		elseif puzzle_info.premade == 5 then
+			local delta = 5
+			for i=0,8 do
+				for y=1,game_size_y,delta do
+					apply_shape(state, shape1, y + delta*i, 2 + delta*i)
+				end
+			end
+	
+			local shape2 = {
+				{ 0, 1, 1},
+				{ 1, 1, 0},
+				{ 0, 0, 1},
+			}
+	
+			local delta = 5
+			for i=0,8 do
+				apply_shape(state, shape2, 2 + delta*i, 16 + delta*i)
+				apply_shape(state, shape2, 2 + delta*i, 11 + delta*i)
 			end
 		end
 
-		local shape2 = {
-			{ 0, 1, 1},
-			{ 1, 1, 0},
-			{ 0, 0, 1},
-		}
-
-		local delta = 5
-		for i=0,8 do
-			apply_shape(state, shape2, 2 + delta*i, 16 + delta*i)
-			apply_shape(state, shape2, 2 + delta*i, 11 + delta*i)
-		end
-
-		core.reveal_cell(state, 1, game_size_y, game_size_x)
+		core.reveal_cell(state, 0, game_size_y, game_size_x)
 
 		core.get_touching_mine_count(state)
-	elseif puzzle_info.premade == 2 then
+	elseif puzzle_info.premade == 2 or puzzle_info.premade == 6 then
 		state = core.new_state(player_count, 30, 30, cell_size, 0)
 		shape = {
 			{ 0, 1, 1},
@@ -386,13 +392,17 @@ function new_game(player_count, level)
 			{ 0, 1, 0},
 		}
 
-		for y=4,state.game.height,8 do
-			for x=4,state.game.width,8 do
-				apply_shape(state, shape, y, x)
+		if puzzle_info.premade == 6 then
+				apply_shape(state, shape, 13, 13)
+		elseif puzzle_info.premade == 2 then
+			for y=4,state.game.height,8 do
+				for x=4,state.game.width,8 do
+					apply_shape(state, shape, y, x)
+				end
 			end
 		end
 
-		core.reveal_cell(state, 1, 30, 1)
+		core.reveal_cell(state, 0, 30, 1)
 
 		core.get_touching_mine_count(state)
 	elseif puzzle_info.premade == 3 then
@@ -413,7 +423,7 @@ function new_game(player_count, level)
 
 		apply_shape(state, shape, 3, 3)
 
-		--core.reveal_cell(state, 1, game_size_y, game_size_x)
+		--core.reveal_cell(state, 0, game_size_y, game_size_x)
 
 		core.get_touching_mine_count(state)
 
@@ -438,7 +448,7 @@ function new_game(player_count, level)
 
 		apply_shape(state, shape, 2, 2)
 
-		core.reveal_cell(state, 1, game_size_y, game_size_x)
+		core.reveal_cell(state, 0, game_size_y, game_size_x)
 
 		core.get_touching_mine_count(state)
 
