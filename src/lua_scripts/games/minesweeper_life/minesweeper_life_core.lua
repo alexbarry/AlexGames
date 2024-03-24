@@ -232,14 +232,25 @@ function core.life_increment(state)
 	local new_board = copy_board(state.game.board)
 	for y=1,#state.game.board do
 		for x=1,#state.game.board[y] do
-			local mine = state.game.board[y][x].has_mine
+			local prev_mine_state = state.game.board[y][x].has_mine
 			local neighbour_count = count_neighbours(state, {y=y, x=x})
-			if mine and 2 <= neighbour_count and neighbour_count <= 3 then
-				new_board[y][x].has_mine = true
-			elseif not mine and neighbour_count == 3 then
-				new_board[y][x].has_mine = true
+
+			local new_mine_state
+			if prev_mine_state and 2 <= neighbour_count and neighbour_count <= 3 then
+				new_mine_state = true
+			elseif not prev_mine_state and neighbour_count == 3 then
+				new_mine_state = true
 			else
-				new_board[y][x].has_mine = false
+				new_mine_state = false
+			end
+
+			new_board[y][x].has_mine = new_mine_state
+			-- when a mine goes away, leave an unrevealed cell in its wake
+			-- I'm not sure if this will be too hard yet, or if
+			-- it would be better to have separate states for "explicitly revealed by player"
+			-- and "was revealed from the start", and only un-reveal the latter
+			if prev_mine_state and not new_mine_state then
+				new_board[y][x].revealed = false
 			end
 		end
 	end
@@ -281,9 +292,27 @@ function core.remove_flags_if_no_longer_valid(state)
 	end
 end
 
+local function is_valid_move(move, cell_prev_state, cell_current_state, y, x)
+	if move == core.MOVE_FLAG_CELL then
+		if not cell_current_state.revealed then
+			return true
+		end
+
+		if not cell_prev_state.has_mine and cell_current_state.has_mine then
+			return true
+		end
+
+		return false
+	elseif move == core.MOVE_CLICK_CELL then
+		return not cell_current_state.revealed
+	else
+		error(string.format("Unhandled move type %s", move))
+	end
+end
+
 function core.handle_move(state, player, move, y, x)
 
-	local prev_cell_state = state.game.board[y][x]
+	local cell_prev_state = state.game.board[y][x]
 
 	-- kind of a hack, I should modify the life_increment function to 
 	-- take in a board, rather than do this
@@ -296,14 +325,13 @@ function core.handle_move(state, player, move, y, x)
 	}
 	core.life_increment(state2)
 
-	print(string.format("On copy of state, incremented life state and found cell %d %d is revealed=%s, has_mine=%s prev_has_mine=%s (move=%s)", y, x, state2.game.board[y][x].revealed, state2.game.board[y][x].has_mine, prev_cell_state.has_mine, move))
+	print(string.format("On copy of state, incremented life state and found cell %d %d is revealed=%s, has_mine=%s prev_has_mine=%s (move=%s)", y, x, state2.game.board[y][x].revealed, state2.game.board[y][x].has_mine, cell_prev_state.has_mine, move))
 
 	local rc
 	-- if flagging, only support flagging cells that previously were not mines,
-	-- and have become one since the life update.
+	-- and have become one since the life update-- or cells that were unrevealed.
 	-- if revealing, only support unrevealed cells
-	if (move == core.MOVE_FLAG_CELL and not prev_cell_state.has_mine and state2.game.board[y][x].has_mine) or
-	   (move == core.MOVE_CLICK_CELL and not prev_cell_state.revealed) then
+	if is_valid_move(move, cell_prev_state, state2.game.board[y][x], y, x) then
 		-- TODO maybe only do this every 10 moves or so
 		core.life_increment(state)
 
@@ -323,6 +351,10 @@ function core.handle_move(state, player, move, y, x)
 			rc = core.clicked_cell(state, player, y, x)
 		else
 			error(string.format("unhandled move type %s", move))
+		end
+
+		if rc ~= core.RC_SUCCESS then
+			error(string.format("Received rc %s?", rc))
 		end
 
 	end
@@ -396,7 +428,11 @@ function core.reveal_cell(state, player, y, x)
 		else
 			score_change = REVEAL_CELL_SCORE
 		end
-		state.players[player].score = state.players[player].score + score_change
+
+		-- for the case where cells are revealed initially, on puzzle creation
+		if player ~= 0 then
+			state.players[player].score = state.players[player].score + score_change
+		end
 
 		if visited[pos.y] == nil then
 			visited[pos.y] = {}
@@ -456,13 +492,20 @@ function core.flag_cell(state, player, y, x)
 			state.game.cells_unrevealed = state.game.cells_unrevealed - 1
 			state.players[player].score = state.players[player].score + score_change
 		end
+
 		-- Now that Conway's game of life is introduced,
 		-- it is possible to flag cells that were previously revealed, but will
 		-- contain a mine on the next life update.
 		-- TODO: it would be better to simply make the UI code render revealed and flagged
 		-- cells as flagged instead of revealed, but I don't want to
 		-- make that change just yet in case it turns out to be more complicated
-		state.game.board[y][x].revealed = false
+		if state.game.board[y][x].has_mine then
+			state.game.board[y][x].revealed = false
+		else
+			-- though if the user flagged a cell with no mine,
+			-- reveal it anyway
+			state.game.board[y][x].revealed = true
+		end
 	end
 
 	return core.RC_SUCCESS
