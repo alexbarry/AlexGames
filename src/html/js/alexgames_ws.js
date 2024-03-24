@@ -14,10 +14,16 @@
 				ws_addr = URL_args.ws_server;
 			} else {
 				const DEFAULT_WS_PORT = "55433";
-				let hostname = window.location.hostname
+				let hostname = window.location.hostname;
 				if (hostname.length == 0) {
 					console.warn("window.location.hostname not set, falling back to localhost");
 					hostname = "localhost"
+				} else if (hostname.includes("alexbarry.github.io")) {
+					console.log("Using alexbarry.net since you are accessing this site hosted on github. If this doesn't work or you want to use a different server, add the 'ws_server' URL parameter.");
+					hostname = "alexbarry.net";
+				} else {
+					console.log(`Checking for websocket server on the hostname of the site: \"${hostname}\"`);
+
 				}
 				if (hostname.startsWith("192.168.") ||
 				    hostname.startsWith("127.0.0.") ||

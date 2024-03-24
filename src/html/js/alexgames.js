@@ -1,6 +1,4 @@
-	// TODO before publishing, should change this to github pages
-	// or something with better uptime
-	const PUBLIC_URL = "https://alexbarry.net/dev/games"
+	const PUBLIC_URL = "https://alexbarry.github.io/AlexGames"
 
 	const UNSET_GAME_TITLE = "Choose a game";
 	const UNSET_GAME_ID = "unset";
