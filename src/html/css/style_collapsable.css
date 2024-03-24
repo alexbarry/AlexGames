@@ -1,0 +1,33 @@
+.collapsable:hover, .toggle_collapsable_btn:hover {
+	cursor: pointer;
+}
+
+.toggle_collapsable_btn {
+	text-decoration: underline;
+}
+
+.toggle_collapsable_btn.content_collapsed:before {
+	content: "(Expand)"
+}
+.toggle_collapsable_btn:not(.content_collapsed):before {
+	content: "(Collapse)"
+}
+
+.collapsed {
+	display: inline-block;
+	inline-size: 400px;
+	word-break: break-all;
+	overflow-inline: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	color: #888888;
+} 
+
+/* TODO not sure how to make this work */
+.collapsed:after {
+	content: 'Click to expand';
+}
+
+.toggle_collapsable.collapsed {
+	display: none;
+}

@@ -1,0 +1,11 @@
+cscope.out
+third_party/
+old/
+out/
+.*.swp
+.*.swo
+.DS_Store
+__pycache__
+
+# LibreOffice spreadsheets in plaintext (to be git-friendly)
+.~lock.*.fods#

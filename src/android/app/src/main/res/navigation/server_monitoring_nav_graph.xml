@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/server_monitoring_nav_graph"
+    app:startDestination="@id/ServerMonitoringFragment">
+
+    <fragment
+        android:id="@+id/ServerMonitoringFragment"
+        android:name="net.alexbarry.alexgames.server.ServerMonitorFragment"
+        android:label="@string/server_monitor_fragment_label"
+        tools:layout="@layout/server_monitor_fragment"/>
+</navigation>

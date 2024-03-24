@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/hostOrLocalFragment">
+
+    <fragment
+        android:id="@+id/localClientAndroidGameSession"
+        android:name="net.alexbarry.alexgames.FirstFragment"
+        android:label="@string/first_fragment_label"
+        tools:layout="@layout/fragment_first">
+
+        <action
+            android:id="@+id/action_FirstFragment_to_SecondFragment"
+            app:destination="@id/localClientAndroidGameSelector" />
+    </fragment>
+    <fragment
+        android:id="@+id/localClientAndroidGameSelector"
+        android:name="net.alexbarry.alexgames.SecondFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_second">
+
+        <action
+            android:id="@+id/action_SecondFragment_to_FirstFragment"
+            app:destination="@id/localClientAndroidGameSession" />
+    </fragment>
+    <fragment
+        android:id="@+id/hostOrLocalFragment"
+        android:name="net.alexbarry.alexgames.HostOrLocalFragment"
+        android:label="fragment_host_or_local"
+        tools:layout="@layout/fragment_host_or_local" >
+        <action
+            android:id="@+id/action_hostOrLocalFragment_to_localClientWebView"
+            app:destination="@id/localClientWebView" />
+        <action
+            android:id="@+id/action_hostOrLocalFragment_to_localClientAndroidGameSelector"
+            app:destination="@id/localClientAndroidGameSelector" />
+        <action
+            android:id="@+id/action_hostOrLocalFragment_to_serverCreationFragment"
+            app:destination="@id/serverCreationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/localClientWebView"
+        android:name="net.alexbarry.alexgames.LocalClientWebView"
+        android:label="fragment_local_client_web_view"
+        tools:layout="@layout/fragment_local_client_web_view" />
+    <fragment
+        android:id="@+id/serverCreationFragment"
+        android:name="net.alexbarry.alexgames.ServerCreationFragment"
+        android:label="fragment_server_creation"
+        tools:layout="@layout/fragment_server_creation" >
+        <action
+            android:id="@+id/action_serverCreationFragment_to_serverMonitorActivity"
+            app:destination="@id/serverMonitorActivity" />
+    </fragment>
+    <activity
+        android:id="@+id/serverMonitorActivity"
+        android:name="net.alexbarry.alexgames.server.ServerMonitorActivity"
+        android:label="server_monitor_activity"
+        tools:layout="@layout/server_monitor_activity" />
+</navigation>

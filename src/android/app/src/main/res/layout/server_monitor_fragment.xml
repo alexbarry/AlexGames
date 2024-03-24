@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".server.ServerMonitorFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:id="@+id/serverAddrTitle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/serverAddrDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintVertical_weight="1"
+        android:textSize="24sp"
+        android:text="@string/server_address_label" />
+
+    <TextView
+        android:id="@+id/serverAddrDescription"
+        app:layout_constraintTop_toBottomOf="@id/serverAddrTitle"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/serverAddr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintVertical_weight="1"
+        android:text="@string/server_address_decsription" />
+
+    <TextView
+        android:id="@+id/serverAddr"
+        app:layout_constraintTop_toBottomOf="@id/serverAddrTitle"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/serverAddrBtnShare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:textColor="#0000ff"
+        app:layout_constraintVertical_weight="1"
+        android:text="@string/server_url_placeholder"/>
+
+
+    <Button
+        android:id="@+id/serverAddrBtnShare"
+        app:layout_constraintTop_toBottomOf="@id/serverAddr"
+        app:layout_constraintBottom_toTopOf="@id/serverAddrDescription2"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/serverAddrBtnOpen"
+        android:text="@string/share"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintVertical_weight="1"/>
+
+    <Button
+        android:id="@+id/serverAddrBtnOpen"
+        app:layout_constraintTop_toTopOf="@id/serverAddrBtnShare"
+        app:layout_constraintLeft_toRightOf="@id/serverAddrBtnShare"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/serverAddrDescription2"
+        android:text="@string/open"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintVertical_weight="1"/>
+
+    <TextView
+        android:id="@+id/serverAddrDescription2"
+        app:layout_constraintTop_toBottomOf="@id/serverAddrBtnShare"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/serverInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        app:layout_constraintVertical_weight="1"
+        android:autoLink="web"
+        android:text="@string/server_address_description2" />
+
+    <!--
+    android:textSize="20dp"
+    android:textStyle="bold"
+    -->
+
+    <TextView
+        android:id="@+id/serverInfo"
+        app:layout_constraintTop_toBottomOf="@id/serverAddrBtnOpen"
+        app:layout_constraintBottom_toTopOf="@id/httpServerLabel"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintVertical_weight="1"/>
+
+
+
+    <TextView
+        android:id="@+id/httpServerLabel"
+        app:layout_constraintTop_toBottomOf="@id/serverInfo"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/httpServerStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:text="@string/http_server_label" />
+
+    <TextView
+        android:id="@+id/httpServerStatus"
+        app:layout_constraintTop_toBottomOf="@id/httpServerLabel"
+        app:layout_constraintBottom_toTopOf="@id/wsServerLabel"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintVertical_weight="3"/>
+
+    <TextView
+        android:id="@+id/wsServerLabel"
+        app:layout_constraintTop_toBottomOf="@id/httpServerStatus"
+        app:layout_constraintBottom_toTopOf="@id/wsServerStatus"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:text="@string/ws_server_label"
+        app:layout_constraintVertical_weight="1"/>
+
+    <TextView
+        android:id="@+id/wsServerStatus"
+        app:layout_constraintTop_toBottomOf="@id/wsServerLabel"
+        app:layout_constraintLeft_toLeftOf="@id/btnStopServer"
+        app:layout_constraintBottom_toBottomOf="@id/btnStopServer"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintVertical_weight="3"/>
+
+    <Button
+        android:id="@+id/btnStopServer"
+        app:layout_constraintTop_toBottomOf="@id/wsServerStatus"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/stop_server"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

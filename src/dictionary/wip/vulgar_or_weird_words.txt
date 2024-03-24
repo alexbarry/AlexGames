@@ -1,0 +1,4 @@
+# These are words that are in a dictionary, so the player shouldn't be blocked from using
+# them as guesses if they player specificially enters them. But they should not show up
+# as the solution to a puzzle, the player shouldn't be expected to guess these or see them
+# at all unless they enter them as a guess.

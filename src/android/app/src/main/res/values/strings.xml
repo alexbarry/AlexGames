@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">AlexGames</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+    <string name="service_notification_channel_name">Hosted Server Status</string>
+    <string name="stop_service">Stop</string>
+    <string name="service_done_toast">Stopping hosted server</string>
+    <string name="service_starting_toast">Hosting server</string>
+    <string name="server_address_label">Server Address</string>
+    <string name="http_server_label">HTTP Server Info</string>
+    <string name="ws_server_label">Websocket Server Info</string>
+    <string name="server_monitor_activity_label">Server Monitoring</string>
+    <string name="server_monitor_fragment_label">Server Monitoring Main</string>
+    <string name="stop_server">Stop server</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="play_locally_offline">Play offline in app</string>
+    <string name="host_server">Host game web server</string>
+    <string name="play_locally_offline_description">Play a game within this app. You can play a single player game, or share your device with another person to play local multiplayer. Network multiplayer will not be available. If you want to play with someone else who is hosting a server, you must get a link to their server from them, and play in a browser.</string>
+    <string name="host_server_description">Host a web server on this device. Then you and others on your local wifi network (if IP isolation isn\'t enabled) can play together by opening a URL in your browser. The URL will be generated on the next page.</string>
+    <string name="local_client_popup_title">Choose local client type</string>
+    <string name="local_client_popup_message">Choose to either play the web version (embedded within an Android webview), or the experimental Android implementation.</string>
+    <string name="local_client_webview">WebView</string>
+    <string name="local_client_android">Android native</string>
+    <string name="http_port_label">HTTP Port</string>
+    <string name="ws_port_label">Websocket Port</string>
+    <string name="start_server">Start server</string>
+    <string name="server_address_decsription">Share the below link with your friends on your local network, or open it yourself in a browser.</string>
+    <string name="server_url_placeholder">http://localhost:50080</string>
+    <string name="share">Share</string>
+    <string name="open">Open</string>
+    <string name="server_address_description2">**NOTE** that it will likely only work if both you and them are on the same home network (e.g. wifi). Some public wifi networks do not allow devices to communicate with each other directly. Technically you could enable port forwarding on your home router and then give them your public IP address, but this is probably not a good idea. To play with someone on a different network, please visit the public site at https://alexbarry.net/games</string>
+</resources>
