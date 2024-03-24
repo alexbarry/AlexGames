@@ -125,6 +125,7 @@ def small_float_sci(f):
 		
 
 if output_ascii_list:
+	os.makedirs(os.path.dirname(ascii_list_output_fname), exist_ok=True)
 	with open(ascii_list_output_fname, 'w') as f:
 		for info in word_info_list:
 			if only_output_words_len is not None and len(info.word) != only_output_words_len: continue
