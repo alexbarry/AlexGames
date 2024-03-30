@@ -4,6 +4,7 @@ FROM nginx:latest
 
 # Install OS dependencies
 # TODO double check that all of these are actually needed
+# zip: used to zip some lua files as an example game to be uploaded
 RUN apt-get update && apt-get install -y \
 	cmake \
 	git \
@@ -13,7 +14,10 @@ RUN apt-get update && apt-get install -y \
 	ninja-build \
 	wget \
 	xz-utils \
-	zlib1g-dev
+	zlib1g-dev \
+	zip
+
+RUN which zip
 
 # Create a python venv to suppress nginx complaining about
 # installing packages to system python.
@@ -67,7 +71,6 @@ COPY . .
 #RUN mkdir -p build/wasm/out/
 #RUN mkdir -p build/wasm/out/http_out
 WORKDIR build/wasm/
-#RUN ./build/wasm/build.sh
 RUN bash ./build.sh
 
 # Copy build output to nginx serving path

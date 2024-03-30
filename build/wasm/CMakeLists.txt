@@ -2,15 +2,12 @@ cmake_minimum_required(VERSION 3.4.1)
 project(alexgames_wasm VERSION "0.1.0")
 
 
-set(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
 
 add_definitions(-DALEXGAMES_WASM)
 
-set(SRC_DIR "../../src")
-# TODO I don't understand why I need the extra ../ before SRC_DIR below
-# set(LUA_SCRIPT_SRC "${SRC_DIR}/lua_scripts/")
-set(LUA_SCRIPT_SRC "../${SRC_DIR}/lua_scripts")
-#set(WORD_DICT "${PROJECT_ROOT}/out/word_dict.db")
+set(SRC_DIR "${PROJECT_ROOT}/src")
+set(LUA_SCRIPT_SRC "${SRC_DIR}/lua_scripts")
 set(HTML_OUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/out/")
 
 set(ENABLE_MEM_SANITIZER 0)
@@ -62,12 +59,6 @@ list(APPEND EXPORTED_FUNCTIONS_WASM
 set(LUA_SCRIPT_PRELOAD_OUT "preload")
 execute_process(COMMAND mkdir -p "${LUA_SCRIPT_PRELOAD_OUT}")
 execute_process(COMMAND cp -r "${LUA_SCRIPT_SRC}/." "${LUA_SCRIPT_PRELOAD_OUT}/")
-
-if (1)
-#execute_process(COMMAND cp  "${WORD_DICT}" "${LUA_SCRIPT_PRELOAD_OUT}/")
-# TODO copy the words.txt file here, not in build.sh
-#execute_process(COMMAND cp  "${WORD_DICT}" "${HTML_OUT_DIR}/")
-endif()
 
 list(APPEND EMCC_LINK_OPTS "-Wall")
 list(APPEND EMCC_LINK_OPTS "-s DISABLE_EXCEPTION_CATCHING=0")
@@ -226,7 +217,6 @@ set_target_properties(alexgames_wasm PROPERTIES LINK_DEPENDS "${LINK_DEPS}")
 # -j argument removes the path from the contents of the zip, so the zip contains only the files, not
 #    all the subfolders like src/lua_scripts/games/api_demo etc
 #
-if (0)
 execute_process(COMMAND zip "example_game_apidemo.zip"
 	"-j" # removes the paths of the files below, so in the zip they're
 	     # just "game.lua" instead of "src/lua_scripts/games/api_demo/game.lua".
@@ -242,4 +232,3 @@ ELSE()
 	# If you are just trying out this project then you don't need this.
 	message(FATAL_ERROR "error, zip for example_game_apidemo.zip returned rc=${API_DEMO_ZIP_CMD_RC}")
 ENDIF()
-endif()
