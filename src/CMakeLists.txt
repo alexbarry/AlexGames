@@ -49,9 +49,13 @@ else()
 	message("Downloading zlib into ${ZLIB_DIR}")
 	execute_process(COMMAND git clone https://github.com/madler/zlib.git ${ZLIB_DIR})
 endif()
+execute_process(COMMAND ls "${ZLIB_LIBRARY}")
+#execute_process(COMMAND ls "${ZLIB_LIBRARY}/asdflkjasdflkjasdflkj.a")
+#message(FATAL_ERROR "test")
 
 message("ZLIB_INCLUDE_DIR is ${ZLIB_INCLUDE_DIR}")
 message("ZLIB_LIBRARY     is ${ZLIB_LIBRARY}")
+
 #message("adding zlib subdirectory")
 #add_subdirectory(${PROJECT_ROOT}/third_party/libzip/ zlib_out)
 

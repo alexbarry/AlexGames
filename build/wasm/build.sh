@@ -5,7 +5,7 @@ set -x
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "${DIR}"
 
-source ./setup_env.sh
+# source ./setup_env.sh
 mkdir -p out
 cd out
 #. ~/repo/emsdk/emsdk_env.sh
@@ -23,6 +23,7 @@ cmake --build . $@
 # selectively adds files to a zip bundle for transferring it to a server, and it
 # doesn't make sense to have to duplicate the list of important HTML/JS/etc files in more than one place
 # In fact, doing that led me to forget to upload the word dictionary at some point in the past.
+echo "[alex] `pwd`"
 HTTP_OUT=http_out
 mkdir -p ${HTTP_OUT}
 
@@ -38,4 +39,4 @@ cp -r *.js *.wasm *.data ${HTTP_OUT}/
 
 # This is an example Lua game that the user can download,
 # optionally edit, and re-upload to see how to make their own game.
-cp -r example_game_apidemo.zip ${HTTP_OUT}/
+# cp -r example_game_apidemo.zip ${HTTP_OUT}/

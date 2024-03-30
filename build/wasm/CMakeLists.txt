@@ -131,6 +131,7 @@ list(APPEND EMCC_COMPILE_OPTS
     "-Werror"
 	"-Wno-error=cpp"
 	"-Wno-error=sign-compare"
+	"-Wno-unused-main"
     "-O3")
 
 if (ENABLE_MEM_SANITIZER)
@@ -225,6 +226,7 @@ set_target_properties(alexgames_wasm PROPERTIES LINK_DEPENDS "${LINK_DEPS}")
 # -j argument removes the path from the contents of the zip, so the zip contains only the files, not
 #    all the subfolders like src/lua_scripts/games/api_demo etc
 #
+if (0)
 execute_process(COMMAND zip "example_game_apidemo.zip"
 	"-j" # removes the paths of the files below, so in the zip they're
 	     # just "game.lua" instead of "src/lua_scripts/games/api_demo/game.lua".
@@ -240,3 +242,4 @@ ELSE()
 	# If you are just trying out this project then you don't need this.
 	message(FATAL_ERROR "error, zip for example_game_apidemo.zip returned rc=${API_DEMO_ZIP_CMD_RC}")
 ENDIF()
+endif()

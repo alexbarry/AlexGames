@@ -6,6 +6,25 @@ Try the web version here: https://alexbarry.github.io/AlexGames
 
 ## How to build
 
+Build and run static HTML code, and host an HTTP server:
+
+TODO: export output of build from docker, so user can copy to their apache/etc dir,
+rather than spin up a whole HTTP server just for this.
+
+```
+sudo docker build -t alexgames_http_server -f docker/http_server/Dockerfile .
+sudo docker run -p 1234:80 alexgames_http_server
+```
+
+From a separate terminal, run this command to host the websocket server:
+```
+sudo docker build -t alexgames_ws_server -f docker/ws_server/Dockerfile .
+sudo docker run -p 55433:55433 -it alexgames_ws_server
+```
+
+The above two commands host an HTTP server on port 1234, and an alexgames websocket server on port 55433.
+Note that if you are hosting this from a public server, then for the websocket server you will need to pass your SSL certs
+
 ### Prerequisite: Install Emscripten
 
 Install emscripten following [these instructions](https://emscripten.org/docs/getting_started/downloads.html):
