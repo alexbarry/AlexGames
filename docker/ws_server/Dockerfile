@@ -1,5 +1,5 @@
-ARG WS_SERVER_PORT=55433
-
+# TODO have the ws and http server inherit from a common image
+# to avoid duplicating so many dependencies
 FROM nginx:latest
 
 RUN apt-get update && apt-get install -y \

@@ -1,3 +1,5 @@
+# TODO have the ws and http server inherit from a common image
+# to avoid duplicating so many dependencies
 FROM nginx:latest
 
 # Install OS dependencies
