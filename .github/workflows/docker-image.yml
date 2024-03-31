@@ -8,13 +8,13 @@ on:
 
 jobs:
 
-  permissions:
-    contents: write
 
-  build:
+  deploy:
+    # why can't this by nginx, like my docker images?
+    runs-on: ubuntu-22.04
 
-    # why can't this by nginx-latest, like my docker images?
-    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
 
@@ -24,7 +24,7 @@ jobs:
     - name: Setup docker buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Build the Docker image for the HTTP server
+    - name: Build AlexGames static HTML via docker
       run: |
         docker build -t alexgames_http_server \
         -f docker/http_server/Dockerfile \
@@ -32,7 +32,7 @@ jobs:
         --output=./docs  \
         .
 
-    - name: Publish HTML to GitHub Pages
+    - name: Deploy built HTML to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
