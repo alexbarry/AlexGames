@@ -1,0 +1,28 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: nginx-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image for the HTTP server
+      run: |
+        docker build -t alexgames_http_server -f docker/http_server/Dockerfile --tag alexgames_http_server .
+        docker create --name alexgames_http_server_image alexgames_http_server
+        docker cp alexgames_http_server:/app/build/wasm/out/http_out/* ./public/
+        docker rm alexgames_http_server_image
+
+    - name: Publish HTML to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
