@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4.1)
-project(alexgames_wasm VERSION "0.1.0")
+project(alexgames_wasm VERSION "0.1.1")
 
 
 get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)

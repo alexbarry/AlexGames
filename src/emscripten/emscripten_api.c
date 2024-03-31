@@ -629,6 +629,9 @@ const struct game_api_callbacks api_callbacks = {
 	.destroy_all           = js_destroy_all,
 };
 
+static void print_ver_info() {
+	printf("AlexGames version %s, git hash = %s\n", PROJECT_VERSION, GIT_HEAD_HASH);
+}
 
 // Entry point from javascript
 EMSCRIPTEN_KEEPALIVE
@@ -639,12 +642,16 @@ void *init_game_api(const char *game_str, int game_str_len) {
 	set_game_dict_api(get_emscripten_game_dict_api());
 
 	g_db_state_handler = saved_state_db_init(NULL, &api_callbacks);
-	return alex_init_game(&api_callbacks, game_str, game_str_len);
+
+	void *handle = alex_init_game(&api_callbacks, game_str, game_str_len);
+
+	print_ver_info();
+	return handle;
 }
 
 // If you don't provide a main function, then it looks like the Lua main takes over
 // and starts prompting for text via stdin, which causes a big popup in a browser.
 // Though I don't actually know CMake allows for multiple main definitions like this.
 int main(void) {
-	printf("AlexGames version %s, git hash = %s\n", PROJECT_VERSION, GIT_HEAD_HASH);
+	print_ver_info();
 }
