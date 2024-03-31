@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+    http_server:
+        build:
+            context: .
+            dockerfile: docker/http_server/Dockerfile
+        ports:
+            - "1234:80"
+    ws_server:
+        build:
+            context: .
+            dockerfile: docker/ws_server/Dockerfile
+        ports:
+            - "55433:55433"

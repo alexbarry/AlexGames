@@ -5,7 +5,7 @@ set -x
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "${DIR}"
 
-source ./setup_env.sh
+# source ./setup_env.sh
 mkdir -p out
 cd out
 #. ~/repo/emsdk/emsdk_env.sh

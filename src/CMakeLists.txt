@@ -19,10 +19,8 @@ set(SQLITE_DIR "${PROJECT_ROOT}/third_party/sqlite/")
 set(LUA_DL_DIR "${PROJECT_ROOT}/third_party/lua/")
 set(WORDLIST_DL_DIR "${PROJECT_ROOT}/third_party/wordlist/")
 
-# Uncomment these lines if you wish to link to the libz.a that
-# you built earlier (see README.md for more info)
-#get_filename_component(ZLIB_LIBRARY "${PROJECT_ROOT}/third_party/zlib/libz.a" ABSOLUTE)
-#get_filename_component(ZLIB_INCLUDE_DIR "${PROJECT_ROOT}/third_party/zlib" ABSOLUTE)
+get_filename_component(ZLIB_LIBRARY "${PROJECT_ROOT}/third_party/zlib/libz.a" ABSOLUTE)
+get_filename_component(ZLIB_INCLUDE_DIR "${PROJECT_ROOT}/third_party/zlib" ABSOLUTE)
 
 # Originally I had made this different for wxWidgets in visual studio, but I think a symlink 
 # called "preload" in the build directory, pointing to `src`, has mitigated this.
@@ -49,9 +47,13 @@ else()
 	message("Downloading zlib into ${ZLIB_DIR}")
 	execute_process(COMMAND git clone https://github.com/madler/zlib.git ${ZLIB_DIR})
 endif()
+execute_process(COMMAND ls "${ZLIB_LIBRARY}")
+#execute_process(COMMAND ls "${ZLIB_LIBRARY}/asdflkjasdflkjasdflkj.a")
+#message(FATAL_ERROR "test")
 
 message("ZLIB_INCLUDE_DIR is ${ZLIB_INCLUDE_DIR}")
 message("ZLIB_LIBRARY     is ${ZLIB_LIBRARY}")
+
 #message("adding zlib subdirectory")
 #add_subdirectory(${PROJECT_ROOT}/third_party/libzip/ zlib_out)
 
