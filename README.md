@@ -8,12 +8,18 @@ Try the web version here: https://alexbarry.github.io/AlexGames
 
 ### Using docker
 
-**TL;DR:** you can simply run `sudo docker-compose up`, then navigate to http://localhost:1234 . This hosts an HTML server on port 1234, and a websocket server on port 55433. But if you want to host it on a public server, you should build the static HTML separately, copy that to your HTML server content path, and run the websocket server separately.
+**TL;DR:** you can simply run `sudo docker-compose up`, then navigate to http://localhost:1234 . This hosts an HTML server on port 1234, and a websocket server on port 55433. But if you want to host it on a public server, you should build the static HTML separately, copy that to your HTML server content path, and run the websocket server separately (see below).
 
 #### Build and host static HTML/JS/WASM
 
+This commands build a docker image containing an HTTP server and the AlexGames static HTML, and it also outputs it to `build/wasm/out/http_out`:
 ```
-sudo docker build -t alexgames_http_server -f docker/http_server/Dockerfile .
+sudo docker build -t alexgames_http_server \
+	-f docker/http_server/Dockerfile \
+	--target=export_output  \
+	--output=build/wasm/out/http_out  \
+	.
+sudo chown -R "${USER}" build/wasm/out
 ```
 
 For development purposes, you can host a simple HTTP server like this, on port 1234:
@@ -21,20 +27,7 @@ For development purposes, you can host a simple HTTP server like this, on port 1
 sudo docker run -p 1234:80 alexgames_http_server
 ```
 
-Alternatively, to copy the static HTML to your own HTTP server, you can get it from the docker image like this:
-```
-# create a temporary container to get the build output
-sudo docker create --name alexgames_http_server_image alexgames_http_server
-# Change the last argument (the dot) to the path where you want to copy it to
-sudo docker cp alexgames_http_server_image:/app/build/wasm/out/http_out .
-
-# clean up the temporary container
-sudo docker rm alexgames_http_server_image
-
-# Note that you may want to change the owner from root, to do that you can
-# run the below command (changing `your_username` to your username):
-sudo chown -R your_username http_out
-```
+Alternatively, copy `build/wasm/out/http_out/*` to your HTTP server path.
 
 #### Build and host the websocket server
 

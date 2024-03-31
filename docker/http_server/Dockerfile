@@ -1,6 +1,6 @@
 # TODO have the ws and http server inherit from a common image
 # to avoid duplicating so many dependencies
-FROM nginx:latest
+FROM nginx:latest as base
 
 # Install OS dependencies
 # TODO double check that all of these are actually needed
@@ -29,21 +29,21 @@ ENV PATH="/alexgames_python_venv/bin:$PATH"
 RUN pip3 install wordfreq # needed to generate dictionary file
 
 # Install Emscripten
-WORKDIR /
-RUN if [ ! -f "/emsdk" ]; then \
+WORKDIR /app
+RUN if [ ! -f "emsdk" ]; then \
 	echo "Cloning emsdk repo..."; \
 	git clone https://github.com/emscripten-core/emsdk.git emsdk ; \
 else \
 	echo "emsdk repo already present"; \
 fi
-WORKDIR /emsdk
+WORKDIR /app/emsdk
 RUN ./emsdk install latest
 RUN ./emsdk activate latest
 RUN . ./emsdk_env.sh
-ENV PATH="${PATH}:/emsdk"
+ENV PATH="${PATH}:/app/emsdk"
 #ENV EM_CONFIG="/root/.emscripten"
 RUN /bin/bash -c "source ./emsdk_env.sh"
-ENV PATH="${PATH}:/emsdk/upstream/emscripten"
+ENV PATH="${PATH}:/app/emsdk/upstream/emscripten"
 RUN emcc --version
 
 
@@ -76,4 +76,8 @@ RUN bash ./build.sh
 # Copy build output to nginx serving path
 RUN cp -r out/http_out/* /usr/share/nginx/html/
 
+FROM scratch as export_output
+COPY --from=base /app/build/wasm/out/http_out/ /
+
+FROM base as server
 # Use base nginx entrypoint to host HTTP server
