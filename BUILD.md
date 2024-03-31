@@ -41,10 +41,9 @@ python environment, you can run this command:
 
 I'm not sure why this is sometimes necessary, I thought emscripten was supposed
 to include zlib. On some computers that I have tried building this project on,
-I did not need to perform these steps.
-
-I would recommend only following these if you get an error like
-"can't find zlib, set `ZLIB_LIBRARY` and `ZLIB_INCLUDE_DIR`".
+I did not need to perform these steps. (Though on my docker image, I did,
+so I made the default behaviour to set `ZLIB_LIBRARY` and `ZLIB_INCLUDE_DIR`
+to point to these paths)
 
 ```
 cd third_party/zlib
@@ -52,13 +51,6 @@ emconfigure ./configure
 emcmake cmake .
 # omitting emcmake below seemed to be necessary
 cmake --build .
-```
-
-Then uncomment these two lines in `src/CMakeLists.txt`:
-
-```
-get_filename_component(ZLIB_LIBRARY "${PROJECT_ROOT}/third_party/zlib/libz.a" ABSOLUTE)
-get_filename_component(ZLIB_INCLUDE_DIR "${PROJECT_ROOT}/third_party/zlib" ABSOLUTE)
 ```
 
 ## Building AlexGames web

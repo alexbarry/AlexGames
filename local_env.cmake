@@ -26,8 +26,3 @@ set(wxWidgets_CONFIGURATION mswud)
 else()
 #set(LUA_SRC_DIR "/home/alex/repo/lua/lua-5.4.3/src")
 endif()
-
-
-set(ZLIB_LIBRARY     ${PROJECT_ROOT}/third_party/zlib/libz.a)
-set(ZLIB_INCLUDE_DIR ${PROJECT_ROOT}/third_party/zlib/)
-
