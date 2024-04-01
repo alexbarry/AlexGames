@@ -29,11 +29,12 @@ jobs:
         docker build -t alexgames_http_server \
         -f docker/http_server/Dockerfile \
         --target=export_output  \
-        --output=./docs  \
+        --output=./public \
         .
 
     - name: Deploy built HTML to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs
+        publish_dir: ./public
+        destination_dir: docs
