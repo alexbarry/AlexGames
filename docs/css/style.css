@@ -1,0 +1,288 @@
+	body {
+		background-color: #aaa;
+	}
+
+	.main {
+		border:1px solid black;
+		background-color:#e9e9ff;
+	}
+
+	.title {
+		text-align:center;
+	}
+
+	a.no_underline {
+		color:#000;
+		text-decoration: none;
+	}
+
+
+	h1, h2, h3, h4, h5, h6, label, button, p, span, li, a {
+		font-family:sans-serif
+	}
+
+	.url {
+		font-family:monospace !important;
+	}
+
+	.options_subheading {
+		margin: 0;
+		margin-top: 15px;
+	}
+
+	.options_p {
+		margin: 0;
+	}
+
+	.subtitle {
+		font-size:12pt;
+	}
+
+	.popup {
+		background-color:#d9d9dfee;
+		border-radius:15px;
+		border:1px solid black;
+		/* padding: 15px; */
+	}
+
+	.popup_content_wrapper {
+		padding: 20px;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		overflow-y: scroll;
+	}
+
+	/* .popup > input { */
+	.popup_input_row {
+		box-sizing: border-box;
+		width: 100%;
+		padding: 10px;
+	}
+
+	.popup_table {
+		display: table;
+		width: 99%;
+	}
+
+	.popup_row {
+		width: 100%;
+		display: table-row;
+	}
+
+	.label_col {
+		width: 125px;
+		display: table-cell;
+		flex: 0;
+		align-self: center;
+	}
+	.input_col {
+		font-family: monospace;
+		display: table-cell;
+		padding: 10px;
+		flex: 1;
+		width: 99%;
+	}
+
+
+	.popup_dropdown_container {
+		display: flex;
+	}
+
+	.popup_dropdown_label {
+		align-self: center;
+	}
+
+	.popup_dropdown {
+		flex: 1;
+		margin-left: 5px;
+		text-align: center;
+		/* TODO should make a generic "clickable" class with this size */
+		height: 50px;
+	}
+
+	.overlay {
+		background-color:#888888dd;
+	}
+
+	.status {
+		background-color:#ffffff55;
+		/* text-align:center; */
+		line-height: 2.5ex;
+		height: 7.5ex;
+		overflow-y:auto;
+		font-size:12pt;
+		border:1px dashed grey;
+	}
+
+	.status_msg {
+		/* Show status messages on a new line */
+		display:block;
+	}
+
+	.status_error {
+		color:#f00;
+	}
+
+
+	.game_choice_popup {
+		background-color:#e9e9ffaa;
+		position:relative;
+		padding: 0;
+	}
+
+
+	.game_choice_popup_wrapper {
+		/* padding-bottom:10em; */
+	}
+	.game_list_padding {
+		height: 10em;
+	}
+
+	.game_row {
+		cursor: pointer;
+		background: #ccc;
+		box-shadow: 0 0 15px -1px rgba(0,0,0,0.8);
+		border:1px solid #ccc;
+		border-radius: 10px;
+		margin: 10px;
+		padding: 10px;
+
+		/*display:flex;*/
+		display:block;
+		position:relative;
+		overflow:hidden;
+	}
+
+	.game_row:hover {
+		background: #dddddd;
+	}
+	
+	.game_title {
+		background-color:#ccc;
+		position:absolute;
+		top:0;
+	}
+
+	.game_row > .description {
+		padding-top: 20pt;
+	}
+
+	.game_row:active {
+		background: #eeeeffcc;
+		box-shadow: 0 0 15px -1px #ffcccccc;
+	}
+
+	.game_choice_popup:after {
+		content: "";
+		position: absolute;
+		/*position: fixed;*/
+		z-index: 5;
+		bottom: 0;
+		left: 0;
+		pointer-events: none;
+		background-image: linear-gradient(to bottom, #00000000, #888888ff 95%);
+		width: 100%;
+		height: 5em;
+		border-radius:15px;
+	}
+	
+	.description {
+		flex:1;
+	}
+
+	.game_wrapper {
+		float:right;
+		top: 0;
+		right:0;
+
+		display: flex;
+		min-width:0px;
+		min-height:0px;
+		align-items:start;
+	}
+	img.game_icon {
+		/*width:100%;*/
+		width:150px;
+		/* flex:1; */
+		align-items:start;
+		min-height:198px;
+		min-width:198px;
+	}
+
+
+.close_button {
+	cursor: pointer;
+	background-color:#fcc;
+	position:absolute;
+	top:0;
+	right:0;
+	width:40px;
+	height:40px;
+	border-radius:15px;
+}
+
+.close_button:hover {
+	background-color:#fdd;
+}
+
+.options_button {
+	width:100%;
+}
+
+/* Shown when a new game is loaded */
+.status_break_line {
+	border-bottom: 1px dashed #88888866;
+}
+
+.url_container {
+	padding: 10px;
+	background-color: white;
+	border: 1px dashed black;
+}
+.url_span {
+	font-family:monospace;
+	overflow-wrap: anywhere;
+}
+.not_supported {
+	color: #777;
+}
+
+.dev_note {
+	font-size: 0.75em;
+	font-style: italic;
+}
+
+.dev_note > code {
+	font-style: normal;
+}
+
+.small {
+	font-size: 0.75em;
+}
+
+.footer_links {
+	text-align: center;
+}
+
+.footer_links_list {
+	margin: 0;
+	padding: 0;
+}
+.footer_links_list > li {
+	display: inline-block;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.api_link {
+	font-family:monospace;
+}
+
+pre {
+	overflow-x: scroll;
+}
+
+.license {
+	font-family:monospace !important;
+}
