@@ -195,7 +195,8 @@ add_library(alexgames_utf8 STATIC
 	cpp_libs/utils/utf8.c)
 
 add_library(lua ${LUA_CORE_SRC_LIST})
-
+# Do this to avoid using the Lua defined main function.
+target_compile_definitions(lua PRIVATE -Dmain=unused_main)
 add_library(alexgames_core STATIC
 	lua_api/lua_api.c
 	lua_api/lua_api_dict.c

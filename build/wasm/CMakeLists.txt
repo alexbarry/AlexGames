@@ -86,7 +86,7 @@ list(APPEND EMCC_LINK_OPTS "-s USE_ZLIB=1")
 # large in that case
 list(APPEND EMCC_LINK_OPTS "-s WASM_BIGINT")
 list(APPEND EMCC_LINK_OPTS "-sSUPPORT_LONGJMP=emscripten")
-list(APPEND EMCC_LINK_OPTS "-Wno-unused-main")
+#list(APPEND EMCC_LINK_OPTS "-Wno-unused-main")
 
 list(APPEND EMCC_LINK_OPTS
 	"-Werror"
