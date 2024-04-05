@@ -1,6 +1,6 @@
 # TODO have the ws and http server inherit from a common image
 # to avoid duplicating so many dependencies
-FROM nginx:latest as base
+FROM nginx:latest as alexgames_build_html
 
 # Install OS dependencies
 # TODO double check that all of these are actually needed
@@ -77,7 +77,7 @@ RUN bash ./build.sh
 RUN cp -r out/http_out/* /usr/share/nginx/html/
 
 FROM scratch as export_output
-COPY --from=base /app/build/wasm/out/http_out/ /
+COPY --from=alexgames_build_html /app/build/wasm/out/http_out/ /
 
-FROM base as server
+FROM alexgames_build_html as http_server
 # Use base nginx entrypoint to host HTTP server
