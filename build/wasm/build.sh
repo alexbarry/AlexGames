@@ -36,6 +36,9 @@ cp -r ../../../img/* ${HTTP_OUT}/img/
 # CMake outputs that I want to be accessible on the HTTP server
 cp -r *.js *.wasm *.data ${HTTP_OUT}/
 
+mkdir -p ${HTTP_OUT}/icon
+cp ../../../img/logo.png ${HTTP_OUT}/icon/logo.png
+
 # This is an example Lua game that the user can download,
 # optionally edit, and re-upload to see how to make their own game.
 cp -r example_game_apidemo.zip ${HTTP_OUT}/
