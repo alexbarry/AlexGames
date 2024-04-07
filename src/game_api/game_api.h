@@ -468,6 +468,12 @@ struct game_api {
 int alex_get_game_count();
 const char *alex_get_game_name(int idx);
 
+void alex_set_root_dir(const char *root_dir);
+// TODO put internal functions like this in a separate header.
+// need to distinguish between "functions called by lua_api.c" and
+// "functions called by platform (wasm/wxWidgets/Android)
+int alex_get_root_dir(char *scripts_dir_out, size_t scripts_dir_out_len);
+
 
 void alex_set_status_err_vargs(const struct game_api_callbacks *api_callbacks, const char *format, ...);
 
