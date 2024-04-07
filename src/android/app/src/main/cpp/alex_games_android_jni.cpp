@@ -30,6 +30,7 @@ Java_net_alexbarry_alexgames_AlexGamesJni_jniHello( JNIEnv* env, jobject thiz );
 
 JNIEXPORT void JNICALL
 Java_net_alexbarry_alexgames_AlexGamesJni_jniInit(JNIEnv* env, jobject thiz,
+                                                  jstring data_dir_path_jstr,
                                                   jstring game_id_jstr);
 JNIEXPORT void JNICALL
 Java_net_alexbarry_alexgames_AlexGamesJni_jniDrawBoard(JNIEnv* env, jobject thiz,
@@ -499,6 +500,7 @@ static const struct game_api_callbacks api = {
 
 JNIEXPORT void JNICALL
 Java_net_alexbarry_alexgames_AlexGamesJni_jniInit(JNIEnv* env, jobject thiz,
+                                                  jstring data_dir_path_jstr,
                                                   jstring game_id_jstr) {
 	set_alex_log_func(alex_log);
 	set_alex_log_err_func(alex_log_err);
@@ -513,6 +515,13 @@ Java_net_alexbarry_alexgames_AlexGamesJni_jniInit(JNIEnv* env, jobject thiz,
 		log_jni("Could not find class AlexGames");
 		return;
 	}
+
+	jboolean is_copy;
+	const char *data_dir_path_cstr = (env)->GetStringUTFChars(data_dir_path_jstr, &is_copy);
+	alex_log("Setting alexgames root dir to data_dir_path = \"%s\"\n", data_dir_path_cstr);
+	alex_set_root_dir(data_dir_path_cstr);
+	(env)->ReleaseStringUTFChars(data_dir_path_jstr, data_dir_path_cstr);
+
 	L = alex_init_game(&api, game_id_cstr, (int)game_id_cstr_len);
 	if (L == NULL) {
 		log_jni("init_lua_api returned NULL");

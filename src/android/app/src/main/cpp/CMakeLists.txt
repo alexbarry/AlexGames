@@ -12,7 +12,9 @@ set(SRC_DIR "../../../../..")
 # on the Nexus 5X emulator, this path is the cache directory
 # TODO I really need to set this at runtime
 #add_definitions(-DROOT_DIR="/data/user/0/net.alexbarry.alexgames/cache/")
-add_definitions(-DROOT_DIR="/data/user/0/net.alexbarry.alexgames/files/games/")
+#add_definitions(-DROOT_DIR="/data/user/0/net.alexbarry.alexgames/files/games/")
+
+
 add_definitions(-DLUA_USE_APICHECK)
 # add_definitions(-DLUA_NOBUILTIN)
 add_definitions(-DLUAI_ASSERT)

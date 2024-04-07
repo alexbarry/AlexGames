@@ -2,6 +2,7 @@ package net.alexbarry.alexgames;
 
 import android.util.Log;
 import android.view.MotionEvent;
+import android.content.Context;
 
 import net.alexbarry.alexgames.graphics.IAlexGamesCanvas;
 import net.alexbarry.alexgames.popup.IAlexGamesPopupManager;
@@ -200,11 +201,18 @@ public class AlexGamesJni {
 	public native void jniHello();
 
 
-	public void init(final String game_id) {
+	public void init(Context context, final String game_id) {
 		runOnThread(new Runnable() {
 			@Override
 			public void run() {
-				jniInit(game_id);
+				//String data_dir_path = context.getCacheDir().getAbsolutePath();
+				String data_dir_path = context.getDataDir().getAbsolutePath();
+
+				// TODO this should probably be done in C
+				//data_dir_path += "/";
+				data_dir_path += "/files/games/";
+
+				jniInit(data_dir_path, game_id);
 				jniStartGame(0, null);
 			}
 		});
@@ -222,7 +230,7 @@ public class AlexGamesJni {
 		});
 	}
 
-	private native void jniInit(String game_id);
+	private native void jniInit(String data_dir_path, String game_id);
 	private native void jniDrawBoard(int dt_ms);
 	private native void jniHandleUserClicked(int pos_y, int pos_x);
 	private native void jniHandleMousemove(int pos_y, int pos_x, int buttons);
