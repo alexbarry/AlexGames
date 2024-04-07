@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.4.1)
 
+# Not supported yet in the android native version. The web version embedded in the Android app should
+# still support this, though.
+set(ENABLE_ZIP_UPLOAD OFF CACHE BOOL "Enable the ability to upload custom games in zip files. Includes libzip and zlib." FORCE)
+
 set(SRC_DIR "../../../../..")
 # add_definitions(-DROOT_DIR="res/assets/")
 # TODO I think this works now for testing...
