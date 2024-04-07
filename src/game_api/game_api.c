@@ -42,6 +42,9 @@ extern const struct game_api *get_stick_api();
 static void (*alexgames_mutex_take_ptr)(void) = NULL;
 static void (*alexgames_mutex_release_ptr)(void) = NULL;
 
+static bool g_root_dir_set = false;
+static char g_root_dir[4096];
+
 static log_func_t g_log_func = NULL;
 static log_func_t g_log_func_err = NULL;
 
@@ -731,4 +734,27 @@ void alexgames_set_mutex_take_func(void (*func)(void)) {
 
 void alexgames_set_mutex_release_func(void (*func)(void)) {
 	alexgames_mutex_release_ptr = func;
+}
+
+void alex_set_root_dir(const char *root_dir) {
+	strncpy(g_root_dir, root_dir, sizeof(g_root_dir));
+	g_root_dir_set = true;
+}
+
+int alex_get_root_dir(char *root_dir_out, size_t root_dir_out_len) {
+	int rc;
+	int str_len;
+	if (g_root_dir_set) {
+		rc = snprintf(root_dir_out, root_dir_out_len, "%s", g_root_dir);
+		str_len = strnlen(g_root_dir, sizeof(g_root_dir));
+	} else {
+		rc = snprintf(root_dir_out, root_dir_out_len, "%s", ROOT_DIR);
+		str_len = strlen(ROOT_DIR);
+	}
+
+	if (rc != str_len) {
+		return -1;
+	} else {
+		return 0;
+	}
 }

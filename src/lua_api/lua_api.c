@@ -259,7 +259,7 @@ static int luaopen_alexdictlib(lua_State *L) {
 #endif
 
 //#define LUA_SCRIPT_DIR ROOT_DIR "src/lua_scripts"
-#define LUA_SCRIPT_DIR ROOT_DIR ""
+//#define LUA_SCRIPT_DIR ROOT_DIR ""
 
 #define LUA_PRELOAD_DIR "preload/"
 
@@ -473,11 +473,20 @@ void *init_lua_game(const struct game_api_callbacks *api_callbacks_arg, const ch
 	//set_game_api(&lua_game_api);
 	api = api_callbacks_arg;
 
+	char lua_script_dir[4096];
+	{
+		int rc = alex_get_root_dir(lua_script_dir, sizeof(lua_script_dir));
+		if (rc) {
+			alex_log_err("Failed to get root dir");
+			return NULL;
+		}
+	}
+
 	char lua_fpath[1024];
 	lua_fpath[0] = '\0';
 	// TODO this doesn't actually protect against buffer overrun
 	// strlcat is better, I think, but I get linker errors when trying to use that in windows
-	strncat(lua_fpath, LUA_SCRIPT_DIR "", sizeof(lua_fpath)-1);
+	strncat(lua_fpath, lua_script_dir, sizeof(lua_fpath)-1);
 	strncat(lua_fpath, lua_fpath_arg, sizeof(lua_fpath)-1);
 
 	alex_log("[lua_init] Trying to load lua script at \"%s\"...\n", lua_fpath);
@@ -524,10 +533,21 @@ void *init_lua_game(const struct game_api_callbacks *api_callbacks_arg, const ch
 	//snprintf(new_path, sizeof(new_path), "%s;%s/?.lua", current_path, ROOT_DIR);
 	//snprintf(new_path, sizeof(new_path), "%s;%s/?.lua;%s/?.lua;%s/?.lua", current_path, LUA_SCRIPT_DIR, LUA_PRELOAD_DIR, LUA_UPLOAD_DIR);
 
+	char preload_path[4096];
+	{
+		char root_dir[4096];
+		int rc = alex_get_root_dir(root_dir, sizeof(root_dir));
+		if (rc) {
+			alex_log_err("Error getting root_dir");
+			return NULL;
+		}
+		snprintf(preload_path, sizeof(preload_path), "%s%s", root_dir, LUA_PRELOAD_DIR);
+		alex_log("[init] preload_path = \"%s\"\n", preload_path);
+	}
 	// TODO include the game's dirname() directory here
 	int new_path_len = snprintf(new_path, sizeof(new_path),
 	                            "%s;%s/?.lua;%s/?.lua;%s/?.lua;%s/?.lua",
-	                            current_path, LUA_SCRIPT_DIR, ROOT_DIR LUA_PRELOAD_DIR,
+	                            current_path, lua_script_dir, preload_path,
 	                            LUA_UPLOAD_DIR, GAME_UPLOAD_PATH);
 	if (new_path_len >= sizeof(new_path)) {
 		alex_log_err("Lua package.path too big, max size %d, actual %d\n", sizeof(new_path), new_path_len);
@@ -536,7 +556,7 @@ void *init_lua_game(const struct game_api_callbacks *api_callbacks_arg, const ch
 		return NULL;
 	}
 	lua_pop(L, 1);
-	alex_log("[lua_init] Including preload path: \"%s\"\n", ROOT_DIR LUA_PRELOAD_DIR);
+	alex_log("[lua_init] Including preload path: \"%s\"\n", preload_path);
 	alex_log("[lua_init] Including upload  path: \"%s\"\n", GAME_UPLOAD_PATH);
 
 	lua_pushstring(L, new_path);
