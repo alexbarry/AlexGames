@@ -207,5 +207,13 @@ To silence this warning, add the --silence_ssl_warning parameter.
 log('Hosting server on port %d' % args.port)
 ws_server = websockets.serve(client_handler, host=None, port=args.port, ssl=ssl_ctx)
 loop = asyncio.get_event_loop()
-loop.run_until_complete(ws_server)
-loop.run_forever()
+try:
+	loop.run_until_complete(ws_server)
+	loop.run_forever()
+except KeyboardInterrupt:
+	log("KeyboardInterrupt received, exiting.")
+	if total_connections != 0: log("Note that %d connections will be lost" % total_connections)
+except Exception as e:
+	log("Exception %r encountered, exiting script" % e)
+	if total_connections != 0: log("Note that %d connections will be lost" % total_connections)
+	raise
