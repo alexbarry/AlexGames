@@ -33,7 +33,7 @@ def get_logfile_name():
     return "logs/%s.log" % datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 os.makedirs('logs/', exist_ok=True)
-f_log = open(get_logfile_name(), "w")
+f_log = open(get_logfile_name(), "w", buffering=1) # line buffered
 
 def log(msg):
     date_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
