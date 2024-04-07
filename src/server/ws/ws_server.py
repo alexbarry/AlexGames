@@ -47,6 +47,7 @@ class InvalidMessageException(Exception):
 
 Msg = collections.namedtuple("Msg", field_names = ["dst", "payload"])
 
+total_connections = 0
 sessions = {}
 #ws_to_session_id = {}
 
@@ -83,6 +84,8 @@ async def send_msg(ws, src, payload):
     await ws.send(msg)
 
 async def client_left(websocket, session_id, client_name):
+	global total_connections
+	total_connections -= 1
 	try:
 		del sessions[session_id][client_name]
 	except KeyError:
@@ -95,6 +98,7 @@ async def client_left(websocket, session_id, client_name):
                 # TODO catch websockets.exceptions.ConnectionClosedError here?
 
 async def client_handler(websocket, path):
+	global total_connections
 	our_name = get_ws_name(websocket)
 	log('Received connection from %r' % our_name)
 
@@ -113,8 +117,9 @@ async def client_handler(websocket, path):
 	if session_id not in sessions:
 		sessions[session_id] = {}
 
+	total_connections += 1
 	sessions[session_id][our_name] = websocket
-	log('Session %r now has %d clients' % (session_id, len(sessions[session_id])))
+	log('Session %r now has %d clients (%d total in all sessions)' % (session_id, len(sessions[session_id]), total_connections))
 	#ws_to_session_id[websocket] = session_id
 
 
@@ -123,9 +128,10 @@ async def client_handler(websocket, path):
 			data = await websocket.recv()
 		except (websockets.exceptions.ConnectionClosedOK,
 		        websockets.exceptions.ConnectionClosedError) as e:
-			log("Client %s disconnected, removing from session %r" % \
-			      (our_name, session_id))
+			# TODO refactor this to some common "remove client" function
 			await client_left(websocket, session_id, our_name)
+			log("Client %s disconnected, removing from session %r (total now %d)" % \
+			      (our_name, session_id, total_connections))
 			break
 		# log("Recvd msg: %s" % to_bin_str(data))
 		try:
