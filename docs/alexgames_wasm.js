@@ -38,7 +38,7 @@ Module['ready'] = new Promise((resolve, reject) => {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmp40vavmsh.js
+// include: /tmp/tmp51pb_27v.js
 
   if (!Module.expectedDataFileDownloads) {
     Module.expectedDataFileDownloads = 0;
@@ -254,21 +254,21 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
 
   })();
 
-// end include: /tmp/tmp40vavmsh.js
-// include: /tmp/tmp2ov8g0_0.js
+// end include: /tmp/tmp51pb_27v.js
+// include: /tmp/tmpebmtpiqw.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['ENVIRONMENT_IS_PTHREAD'] || Module['$ww']) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmp2ov8g0_0.js
-// include: /tmp/tmppk7lf9ru.js
+  // end include: /tmp/tmpebmtpiqw.js
+// include: /tmp/tmpl46w1mi8.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach(function(task) {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmppk7lf9ru.js
+  // end include: /tmp/tmpl46w1mi8.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -1254,7 +1254,7 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  226143: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  226223: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
@@ -6068,8 +6068,8 @@ var ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_e
 var ___get_exception_message = createExportWrapper('__get_exception_message');
 var ___cxa_can_catch = createExportWrapper('__cxa_can_catch');
 var ___cxa_is_pointer_type = createExportWrapper('__cxa_is_pointer_type');
-var ___start_em_js = Module['___start_em_js'] = 218668;
-var ___stop_em_js = Module['___stop_em_js'] = 226143;
+var ___start_em_js = Module['___start_em_js'] = 218748;
+var ___stop_em_js = Module['___stop_em_js'] = 226223;
 function invoke_vi(index,a1) {
   var sp = stackSave();
   try {
