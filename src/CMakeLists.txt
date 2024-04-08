@@ -187,13 +187,6 @@ add_library(alexgames_c_dict STATIC
 	dictionary/c_dictionary.c)
 target_include_directories(alexgames_c_dict PRIVATE game_api/)
 
-add_library(alexgames_varint STATIC
-	cpp_libs/utils/varint.h
-	cpp_libs/utils/varint.c)
-
-add_library(alexgames_utf8 STATIC
-	cpp_libs/utils/utf8.c)
-
 add_library(lua ${LUA_CORE_SRC_LIST})
 
 add_library(alexgames_core STATIC
@@ -226,7 +219,6 @@ target_include_directories(alexgames_core PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 #add_subdirectory("${SRC_DIR}/cpp_games/stick" out/cpp_stick)
 
-#list(APPEND libs "cpp_stick" alexgames_varint alexgames_utf8)
 if (ENABLE_WORD_DICT)
 #list(APPEND libs alexgames_dict)
 endif()
