@@ -285,7 +285,7 @@ end
 
 
 function load_state_move_offset(move_offset)
-	local serialized_state = alexgames.get_saved_state_offset(session_id, move_offset)
+	local serialized_state = alexgames.adjust_saved_state_offset(session_id, move_offset)
 	load_state_helper(session_id, serialized_state)
 	update()
 	send_state()
@@ -314,7 +314,7 @@ function start_game(session_id_arg, serialized_state)
 		load_state_helper(session_id_arg, serialized_state)
 	elseif last_sess_id ~= nil then
 		print("Loading autosaved state")
-		serialized_state = alexgames.get_saved_state_offset(last_sess_id, 0)
+		serialized_state = alexgames.adjust_saved_state_offset(last_sess_id, 0)
 		load_state_helper(last_sess_id, serialized_state)
 	else
 		print("Starting new game, no URL param or autosaved state found")

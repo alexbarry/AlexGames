@@ -174,7 +174,7 @@ static const struct luaL_Reg lua_c_api[] = {
 	{"read_stored_data", lua_read_stored_data },
 	{"save_state",      lua_save_state      },
 	{"has_saved_state_offset", lua_has_saved_state_offset },
-	{"get_saved_state_offset", lua_get_saved_state_offset },
+	{"adjust_saved_state_offset", lua_get_saved_state_offset },
 	{"draw_extra_canvas",     lua_draw_extra_canvas     },
 	{"new_extra_canvas",      lua_new_extra_canvas      },
 	{"set_active_canvas",     lua_set_active_canvas     },
@@ -1789,7 +1789,7 @@ static int lua_get_saved_state_offset(lua_State *L) {
 		int session_id_is_int = 0;
 		session_id = lua_tointegerx(L, 1, &session_id_is_int);
 		if (!session_id_is_int) {
-			luaL_error(L, "get_saved_state_offset called with invalid session_id param, expected int");
+			luaL_error(L, "adjust_saved_state_offset called with invalid session_id param, expected int");
 			return 0;
 		}
 	}
@@ -1798,13 +1798,13 @@ static int lua_get_saved_state_offset(lua_State *L) {
 		int move_id_offset_is_int = 0;
 		move_id_offset = lua_tointegerx(L, 2, &move_id_offset_is_int);
 		if (!move_id_offset_is_int) {
-			luaL_error(L, "get_saved_state_offset called with invalid move_id_offset param, expected int");
+			luaL_error(L, "adjust_saved_state_offset called with invalid move_id_offset param, expected int");
 			return 0;
 		}
 	}
 
-	if (api->get_saved_state_offset == NULL) {
-		luaL_error(L, "api->get_saved_state_offset is NULL");
+	if (api->adjust_saved_state_offset == NULL) {
+		luaL_error(L, "api->adjust_saved_state_offset is NULL");
 		return 0;
 	}
 
@@ -1812,7 +1812,7 @@ static int lua_get_saved_state_offset(lua_State *L) {
 	uint8_t *buff = malloc(max_saved_state_size);
 
 	printf("Loading saved state session_id=%lld, move_id_offset=%lld\n", session_id, move_id_offset);
-	int bytes_read = api->get_saved_state_offset(session_id, move_id_offset, buff, max_saved_state_size);
+	int bytes_read = api->adjust_saved_state_offset(session_id, move_id_offset, buff, max_saved_state_size);
 
 	int vals_to_return = 0;
 
@@ -1822,14 +1822,14 @@ static int lua_get_saved_state_offset(lua_State *L) {
 		return 0;
 	} else if (bytes_read > max_saved_state_size) {
 		free(buff);
-		luaL_error(L, "api->get_saved_state_offset returned %d", bytes_read);
+		luaL_error(L, "api->adjust_saved_state_offset returned %d", bytes_read);
 		return 0;
 	} else if (bytes_read > 0) {
 		lua_pushlstring(L, (const char *)buff, bytes_read);
 		vals_to_return = 1;
 	} else {
 		free(buff);
-		luaL_error(L, "api->get_saved_state_offset returned %d", bytes_read);
+		luaL_error(L, "api->adjust_saved_state_offset returned %d", bytes_read);
 		return 0;
 	}
 	

@@ -204,7 +204,7 @@ bool SavedStateDb::has_saved_state_offset(int session_id, int move_id_offset) {
 	return bytes_read > 0;
 }
 
-int SavedStateDb::get_saved_state_offset(int session_id, int move_id_offset, uint8_t *state_out, size_t max_state_len) {
+int SavedStateDb::adjust_saved_state_offset(int session_id, int move_id_offset, uint8_t *state_out, size_t max_state_len) {
 	uint32_t move_id = -1;
 	bool move_id_stored = read_uint32(get_key_session_move_id(session_id).c_str(), &move_id, -1);
 	// is this ever possible in non erroneous conditions?

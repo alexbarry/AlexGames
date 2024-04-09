@@ -617,7 +617,7 @@ const struct game_api_callbacks api_callbacks = {
 	.get_last_session_id = db_helper_get_last_session_id,
 	.save_state         = db_helper_save_state,
 	.has_saved_state_offset = db_helper_has_saved_state_offset,
-	.get_saved_state_offset = db_helper_get_saved_state_offset,
+	.adjust_saved_state_offset = db_helper_get_saved_state_offset,
 
 	.draw_extra_canvas     = js_draw_extra_canvas,
 	.new_extra_canvas      = js_new_extra_canvas,

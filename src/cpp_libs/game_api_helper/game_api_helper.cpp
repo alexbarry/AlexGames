@@ -55,7 +55,7 @@ static int get_new_session_id(void) { return 0; }
 static int get_last_session_id(const char *game_id) { return 0; }
 static void save_state(int session_id, const uint8_t *state, size_t state_len) {}
 static bool has_saved_state_offset(int session_id, int move_id_offset) { return false; }
-static int get_saved_state_offset(int session_id, int move_id_offset, uint8_t *state, size_t state_len) { return 0; }
+static int adjust_saved_state_offset(int session_id, int move_id_offset, uint8_t *state, size_t state_len) { return 0; }
 
 
 static void draw_extra_canvas(const char *img_id,
@@ -111,7 +111,7 @@ struct game_api_callbacks create_default_callbacks(void) {
 		/* .get_last_session_id    = */ get_last_session_id,
 		/* .save_state             = */ save_state,
 		/* .has_saved_state_offset = */ has_saved_state_offset,
-		/* .get_saved_state_offset = */ get_saved_state_offset,
+		/* .adjust_saved_state_offset = */ adjust_saved_state_offset,
 		/* .draw_extra_canvas      = */ draw_extra_canvas,
 		/* .new_extra_canvas       = */ new_extra_canvas,
 		/* .set_active_canvas      = */ set_active_canvas,

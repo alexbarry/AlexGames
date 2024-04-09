@@ -297,20 +297,23 @@ struct game_api_callbacks {
 	bool (*has_saved_state_offset)(int session_id, int move_id_offset);
 
 	/**
-	 * Reads saved state from current move ID plus move_id_offset.
+	 * Reads saved state from current move ID plus move_id_offset,
+	 * and adjusts the current move ID by `move_id_offset`.
 	 *
 	 * Meant to be used as part of providing "undo" and "redo" buttons. ("undo" would
-	 * be move_id_offset -1, "redo" would be 1)
-	 * I think I'll also start to use this for loading the saved state initially, providing
-	 * an offset of 0.
+	 * be move_id_offset -1, "redo" would be 1), and also for loading the last
+	 * saved state when a game first starts.
 	 *
 	 * Returns number of bytes actually read. Returns a negative number if an
 	 * error occurred.
 	 *
-	 * TODO: rename this from "get_saved_state_offset" to something that makes it clear that
-	 *       the current move ID is adjusted.
+	 * TODO: this could possibly be handled by the game platform itself, passing the last
+	 *       saved state as a param to `start_game` instead.
+	 *       Then each game wouldn't need to implement the slightly clunky behaviour of both
+	 *       checking if state was passed to `start_game`, and then calling this API
+	 *       to load previously saved state.
 	 */
-	int (*get_saved_state_offset)(int session_id, int move_id_offset, uint8_t *state, size_t state_len);
+	int (*adjust_saved_state_offset)(int session_id, int move_id_offset, uint8_t *state, size_t state_len);
 
 	/** Draws one of the extra canvases on the active canvas */
 	void (*draw_extra_canvas)(const char *img_id,

@@ -394,7 +394,7 @@ function start_game(session_id, state_serialized)
 	else
 		local last_sess_id = alexgames.get_last_session_id()
 		if last_sess_id ~= nil then
-			state_serialized = alexgames.get_saved_state_offset(last_sess_id, 0) 
+			state_serialized = alexgames.adjust_saved_state_offset(last_sess_id, 0) 
 			g_session_id = last_sess_id
 			state = serialize.deserialize_state(state_serialized)
 			state_set = true

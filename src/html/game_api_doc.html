@@ -63,7 +63,7 @@
 <ul>
 	<li><strong>Init</strong>: Game client initializes (on HTML this means downloading images), including network connection to the server for network multiplayer.</li>
 	<li><strong>Load main Lua file</strong>: This initializion includes running all the code in the game's main Lua file (which may include additional Lua files). These files should only define functions, and not actually "do" anything outside of those functions.</li>
-	<li><strong>Call start_game</strong>: The game client calls the game's <a class="api_link" href="#start_game">start_game</a> callback if the user wants to start a new game, or it calls the <a class="api_link" href="#load_state">load_state</a> callback if the user has provided state from a URL parameter (or is loading this game from the autosave / history browser UI. The game should initialize its own state, and may call some or all of the below APIs:
+	<li><strong>Call start_game</strong>: The game client calls the game's <a class="api_link" href="#start_game">start_game</a> callback, optionally providing serialized state if the user has provided state from a URL parameter (or is loading this game from the autosave / history browser UI. If the game is being loaded from saved history, a session ID param is also provided. From this callback, the game should initialize its own state if not provided, and may call some or all of the below APIs:
 	<ul>
 		<li>calling the <a class="api_link" href="#enable_evt">enable_evt</a> API. This can enable things like keyboard, detailed touch or mouse input (more than just clicks).</li>
 		<li>calling the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> API. This configures a regular timer to call the <a class="api_link" href="#update">update</a> callback.
@@ -81,9 +81,9 @@
 	</ul>
 	</li>
 	<li><strong>Network multiplayer</strong>: The game may send messages to other players with <a class="api_link" href="#send_message">send_message</a>, and receive messages from <a class="api_link" href="#handle_msg_received ">handle_msg_received</a>.</li>
-	<li><strong>Autosave state</strong>: The game may store its state with the <a class="api_link" href="#save_state API">save_state</a> API. This allows the user to browse through saved states through the history browser in <i>Load autosaved game</i> button in the <i>options</i> menu.</li>
+	<li><strong>Autosave state</strong>: The game may store its state with the <a class="api_link" href="#save_state">save_state</a> API. This allows the user to browse through saved states through the history browser in <i>Load autosaved game</i> button in the <i>options</i> menu.</li>
 	<li><strong>Save other game state</strong>: Alternatively, the game can read or write saved data directly with the <a class="api_link" href="#store_data">store_data</a> and <a class="api_link" href="#read_stored_data">read_stored_data</a> APIs.</li>
-	<li><strong>Export game state</strong>: The user may wish to continue playing the game on another device, or share the initial state with a friend to try the same puzzle they just enjoyed. When the user presses the <i>Options</i> button, the <a class="api_link" href="#get_state">get_state</a> and <a class="api_link" href="#get_init_state">get_init_state</a> APIs are called, and both are available as URLs with the binary state data base 64 encoded in the web version. (When a user opens one of these links, the game is loaded via the <a class="api_link" href="#load_state">load_state</a> API).</li>
+	<li><strong>Export game state</strong>: The user may wish to continue playing the game on another device, or share the initial state with a friend to try the same puzzle they just enjoyed. When the user presses the <i>Options</i> button, the <a class="api_link" href="#get_state">get_state</a> and the (if defined) <a class="api_link" href="#get_init_state">get_init_state</a> APIs are called, and both are available as URLs with the binary state data base 64 encoded in the web version. (The serialized state will be passed to <a class="api_link" href="#start_game">start_game</a> callback when the user opens the URL with the serialized state)</li>
 
 </ul>
 
@@ -136,6 +136,9 @@
 	<ul id="persistent_saved_state_apis_body">
 		<li><a class="api_link" href="#get_new_session_id">get_new_session_id</a></li>
 		<li><a class="api_link" href="#save_state">save_state</a></li>
+		<li><a class="api_link" href="#get_last_session_id">get_last_session_id</a></li>
+		<li><a class="api_link" href="#has_saved_state_offset">has_saved_state_offset</a></li>
+		<li><a class="api_link" href="#adjust_saved_state_offset">adjust_saved_state_offset</a></li>
 	</ul>
 
 	<li><strong>Miscellaneous APIs</strong> <span id="misc_apis_toggle_collapsed"></span></li>
@@ -159,8 +162,7 @@
 		<li><strong>Main</strong> <span id="callbacks_main_toggle_collapsed"></span></li>
 		<ul id="callbacks_main_body">
 			<li><a class="api_link" href="#update">update</a>: Called when the screen should be rendered, or at a specific interval if the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> is called. Meant to be the "main loop" of games.</li>
-			<li><a class="api_link" href="#start_game">start_game</a>: Called when the game is started. <span class="collapsable collapsed">Note that performing game initialization outside of this function is not recommended, because <a class="api_link" href="#load_state">load_state</a> is called instead of this when a game is loaded from saved state (either for the user to play, or to just render a preview in thie "history browser" interface.</span></li>
-			<li><a class="api_link" href="#load_state">load_state</a>: <span class="collapsable collapsed">Called when the game is loaded from saved state.</span></li>
+			<li><a class="api_link" href="#start_game">start_game</a>: Called when the game is started. May pass serialized state if the user is loading a previous game from the history browser, or is opening a URL with serialized state passed as a parameter.</li>
 			<li><a class="api_link" href="#get_state">get_state</a></li>
 			<li><a class="api_link" href="#get_init_state">get_init_state</a></li>
 		</ul>
@@ -431,6 +433,32 @@ popup_info = {
 	<li><code>state</code>: A byte array of game state.</li>
 </ul>
 
+
+<h4 id="get_last_session_id">get_last_session_id</h4>
+<code>alexgames.get_last_session_id()</code>
+
+<p>Returns the last session ID for your current game. Returns <code>nil</code> if no previous session ID is present for this game.</p>
+
+<p>The only expected use case for this API is when the game is first started, you can check if this is set, and then call <a class="api_link">adjust_saved_state_offset(session_id, 0)</a> to load the previously saved state.</p>
+
+<h4 id="has_saved_state_offset">has_saved_state_offset</h4>
+<code>alexgames.has_saved_state_offset(session_id, move_id_offset)</code>
+
+<p>Returns <code>true</code> if a saved state is defined at the session ID, and (current move ID plus <code>move_id_offset</code>), returns <code>false</code> otherwise.</p>
+
+<p>The only expected use case for this API is for <i>Undo</i> and <i>Redo</i> buttons. This can be checked each time the screen is updated, to decide whether or not to enable (allow to be pressed) the Undo/Redo buttons.</p>
+
+<h4 id="adjust_saved_state_offset">adjust_saved_state_offset</h4>
+<code>alexgames.adjust_saved_state_offset(session_id, move_id_offset)</code>
+
+<p>Returns the saved state for the session ID and (current move ID plus <code>move_id_offset</code>), and increments the move ID by <code>mode_id_offset</code>.</p>
+
+<p>This API is expected to be used for two cases:</p>
+<ul>
+	<li><i>Undo</i> and <i>Redo</i> buttons: when the user presses one of thes buttons, call this API to get the saved state, and update the move ID.</li>
+	<li>When a game is started, if no saved state is passed as a parameter, if <a class="api_link">get_last_session_id</a> returns a non-nil value, then call this API with a <code>move_id_offset</code> of <code>0</code> to get the last saved state.</li>
+</ul>
+
 <h3>Miscellaneous APIs</h3>
 
 <h4 id="get_time_ms">get_time_ms</h4>
@@ -460,16 +488,16 @@ popup_info = {
 <p>Called when the screen should be rendered, or at a specific interval if the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> is called. Meant to be the "main loop" of games.</p>
 
 <h4 id="start_game">start_game</h4>
-<code>start_game()</code>
+<code>start_game(session_id, serialized_state)</code>
 
-<p>Called when the game is first started. This should generate a new game. Note that games may also be loaded from saved state, meaning <a class="api_link" href="#load_state">load_state</a> will be called instead of this one.</p>
+<p>Called when the game is first started. If <code>serialized_state</code> is <code>nil</code>, the game should initialize new state. If <code>serialized_state</code> is not <code>nil</code>, the game should deserialize it and use that as the game state. The game should also store the <code>session_id</code>, as that is used as a key when writing to the saved state database via the <a class="api_link" href="#save_state">save_state</a> API.</p>
 
-<h4 id="load_state">load_state</h4>
-<code>load_state(session_id, state)</code>
-
-<p>Called when a game is loaded from state: either from the user selecting it in the history browser, or by providing state from a URL parameter. Initialization code must be performed here, since if this API is called, then <a class="api_link" href="#start_game">start_game</a> is not called.</p>
-
-<p>Note that this API is also called when rendering history browser previews. This should be transparent to most games if they handle this correctly.</p>
+<p>This happens in three cases:</p>
+<ol>
+	<li>the user opens a URL with serialized state as a parameter,</li>
+	<li>the user loads a previously saved game from the history browser, or</li>
+	<li>the user is browsing previously saved games from the history browser-- this API is called to generate the previews.</li>
+</ol>
 
 <h4 id="get_state">get_state</h4>
 <code>get_state()</code>

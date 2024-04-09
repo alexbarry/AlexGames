@@ -29,7 +29,7 @@ class SavedStateDb {
 	 *
 	 * This is helpful for games loading their last saved game when
 	 * started. They can call this API to get the session ID, then
-	 * `get_saved_state_offset(session_id=session_id, move_id_offset=0)`
+	 * `adjust_saved_state_offset(session_id=session_id, move_id_offset=0)`
 	 * to load the last saved state.
 	 */
 	uint32_t get_last_session_id(const char *game_id);
@@ -50,7 +50,7 @@ class SavedStateDb {
 	uint32_t get_next_move_id(int session_id);
 
 	bool has_saved_state_offset(int session_id, int move_id_offset);
-	int get_saved_state_offset(int session_id, int move_id_offset, uint8_t *state_out, size_t max_state_len);
+	int adjust_saved_state_offset(int session_id, int move_id_offset, uint8_t *state_out, size_t max_state_len);
 
 	private:
 	void *L;
