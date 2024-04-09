@@ -30,7 +30,7 @@ local g_state = {
 	key_state = keyboard_input.new_key_state(),
 }
 
-function draw_board()
+function update()
 	draw.draw_state(g_state.game, g_state.ui, player_idx)
 	if not is_paused then
 		core.update_state(g_state.game, MS_PER_FRAME)

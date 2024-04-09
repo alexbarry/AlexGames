@@ -9,7 +9,7 @@ local height = 75
 local i = 0
 local prop = 0
 
-function draw_board()
+function update()
 	alexgames.draw_clear()
 
 	if prop % 2 == 0 then
@@ -65,10 +65,10 @@ local BTN_ID_NEXT_PROP  = "btn_next_prop"
 function handle_btn_clicked(btn_id)
 	if btn_id == BTN_ID_NEXT_FRAME then
 		i = i + 1
-		draw_board()
+		update()
 	elseif btn_id == BTN_ID_NEXT_PROP then
 		prop = prop + 1
-		draw_board()
+		update()
 	else
 		error(string.format("Unhandled btn id %s", btn_id))
 	end

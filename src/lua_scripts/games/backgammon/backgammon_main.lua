@@ -155,7 +155,7 @@ local function save_state()
 	alexgames.save_state(session_id, serialized_state)
 end
 
-function draw_board()
+function update()
 	core.increment_move_timer(state)
 	draw.draw_state(state, session_id, get_player())
 	print(string.format("Game state is %d", state.game_state))
@@ -316,12 +316,12 @@ local function handle_cmd(cmd, player, params)
 		rc = core.roll(state, player, dice_vals)
 		state.dice_loading = false
 		print(string.format("Dice vals are now: %s", utils.ary_to_str(state.dice_vals)))
-		draw_board()
+		update()
 		return rc
 	elseif cmd == CMD_ROLL_REQ then
 		rc = roll_request(state, player)
 		handle_rc(rc)
-		draw_board()
+		update()
 	else
 		error(string.format("Unhandled cmd \"%s\"", cmd))
 	end
@@ -373,7 +373,7 @@ local function load_saved_state_offset(move_id_offset)
 		error(string.format("get_saved_state_offset(offset=%d) returned nil", move_id_offset))
 	end
 	load_state(session_id, serialized_state)
-	draw_board()
+	update()
 end
 
 function handle_btn_clicked(btn_id)
@@ -393,13 +393,13 @@ function handle_btn_clicked(btn_id)
 	elseif btn_id == draw.BTN_ID_ROLL then
 		--rc = send_and_handle_cmd(CMD_ROLL, get_player())
 		rc = roll_request(state, get_player())
-		draw_board()
+		update()
 	elseif btn_id == draw.BTN_ID_ACK then
 		rc = send_and_handle_cmd(CMD_ACK_INIT, get_player())
-		draw_board()
+		update()
 	elseif btn_id == draw.BTN_ID_UNSELECT then
 		rc = send_and_handle_cmd(CMD_UNSELECT, get_player())
-		draw_board()
+		update()
 	else
 		error(string.format("unhandled btn_id=%s", btn_id))
 	end
@@ -420,7 +420,7 @@ function handle_popup_btn_clicked(popup_id, btn_id)
 		end
 		core.double_response(state, get_player(), accepted)
 		alexgames.hide_popup()
-		draw_board()
+		update()
 	else
 		error(string.format("Unhandled popup_id = %s", popup_id))
 	end
@@ -430,7 +430,7 @@ local function new_game()
 	alexgames.set_status_msg("Starting new game")
 	session_id = alexgames.get_new_session_id()
 	state = core.new_game()
-	draw_board()
+	update()
 end
 
 function handle_game_option_evt(option_id)
@@ -462,7 +462,7 @@ function handle_msg_received(src, msg)
 		--print(string.format("Received game cmd %s", utils.ary_to_str(params)))
 		local rc = handle_cmd(table.unpack(params))
 		handle_rc(rc)
-		draw_board()
+		update()
 	-- TODO handle "game_cmd" messages, call handle_cmd
 	elseif false then
 --[[
@@ -484,7 +484,7 @@ function handle_msg_received(src, msg)
 			alexgames.set_status_err("Other player made an invalid move")
 		else
 			alexgames.set_status_msg("Your move")
-			draw_board()
+			update()
 			save_state()
 		end
 
@@ -496,7 +496,7 @@ function handle_msg_received(src, msg)
 		print("Recieved state:")
 		--core.print_state(recvd_state)
 		state = recvd_state
-		draw_board()
+		update()
 		save_state()
 	elseif header == "player_left" and src == "ctrl" then
 	elseif header == "player_joined" then

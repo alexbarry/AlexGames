@@ -7,11 +7,11 @@ local FPS = 60
 
 local g_state = nil
 
-function draw_board(dt_ms)
+function update(dt_ms)
 	if dt_ms and dt_ms > 0 then
 		core.update_state(g_state, dt_ms)
 	end
-	draw.draw_board(g_state)
+	draw.update(g_state)
 end
 
 local jump_keys = {

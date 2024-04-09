@@ -38,8 +38,8 @@ state.board = {
 }
 ]]
 
-function draw_board()
-	draw.draw_board(state)
+function update()
+	draw.update(state)
 	alexgames.set_btn_enabled(BTN_ID_UNDO, alexgames.has_saved_state_offset(session_id, -1))
 	alexgames.set_btn_enabled(BTN_ID_REDO, alexgames.has_saved_state_offset(session_id,  1))
 end
@@ -70,7 +70,7 @@ function handle_user_clicked(coord_y, coord_x)
 
 	core.print_state(state)
 	print(string.format("serialized state is: %s", utils.binstr_to_hr_str(serialize.serialize_state(state))))
-	draw_board()
+	update()
 end
 
 
@@ -125,7 +125,7 @@ function handle_msg_received(src, msg)
 			alexgames.set_status_err("Other player made an invalid move")
 		else
 			alexgames.set_status_msg("Your move")
-			draw_board()
+			update()
 			save_state()
 		end
 
@@ -136,7 +136,7 @@ function handle_msg_received(src, msg)
 		print("Recieved state:")
 		core.print_state(recvd_state)
 		state = recvd_state
-		draw_board()
+		update()
 		save_state()
 	elseif header == "player_left" and src == "ctrl" then
 	elseif header == "player_joined" then
@@ -207,7 +207,7 @@ end
 local function load_state_move_offset(move_id_offset)
 	local serialized_state = alexgames.get_saved_state_offset(session_id, move_id_offset)
 	state = serialize.deserialize_state(serialized_state)
-	draw_board()
+	update()
 	broadcast_state("all")
 end
 
@@ -245,7 +245,7 @@ function handle_game_option_evt(option_id)
 		session_id = alexgames.get_new_session_id()
 		state = core.new_state()
 		save_state()
-		draw_board()
+		update()
 		broadcast_state("all")
 	end
 end

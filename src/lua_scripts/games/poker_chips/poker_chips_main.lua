@@ -64,7 +64,7 @@ core.print_state(state.game)
 state.ui = ui.init()
 ui.update(state.ui, state.game, get_player())
 
-function draw_board() 
+function update() 
 	ui.draw(state.ui)
 end
 
@@ -130,7 +130,7 @@ function handle_msg_received(src, msg)
 		local received_state = serialize.deserialize_state(payload)
 		state.game = received_state
 		ui.update(state.ui, state.game, get_player())
-		draw_board()
+		update()
 	else
 		error(string.format("Unhandled message: %s", header))
 	end

@@ -48,7 +48,7 @@ local game_params = {
 local ui_state = draw.init(screen_width, screen_height, game_params)
 local state = nil
 
-function draw_board()
+function update()
 	if state == nil then
 		return
 	end
@@ -287,7 +287,7 @@ local function start_host_game(players_arg, player_arg, player_name_to_idx_arg)
 	is_client = false
 	new_game(#players)
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end
 
 local function start_client_game(players_arg, player_arg, player_name_to_idx_arg)
@@ -324,7 +324,7 @@ function handle_msg_received(src, msg)
 	end
 
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end 
 
 function handle_popup_btn_clicked(popup_id, btn_idx)

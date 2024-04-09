@@ -25,7 +25,7 @@ local padding = 5
 
 local last_touch_str = nil
 
-function draw_board()
+function update()
 	alexgames.draw_clear()
 
 	if touch_count == 0 then
@@ -85,7 +85,7 @@ function handle_touch_evt(evt_id, changed_touches)
 			touches[touch.id] = nil
 		end
 	end
-	draw_board()
+	update()
 end
 
 alexgames.enable_evt('touch')

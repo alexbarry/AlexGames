@@ -18,7 +18,7 @@ draw.init()
 alexgames.add_game_option(BTN_ID_NEW_GAME, { type = alexgames.OPTION_TYPE_BTN, label = "New Game"})
 
 
-function draw_board(dt_ms)
+function update(dt_ms)
 	if g_state == nil then return end
 	if dt_ms ~= nil then
 		draw.update_state(draw_state, dt_ms)
@@ -49,7 +49,7 @@ function load_state_offset(move_offset)
 	local state_serialized = alexgames.get_saved_state_offset(g_session_id, move_offset)
 	g_state = serialize.deserialize(state_serialized)
 	g_win_anim_shown = false
-	draw_board()
+	update()
 end
 
 function handle_btn_clicked(btn_id)
@@ -68,7 +68,7 @@ function handle_game_option_evt(option_id)
 		g_state = core.new_state(11, 3, 4)
 		g_win_anim_shown = false
 		save_state()
-		draw_board()
+		update()
 	else
 		error(string.format("Unhandled game option evt id=%s", option_id))
 	end
@@ -79,7 +79,7 @@ function start_game(session_id, state_serialized)
 	if state_serialized ~= nil then
 		g_session_id = session_id
 		g_state = serialize.deserialize(state_serialized)
-		draw_board()
+		update()
 	else
 		local prev_session_id = alexgames.get_last_session_id()
 		print(string.format("Read previous session ID %s", prev_session_id))

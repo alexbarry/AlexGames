@@ -19,7 +19,7 @@ local state = {
 }
 state.ui_state   = draw.init()
 
-function draw_board(dt_ms)
+function update(dt_ms)
 	draw.draw_state(state.ui_state, state.game_state, dt_ms)
 end
 

@@ -50,11 +50,11 @@ function get_game_list() {
  *
  * TODO: maybe it makes sense to have a separate API for this
  */
-function draw_board(ptr, dt_ms) {
+function update(ptr, dt_ms) {
 	if (dt_ms === undefined) {
 		dt_ms = 0;
 	}
-	return Module.ccall("draw_board", null, ["number", "number"], [ptr, dt_ms]);
+	return Module.ccall("update", null, ["number", "number"], [ptr, dt_ms]);
 }
 
 // Previously this was an API to receive a string from the user.

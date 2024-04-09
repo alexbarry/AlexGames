@@ -57,7 +57,7 @@ function send_state_updates_if_host()
 	end
 end
 
-function draw_board()
+function update()
 	if state == nil then
 		return
 	end
@@ -139,7 +139,7 @@ function handle_btn_clicked(btn_id)
 	else
 		error(string.format("Unhandled btn_id %s", btn_id))
 	end
-	draw_board()
+	update()
 	save_state()
 	core.print_state(state)
 	send_state_updates_if_host()
@@ -161,7 +161,7 @@ function handle_user_clicked(coord_y, coord_x)
 	elseif action.action_type == draw.ACTION_TYPE_UI then
 		draw.handle_ui_action(ui_state, action)
 	end
-	draw_board()
+	update()
 	save_state()
 	core.print_state(state)
 	send_state_updates_if_host()
@@ -177,7 +177,7 @@ local function start_host_game(players_arg, player_arg, player_name_to_idx_arg)
 		new_game(#players)
 	end
 	send_state_updates_if_host()
-	draw_board()
+	update()
 	core.print_state(state)
 end
 
@@ -219,7 +219,7 @@ function handle_msg_received(src, msg)
 	end
 
 	send_state_updates_if_host()
-	draw_board()
+	update()
 	core.print_state(state)
 	save_state()
 end 

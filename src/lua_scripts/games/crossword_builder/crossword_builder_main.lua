@@ -43,20 +43,20 @@ draw.update_state(state.draw, state.game)
 table.insert(state.draw.tiles.placed_tiles, { pos = { grid_idx = 1, y_idx = 6, x_idx = 7 }, letter = "S" } )
 --]]
 
-function draw_board()
+function update()
 	draw.draw(state.draw)
 end
 
 function handle_mouse_evt(evt_id, pos_y, pos_x, params)
 	--print(string.format("handle_mouse_evt(evt_id=%s, pos_y=%d, pos_x=%d)", evt_id, pos_y, pos_x))
 	draw.handle_mouse_evt(state.draw, evt_id, pos_y, pos_x, params)
-	draw_board()
+	update()
 end
 
 function handle_mousemove(pos_y, pos_x, params)
 	--print(string.format("handle_mousemove(pos_y=%d, pos_x=%d)", pos_y, pos_x))
 	draw.handle_mousemove(state.draw, pos_y, pos_x, params)
-	draw_board()
+	update()
 end
 
 function handle_touch_evt(evt_id, changed_touches)

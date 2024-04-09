@@ -66,7 +66,7 @@ local function get_colour_of_square(state, y, x)
 	end
 end
 
-function draw.draw_board(state)
+function draw.update(state)
 	--alexgames.draw_rect('#000000', 0, 0, height, width)
 	alexgames.draw_clear()
 	-- Why do I need to add another 2 pixels here?? Otherwise the gold edge is cutoff

@@ -24,7 +24,7 @@ local TIME_PER_FRAME_MS = 1000/FPS
 
 local GAME_OPTION_NEW_GAME = "option_new_game"
 
-function draw_board(dt_ms)
+function update(dt_ms)
 	if state.game.game_over then 
 		state.game.game_over = false
 		core.reset_player_state(state.game, player_idx)

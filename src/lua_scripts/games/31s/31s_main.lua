@@ -54,7 +54,7 @@ function init_ui()
 end
 
 
-function draw_board()
+function update()
 	game31s_draw.draw(state, player)
 	--game31s.print_state(state)
 end
@@ -126,7 +126,7 @@ function handle_user_clicked(y,x)
 		alexgames.set_status_err(game31s.err_code_to_str(rc))
 	end
 
-	draw_board()
+	update()
 	check_for_winners()
 	send_state_updates_if_host()
 	game31s.print_state(state)
@@ -138,7 +138,7 @@ function handle_btn_clicked(btn_id)
 			local rc = game31s.player_knock(state, player)
 			if rc == game31s.SUCCESS then
 				send_state_updates_if_host()
-				draw_board()
+				update()
 			else
 				alexgames.set_status_err(game31s.err_code_to_str(rc))
 			end
@@ -157,7 +157,7 @@ local function start_host_game(players_arg, player_arg, player_name_to_idx_arg)
 	is_client = false
 	new_game(#players)
 	send_state_updates_if_host()
-	draw_board()
+	update()
 	game31s.print_state(state)
 
 end
@@ -314,7 +314,7 @@ function handle_msg_received(src, msg)
 		print(string.format("Unhandled message header \"%s\" from \"%s\"", header, msg))
 	end
 	send_state_updates_if_host()
-	draw_board()
+	update()
 	check_for_winners()
 	if not is_client then
 		game31s.print_state(state)

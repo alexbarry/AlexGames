@@ -22,7 +22,7 @@ end
 
 
 function draw.draw(state)
-	-- This clears anything on the screen from previous `draw_board` calls.
+	-- This clears anything on the screen from previous `update` calls.
 	alexgames.draw_clear()
 
 

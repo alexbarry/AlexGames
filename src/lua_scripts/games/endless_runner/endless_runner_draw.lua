@@ -56,7 +56,7 @@ local function game_pos_to_screen_pos(state, pt)
 	return screen_pt
 end
 
-function draw.draw_board(state, dt_ms)
+function draw.update(state, dt_ms)
 	alexgames.draw_clear()
 
 	for _, wall in ipairs(state.walls) do

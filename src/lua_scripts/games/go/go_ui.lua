@@ -44,7 +44,7 @@ function go_ui.init_ui(session_id, board_piece_size_arg, screen_width, screen_he
 	update_undo_redo_btns(session_id)
 end
 
-function go_ui.draw_board(session_id, board, last_y, last_x)
+function go_ui.update(session_id, board, last_y, last_x)
 
 	alexgames.draw_clear()
 
@@ -75,7 +75,7 @@ function go_ui.draw_board(session_id, board, last_y, last_x)
 			local x_pos = piece_space_size/2 + x_idx * piece_space_size
 			local img_id = nil
 			if y_idx > #board or x_idx > #board[1] then
-				error(string.format("draw_board: {y=%d, x=%d} out of range of board size {y=%d,x=%d}", y_idx+1, x_idx+1, #board, #board[1]))
+				error(string.format("update: {y=%d, x=%d} out of range of board size {y=%d,x=%d}", y_idx+1, x_idx+1, #board, #board[1]))
 			end
 			local piece_type = board[y_idx+1][x_idx+1]
 			-- TODO replace 1 and 2 with go.PLAYER1 and go.PLAYER2

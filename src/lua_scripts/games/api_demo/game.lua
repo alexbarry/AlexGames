@@ -46,11 +46,11 @@ local MS_PER_FRAME = math.floor(1000/FPS)
 
 -- This function is called initially, and then many times repeatedly if `alexgames.set_timer_update_ms(time_ms)`
 -- is called, to update state.
--- TODO It really should be renamed from "draw_board" to "update" or something.
+-- TODO It really should be renamed from "update" to "update" or something.
 -- 
 -- TODO I think it would also be cleaner to move away from global symbols like this, and instead register the important methods
--- in something like `alexgames.init({update=draw_board})`, and register the others (key, touch, mousemove) when I enable those events.
-function draw_board()
+-- in something like `alexgames.init({update=update})`, and register the others (key, touch, mousemove) when I enable those events.
+function update()
 	local dt_ms = MS_PER_FRAME
 
 
@@ -186,7 +186,7 @@ end
 function start_game(session_id_arg, state_serialized)
 	draw.init(board_height, board_width)
 	
-	-- This causes draw_board to be called every `MS_PER_FRAME` ms.
+	-- This causes update to be called every `MS_PER_FRAME` ms.
 	alexgames.set_timer_update_ms(MS_PER_FRAME)
 	
 	-- This causes handle_key_evt to get key presses.

@@ -79,7 +79,7 @@ local function draw_board_internal()
 	alexgames.set_btn_enabled(BTN_ID_REDO, alexgames.has_saved_state_offset(g_session_id,  1))
 end
 
-function draw_board()
+function update()
 	draw_board_internal()
 end
 
@@ -319,6 +319,6 @@ function start_game(session_id_arg, state_serialized)
 	g_state = core.new_game()
 	player = core.PLAYER_WHITE
 	local_multiplayer = true
-	draw_board()
+	update()
 	--]]
 end

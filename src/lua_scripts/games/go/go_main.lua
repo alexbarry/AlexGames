@@ -104,9 +104,9 @@ function handle_user_string_input(row_col)
 	return rc
 end
 
-function draw_board() 
+function update() 
 	if state ~= nil then
-		go_ui.draw_board(session_id, state.board, state.last_move_y, state.last_move_x)
+		go_ui.update(session_id, state.board, state.last_move_y, state.last_move_x)
 	end
 end
 
@@ -138,7 +138,7 @@ function handle_user_clicked(pos_y, pos_x)
 	else
 		alexgames.set_status_err(go.err_code_to_str(rc))
 	end
-	draw_board()
+	update()
 	update_status_msg_turn(state, ctrl_state)
 end
 
@@ -183,7 +183,7 @@ function handle_msg_received(src, msg)
 		end
 		go.player_move(state, player, row, col)
 		alexgames.set_status_err("")
-		draw_board()
+		update()
 		update_status_msg_turn(state, ctrl_state)
 		save_state()
 	elseif header == "get_state" then
@@ -196,7 +196,7 @@ function handle_msg_received(src, msg)
 		if go_ui.get_board_piece_size() ~= #new_state.board then
 			go_ui.set_board_piece_size(#new_state.board)
 		end
-		draw_board()
+		update()
 		alexgames.set_status_err("")
 		update_status_msg_turn(state, ctrl_state)
 	elseif header == "player_left" and src == "ctrl" then
@@ -212,7 +212,7 @@ local function load_saved_state_offset(move_id_offset)
 		error(string.format("get_saved_state_offset(offset=%d) returned nil", move_id_offset))
 	end
 	internal_load_state(session_id, serialized_state)
-	draw_board()
+	update()
 end
 
 local function handle_pass(player)
@@ -220,7 +220,7 @@ local function handle_pass(player)
 	if rc ~= go.SUCCESS then
 		alexgames.set_status_err(go.err_code_to_str(rc))
 	else
-		draw_board()
+		update()
 		save_state()
 		update_status_msg_turn(state, ctrl_state)
 
@@ -273,7 +273,7 @@ function handle_popup_btn_clicked(popup_id, btn_idx)
 		set_state(go.new_game(desired_game_size))
 		go_ui.set_board_piece_size(desired_game_size)
 		print(string.format("state.board: %s", state.board))
-		draw_board()
+		update()
 		broadcast_state()
 	elseif popup_id == POPUP_ID_START_NEW_GAME_PROMPT then
 		if btn_idx == 0 then

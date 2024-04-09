@@ -27,7 +27,7 @@ local g_state = {
 }
 
 
-function draw_board(dt_ms)
+function update(dt_ms)
 	--core.update_state(g_state.game, TIME_PER_FRAME_MS/1000.0)
 	core.update_state(g_state.game, dt_ms/1000.0)
 	draw.draw_state(g_state.game, g_state.ui)

@@ -105,7 +105,7 @@
 			start_game(gfx.ptr);
 		}
 
-		draw_board(gfx.ptr, 0);
+		update(gfx.ptr, 0);
 	}
 
 

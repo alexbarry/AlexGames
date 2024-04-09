@@ -66,13 +66,13 @@
 	<li><strong>Call start_game</strong>: The game client calls the game's <a class="api_link" href="#start_game">start_game</a> callback if the user wants to start a new game, or it calls the <a class="api_link" href="#load_state">load_state</a> callback if the user has provided state from a URL parameter (or is loading this game from the autosave / history browser UI. The game should initialize its own state, and may call some or all of the below APIs:
 	<ul>
 		<li>calling the <a class="api_link" href="#enable_evt">enable_evt</a> API. This can enable things like keyboard, detailed touch or mouse input (more than just clicks).</li>
-		<li>calling the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> API. This configures a regular timer to call the <a class="api_link" href="#draw_board">draw_board</a> callback.
+		<li>calling the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> API. This configures a regular timer to call the <a class="api_link" href="#update">update</a> callback.
 	</ul>
 	</li>
-	<li><strong>Call draw_board</strong>: The game client calls the game's <a class="api_link" href="#draw_board">draw_board</a> callback. From here, the game should:
+	<li><strong>Call update</strong>: The game client calls the game's <a class="api_link" href="#update">update</a> callback. From here, the game should:
 	<ul>
 		<li>draw the current game state using the Drawing APIs, such as <a class="api_link" href="#draw_graphic">draw_graphic</a>, <a class="api_link" href="#draw_line">draw_line</a>, <a class="api_link" href="#draw_rect">draw_rect</a>, or <a class="api_link" href="#draw_circle">draw_circle</a>. Games should first call <a class="api_link" href="#draw_clear">draw_clear</a> to first clear the buffer/screen, and then call <a class="api_link" href="#draw_refresh"</a>draw_refresh</a> to commit their drawing to the user's screen.</li>
-		<li>If the game configured a timer via the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> API, then the game should also update its time-based state here (<code>draw_board</code> is called at the frequency passed as an argument to <code>set_update_timer_ms</code>).</li>
+		<li>If the game configured a timer via the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> API, then the game should also update its time-based state here (<code>update</code> is called at the frequency passed as an argument to <code>set_update_timer_ms</code>).</li>
 	</ul>
 	</li>
 	<li><strong>Handle user input</strong>: The user may provide input by clicking on the screen with their mouse, or pressing it with their finger on mobile (<a class="api_link" href="#handle_user_clicked">handle_user_clicked</a>), or other forms of input if enabled via <a class="api_link" href="#enable_evt">enable_evt</a>: keyboard input (<a class="api_link" href="#handle_key_evt">handle_key_evt</a>), touch (<a class="api_link" href="#handle_touch_evt">handle_touch_evt</a>), or more granular mouse input (button pressed, released, mouse moved: <a class="api_link" href="#handle_mouse_evt">handle_mouse_evt</a>, <a class="api_link" href="#handle_mousemove">handle_mousemove</a>)
@@ -123,7 +123,7 @@
 
 	<li><strong>Timer APIs</strong> <span id="timer_apis_toggle_collapsed"></span></li>
 	<ul id="timer_apis_body">
-		<li><a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a>: Calls the <a class="api_link" href="#draw_board">draw_board</a> callback at the specified interval, in milliseconds. This allows for real time games, or games with animations.</li>
+		<li><a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a>: Calls the <a class="api_link" href="#update">update</a> callback at the specified interval, in milliseconds. This allows for real time games, or games with animations.</li>
 	</ul>
 
 
@@ -132,7 +132,7 @@
 		<li><a class="api_link" href="#store_data">store_data</a></li>
 		<li><a class="api_link" href="#read_stored_data">read_stored_data</a></li>
 	</ul>
-	<li><strong>Persistent saved state APIs</strong>: stores games' states to the "history browser" interface, <span class="collapsable collapsed">where the user can browse through different game sessions, and individual moves within those games. A preview of the game is rendered through the regular <code>draw_board</code> API.</span> <span id="persistent_saved_state_apis_toggle_collapsed"></span></li>
+	<li><strong>Persistent saved state APIs</strong>: stores games' states to the "history browser" interface, <span class="collapsable collapsed">where the user can browse through different game sessions, and individual moves within those games. A preview of the game is rendered through the regular <code>update</code> API.</span> <span id="persistent_saved_state_apis_toggle_collapsed"></span></li>
 	<ul id="persistent_saved_state_apis_body">
 		<li><a class="api_link" href="#get_new_session_id">get_new_session_id</a></li>
 		<li><a class="api_link" href="#save_state">save_state</a></li>
@@ -158,7 +158,7 @@
 	<ul id="callbacks_body">
 		<li><strong>Main</strong> <span id="callbacks_main_toggle_collapsed"></span></li>
 		<ul id="callbacks_main_body">
-			<li><a class="api_link" href="#draw_board">draw_board</a>: Called when the screen should be rendered, or at a specific interval if the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> is called. Meant to be the "main loop" of games.</li>
+			<li><a class="api_link" href="#update">update</a>: Called when the screen should be rendered, or at a specific interval if the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> is called. Meant to be the "main loop" of games.</li>
 			<li><a class="api_link" href="#start_game">start_game</a>: Called when the game is started. <span class="collapsable collapsed">Note that performing game initialization outside of this function is not recommended, because <a class="api_link" href="#load_state">load_state</a> is called instead of this when a game is loaded from saved state (either for the user to play, or to just render a preview in thie "history browser" interface.</span></li>
 			<li><a class="api_link" href="#load_state">load_state</a>: <span class="collapsable collapsed">Called when the game is loaded from saved state.</span></li>
 			<li><a class="api_link" href="#get_state">get_state</a></li>
@@ -395,7 +395,7 @@ popup_info = {
 
 <code>alexgames.set_update_timer_ms(update_time_period_ms)</code>
 
-<p>When called, causes <a class="api_link" href="#draw_board">draw_board</a> to be called every <code>update_time_period_ms</code> milliseconds.</p>
+<p>When called, causes <a class="api_link" href="#update">update</a> to be called every <code>update_time_period_ms</code> milliseconds.</p>
 
 <h3>Persistent Storage APIs</h3>
 
@@ -454,8 +454,8 @@ popup_info = {
 
 <h3>Main Callbacks</h3>
 
-<h4 id="draw_board">draw_board</h4>
-<code>draw_board()</code>
+<h4 id="update">update</h4>
+<code>update()</code>
 
 <p>Called when the screen should be rendered, or at a specific interval if the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> is called. Meant to be the "main loop" of games.</p>
 

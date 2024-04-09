@@ -110,12 +110,12 @@ local function draw_board_internal()
 end
 
 -- TODO should never call the update_animations from anywhere but here,
--- and should call draw_board_internal in this file only, never `draw_board` directly
-function draw_board(dt_ms)
+-- and should call draw_board_internal in this file only, never `update` directly
+function update(dt_ms)
 	if dt_ms == nil then
 		dt_ms = 0
 	end
-	--print(string.format("draw_board(dt_ms=%s)", dt_ms))
+	--print(string.format("update(dt_ms=%s)", dt_ms))
 	core.update_time_elapsed(state, dt_ms)
 	draw.update_animations(state, dt_ms)
 	draw_board_internal()
@@ -155,7 +155,7 @@ local function load_prev_state()
 		draw.stop_move_animations()
 		state = serialize.deserialize_state(prev_state_serialized)
 		state.time_elapsed = time_elapsed
-		draw_board()
+		update()
 		alexgames.set_status_msg("Loaded previous state")
 	else
 		alexgames.set_status_err("Can not load previous state, not found")
@@ -364,7 +364,7 @@ function load_hr_binstr_state(version, hr_binstr_state)
 	local state_board_serialized = utils.hr_binstr_to_binstr(hr_binstr_state)
 	local board_state = serialize.deserialize_board_state(version, state_board_serialized)
 	state = core.new_state_from_board_state(player_count, board_state)
-	draw_board()
+	update()
 end
 
 function load_saved_state(session_id_arg, state_serialized)

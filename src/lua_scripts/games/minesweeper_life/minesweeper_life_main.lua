@@ -159,12 +159,12 @@ local function check_for_input_time_done()
 		local cell_coords = draw.pos_to_cell_coords(state, player, user_input_pos_y, user_input_pos_x)
 		handle_move(state, player, core.MOVE_FLAG_CELL, cell_coords.y, cell_coords.x)
 		send_state_updates_if_host()
-		draw_board()
+		update()
 	end
 end
 
--- TODO change draw_board to some "update_evt" or something
-function draw_board(dt_ms)
+-- TODO change update to some "update_evt" or something
+function update(dt_ms)
 	if dt_ms ~= nil then
 		draw.update(dt_ms)
 	end
@@ -196,7 +196,7 @@ local function handle_user_input_release(pos_y, pos_x, cancel)
 			move_type = core.MOVE_FLAG_CELL
 		end
 		handle_move(state, player, move_type, cell_coords.y, cell_coords.x)
-		draw_board()
+		update()
 		send_state_updates_if_host()
 	end
 	user_input_down = false
@@ -232,7 +232,7 @@ local function handle_user_input_move(pos_y, pos_x)
 		core.adjust_offset(state, player,
 			math.floor(user_offset_y + offset_adj_y),
 			math.floor(user_offset_x + offset_adj_x))
-		draw_board()
+		update()
 	end
 end
 
@@ -304,7 +304,7 @@ function handle_wheel_changed(dy, dx)
 
 	core.set_zoom_fact(state, player, zoom_fact)
 
-	draw_board()
+	update()
 end
 
 function send_state_updates_if_host()
@@ -472,7 +472,7 @@ local function start_host_game(players_arg, player_arg, player_name_to_idx_arg)
 		prompt_level()
 	end
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end
 
 local function start_client_game(players_arg, player_arg, player_name_to_idx_arg)
@@ -533,7 +533,7 @@ function handle_msg_received(src, msg)
 	end
 
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end
 
 
@@ -559,7 +559,7 @@ function handle_game_option_evt(game_opt_id, value)
 	if game_opt_id == GAME_OPT_NEW_GAME then
 		--new_game(#players)
 		prompt_level()
-		draw_board()
+		update()
 	end
 end
 

@@ -70,7 +70,7 @@ local function send_state_updates_if_host()
 end
 
 
-function draw_board()
+function update()
 	draw.draw(state, player)
 end
 
@@ -94,7 +94,7 @@ function handle_mousemove(pos_y, pos_x)
 		alexgames.send_message("all", string.format("move:%d,%d,%s,%d,%d", player, 3, 'mouse', pos_y, pos_x))
 	end
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end
 
 function handle_mouse_evt(evt_id, pos_y, pos_x)
@@ -104,7 +104,7 @@ function handle_mouse_evt(evt_id, pos_y, pos_x)
 		alexgames.send_message("all", string.format("move:%d,%d,%s,%d,%d", player, evt_id, 'mouse', pos_y, pos_x))
 	end
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end
 
 local function handle_recvd_move(state, msg_player, msg_evt, msg_y, msg_x)
@@ -116,7 +116,7 @@ local function handle_recvd_move(state, msg_player, msg_evt, msg_y, msg_x)
 		error("Unhandled evt_id " .. msg_evt)
 	end
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end
 
 function handle_msg_received(src, msg)
@@ -152,7 +152,7 @@ function handle_msg_received(src, msg)
 	else
 		error("Unhandled msg: " .. msg)
 	end
-	draw_board()
+	update()
 end
 
 function handle_popup_btn_clicked(popup_id, btn_idx)
@@ -178,7 +178,7 @@ local function start_host_game(players_arg, player_arg, player_name_to_idx_arg)
 	is_client = false
 	new_game(#players)
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end
 
 local function start_client_game(players_arg, player_arg, player_name_to_idx_arg)
@@ -211,7 +211,7 @@ function handle_touch_evt(evt_id, changed_touches)
 		end
 	end
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end
 
 

@@ -49,7 +49,7 @@ function new_game()
 		send_state()
 	end
 	request_state = true
-	draw_board()
+	update()
 end
 
 PLAYER_CHOICE_POPUP_ID = "choose_player_colour"
@@ -65,8 +65,8 @@ PLAYER_IDX_TO_BTN_IDX_MAP = utils.reverse_map(PLAYER_CHOICE_BTNS_MAP)
 
 GAME_OVER_POPUP_ID = "game_over"
 
-function draw_board() 
-	wu_ui.draw_board(session_id, state.board, state.last_move_y, state.last_move_x)
+function update() 
+	wu_ui.update(session_id, state.board, state.last_move_y, state.last_move_x)
 end
 
 function first_char_upper(str)
@@ -99,7 +99,7 @@ function handle_user_clicked(pos_y, pos_x)
 	else
 		alexgames.set_status_err(wu.err_code_to_str(rc))
 	end
-	draw_board()
+	update()
 	update_status_msg_turn(state, ctrl_state)
 	check_for_winner()
 end
@@ -139,7 +139,7 @@ function handle_msg_received(src, msg)
 		end
 		wu.player_move(state, player, row, col)
 		alexgames.set_status_err("")
-		draw_board()
+		update()
 		update_status_msg_turn(state, ctrl_state)
 		check_for_winner()
 	elseif header == "get_state" then
@@ -149,7 +149,7 @@ function handle_msg_received(src, msg)
 		-- TODO check with user if they want to overwrite their state with
 		-- this (possibly unsolicited!!) state from the other player
 		state = new_state
-		draw_board()
+		update()
 		alexgames.set_status_err("")
 		update_status_msg_turn(state, ctrl_state)
 	elseif header == "new_game" then
@@ -287,7 +287,7 @@ end
 function load_state_move_offset(move_offset)
 	local serialized_state = alexgames.get_saved_state_offset(session_id, move_offset)
 	load_state_helper(session_id, serialized_state)
-	draw_board()
+	update()
 	send_state()
 end
 

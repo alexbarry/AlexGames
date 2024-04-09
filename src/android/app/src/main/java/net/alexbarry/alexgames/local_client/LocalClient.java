@@ -61,7 +61,7 @@ public class LocalClient {
         //game_id = "stick";
         Log.i(TAG, String.format("initializing alexgames with game_id=\"%s\"", game_id));
         alexGames.init(context, game_id);
-        alexGames.draw_board(0);
+        alexGames.update(0);
 
         alexGamesCanvas.setOnTouchListener(new View.OnTouchListener() {
             @Override

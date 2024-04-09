@@ -534,7 +534,7 @@ Java_net_alexbarry_alexgames_AlexGamesJni_jniDrawBoard(JNIEnv* env, jobject thiz
 	g_env = env;
 	g_thiz = thiz;
 	//g_cls = env->FindClass("net/alexbarry/alexgames/AlexGamesJni");
-	game_api->draw_board(L, dt_ms);
+	game_api->update(L, dt_ms);
 }
 
 JNIEXPORT void JNICALL

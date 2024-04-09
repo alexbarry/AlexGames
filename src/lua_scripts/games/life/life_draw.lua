@@ -18,7 +18,7 @@ function lua_draw.init(cell_size)
 	cell_size_x = cell_size
 end
 
-function lua_draw.draw_board(board)
+function lua_draw.update(board)
 	alexgames.draw_clear()
 	for y=1,#board do
 		for x=1,#board[y] do

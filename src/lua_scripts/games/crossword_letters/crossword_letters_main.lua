@@ -50,7 +50,7 @@ local function get_saved_state_key(puzzle_id)
 	return string.format("crossword_letters_state_%04d", puzzle_id)
 end
 
-function draw_board()
+function update()
 	draw.draw_state(state.ui_state, state.game_state)
 	update_saved_state()
 end

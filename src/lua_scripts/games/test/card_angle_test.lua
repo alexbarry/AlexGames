@@ -24,7 +24,7 @@ cards.shuffle(deck)
 local angle_offset = 0
 local cards_face_down = true
 
-function draw_board()
+function update()
 	alexgames.set_status_msg(string.format("Drawing cards with angle offset = %d", angle_offset))
 	alexgames.draw_clear()
 
@@ -73,7 +73,7 @@ function handle_btn_clicked(btn_id)
 	elseif btn_id == BTN_ID_TOGGLE_FACE_DN_UP then
 		cards_face_down = not cards_face_down
 	end
-	draw_board()
+	update()
 end
 
 alexgames.create_btn(BTN_ID_INC_ANGLE, "Increment Angle", 1)

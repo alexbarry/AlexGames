@@ -24,7 +24,7 @@ local function internal_draw_board()
 
 	for i, info in ipairs(recent_updates) do
 		local y = (TEXT_SIZE + PADDING) * (i)
-		local msg = string.format("%3.3f: draw_board fired, dt_ms: %d", info.time_ms/1000, info.dt_ms)
+		local msg = string.format("%3.3f: update fired, dt_ms: %d", info.time_ms/1000, info.dt_ms)
 		alexgames.draw_text(msg, TEXT_COLOUR, y, 0, TEXT_SIZE, alexgames.TEXT_ALIGN_LEFT)
 	end
 
@@ -35,7 +35,7 @@ local function internal_draw_board()
 	alexgames.draw_refresh()
 end
 
-function draw_board(dt_ms)
+function update(dt_ms)
 	local time_ms = alexgames.get_time_ms() - program_start_time
 	total_updates = total_updates + 1
 	table.insert(recent_updates, { dt_ms = dt_ms, time_ms = time_ms })

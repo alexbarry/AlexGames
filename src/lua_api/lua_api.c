@@ -752,8 +752,8 @@ static int lua_my_print(lua_State* L) {
     return 0;
 }
 
-static void draw_board(void *L, int dt_ms) {
-	GAME_LUA_TRACE("draw_board\n");
+static void update(void *L, int dt_ms) {
+	GAME_LUA_TRACE("update\n");
 	if (L == NULL) {
 		fprintf(stderr, "%s: L == NULL\n", __func__);
 		return;
@@ -761,12 +761,12 @@ static void draw_board(void *L, int dt_ms) {
 	LUA_API_ENTER();
 	lua_checkstack_or_return(L, 1);
 	lua_push_error_handler(L);
-	lua_getglobal_checktype_or_return(L, "draw_board", LUA_TFUNCTION);
+	lua_getglobal_checktype_or_return(L, "update", LUA_TFUNCTION);
 	lua_pushnumber(L, dt_ms);
 	pcall_handle_error(L, 1, 0);
 	lua_pop_error_handler(L);
 	LUA_API_EXIT();
-	GAME_LUA_TRACE("draw_board completed\n");
+	GAME_LUA_TRACE("update completed\n");
 }
 
 static void handle_user_string_input(void *L, char *user_line, int str_len, bool is_cancelled) {
@@ -1091,7 +1091,7 @@ static void lua_run_cmd(void *L, const char *str, int string_len) {
 const struct game_api lua_game_api = {
 	.init_lua_api = NULL, //init_lua_api, // TODO do I need this?
 	.destroy_game = destroy_lua_game,
-	.draw_board = draw_board,
+	.update = update,
 	.handle_user_string_input = handle_user_string_input,
 	.handle_user_clicked = handle_user_clicked,
 	.handle_mousemove = handle_mousemove,

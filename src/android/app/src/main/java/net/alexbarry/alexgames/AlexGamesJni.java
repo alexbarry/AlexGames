@@ -52,7 +52,7 @@ public class AlexGamesJni {
 					dt_ms = current_time_ms - AlexGamesJni.this.last_timer_fired_ms;
 				}
 				AlexGamesJni.this.last_timer_fired_ms = current_time_ms;
-				AlexGamesJni.this.draw_board((int)dt_ms);
+				AlexGamesJni.this.update((int)dt_ms);
 			});
 		};
 
@@ -221,7 +221,7 @@ public class AlexGamesJni {
 		thread.start(); // TODO uncomment
 		 */
 	}
-	public void draw_board(int dt_ms) {
+	public void update(int dt_ms) {
 		runOnThread(new Runnable() {
 			@Override
 			public void run() {
