@@ -589,7 +589,7 @@ function update_timer_period_ms(gfx, timer_period_ms) {
 			let deviation = dt_ms - timer_period_ms;
 			//console.debug(`Subsequent timer fired, time since last timer is: ${trunc_val(dt_ms, round_val)}, deviation: ${trunc_val(deviation, round_val)}`);
 		}
-		draw_board(gfx.ptr, dt_ms);
+		update(gfx.ptr, dt_ms);
 		gfx.last_timer_fired_ms = current_time_ms;
 	}
 
