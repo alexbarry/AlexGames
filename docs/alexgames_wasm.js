@@ -38,7 +38,7 @@ Module['ready'] = new Promise((resolve, reject) => {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpczb4exky.js
+// include: /tmp/tmp7sahooor.js
 
   if (!Module.expectedDataFileDownloads) {
     Module.expectedDataFileDownloads = 0;
@@ -254,21 +254,21 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
 
   })();
 
-// end include: /tmp/tmpczb4exky.js
-// include: /tmp/tmp1mw1_byw.js
+// end include: /tmp/tmp7sahooor.js
+// include: /tmp/tmptkaf8tcu.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['ENVIRONMENT_IS_PTHREAD'] || Module['$ww']) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmp1mw1_byw.js
-// include: /tmp/tmpnrq81hvq.js
+  // end include: /tmp/tmptkaf8tcu.js
+// include: /tmp/tmpjkacniqm.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach(function(task) {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpnrq81hvq.js
+  // end include: /tmp/tmpjkacniqm.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -746,7 +746,6 @@ function checkStackCookie() {
 // end include: runtime_assertions.js
 var __ATPRERUN__  = []; // functions called before the runtime is initialized
 var __ATINIT__    = []; // functions called during startup
-var __ATMAIN__    = []; // functions called when main() is to be run
 var __ATEXIT__    = []; // functions called during shutdown
 var __ATPOSTRUN__ = []; // functions called after the main() is called
 
@@ -777,12 +776,6 @@ TTY.init();
   callRuntimeCallbacks(__ATINIT__);
 }
 
-function preMain() {
-  checkStackCookie();
-  
-  callRuntimeCallbacks(__ATMAIN__);
-}
-
 function postRun() {
   checkStackCookie();
 
@@ -802,10 +795,6 @@ function addOnPreRun(cb) {
 
 function addOnInit(cb) {
   __ATINIT__.unshift(cb);
-}
-
-function addOnPreMain(cb) {
-  __ATMAIN__.unshift(cb);
 }
 
 function addOnExit(cb) {
@@ -1254,7 +1243,7 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  226223: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  225435: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
@@ -5668,25 +5657,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       return _strftime(s, maxsize, format, tm); // no locale support yet
     };
 
-
-  var handleException = (e) => {
-      // Certain exception types we do not treat as errors since they are used for
-      // internal control flow.
-      // 1. ExitStatus, which is thrown by exit()
-      // 2. "unwind", which is thrown by emscripten_unwind_to_js_event_loop() and others
-      //    that wish to return to JS event loop.
-      if (e instanceof ExitStatus || e == 'unwind') {
-        return EXITSTATUS;
-      }
-      checkStackCookie();
-      if (e instanceof WebAssembly.RuntimeError) {
-        if (_emscripten_stack_get_current() <= 0) {
-          err('Stack overflow detected.  You can try increasing -sSTACK_SIZE (currently set to 131072)');
-        }
-      }
-      quit_(1, e);
-    };
-
   var wasmTableMirror = [];
   
   var wasmTable;
@@ -6048,12 +6018,10 @@ var _close_file = Module['_close_file'] = createExportWrapper('close_file');
 var _dump_file = Module['_dump_file'] = createExportWrapper('dump_file');
 var _unzip_file = Module['_unzip_file'] = createExportWrapper('unzip_file');
 var _init_game_api = Module['_init_game_api'] = createExportWrapper('init_game_api');
-var _main = createExportWrapper('main');
 var _update_dict = Module['_update_dict'] = createExportWrapper('update_dict');
 var ___cxa_free_exception = createExportWrapper('__cxa_free_exception');
 var _fflush = createExportWrapper('fflush');
 var setTempRet0 = createExportWrapper('setTempRet0');
-var _main = createExportWrapper('__main_argc_argv');
 var _setThrew = createExportWrapper('setThrew');
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports['emscripten_stack_init'])();
 var _emscripten_stack_get_free = () => (_emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'])();
@@ -6068,8 +6036,8 @@ var ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_e
 var ___get_exception_message = createExportWrapper('__get_exception_message');
 var ___cxa_can_catch = createExportWrapper('__cxa_can_catch');
 var ___cxa_is_pointer_type = createExportWrapper('__cxa_is_pointer_type');
-var ___start_em_js = Module['___start_em_js'] = 218748;
-var ___stop_em_js = Module['___stop_em_js'] = 226223;
+var ___start_em_js = Module['___start_em_js'] = 217960;
+var ___stop_em_js = Module['___stop_em_js'] = 225435;
 function invoke_vi(index,a1) {
   var sp = stackSave();
   try {
@@ -6388,6 +6356,7 @@ var missingLibrarySymbols = [
   'autoResumeAudioContext',
   'getDynCaller',
   'dynCall',
+  'handleException',
   'runtimeKeepalivePush',
   'runtimeKeepalivePop',
   'callUserCallback',
@@ -6567,7 +6536,6 @@ var unexportedSymbols = [
   'runEmAsmFunction',
   'jstoi_s',
   'getExecutableName',
-  'handleException',
   'keepRuntimeAlive',
   'asyncLoad',
   'alignMemory',
@@ -6649,28 +6617,6 @@ dependenciesFulfilled = function runCaller() {
   if (!calledRun) dependenciesFulfilled = runCaller; // try this again later, after new deps are fulfilled
 };
 
-function callMain() {
-  assert(runDependencies == 0, 'cannot call main when async dependencies remain! (listen on Module["onRuntimeInitialized"])');
-  assert(__ATPRERUN__.length == 0, 'cannot call main when preRun functions remain to be called');
-
-  var entryFunction = _main;
-
-  var argc = 0;
-  var argv = 0;
-
-  try {
-
-    var ret = entryFunction(argc, argv);
-
-    // if we're not running an evented main loop, it's time to exit
-    exitJS(ret, /* implicit = */ true);
-    return ret;
-  }
-  catch (e) {
-    return handleException(e);
-  }
-}
-
 function stackCheckInit() {
   // This is normally called automatically during __wasm_call_ctors but need to
   // get these values before even running any of the ctors so we call it redundantly
@@ -6706,12 +6652,10 @@ function run() {
 
     initRuntime();
 
-    preMain();
-
     readyPromiseResolve(Module);
     if (Module['onRuntimeInitialized']) Module['onRuntimeInitialized']();
 
-    if (shouldRunNow) callMain();
+    assert(!Module['_main'], 'compiled without a main, but one is present. if you added it from JS, use Module["onRuntimeInitialized"]');
 
     postRun();
   }
@@ -6776,11 +6720,6 @@ if (Module['preInit']) {
     Module['preInit'].pop()();
   }
 }
-
-// shouldRunNow refers to calling main(), not run().
-var shouldRunNow = true;
-
-if (Module['noInitialRun']) shouldRunNow = false;
 
 run();
 
