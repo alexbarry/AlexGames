@@ -20,7 +20,7 @@ local function get_player()
 	return 1 -- TODO
 end
 
-function draw_board()
+function update()
 	draw.draw_state(g_ui_state, get_player())
 end
 
@@ -29,7 +29,7 @@ function handle_user_clicked(y_pos, x_pos)
 	if click_info ~= nil then
 		print(string.format("User clicked { action=%s, arg=%s }", click_info.action, click_info.action_arg_idx))
 		local rc = ui.handle_action(g_ui_state, get_player(), click_info.action, click_info.action_arg_idx)
-		draw_board()
+		update()
 	end
 end
 	

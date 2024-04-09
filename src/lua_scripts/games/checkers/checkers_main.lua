@@ -5,7 +5,7 @@ local core       = require("games/checkers/checkers_core")
 local draw       = require("games/checkers/checkers_draw")
 local serialize  = require("games/checkers/checkers_serialize")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local height = 480
 local width  = 480
@@ -16,7 +16,7 @@ local local_multiplayer = nil
 local player_name_to_id = {}
 local player = nil
 local g_other_player = nil
-local session_id = alex_c_api.get_new_session_id()
+local session_id = alexgames.get_new_session_id()
 local state = core.new_state()
 
 local GAME_OPTION_NEW_GAME = "game_option_new_game"
@@ -38,10 +38,10 @@ state.board = {
 }
 ]]
 
-function draw_board()
-	draw.draw_board(state)
-	alex_c_api.set_btn_enabled(BTN_ID_UNDO, alex_c_api.has_saved_state_offset(session_id, -1))
-	alex_c_api.set_btn_enabled(BTN_ID_REDO, alex_c_api.has_saved_state_offset(session_id,  1))
+function update()
+	draw.update(state)
+	alexgames.set_btn_enabled(BTN_ID_UNDO, alexgames.has_saved_state_offset(session_id, -1))
+	alexgames.set_btn_enabled(BTN_ID_REDO, alexgames.has_saved_state_offset(session_id,  1))
 end
 
 local function get_player()
@@ -57,20 +57,20 @@ function handle_user_clicked(coord_y, coord_x)
 	local rc = core.player_move(state, get_player(), piece.y, piece.x)
 	
 	if rc ~= core.RC_SUCCESS then
-		alex_c_api.set_status_err(core.rc_to_string(rc))
+		alexgames.set_status_err(core.rc_to_string(rc))
 	else
 		-- TODO this saves even when the player just selects something... that
 		-- shouldn't count as a move.
 		save_state()
-		alex_c_api.set_status_msg("Waiting for other player to move")
+		alexgames.set_status_msg("Waiting for other player to move")
 		if not local_multiplayer then
-			alex_c_api.send_message("all", string.format("move:%d,%d,%d", player, piece.y, piece.x))
+			alexgames.send_message("all", string.format("move:%d,%d,%d", player, piece.y, piece.x))
 		end
 	end
 
 	core.print_state(state)
 	print(string.format("serialized state is: %s", utils.binstr_to_hr_str(serialize.serialize_state(state))))
-	draw_board()
+	update()
 end
 
 
@@ -93,7 +93,7 @@ function handle_popup_btn_clicked(popup_id, btn_idx)
 end
 
 local function broadcast_state(dst)
-	alex_c_api.send_message(dst, "state:" .. serialize.serialize_state(state))
+	alexgames.send_message(dst, "state:" .. serialize.serialize_state(state))
 end
 
 function handle_msg_received(src, msg)
@@ -122,10 +122,10 @@ function handle_msg_received(src, msg)
 		x = tonumber(x)
 		local rc = core.player_move(state, player_idx, y, x)
 		if rc ~= core.RC_SUCCESS then
-			alex_c_api.set_status_err("Other player made an invalid move")
+			alexgames.set_status_err("Other player made an invalid move")
 		else
-			alex_c_api.set_status_msg("Your move")
-			draw_board()
+			alexgames.set_status_msg("Your move")
+			update()
 			save_state()
 		end
 
@@ -136,7 +136,7 @@ function handle_msg_received(src, msg)
 		print("Recieved state:")
 		core.print_state(recvd_state)
 		state = recvd_state
-		draw_board()
+		update()
 		save_state()
 	elseif header == "player_left" and src == "ctrl" then
 	elseif header == "player_joined" then
@@ -205,9 +205,9 @@ function two_player_init()
 end
 
 local function load_state_move_offset(move_id_offset)
-	local serialized_state = alex_c_api.get_saved_state_offset(session_id, move_id_offset)
+	local serialized_state = alexgames.get_saved_state_offset(session_id, move_id_offset)
 	state = serialize.deserialize_state(serialized_state)
-	draw_board()
+	update()
 	broadcast_state("all")
 end
 
@@ -220,39 +220,39 @@ function handle_btn_clicked(btn_id)
 end
 
 function start_game(session_id_arg, serialized_state)
-	local last_sess_id = alex_c_api.get_last_session_id()
+	local last_sess_id = alexgames.get_last_session_id()
 	if serialized_state then
 		session_id = session_id_arg
 		state = serialize.deserialize_state(serialized_state)
 	elseif last_sess_id ~= nil then
-		serialized_state = alex_c_api.get_saved_state_offset(last_sess_id, 0)
+		serialized_state = alexgames.get_saved_state_offset(last_sess_id, 0)
 		session_id = last_sess_id
 		state = serialize.deserialize_state(serialized_state)
 	end
 	two_player_init()
 
-	--alex_c_api.send_message("all", "player_joined:")
-	alex_c_api.send_message("all", "get_state:")
+	--alexgames.send_message("all", "player_joined:")
+	alexgames.send_message("all", "get_state:")
 
-	alex_c_api.add_game_option(GAME_OPTION_NEW_GAME, { label = "New Game", type = alex_c_api.OPTION_TYPE_BTN })
+	alexgames.add_game_option(GAME_OPTION_NEW_GAME, { label = "New Game", type = alexgames.OPTION_TYPE_BTN })
 
-	alex_c_api.create_btn(BTN_ID_UNDO, "Undo", 1)
-	alex_c_api.create_btn(BTN_ID_REDO, "Redo", 1)
+	alexgames.create_btn(BTN_ID_UNDO, "Undo", 1)
+	alexgames.create_btn(BTN_ID_REDO, "Redo", 1)
 end
 
 function handle_game_option_evt(option_id)
 	if option_id == GAME_OPTION_NEW_GAME then
-		session_id = alex_c_api.get_new_session_id()
+		session_id = alexgames.get_new_session_id()
 		state = core.new_state()
 		save_state()
-		draw_board()
+		update()
 		broadcast_state("all")
 	end
 end
 
 function save_state()
 	local serialized_state = serialize.serialize_state(state)
-	alex_c_api.save_state(session_id, serialized_state)
+	alexgames.save_state(session_id, serialized_state)
 end
 
 function get_state()

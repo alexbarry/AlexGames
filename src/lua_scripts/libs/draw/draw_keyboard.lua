@@ -1,6 +1,6 @@
 local draw_keyboard = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local KEYS = {
 	"qwertyuiop",
@@ -115,26 +115,26 @@ function draw_keyboard.draw_keyboard(kb_params)
 			if bg_colour == nil then bg_colour = kb_params.key_bg_colour_default end
 			if fg_colour == nil then fg_colour = kb_params.key_fg_colour_default end
 			
-			alex_c_api.draw_rect(bg_colour,
+			alexgames.draw_rect(bg_colour,
 			                     pos.y_start, pos.x_start,
 			                     pos.y_end,   pos.x_end)
-			alex_c_api.draw_text(string.upper(char), fg_colour,
+			alexgames.draw_text(string.upper(char), fg_colour,
 			                     pos.text_y, pos.text_x,
 			                     key_params.text_size,
-			                     alex_c_api.TEXT_ALIGN_CENTRE)
+			                     alexgames.TEXT_ALIGN_CENTRE)
 		end
 	end
 
 
 	for _, key_info in ipairs(SPECIAL_KEYS) do
 		local pos = get_key_pos(key_params, nil, nil, key_info.idx)
-			alex_c_api.draw_rect(kb_params.key_bg_colour_default,
+			alexgames.draw_rect(kb_params.key_bg_colour_default,
 			                     pos.y_start, pos.x_start,
 			                     pos.y_end,   pos.x_end)
-			alex_c_api.draw_text(key_info.text, '#888888',
+			alexgames.draw_text(key_info.text, '#888888',
 			                     pos.text_y, pos.text_x,
 			                     pos.text_size,
-			                     alex_c_api.TEXT_ALIGN_CENTRE)
+			                     alexgames.TEXT_ALIGN_CENTRE)
 
 	end
 end

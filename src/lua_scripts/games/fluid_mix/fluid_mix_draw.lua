@@ -1,5 +1,5 @@
 local draw = {}
-local alex_c_api  = require("alex_c_api")
+local alexgames  = require("alexgames")
 local draw_shapes = require("libs/draw/draw_shapes")
 
 local draw_celebration_anim = require("libs/draw/draw_celebration_anim")
@@ -45,8 +45,8 @@ local g_victory_anim_timer = nil
 
 
 function draw.init()
-	alex_c_api.create_btn(draw.BTN_ID_UNDO, "Undo", 1)
-	alex_c_api.create_btn(draw.BTN_ID_REDO, "Redo", 1)
+	alexgames.create_btn(draw.BTN_ID_UNDO, "Undo", 1)
+	alexgames.create_btn(draw.BTN_ID_REDO, "Redo", 1)
 end
 
 function draw.new_state()
@@ -90,7 +90,7 @@ function draw.update_state(draw_state, dt_ms)
 end
 
 function draw.draw_state(session_id, state, draw_state)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
 	local num_rows = get_num_rows(#state.vials)
 	local params = get_size_params(state, num_rows)
@@ -111,17 +111,17 @@ function draw.draw_state(session_id, state, draw_state)
 				error(string.format("could not resolve colour idx %s", colour_idx))
 			end
 			seg_idx = state.num_segments - seg_idx + 1
-			alex_c_api.draw_rect(colour,
+			alexgames.draw_rect(colour,
 			                     vial_params.y_start + (seg_idx-1)*params.height/state.num_segments, vial_params.x_start,
 			                     vial_params.y_start + (seg_idx)*params.height/state.num_segments,   vial_params.x_end)
-			alex_c_api.draw_text(string.format("%d", colour_idx), OUTLINE_COLOUR,
+			alexgames.draw_text(string.format("%d", colour_idx), OUTLINE_COLOUR,
 			                     vial_params.y_start + params.height/2/state.num_segments + (seg_idx-1)*params.height/state.num_segments,
 			                     vial_params.x_start + params.width/2,
-			                     12, alex_c_api.TEXT_ALIGN_CENTRE)
+			                     12, alexgames.TEXT_ALIGN_CENTRE)
 		end
 		::draw_highlight::
 		if vial_idx == draw_state.selected then
-			alex_c_api.draw_rect(HIGHLIGHT_COLOUR,
+			alexgames.draw_rect(HIGHLIGHT_COLOUR,
 			                     vial_params.y_start, vial_params.x_start,
 			                     vial_params.y_end,   vial_params.x_end)
 			draw_shapes.draw_rect_outline(HIGHLIGHT_OUTLINE_COLOUR, HIGHLIGHT_OUTLINE_WIDTH,
@@ -131,10 +131,10 @@ function draw.draw_state(session_id, state, draw_state)
 	end
 	
 	draw_celebration_anim.draw(anim_state)
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 
-	alex_c_api.set_btn_enabled(draw.BTN_ID_UNDO, alex_c_api.has_saved_state_offset(session_id, -1))
-	alex_c_api.set_btn_enabled(draw.BTN_ID_REDO, alex_c_api.has_saved_state_offset(session_id,  1))
+	alexgames.set_btn_enabled(draw.BTN_ID_UNDO, alexgames.has_saved_state_offset(session_id, -1))
+	alexgames.set_btn_enabled(draw.BTN_ID_REDO, alexgames.has_saved_state_offset(session_id,  1))
 end
 
 function draw.coords_to_vial_idx(state, pos_y, pos_x)
@@ -170,19 +170,19 @@ function draw.trigger_win_anim(draw_state, fps)
 	if g_victory_anim_timer ~= nil then
 		error(string.format("victory_animation: anim_timer is not nil"))
 	end
-	g_victory_anim_timer = alex_c_api.set_timer_update_ms(1000/fps)
+	g_victory_anim_timer = alexgames.set_timer_update_ms(1000/fps)
 	draw_celebration_anim.fireworks_display(anim_state, {
 		colour_pref = "light",
 		on_finish = function ()
 			if g_victory_anim_timer == nil then
-				alex_c_api.set_status_err("warning: g_victory_anim_timer is nil on anim complete")
+				alexgames.set_status_err("warning: g_victory_anim_timer is nil on anim complete")
 			else
-				alex_c_api.delete_timer(g_victory_anim_timer)
+				alexgames.delete_timer(g_victory_anim_timer)
 				g_victory_anim_timer = nil
 			end
 			--print("animation finished! Resuming timer")
-			--alex_c_api.set_timer_update_ms(0)
-			--alex_c_api.set_timer_update_ms(1000/60)
+			--alexgames.set_timer_update_ms(0)
+			--alexgames.set_timer_update_ms(1000/60)
 		end,
 	})
 end

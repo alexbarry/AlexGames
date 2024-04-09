@@ -1,6 +1,6 @@
 local dice_draw = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local draw_more  = require("libs/draw/draw_more")
 
 local DICE_IMG_MAP = {
@@ -14,7 +14,7 @@ local DICE_IMG_MAP = {
 
 function dice_draw.draw_one_die(die_val, y_pos, x_pos, y_size, x_size, idx, args)
 	if args ~= nil and args.background_colour ~= nil then
-		alex_c_api.draw_rect(args.background_colour,
+		alexgames.draw_rect(args.background_colour,
 		                     y_pos, x_pos,
 		                     y_pos + y_size, x_pos + x_size)
 	end
@@ -31,7 +31,7 @@ function dice_draw.draw_one_die(die_val, y_pos, x_pos, y_size, x_size, idx, args
 		if args.dice_used_overlay_colour == nil then
 			error("args.dice_used_overlay_colour is nil, but args.used_dice is specified", 2)
 		end
-		alex_c_api.draw_rect(args.dice_used_overlay_colour, y_pos, x_pos, y_pos + y_size, x_pos + x_size)
+		alexgames.draw_rect(args.dice_used_overlay_colour, y_pos, x_pos, y_pos + y_size, x_pos + x_size)
 	end
 end
 

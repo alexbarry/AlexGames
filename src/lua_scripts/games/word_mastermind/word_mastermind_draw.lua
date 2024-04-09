@@ -1,6 +1,6 @@
 local draw = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local core                  = require("games/word_mastermind/word_mastermind_core")
 
@@ -26,8 +26,8 @@ local CHAR_BG_COLOUR_CHAR_KNOWN = '#aaaa00'
 local CHAR_BG_COLOUR_UNUSED     = '#444444'
 local CHAR_BG_COLOUR_UNKNOWN    = '#ffffff'
 
-if alex_c_api.get_user_colour_pref() == "dark" or 
-   alex_c_api.get_user_colour_pref() == "very_dark" then
+if alexgames.get_user_colour_pref() == "dark" or 
+   alexgames.get_user_colour_pref() == "very_dark" then
 	CHAR_TEXT_COLOUR          = '#888888'
 	CHAR_TEXT_COLOUR_UNKNOWN  = '#888888'
 	CHAR_BG_COLOUR_POS_KNOWN  = '#003300'
@@ -65,13 +65,13 @@ function draw.init()
 		user_input = {},
 		anim = draw_celebration_anim.new_state({
 			on_finish = function ()
-				alex_c_api.set_timer_update_ms(0)
+				alexgames.set_timer_update_ms(0)
 			end,
 		})
 	}
 
-	alex_c_api.create_btn(BTN_ID_CUSTOM_PUZZLE, "New Custom Puzzle", 1)
-	alex_c_api.create_btn(BTN_ID_NEW_GAME,      "New Game", 1)
+	alexgames.create_btn(BTN_ID_CUSTOM_PUZZLE, "New Custom Puzzle", 1)
+	alexgames.create_btn(BTN_ID_NEW_GAME,      "New Game", 1)
 
 	return draw_state
 end
@@ -113,16 +113,16 @@ local function draw_word(game_state, pos, word, score)
 		local rect_x1 = x_pos - (TEXT_SIZE + padding/2)/2
 		local rect_y2 = y_pos + TEXT_SIZE + padding/2
 		local rect_x2 = x_pos + (TEXT_SIZE+padding/2)/2
-		alex_c_api.draw_rect(bg_colour,
+		alexgames.draw_rect(bg_colour,
 		                     rect_y1, rect_x1,
 		                     rect_y2, rect_x2)
 		draw_shapes.draw_rect_outline(bg_outline_colour, OUTLINE_WIDTH,
 		                              rect_y1, rect_x1,
 		                              rect_y2, rect_x2)
-		alex_c_api.draw_text(string.upper(char), fg_colour,
+		alexgames.draw_text(string.upper(char), fg_colour,
 		                     y_pos + TEXT_SIZE, x_pos,
 		                     math.floor(0.7*TEXT_SIZE),
-		                     alex_c_api.TEXT_ALIGN_CENTRE)
+		                     alexgames.TEXT_ALIGN_CENTRE)
 	end
 end
 
@@ -161,7 +161,7 @@ local function get_keyboard_params(game_state)
 end
 
 function draw.draw_state(ui_state, game_state, dt_ms)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 	if game_state == nil then return end
 	for i=1,game_state.max_guesses do
 		if i <= #game_state.guesses then
@@ -191,7 +191,7 @@ function draw.draw_state(ui_state, game_state, dt_ms)
 		draw_celebration_anim.update(ui_state.anim, dt_ms/1000.0)
 	end
 	draw_celebration_anim.draw(ui_state.anim)
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 local function handle_enter(ui_state)
@@ -262,7 +262,7 @@ end
 
 function draw.player_won(ui_state)
 	draw_celebration_anim.fireworks_display(ui_state.anim)
-	alex_c_api.set_timer_update_ms(1000/60)
+	alexgames.set_timer_update_ms(1000/60)
 end
 
 function draw.handle_btn_pressed(game_state, ui_state, btn_id)
@@ -292,7 +292,7 @@ end
 
 function draw.handle_popup_btn_pressed(game_state, ui_state, popup_id, btn_id)
 	if popup_id == POPUP_ID_NEW_GAME_CONFIRM then
-		alex_c_api.hide_popup()
+		alexgames.hide_popup()
 		if btn_id == 0 then
 			return draw.ACTION_NEW_GAME
 		elseif btn_id == 1 then
@@ -300,11 +300,11 @@ function draw.handle_popup_btn_pressed(game_state, ui_state, popup_id, btn_id)
 			error(string.format("Unhandled btn_id %d for popup %s", btn_id, popup_id))
 		end
 	elseif popup_id == POPUP_ID_CUSTOM_PUZZLE_CONFIRM then
-		alex_c_api.hide_popup()
+		alexgames.hide_popup()
 		if btn_id == 0 then
 			return draw.ACTION_CUSTOM_PUZZLE
 		elseif btn_id == 1 then
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 		else
 			error(string.format("Unhandled btn_id %d for popup %s", btn_id, popup_id))
 		end

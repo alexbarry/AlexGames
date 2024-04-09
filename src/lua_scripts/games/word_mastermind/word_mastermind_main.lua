@@ -1,7 +1,7 @@
 -- TODO currently there's a bug where if you generate a custom puzzle via entering a
 -- string and press "enter" with the keyboard, you see a 'Invalid guess ""' error message,
 -- I guess the popup is being closed, and then the enter key is being processed.
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local words_lib  = require("libs/words")
 
 local core      = require("games/word_mastermind/word_mastermind_core")
@@ -19,7 +19,7 @@ local state = {
 }
 state.ui_state   = draw.init()
 
-function draw_board(dt_ms)
+function update(dt_ms)
 	draw.draw_state(state.ui_state, state.game_state, dt_ms)
 end
 
@@ -29,15 +29,15 @@ end
 
 local function save_state(game_state)
 	local serialized_state = serialize.serialize_state(game_state)
-	alex_c_api.store_data(SAVED_STATE_KEY, serialized_state)
-	alex_c_api.store_data(SESSION_ID_KEY, serialize.serialize_session_id(state.session_id))
+	alexgames.store_data(SAVED_STATE_KEY, serialized_state)
+	alexgames.store_data(SESSION_ID_KEY, serialize.serialize_session_id(state.session_id))
 
-	alex_c_api.save_state(state.session_id, serialized_state)
+	alexgames.save_state(state.session_id, serialized_state)
 end
 
 local function new_game(word)
-	alex_c_api.set_status_msg("Starting new game")
-	state.session_id = alex_c_api.get_new_session_id()
+	alexgames.set_status_msg("Starting new game")
+	state.session_id = alexgames.get_new_session_id()
 	state.game_state = core.new_game(WORD_LEN, MAX_GUESSES, word)
 	save_state(state.game_state)
 	draw.draw_state(state.ui_state, state.game_state, 0)
@@ -48,7 +48,7 @@ local function prompt_custom_puzzle()
 	            "Then you can either let a friend play on your device, " ..
 	            "or send them a link by pressing \"share state\" in the " ..
 	            "options menu."
-	alex_c_api.prompt_string("Custom puzzle", msg)
+	alexgames.prompt_string("Custom puzzle", msg)
 end
 
 function get_state()
@@ -77,7 +77,7 @@ function handle_user_string_input(str_input, is_cancelled)
 	print(string.format("handle_user_string_input: %s, is_cancelled=%s", str_input, is_cancelled))
 	local rc = core.validate_word(state.game_state, str_input)
 	if rc ~= core.RC_SUCCESS then
-		alex_c_api.set_status_err(string.format("Invalid word \"%s\": %s", str_input, core.rc_to_str(rc)))
+		alexgames.set_status_err(string.format("Invalid word \"%s\": %s", str_input, core.rc_to_str(rc)))
 		return
 	end
 	new_game(str_input)
@@ -87,7 +87,7 @@ end
 function start_game(session_id, serialized_state)
 	core.init_lib()
 	if not core.dict_ready() then
-		alex_c_api.set_status_msg("Waiting for dictionary to load... not starting game yet")
+		alexgames.set_status_msg("Waiting for dictionary to load... not starting game yet")
 		return
 	end
 
@@ -95,8 +95,8 @@ function start_game(session_id, serialized_state)
 	-- persistent storage
 	if serialized_state == nil then
 		-- TODO now that the get_last_session_id() API was introduced, I should use that instead
-		session_id = serialize.deserialize_session_id(alex_c_api.read_stored_data(SESSION_ID_KEY))
-		serialized_state = alex_c_api.read_stored_data(SAVED_STATE_KEY)
+		session_id = serialize.deserialize_session_id(alexgames.read_stored_data(SESSION_ID_KEY))
+		serialized_state = alexgames.read_stored_data(SAVED_STATE_KEY)
 	end
 
 	-- if we do have some saved state, then deserialize it.
@@ -108,7 +108,7 @@ function start_game(session_id, serialized_state)
 		new_game()
 	end
 
-	alex_c_api.enable_evt("key")
+	alexgames.enable_evt("key")
 end
 
 local function handle_guess(guess)
@@ -125,9 +125,9 @@ local function handle_guess(guess)
 				msg = msg .. string.format(", game over! Correct answer was \"%s\"", state.game_state.word)
 			end
 		end
-		alex_c_api.set_status_msg(msg)
+		alexgames.set_status_msg(msg)
 	else
-		alex_c_api.set_status_err(string.format("Invalid guess \"%s\", %s", guess, core.rc_to_str(rc)))
+		alexgames.set_status_err(string.format("Invalid guess \"%s\", %s", guess, core.rc_to_str(rc)))
 	end
 end
 

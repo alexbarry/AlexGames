@@ -497,15 +497,15 @@ void *init_lua_game(const struct game_api_callbacks *api_callbacks_arg, const ch
 	luaL_openlibs(L);
 
 #ifdef ENABLE_WORD_DICT
-	// TODO why does alex_c_api.dict have to be initialized before alex_c_api?
+	// TODO why does alexgames.dict have to be initialized before alexgames?
 	// maybe I have a bug causing it to fail when they're reversed.
 
 	// TODO remove this, this is the old dictionary API
-	//luaL_requiref(L, "alex_c_api.dict",  luaopen_alexdictlib, 0);
+	//luaL_requiref(L, "alexgames.dict",  luaopen_alexdictlib, 0);
 
-	init_lua_alex_dict(L, "alex_c_api.dict", get_game_dict_api());
+	init_lua_alex_dict(L, "alexgames.dict", get_game_dict_api());
 #endif
-	luaL_requiref(L, "alex_c_api", luaopen_alexlib, 0);
+	luaL_requiref(L, "alexgames", luaopen_alexlib, 0);
 	// luaL_requiref leaves a copy of the library on the stack, so we need to pop it
 	lua_pop(L, -1);
 	lua_pop(L, -1);
@@ -752,8 +752,8 @@ static int lua_my_print(lua_State* L) {
     return 0;
 }
 
-static void draw_board(void *L, int dt_ms) {
-	GAME_LUA_TRACE("draw_board\n");
+static void update(void *L, int dt_ms) {
+	GAME_LUA_TRACE("update\n");
 	if (L == NULL) {
 		fprintf(stderr, "%s: L == NULL\n", __func__);
 		return;
@@ -761,12 +761,12 @@ static void draw_board(void *L, int dt_ms) {
 	LUA_API_ENTER();
 	lua_checkstack_or_return(L, 1);
 	lua_push_error_handler(L);
-	lua_getglobal_checktype_or_return(L, "draw_board", LUA_TFUNCTION);
+	lua_getglobal_checktype_or_return(L, "update", LUA_TFUNCTION);
 	lua_pushnumber(L, dt_ms);
 	pcall_handle_error(L, 1, 0);
 	lua_pop_error_handler(L);
 	LUA_API_EXIT();
-	GAME_LUA_TRACE("draw_board completed\n");
+	GAME_LUA_TRACE("update completed\n");
 }
 
 static void handle_user_string_input(void *L, char *user_line, int str_len, bool is_cancelled) {
@@ -1091,7 +1091,7 @@ static void lua_run_cmd(void *L, const char *str, int string_len) {
 const struct game_api lua_game_api = {
 	.init_lua_api = NULL, //init_lua_api, // TODO do I need this?
 	.destroy_game = destroy_lua_game,
-	.draw_board = draw_board,
+	.update = update,
 	.handle_user_string_input = handle_user_string_input,
 	.handle_user_clicked = handle_user_clicked,
 	.handle_mousemove = handle_mousemove,

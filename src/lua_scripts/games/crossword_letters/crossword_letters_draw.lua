@@ -1,5 +1,5 @@
 -- Author: Alex Barry (github.com/alexbarry)
-local alex_c_api  = require("alex_c_api")
+local alexgames  = require("alexgames")
 local draw_shapes = require("libs/draw/draw_shapes")
 
 local draw_celebration_anim = require("libs/draw/draw_celebration_anim")
@@ -53,8 +53,8 @@ KEY_USED_FG_COLOUR           = '#cccccc88'
 local CELL_BG_COLOUR_OUTLINE_WIDTH = 2
 local CELL_FG_COLOUR         = "#000000"
 
-if alex_c_api.get_user_colour_pref() == "dark" or 
-   alex_c_api.get_user_colour_pref() == "very_dark" then 
+if alexgames.get_user_colour_pref() == "dark" or 
+   alexgames.get_user_colour_pref() == "very_dark" then 
 	CELL_BG_COLOUR         = '#002244'
 	CELL_BG_COLOUR_OUTLINE = '#666666'
 	CELL_BG_COLOUR_OUTLINE_WIDTH = 2
@@ -117,13 +117,13 @@ function draw.init(params)
 
 	ui_state.anim = draw_celebration_anim.new_state({
 		on_finish = function()
-			alex_c_api.set_timer_update_ms(0)
+			alexgames.set_timer_update_ms(0)
 		end
 	})
 
-	alex_c_api.create_btn(BTN_ID_HINT,   "Hint",      1)
-	alex_c_api.create_btn(BTN_ID_BKSP,   "Backspace", 2)
-	alex_c_api.create_btn(BTN_ID_SUBMIT, "Submit"   , 2)
+	alexgames.create_btn(BTN_ID_HINT,   "Hint",      1)
+	alexgames.create_btn(BTN_ID_BKSP,   "Backspace", 2)
+	alexgames.create_btn(BTN_ID_SUBMIT, "Submit"   , 2)
 	return ui_state
 end
 
@@ -175,17 +175,17 @@ local function get_keys_used_map(ui_state)
 end
 
 function draw.draw_state(ui_state, game_state)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 	if game_state == nil then return end
 	local puzzle_id = "?"
 	if game_state.puzzle_id ~= nil then
 		puzzle_id = game_state.puzzle_id
 	end
 	local puzzle_id_text = string.format("Puzzle %3s of %3d", puzzle_id, ui_state.num_puzzles)
-	alex_c_api.draw_text(puzzle_id_text, CELL_FG_COLOUR,
+	alexgames.draw_text(puzzle_id_text, CELL_FG_COLOUR,
 	                     CELL_TEXT_SIZE + PADDING, board_width/2,
 	                     CELL_TEXT_SIZE,
-	                     alex_c_api.TEXT_ALIGN_CENTRE)
+	                     alexgames.TEXT_ALIGN_CENTRE)
 	local show_all = false
 	--show_all = true -- TODO DO NOT SUBMIT
 	local crossword_grid = core.get_filled_crossword_grid(game_state, show_all)
@@ -200,7 +200,7 @@ function draw.draw_state(ui_state, game_state)
 			if #cell > 0 then
 				if cell == "?" then cell = ' ' end
 				--cell = game_state.finished_crossword.grid[y][x]
-				alex_c_api.draw_rect(CELL_BG_COLOUR,
+				alexgames.draw_rect(CELL_BG_COLOUR,
 				                     pos.y_start, pos.x_start,
 				                     pos.y_end,   pos.x_end)
 				draw_shapes.draw_rect_outline(CELL_BG_COLOUR_OUTLINE, CELL_BG_COLOUR_OUTLINE_WIDTH,
@@ -208,10 +208,10 @@ function draw.draw_state(ui_state, game_state)
 				                              pos.y_end,   pos.x_end)
 				if cell ~= core.EMPTY then
 					cell = string.upper(cell)
-					alex_c_api.draw_text(cell, CELL_FG_COLOUR,
+					alexgames.draw_text(cell, CELL_FG_COLOUR,
 					                     pos.y_text, pos.x_text,
 					                     CELL_TEXT_SIZE,
-					                     alex_c_api.TEXT_ALIGN_CENTRE)
+					                     alexgames.TEXT_ALIGN_CENTRE)
 				end
 			end
 		end
@@ -233,24 +233,24 @@ function draw.draw_state(ui_state, game_state)
 			key_fg_colour = CELL_FG_COLOUR
 		end
 
-		alex_c_api.draw_rect(key_bg_colour,
+		alexgames.draw_rect(key_bg_colour,
 		                     key_pos.y_start, key_pos.x_start,
 		                     key_pos.y_end,   key_pos.x_end)
 
-		alex_c_api.draw_text(string.upper(letter), key_fg_colour,
+		alexgames.draw_text(string.upper(letter), key_fg_colour,
 		                     key_pos.text_y, key_pos.text_x,
 		                     KEY_TEXT_SIZE,
-		                     alex_c_api.TEXT_ALIGN_CENTRE)
+		                     alexgames.TEXT_ALIGN_CENTRE)
 	end
 
 	local input_display_y_start = 14 * CELL_SIZE
 	local input_word = draw.get_word(ui_state)
 	input_word = string.upper(input_word)
-	alex_c_api.draw_text(input_word, CELL_FG_COLOUR,
+	alexgames.draw_text(input_word, CELL_FG_COLOUR,
 	                     input_display_y_start,
 	                     board_width/2,
 	                     KEY_TEXT_SIZE,
-	                     alex_c_api.TEXT_ALIGN_CENTRE)
+	                     alexgames.TEXT_ALIGN_CENTRE)
 
 	buttons.draw(ui_state.buttons)
 
@@ -258,7 +258,7 @@ function draw.draw_state(ui_state, game_state)
 	draw_celebration_anim.update(ui_state.anim, dt/1000)
 	draw_celebration_anim.draw(ui_state.anim)
 
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 local function get_letter_idx(ui_state, game_state, letter_arg)
@@ -382,7 +382,7 @@ end
 function draw.player_won(ui_state)
 	draw_celebration_anim.fireworks_display(ui_state.anim)
 	local dt = 1000/60 -- TODO
-	alex_c_api.set_timer_update_ms(dt)
+	alexgames.set_timer_update_ms(dt)
 end
 
 return draw

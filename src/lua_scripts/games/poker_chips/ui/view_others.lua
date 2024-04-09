@@ -3,7 +3,7 @@ local view_others = {}
 
 local buttons = require("libs/ui/buttons")
 local draw_more = require("libs/draw/draw_more")
-local alex_c_api  = require("alex_c_api")
+local alexgames  = require("alexgames")
 
 local core = require("games/poker_chips/poker_chips_core")
 
@@ -80,19 +80,19 @@ function view_others.init(ui_params, view_others_params)
 
 
 		local min_bet_txt = string.format("Minimum Bet: %3d", view_others_state.min_bet)
-		alex_c_api.draw_text(min_bet_txt, g_ui_params.BTN_FG_COLOUR,
+		alexgames.draw_text(min_bet_txt, g_ui_params.BTN_FG_COLOUR,
 		                     init_info_offset, g_ui_params.margin,
 		                     text_size, 1)
 
 		local pots_strs = string.format("Pot: %3s", core.get_pot_string(view_others_state.pots))
-		alex_c_api.draw_text(pots_strs, g_ui_params.BTN_FG_COLOUR,
+		alexgames.draw_text(pots_strs, g_ui_params.BTN_FG_COLOUR,
 		                     init_info_offset, g_ui_params.board_width - g_ui_params.margin,
 		                     text_size, -1)
 
 		if #view_others_state.players == 0 then
 			init_info_offset = init_info_offset + text_size + g_ui_params.margin
 	
-			alex_c_api.draw_text(string.format("Player count: %d", #view_others_state.players),
+			alexgames.draw_text(string.format("Player count: %d", #view_others_state.players),
 			                     g_ui_params.BTN_FG_COLOUR,
 			                     init_info_offset, g_ui_params.margin,
 			                     text_size, 1)
@@ -115,24 +115,24 @@ function view_others.init(ui_params, view_others_params)
 			end
 			local x_pos = g_ui_params.margin
 			if i == view_others_state.player_turn then
-			alex_c_api.draw_text(CURRENT_PLAYER_TEXT_ICON, text_colour,
+			alexgames.draw_text(CURRENT_PLAYER_TEXT_ICON, text_colour,
 			                     y_pos, x_pos, text_size, 1)
 			end
 			x_pos = x_pos + CURRENT_PLAYER_ICON_WIDTH
 
-			alex_c_api.draw_text(player_info.name, text_colour,
+			alexgames.draw_text(player_info.name, text_colour,
 			                     y_pos, x_pos, text_size, 1)
 			x_pos = x_pos + PLAYER_NAME_WIDTH
 
 			if player_info.last_action ~= nil then
 				local status = get_player_status(player_info)
-				alex_c_api.draw_text(status, text_colour,
+				alexgames.draw_text(status, text_colour,
 				                     y_pos, x_pos, text_size, 1)
 			end
 			x_pos = x_pos + PLAYER_ACTION_WIDTH
 
 			x_pos = x_pos + PLAYER_CHIPS_WIDTH
-			alex_c_api.draw_text(string.format("%4d", player_info.chips), text_colour,
+			alexgames.draw_text(string.format("%4d", player_info.chips), text_colour,
 			                     y_pos, x_pos, text_size, -1)
 
 			y_pos = y_pos + text_size + g_ui_params.padding

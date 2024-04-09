@@ -1,7 +1,7 @@
 local core = require("games/crib/crib_core")
 local draw = require("games/crib/crib_draw")
 local crib_serialize = require("games/crib/crib_serialize")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local wait_for_players = require("libs/multiplayer/wait_for_players")
 
@@ -32,7 +32,7 @@ core.print_state(state)
 local ui_state = draw.init(480, 480)
 
 function new_game(player_count)
-	g_session_id = alex_c_api.get_new_session_id()
+	g_session_id = alexgames.get_new_session_id()
 	state = core.new_game(player_count)
 end
 
@@ -52,18 +52,18 @@ function send_state_updates_if_host()
 			goto next_player
 		end
 		local state_msg = "state:" .. crib_serialize.serialize_client_state(state, dst_player)
-		alex_c_api.send_message(player_name, state_msg)
+		alexgames.send_message(player_name, state_msg)
 		::next_player::
 	end
 end
 
-function draw_board()
+function update()
 	if state == nil then
 		return
 	end
 	if state.state == core.states.PICK_DISCARD and #state.hands[player] ~= core.CARDS_PER_HAND then
 		local msg = core.get_discard_status_str(state, player)
-		alex_c_api.set_status_msg(msg)
+		alexgames.set_status_msg(msg)
 	else
 		-- TODO why is this here?
 		print(string.format("Unhandled state %s", state.state))
@@ -75,7 +75,7 @@ function handle_move(action)
 	if not is_client then
 		local rc = core.handle_move(state, player, action)
 		if rc ~= core.RC_SUCCESS then
-			alex_c_api.set_status_err(core.rc_to_str(rc))
+			alexgames.set_status_err(core.rc_to_str(rc))
 		end
 	else
 		send_move_msg(action)
@@ -88,7 +88,7 @@ function send_move_msg(action)
 		msg = msg .. string.format(",%d", action.idx)
 	end
 	print("Sending message: " .. msg)
-	alex_c_api.send_message("all", msg) -- TODO maybe only message the host
+	alexgames.send_message("all", msg) -- TODO maybe only message the host
 end
 
 function handle_recv_move(src, payload)
@@ -131,7 +131,7 @@ function handle_btn_clicked(btn_id)
 	local rc = nil
 	if btn_id == draw.BTN_ID_DISCARD then
 		handle_move({ action = core.actions.DISCARD_CONFIRM })
-		alex_c_api.set_status_msg("Waiting for other players to discard")
+		alexgames.set_status_msg("Waiting for other players to discard")
 	elseif btn_id == draw.BTN_ID_PASS then
 		handle_move({ action = core.actions.CANT_MOVE_ACCEPT})
 	elseif btn_id == draw.BTN_ID_NEXT then
@@ -139,7 +139,7 @@ function handle_btn_clicked(btn_id)
 	else
 		error(string.format("Unhandled btn_id %s", btn_id))
 	end
-	draw_board()
+	update()
 	save_state()
 	core.print_state(state)
 	send_state_updates_if_host()
@@ -161,7 +161,7 @@ function handle_user_clicked(coord_y, coord_x)
 	elseif action.action_type == draw.ACTION_TYPE_UI then
 		draw.handle_ui_action(ui_state, action)
 	end
-	draw_board()
+	update()
 	save_state()
 	core.print_state(state)
 	send_state_updates_if_host()
@@ -177,7 +177,7 @@ local function start_host_game(players_arg, player_arg, player_name_to_idx_arg)
 		new_game(#players)
 	end
 	send_state_updates_if_host()
-	draw_board()
+	update()
 	core.print_state(state)
 end
 
@@ -219,7 +219,7 @@ function handle_msg_received(src, msg)
 	end
 
 	send_state_updates_if_host()
-	draw_board()
+	update()
 	core.print_state(state)
 	save_state()
 end 
@@ -236,7 +236,7 @@ function save_state()
 	-- Only the host can save the state
 	if not is_client then
 		local serialized_state = crib_serialize.serialize_state(state)
-		alex_c_api.save_state(g_session_id, serialized_state)
+		alexgames.save_state(g_session_id, serialized_state)
 	end
 end
 

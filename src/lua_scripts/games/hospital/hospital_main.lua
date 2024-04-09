@@ -5,7 +5,7 @@ local serialize = require("games/hospital/hospital_serialize")
 
 local wait_for_players = require("libs/multiplayer/wait_for_players")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 --[[
 	TODO:
@@ -48,7 +48,7 @@ local game_params = {
 local ui_state = draw.init(screen_width, screen_height, game_params)
 local state = nil
 
-function draw_board()
+function update()
 	if state == nil then
 		return
 	end
@@ -128,7 +128,7 @@ local function handle_actions_client(actions, player)
 	for _, action in ipairs(actions) do
 		local payload = ""
 		if action.action == core.ACTION_DIR_PAD_POS_CHANGE then
-			local curr_time = alex_c_api.get_time_ms()
+			local curr_time = alexgames.get_time_ms()
 			if action.vec_y ~= 0 and action.vec_x ~= 0 and
 			   last_dirpad_update_time ~= nil and
 			   curr_time - last_dirpad_update_time < MIN_DIRPAD_POS_UPDATE_PERIOD_MS then
@@ -139,7 +139,7 @@ local function handle_actions_client(actions, player)
 			                                 math.floor(action.vec_x*1000))
 		end
 		local msg = string.format("action:%d,%s", action.action, payload)
-		alex_c_api.send_message("all", msg)
+		alexgames.send_message("all", msg)
 		::next_action::
 	end
 end
@@ -272,7 +272,7 @@ function send_state_updates_if_host()
 			goto next_player
 		end
 		local state_msg = "state:" .. serialize.serialize_state(state)
-		alex_c_api.send_message(player_name, state_msg)
+		alexgames.send_message(player_name, state_msg)
 		::next_player::
 	end
 end
@@ -287,7 +287,7 @@ local function start_host_game(players_arg, player_arg, player_name_to_idx_arg)
 	is_client = false
 	new_game(#players)
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end
 
 local function start_client_game(players_arg, player_arg, player_name_to_idx_arg)
@@ -324,7 +324,7 @@ function handle_msg_received(src, msg)
 	end
 
 	send_state_updates_if_host()
-	draw_board()
+	update()
 end 
 
 function handle_popup_btn_clicked(popup_id, btn_idx)
@@ -335,9 +335,9 @@ function handle_popup_btn_clicked(popup_id, btn_idx)
 end
 
 function start_game()
-	alex_c_api.enable_evt('touch')
-	alex_c_api.enable_evt('key')
-	alex_c_api.set_timer_update_ms(math.floor(dt))
+	alexgames.enable_evt('touch')
+	alexgames.enable_evt('key')
+	alexgames.set_timer_update_ms(math.floor(dt))
 
 	wait_for_players.init(players, player, start_host_game, start_client_game)
 end

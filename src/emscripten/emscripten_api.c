@@ -53,8 +53,8 @@ void start_game(void *L, int session_id, const uint8_t *state, size_t state_len)
 
 	
 EMSCRIPTEN_KEEPALIVE
-void draw_board(void *L, int dt_ms) {
-	game_api->draw_board(L, dt_ms);
+void update(void *L, int dt_ms) {
+	game_api->update(L, dt_ms);
 }
 
 EMSCRIPTEN_KEEPALIVE

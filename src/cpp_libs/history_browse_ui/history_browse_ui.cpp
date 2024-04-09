@@ -52,7 +52,7 @@
 
 static void* init_lib(const struct game_api_callbacks *api_arg, const char *game_str, int game_str_len);
 static void destroy_game(void *L);
-static void draw_board(void *L, int dt_ms);
+static void update(void *L, int dt_ms);
 static void handle_user_string_input(void *L, char *user_line, int str_len, bool is_cancelled);
 static void handle_user_clicked(void *L, int pos_y, int pos_x);
 static void handle_mousemove(void *L, int pos_y, int pos_x, int buttons);
@@ -76,7 +76,7 @@ static void lua_run_cmd(void *L, const char *str, int string_len);
 static const struct game_api my_game_api = {
 	/* .init_lua_api             = */ init_lib,
 	/* .destroy_game             = */ destroy_game,
-	/* .draw_board               = */ draw_board,
+	/* .update               = */ update,
 	/* .handle_user_string_input = */ handle_user_string_input,
 	/* .handle_user_clicked      = */ handle_user_clicked,
 	/* .handle_mousemove         = */ handle_mousemove,
@@ -158,7 +158,7 @@ class history_browse_state;
 
 class HistoryBrowseWindow {
 	public:
-	virtual void draw_board(void *L, int dt_ms) = 0;
+	virtual void update(void *L, int dt_ms) = 0;
 
 	/** handle_user_pressed means "mouse click or touch presses determined to be a click (rather than swipe)" */
 	virtual enum user_action handle_user_pressed(history_browse_state *state, int pos_y, int pos_x) = 0;
@@ -181,7 +181,7 @@ class HistoryBrowseWindow {
 class SessionSelectState : public HistoryBrowseWindow {
 	public:
 	SessionSelectState(void *state) {};
-	void draw_board(void *L, int dt_ms);
+	void update(void *L, int dt_ms);
 	enum user_action handle_user_pressed(history_browse_state *state, int pos_y, int pos_x);
 	void handle_mousemove(history_browse_state *state, int pos_y, int pos_x, int buttons);
 	void handle_mouse_evt(history_browse_state *state, int mouse_evt_id, int pos_y, int pos_x, int buttons);
@@ -206,7 +206,7 @@ class MoveSelectState : public HistoryBrowseWindow {
 	MoveSelectState(void *state) :
 		move_select_button_helper(state)
 		{}
-	void draw_board(void *L, int dt_ms);
+	void update(void *L, int dt_ms);
 	enum user_action handle_user_pressed(history_browse_state *state, int pos_y, int pos_x);
 	void init_buttons(history_browse_state *state);
 	void handle_mousemove(history_browse_state *state, int pos_y, int pos_x, int buttons) {}
@@ -394,7 +394,7 @@ static bool load_game(history_browse_state *state) {
 		g_callbacks->set_game_handle(L, game_id);
 
 		lua_game_api.start_game(L, session_id, saved_game_state, saved_game_state_len);
-		lua_game_api.draw_board(L, 0);
+		lua_game_api.update(L, 0);
 		rc = true;
 
 	}
@@ -456,7 +456,7 @@ void SessionSelectState::generate_state_previews(history_browse_state *state) {
 		void *L = init_lua_game(&preview_draw_callbacks, fpath);
 		//uint8_t saved_game_state[MAX_GAME_STATE_SIZE];
 		lua_game_api.start_game(L, session_id, saved_game_state, saved_game_state_len);
-		lua_game_api.draw_board(L, 0);
+		lua_game_api.update(L, 0);
 
 		lua_game_api.destroy_game(L);
 		g_preview_game_id = nullptr;
@@ -601,7 +601,7 @@ static void destroy_game(void *L) {
 	// g_callbacks->destroy_all();
 }
 
-void SessionSelectState::draw_board(void *L, int dt_ms) {
+void SessionSelectState::update(void *L, int dt_ms) {
 	history_browse_state *state = (history_browse_state*)L;
 
 	int offset = this->y_pos;
@@ -649,7 +649,7 @@ void SessionSelectState::draw_board(void *L, int dt_ms) {
 	}
 }
 
-void MoveSelectState::draw_board(void *L_arg, int dt_ms) {
+void MoveSelectState::update(void *L_arg, int dt_ms) {
 	history_browse_state *state = (history_browse_state*)L_arg;
 	const struct game_api_callbacks preview_draw_callbacks = create_preview_draw_callbacks();
 	const char *move_preview_canvas_id = "select_move_preview";
@@ -683,7 +683,7 @@ void MoveSelectState::draw_board(void *L_arg, int dt_ms) {
 	void *L = init_lua_game(&preview_draw_callbacks, fpath);
 	//uint8_t saved_game_state[MAX_GAME_STATE_SIZE];
 	lua_game_api.start_game(L, session_id, saved_game_state, saved_game_state_len);
-	lua_game_api.draw_board(L, 0);
+	lua_game_api.update(L, 0);
 
 	free(saved_game_state);
 	destroy_lua_game(L);
@@ -717,11 +717,11 @@ void MoveSelectState::draw_board(void *L_arg, int dt_ms) {
 	this->move_select_button_helper.draw_buttons(g_callbacks);
 }
 
-static void draw_board(void *L, int dt_ms) {
+static void update(void *L, int dt_ms) {
 	history_browse_state *state = (history_browse_state *)L;
 
 	g_callbacks->draw_clear();
-	state->window->draw_board(L, dt_ms);
+	state->window->update(L, dt_ms);
 #if 0
 	switch (state->window) {
 		case WINDOW_SELECT_SESSION:
@@ -772,9 +772,9 @@ static void handle_user_action(void *L, enum user_action action) {
 	switch (action) {
 		case USER_ACTION_LOAD_GAME: {
 			bool rc = load_game(state);
-			// Can **not** fallthrough to draw_board(L) here, because
-			// draw_board should now point to the Lua draw board (not the history draw board),
-			// and even if it is changed to game_api->draw_board(L), the L is wrong too -- that
+			// Can **not** fallthrough to update(L) here, because
+			// update should now point to the Lua draw board (not the history draw board),
+			// and even if it is changed to game_api->update(L), the L is wrong too -- that
 			// still points to the history browse state, but we've changed to use the new Lua game's
 			// state
 			if (rc) {
@@ -793,7 +793,7 @@ static void handle_user_action(void *L, enum user_action action) {
 		}
 
 		case USER_ACTION_NONE:
-			draw_board(L, 0);
+			update(L, 0);
 			break;
 	}
 }
@@ -821,7 +821,7 @@ void SessionSelectState::handle_mousemove(history_browse_state *state, int pos_y
 	if (diff != 0) {
 		this->y_pos += diff;
 		this->y_pos = clip(-this->max_y_pos, this->y_pos, 0);
-		draw_board(state, 0);
+		update(state, 0);
 	}
 }
 
@@ -837,7 +837,7 @@ void SessionSelectState::handle_mouse_evt(history_browse_state *state, int mouse
 
 static bool handle_key_evt(void *L, const char *evt_id, const char *key_code) {
 	//history_browse_state *state = (history_browse_state *)L;
-	draw_board(L, 0);
+	update(L, 0);
 	return false;
 }
 
@@ -849,7 +849,7 @@ static void handle_wheel_changed(void *L, int delta_y, int delta_x) {
 void SessionSelectState::handle_wheel_changed(history_browse_state *state, int delta_y, int delta_x) {
 	this->y_pos += -delta_y;
 	this->y_pos = clip(-this->max_y_pos, this->y_pos, 0);
-	draw_board(state, 0);
+	update(state, 0);
 	//printf("handle_wheel_changed{ dy = %d, dx = %d }\n", delta_y, delta_x);
 }
 
@@ -860,7 +860,7 @@ static void handle_touch_evt(void *L,
 	bool activity = state->window->handle_touch_evt(state, std::string(evt_id_str), changed_touches, changed_touches_len);
 	// TODO maybe don't do this, game may have changed
 	if (activity) {
-		draw_board(L, 0);
+		update(L, 0);
 	}
 }
 

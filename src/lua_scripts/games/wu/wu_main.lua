@@ -5,13 +5,13 @@ local wu      = require("games/wu/wu_core")
 local wu_ui   = require("games/go/go_ui")
 local wu_ctrl = require("games/wu/wu_ctrl")
 
-local alex_c_api = require("alex_c_api");
+local alexgames = require("alexgames");
 local show_buttons_popup = require("libs/ui/show_buttons_popup")
 
 local OPTION_ID_NEW_GAME = "opt_new_game"
 
 -- e.g. either 9x9, 13x13, or 19x19
-local session_id = alex_c_api.get_new_session_id()
+local session_id = alexgames.get_new_session_id()
 local wu_game_size = 15
 local state
 local ctrl_state = wu_ctrl.new_state()
@@ -41,15 +41,15 @@ end
 
 function new_game()
 	state = wu.new_game(wu_game_size)
-	alex_c_api.set_status_msg("Choose piece colour")
+	alexgames.set_status_msg("Choose piece colour")
 	if request_state then
-		alex_c_api.send_message("all", "get_state:")
+		alexgames.send_message("all", "get_state:")
 	else
-		alex_c_api.send_message("all", "new_game:")
+		alexgames.send_message("all", "new_game:")
 		send_state()
 	end
 	request_state = true
-	draw_board()
+	update()
 end
 
 PLAYER_CHOICE_POPUP_ID = "choose_player_colour"
@@ -65,8 +65,8 @@ PLAYER_IDX_TO_BTN_IDX_MAP = utils.reverse_map(PLAYER_CHOICE_BTNS_MAP)
 
 GAME_OVER_POPUP_ID = "game_over"
 
-function draw_board() 
-	wu_ui.draw_board(session_id, state.board, state.last_move_y, state.last_move_x)
+function update() 
+	wu_ui.update(session_id, state.board, state.last_move_y, state.last_move_x)
 end
 
 function first_char_upper(str)
@@ -82,7 +82,7 @@ function check_for_winner()
 		                              "Game over",
 		                              msg,
 		                              {"New game"})
-		alex_c_api.set_status_msg(msg)
+		alexgames.set_status_msg(msg)
 	end
 end
 
@@ -92,20 +92,20 @@ function handle_user_clicked(pos_y, pos_x)
 	local rc = wu.player_move(state, player, pos.y, pos.x)
 	if rc == wu.SUCCESS then
 		if not local_multiplayer then
-			alex_c_api.send_message("all", string.format("move:%d,%d,%d", player, pos.y, pos.x));
+			alexgames.send_message("all", string.format("move:%d,%d,%d", player, pos.y, pos.x));
 		end
-		alex_c_api.set_status_err("")
-		alex_c_api.save_state(session_id, wu.serialize_state(state))
+		alexgames.set_status_err("")
+		alexgames.save_state(session_id, wu.serialize_state(state))
 	else
-		alex_c_api.set_status_err(wu.err_code_to_str(rc))
+		alexgames.set_status_err(wu.err_code_to_str(rc))
 	end
-	draw_board()
+	update()
 	update_status_msg_turn(state, ctrl_state)
 	check_for_winner()
 end
 
 function send_state()
-	alex_c_api.send_message("all", "state:"..wu.serialize_state(state))
+	alexgames.send_message("all", "state:"..wu.serialize_state(state))
 end
 
 function handle_msg_received(src, msg)
@@ -138,8 +138,8 @@ function handle_msg_received(src, msg)
 			return
 		end
 		wu.player_move(state, player, row, col)
-		alex_c_api.set_status_err("")
-		draw_board()
+		alexgames.set_status_err("")
+		update()
 		update_status_msg_turn(state, ctrl_state)
 		check_for_winner()
 	elseif header == "get_state" then
@@ -149,8 +149,8 @@ function handle_msg_received(src, msg)
 		-- TODO check with user if they want to overwrite their state with
 		-- this (possibly unsolicited!!) state from the other player
 		state = new_state
-		draw_board()
-		alex_c_api.set_status_err("")
+		update()
+		alexgames.set_status_err("")
 		update_status_msg_turn(state, ctrl_state)
 	elseif header == "new_game" then
 		request_state = true
@@ -184,7 +184,7 @@ function update_status_msg_turn(state, ctrl_state)
 	if not local_multiplayer then
 		display_name = string.format("%s (%s)", display_name, get_player_name(state.player_turn))
 	end
-	alex_c_api.set_status_msg(string.format("Waiting for %s to move", display_name))
+	alexgames.set_status_msg(string.format("Waiting for %s to move", display_name))
 end
 
 function handle_popup_btn_clicked(popup_id, btn_idx)
@@ -193,11 +193,11 @@ function handle_popup_btn_clicked(popup_id, btn_idx)
 	elseif popup_id == GAME_OVER_POPUP_ID then
 		if btn_idx == 0 then
 			new_game()
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 		end
 	else
 		print(string.format("Unexpected popup_id \"%s\"", popup_id));
-		alex_c_api.hide_popup()
+		alexgames.hide_popup()
 	end
 end
 
@@ -285,9 +285,9 @@ end
 
 
 function load_state_move_offset(move_offset)
-	local serialized_state = alex_c_api.get_saved_state_offset(session_id, move_offset)
+	local serialized_state = alexgames.get_saved_state_offset(session_id, move_offset)
 	load_state_helper(session_id, serialized_state)
-	draw_board()
+	update()
 	send_state()
 end
 
@@ -307,21 +307,21 @@ end
 
 
 function start_game(session_id_arg, serialized_state)
-	local last_sess_id = alex_c_api.get_last_session_id()
+	local last_sess_id = alexgames.get_last_session_id()
 
 	if serialized_state ~= nil then
 		print("Loading state from URL param")
 		load_state_helper(session_id_arg, serialized_state)
 	elseif last_sess_id ~= nil then
 		print("Loading autosaved state")
-		serialized_state = alex_c_api.get_saved_state_offset(last_sess_id, 0)
+		serialized_state = alexgames.get_saved_state_offset(last_sess_id, 0)
 		load_state_helper(last_sess_id, serialized_state)
 	else
 		print("Starting new game, no URL param or autosaved state found")
 		new_game()
 	end
 	two_player_init()
-	alex_c_api.send_message("all", "get_state:")
+	alexgames.send_message("all", "get_state:")
 
-	alex_c_api.add_game_option(OPTION_ID_NEW_GAME, { type = alex_c_api.OPTION_TYPE_BTN, label = "New Game"})
+	alexgames.add_game_option(OPTION_ID_NEW_GAME, { type = alexgames.OPTION_TYPE_BTN, label = "New Game"})
 end

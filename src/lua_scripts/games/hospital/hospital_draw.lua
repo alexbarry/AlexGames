@@ -2,7 +2,7 @@ local draw = {}
 
 local core       = require("games/hospital/hospital_core")
 local draw_more = require("libs/draw/draw_more")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 draw.INPUT_TYPE_KEYBOARD = 1
 draw.INPUT_TYPE_TOUCH    = 2
@@ -246,11 +246,11 @@ local function draw_using_progress(state, ui_state, player_idx)
 
 
 	local progress = player_state.use_progress/100.0
-	alex_c_api.draw_rect(PLAYER_HIGHLIGHT_COLOURS[player_idx].fill,
+	alexgames.draw_rect(PLAYER_HIGHLIGHT_COLOURS[player_idx].fill,
 	                     math.floor(draw_pt.y), math.floor(draw_pt.x),
 	                     math.floor(draw_pt.y + size.y), math.floor(draw_pt.x + size.x))
 
-	alex_c_api.draw_rect(PLAYER_HIGHLIGHT_COLOURS[player_idx].stroke,
+	alexgames.draw_rect(PLAYER_HIGHLIGHT_COLOURS[player_idx].stroke,
 	                     math.floor(draw_pt.y), math.floor(draw_pt.x),
 	                     math.floor(draw_pt.y + size.y), math.floor(draw_pt.x + progress*size.x))
 
@@ -325,7 +325,7 @@ local function get_time_left_colour(portion)
 		return TIME_LEFT_FG_MED_COLOUR
 	else
 		-- blinking animation
-		local time_ms = alex_c_api.get_time_ms()
+		local time_ms = alexgames.get_time_ms()
 		if math.floor(time_ms/200) % 2 == 1 then
 			return TIME_LEFT_FG_BAD_COLOUR
 		else
@@ -353,13 +353,13 @@ local function draw_ui_layer_patient(state, ui_state, player, patient)
 		                        size.x, size.y)
 		if patient.needs_revealed then
 		local portion = patient.time_left / patient.orig_time_left
-			alex_c_api.draw_rect(TIME_LEFT_BG_COLOUR,
+			alexgames.draw_rect(TIME_LEFT_BG_COLOUR,
 			                     gfx_pt.y,
 			                     gfx_pt.x - TIME_LEFT_ICON_WIDTH - PADDING,
 			                     gfx_pt.y + size.y,
 			                     gfx_pt.x - PADDING)
 
-			alex_c_api.draw_rect(get_time_left_colour(portion),
+			alexgames.draw_rect(get_time_left_colour(portion),
 			                     gfx_pt.y + math.floor((1-portion) * size.y),
 			                     gfx_pt.x - TIME_LEFT_ICON_WIDTH - PADDING,
 			                     gfx_pt.y + size.y,
@@ -387,12 +387,12 @@ local function draw_ui_layer_patient(state, ui_state, player, patient)
 			                        math.floor(cross_size.y),
 			                        math.floor(cross_size.x))
 			local portion = patient.fix_time / patient.orig_fix_time
-			alex_c_api.draw_rect(FIX_TIME_PROGRSS_BAR_BG_COLOUR,
+			alexgames.draw_rect(FIX_TIME_PROGRSS_BAR_BG_COLOUR,
 			                     fix_bar_pos.y,
 			                     fix_bar_pos.x,
 			                     fix_bar_pos.y + fix_bar_size.y,
 			                     fix_bar_pos.x + fix_bar_size.x)
-			alex_c_api.draw_rect(FIX_TIME_PROGRSS_BAR_FG_COLOUR,
+			alexgames.draw_rect(FIX_TIME_PROGRSS_BAR_FG_COLOUR,
 			                     fix_bar_pos.y + math.floor(portion*size.y),
 			                     fix_bar_pos.x,
 			                     fix_bar_pos.y + fix_bar_size.y,
@@ -432,16 +432,16 @@ local function draw_highlight_floor_cell(ui_state, colour, y, x)
 	local ib = game_pt_to_gfx_pt(point(y+1+padding,x+0-padding), ui_state)
 	local ic = game_pt_to_gfx_pt(point(y+1+padding,x+1+padding), ui_state)
 	local id = game_pt_to_gfx_pt(point(y+0-padding,x+1+padding), ui_state)
-	alex_c_api.draw_line(colour, highlight_line_size,
+	alexgames.draw_line(colour, highlight_line_size,
 	                     math.floor(ia.y), math.floor(ia.x),
 	                     math.floor(ib.y), math.floor(ib.x))
-	alex_c_api.draw_line(colour, highlight_line_size,
+	alexgames.draw_line(colour, highlight_line_size,
 	                     math.floor(ib.y), math.floor(ib.x),
 	                     math.floor(ic.y), math.floor(ic.x))
-	alex_c_api.draw_line(colour, highlight_line_size,
+	alexgames.draw_line(colour, highlight_line_size,
 	                     math.floor(ic.y), math.floor(ic.x),
 	                     math.floor(id.y), math.floor(id.x))
-	alex_c_api.draw_line(colour, highlight_line_size,
+	alexgames.draw_line(colour, highlight_line_size,
 	                     math.floor(id.y), math.floor(id.x),
 	                     math.floor(ia.y), math.floor(ia.x))
 end
@@ -457,23 +457,23 @@ local function draw_touch_input()
 end
 
 local function draw_keyboard_input()
-	alex_c_api.draw_text('[Z]: Pick up / use', CONTROLS_TEXT_COLOUR,
+	alexgames.draw_text('[Z]: Pick up / use', CONTROLS_TEXT_COLOUR,
 	                     screen_height - 50, 10, CONTROLS_TEXT_SIZE, 1)
-	alex_c_api.draw_text('[X]: Drop', CONTROLS_TEXT_COLOUR,
+	alexgames.draw_text('[X]: Drop', CONTROLS_TEXT_COLOUR,
 	                     screen_height - 20, 10, CONTROLS_TEXT_SIZE, 1)
-	alex_c_api.draw_text('[Arrows]: Move', CONTROLS_TEXT_COLOUR,
+	alexgames.draw_text('[Arrows]: Move', CONTROLS_TEXT_COLOUR,
 	                     screen_height - 20, screen_width - 10, CONTROLS_TEXT_SIZE, -1)
 end
 
 local function draw_unknown_input()
-	alex_c_api.draw_text('Touch screen or use keyboard to select input', CONTROLS_TEXT_COLOUR,
+	alexgames.draw_text('Touch screen or use keyboard to select input', CONTROLS_TEXT_COLOUR,
 	                     screen_height - 20, math.floor(screen_width/2), CONTROLS_TEXT_SIZE, 0)
 end
 
 local function draw_animations(animations)
 	for _, anim in ipairs(animations) do
 		if anim.anim_type == ANIM_TYPE_FLOAT_TEXT then
-			alex_c_api.draw_text(anim.text, anim.text_colour,
+			alexgames.draw_text(anim.text, anim.text_colour,
 			                     math.floor(anim.y), math.floor(anim.x),
 			                     anim.font_size, 0)
 		else
@@ -483,7 +483,7 @@ local function draw_animations(animations)
 end
 
 function draw.draw_state(state, ui_state, player)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
 	if state == nil then
 		return
@@ -532,7 +532,7 @@ function draw.draw_state(state, ui_state, player)
 		draw_unknown_input()
 	end
 
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 local function sign(x)

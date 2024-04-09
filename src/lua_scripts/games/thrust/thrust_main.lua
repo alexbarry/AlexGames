@@ -13,7 +13,7 @@ local core = require("games/thrust/thrust_core")
 local draw = require("games/thrust/thrust_draw")
 local key_input = require("games/thrust/thrust_keyboard_input")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 
 --local FPS = 60
@@ -27,7 +27,7 @@ local g_state = {
 }
 
 
-function draw_board(dt_ms)
+function update(dt_ms)
 	--core.update_state(g_state.game, TIME_PER_FRAME_MS/1000.0)
 	core.update_state(g_state.game, dt_ms/1000.0)
 	draw.draw_state(g_state.game, g_state.ui)
@@ -71,8 +71,8 @@ function get_state()
 end
 
 function start_game()
-	alex_c_api.enable_evt("mouse_move")
-	alex_c_api.enable_evt("key")
-	alex_c_api.enable_evt("touch")
-	alex_c_api.set_timer_update_ms(TIME_PER_FRAME_MS)
+	alexgames.enable_evt("mouse_move")
+	alexgames.enable_evt("key")
+	alexgames.enable_evt("touch")
+	alexgames.set_timer_update_ms(TIME_PER_FRAME_MS)
 end

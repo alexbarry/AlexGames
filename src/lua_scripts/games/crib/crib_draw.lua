@@ -1,6 +1,6 @@
 local core = require("games/crib/crib_core")
 local cards_draw = require("libs/cards/cards_draw")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local draw_more = require("libs/draw/draw_more")
 
 local draw = {}
@@ -58,12 +58,12 @@ function draw.init(height_arg, width_arg)
 
 	hand_width = core.CARDS_PER_HAND * card_width + (core.CARDS_PER_HAND - 1) * card_padding
 
-	alex_c_api.create_btn(draw.BTN_ID_DISCARD, "Discard", 1)
-	alex_c_api.create_btn(draw.BTN_ID_PASS,    "Can't move", 1)
-	alex_c_api.create_btn(draw.BTN_ID_NEXT,    "Next", 1)
-	alex_c_api.set_btn_enabled(draw.BTN_ID_DISCARD, false)
-	alex_c_api.set_btn_enabled(draw.BTN_ID_PASS,    false)
-	alex_c_api.set_btn_enabled(draw.BTN_ID_NEXT,    false)
+	alexgames.create_btn(draw.BTN_ID_DISCARD, "Discard", 1)
+	alexgames.create_btn(draw.BTN_ID_PASS,    "Can't move", 1)
+	alexgames.create_btn(draw.BTN_ID_NEXT,    "Next", 1)
+	alexgames.set_btn_enabled(draw.BTN_ID_DISCARD, false)
+	alexgames.set_btn_enabled(draw.BTN_ID_PASS,    false)
+	alexgames.set_btn_enabled(draw.BTN_ID_NEXT,    false)
 
 	local ui_state = {
 		points_popup_shown   = false,
@@ -169,11 +169,11 @@ local function player_pos_to_idx(state, player, pos)
 end
 
 local function draw_points_popup(state, points_info, player)
-		alex_c_api.draw_rect(CARD_POINTS_POPUP_BACKGROUND_COLOUR,
+		alexgames.draw_rect(CARD_POINTS_POPUP_BACKGROUND_COLOUR,
 		                     popup_padding, popup_padding,
 		                     width - popup_padding, height - popup_padding)
 
-		alex_c_api.draw_text(string.format("Player %d points: %d", player, points_info.points), TEXT_COLOUR,
+		alexgames.draw_text(string.format("Player %d points: %d", player, points_info.points), TEXT_COLOUR,
 		                     popup_padding + 2*card_padding,
 		                     popup_padding + card_padding,
 		                     TEXT_SIZE, 1, 0)
@@ -183,7 +183,7 @@ local function draw_points_popup(state, points_info, player)
 			local text_height = small_card_height + small_card_padding
 			local text_pos_y = popup_padding + 4*card_padding + (i-1)*text_height
 			local reason_str = core.point_type_to_str(points_reason.reason)
-			alex_c_api.draw_text(string.format("+%2d %s", points_reason.points, reason_str), TEXT_COLOUR,
+			alexgames.draw_text(string.format("+%2d %s", points_reason.points, reason_str), TEXT_COLOUR,
 			                     text_pos_y, popup_padding + 3*card_padding, 16, 1, 0)
 			for j,card_idx in ipairs(points_reason.card_idxs) do
 				local card_pos_x = width - popup_padding - j*(small_card_width + small_card_padding)
@@ -215,11 +215,11 @@ local function draw_points_popup(state, points_info, player)
 
 		local btn_pos_y = height - popup_padding - more_info_btn_height - card_padding
 		local btn_pos_x = popup_padding + card_padding
-		alex_c_api.draw_rect('#dddddd',
+		alexgames.draw_rect('#dddddd',
 		                        btn_pos_y, btn_pos_x,
 		                        (width - popup_padding - card_padding), --  - btn_pos_x,
 		                        (height - popup_padding - card_padding)) --  - btn_pos_y)
-		alex_c_api.draw_text("Close", TEXT_COLOUR,
+		alexgames.draw_text("Close", TEXT_COLOUR,
 		                     math.floor(btn_pos_y + more_info_btn_height/2),
 		                     math.floor(width/2),
 		                     TEXT_SIZE, 0, 0)
@@ -271,7 +271,7 @@ local function get_score(state, player)
 end
 
 function draw.draw(state, ui_state, player)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
 
 	if state == nil then
@@ -287,7 +287,7 @@ function draw.draw(state, ui_state, player)
 	end
 
 	if state.state == core.states.PLAY then
-		alex_c_api.draw_text(tostring(state.playing_sum), TEXT_COLOUR,
+		alexgames.draw_text(tostring(state.playing_sum), TEXT_COLOUR,
 			math.floor(height/2),
 			math.floor(width/2 + card_padding),
 			TEXT_SIZE,
@@ -304,7 +304,7 @@ function draw.draw(state, ui_state, player)
 			false, 0)
 	end
 
-	alex_c_api.draw_text(get_score(state, player), TEXT_COLOUR,
+	alexgames.draw_text(get_score(state, player), TEXT_COLOUR,
 		math.floor(height - card_height - 2*card_padding),
 		math.floor(width - 2*card_padding),
 		TEXT_SIZE,
@@ -312,7 +312,7 @@ function draw.draw(state, ui_state, player)
 		0)
 
 	local crib_label_pos = get_crib_label_pos(state.player_crib, player)
-	alex_c_api.draw_text("crib", TEXT_COLOUR,
+	alexgames.draw_text("crib", TEXT_COLOUR,
 		crib_label_pos.y,
 		crib_label_pos.x,
 		TEXT_SIZE,
@@ -350,7 +350,7 @@ function draw.draw(state, ui_state, player)
 	-- TODO loop through all other players and draw their cards
 	-- TODO should draw offset array for other players too
 	local other_player = get_other_player(state, player)
-	alex_c_api.draw_text(get_score(state, other_player), TEXT_COLOUR,
+	alexgames.draw_text(get_score(state, other_player), TEXT_COLOUR,
 		math.floor(card_height + 3*card_padding), -- TODO the other one is 2*padding. Ensure vertical centre?
 		math.floor(2*card_padding),
 		TEXT_SIZE,
@@ -407,7 +407,7 @@ function draw.draw(state, ui_state, player)
 
 		local hand_score_pos = get_hand_score_pos(player, player_idx)
 
-		alex_c_api.draw_text(string.format("+%d", points_info.points),
+		alexgames.draw_text(string.format("+%d", points_info.points),
 			TEXT_COLOUR,
 			hand_score_pos.y, hand_score_pos.x,
 			TEXT_SIZE, 0, 0)
@@ -419,15 +419,15 @@ function draw.draw(state, ui_state, player)
 		::next_player::
 	end
 
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 
 	local visible_btn_discard = (state.state == core.states.PICK_DISCARD)
 	local visible_btn_pass    = (state.state == core.states.PLAY)
 	local visible_btn_next    = (state.state == core.states.ACKNOWLEDGE_POINTS or
 	                             state.state == core.states.ACKNOWLEDGE_CRIB)
-	alex_c_api.set_btn_visible(draw.BTN_ID_DISCARD, visible_btn_discard)
-	alex_c_api.set_btn_visible(draw.BTN_ID_PASS,    visible_btn_pass)
-	alex_c_api.set_btn_visible(draw.BTN_ID_NEXT,    visible_btn_next)
+	alexgames.set_btn_visible(draw.BTN_ID_DISCARD, visible_btn_discard)
+	alexgames.set_btn_visible(draw.BTN_ID_PASS,    visible_btn_pass)
+	alexgames.set_btn_visible(draw.BTN_ID_NEXT,    visible_btn_next)
 
 	local enable_discard_btn = (state.state == core.states.PICK_DISCARD and 
 	                            #state.hands[player] > core.CARDS_PER_HAND and
@@ -438,9 +438,9 @@ function draw.draw(state, ui_state, player)
 	local enable_btn_next = ((state.state == core.states.ACKNOWLEDGE_POINTS or
 	                          state.state == core.states.ACKNOWLEDGE_CRIB) and
 	                         not core.has_acknowledged_points(state, player))
-	alex_c_api.set_btn_enabled(draw.BTN_ID_DISCARD, enable_discard_btn)
-	alex_c_api.set_btn_enabled(draw.BTN_ID_PASS, enable_pass_btn)
-	alex_c_api.set_btn_enabled(draw.BTN_ID_NEXT, enable_btn_next)
+	alexgames.set_btn_enabled(draw.BTN_ID_DISCARD, enable_discard_btn)
+	alexgames.set_btn_enabled(draw.BTN_ID_PASS, enable_pass_btn)
+	alexgames.set_btn_enabled(draw.BTN_ID_NEXT, enable_btn_next)
 end
 
 function draw.coords_to_action(state, ui_state, player, coord_y, coord_x)

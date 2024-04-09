@@ -1,11 +1,11 @@
 local draw_more = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
--- Same as alex_c_api.draw_graphic, but the position is
+-- Same as alexgames.draw_graphic, but the position is
 -- from the top left instead of the centre.
 --
--- Originally alex_c_api.draw_graphic(...) worked this way, but I changed it
+-- Originally alexgames.draw_graphic(...) worked this way, but I changed it
 -- when adding support for rotation of angles besides 0, 90, 180, 270.
 -- So this API is provided to help convert the older games.
 function draw_more.draw_graphic_ul(img_id,
@@ -16,7 +16,7 @@ function draw_more.draw_graphic_ul(img_id,
 		y_rot_offset = height/2*math.cos(params.angle_degrees/180*math.pi) + width/2*math.sin(params.angle_degrees/180*math.pi)
 		x_rot_offset = width/2*math.cos(params.angle_degrees/180*math.pi) - height/2*math.sin(params.angle_degrees/180*math.pi)
 	end
-	return alex_c_api.draw_graphic(img_id,
+	return alexgames.draw_graphic(img_id,
 	                               math.floor(y + y_rot_offset),
 	                               math.floor(x + x_rot_offset),
 	                               width,
@@ -111,7 +111,7 @@ function draw_more.draw_dashed_line(colour, thickness, duty_cycle, step, y1, x1,
 
 		local piece_y2 = math.floor(piece_y + piece_dy*duty_cycle)
 		local piece_x2 = math.floor(piece_x + piece_dx*duty_cycle)
-		alex_c_api.draw_line(colour, thickness,
+		alexgames.draw_line(colour, thickness,
 		                     piece_y, piece_x,
 		                     piece_y2, piece_x2)
 		piece_y = math.floor(piece_y + piece_dy)

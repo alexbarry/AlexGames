@@ -1,7 +1,7 @@
 
 local draw = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local draw_more = require("libs/draw/draw_more")
 local draw_celebration_anim = require("libs/draw/draw_celebration_anim")
 
@@ -72,11 +72,11 @@ function draw.update(dt_ms)
 end
 
 function draw.draw_state(state, player)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 	if state == nil or state.game == nil then
 		return
 	end
-	alex_c_api.draw_rect(BACKGROUND_COLOUR, 0, 0, board_width, board_height)
+	alexgames.draw_rect(BACKGROUND_COLOUR, 0, 0, board_width, board_height)
 	-- TODO only draw cells that are (partially or fully) visible
 	for y, row in ipairs(state.game.board) do
 		for x, cell in ipairs(row) do
@@ -112,13 +112,13 @@ function draw.draw_state(state, player)
 	local text_height = 30
 	local player_text_width  = 165
 	local text_padding = 10
-	alex_c_api.draw_rect(TEXT_BACKGROUND_COLOUR,
+	alexgames.draw_rect(TEXT_BACKGROUND_COLOUR,
 	                     board_height - #state.players*text_height - text_padding,
 	                     board_width  - player_text_width - text_padding,
 	                     board_height, board_width)
 	for i=0,#state.players-1 do
 		local player_idx = #state.players - i
-		alex_c_api.draw_text(string.format("Player %d: %4d", player_idx, state.players[player_idx].score),
+		alexgames.draw_text(string.format("Player %d: %4d", player_idx, state.players[player_idx].score),
 		                     TEXT_COLOUR,
 		                     board_height - i * text_height - text_padding,
 							 board_width - text_padding,
@@ -128,23 +128,23 @@ function draw.draw_state(state, player)
 	end
 
 	local mines_text_width = 115
-	alex_c_api.draw_rect(TEXT_BACKGROUND_COLOUR,
+	alexgames.draw_rect(TEXT_BACKGROUND_COLOUR,
 	                     board_height - text_height - text_padding,
 	                     0,
 	                     board_height, mines_text_width + text_padding)
-	alex_c_api.draw_text(string.format("Mines: %3d", state.game.mines_unrevealed),
+	alexgames.draw_text(string.format("Mines: %3d", state.game.mines_unrevealed),
 	                     TEXT_COLOUR,
 	                     board_height - text_padding,
 	                     text_padding,
 	                     TEXT_FONT_SIZE,
-	                     alex_c_api.TEXT_ALIGN_LEFT)
+	                     alexgames.TEXT_ALIGN_LEFT)
 
 	if draw.draw_flag_flash then
-		alex_c_api.draw_rect('#ffffff88', 0, 0, 480, 480)
+		alexgames.draw_rect('#ffffff88', 0, 0, 480, 480)
 		draw.draw_flag_flash = false
 	end
 	draw_celebration_anim.draw(anim_state)
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 function draw.pos_to_cell_coords(state, player, pos_y, pos_x)
@@ -160,19 +160,19 @@ function draw.victory_animation(fps)
 	if g_victory_anim_timer ~= nil then
 		error(string.format("victory_animation: anim_timer is not nil"))
 	end
-	g_victory_anim_timer = alex_c_api.set_timer_update_ms(1000/fps)
+	g_victory_anim_timer = alexgames.set_timer_update_ms(1000/fps)
 	draw_celebration_anim.fireworks_display(anim_state, {
 		colour_pref = "light",
 		on_finish = function ()
 			if g_victory_anim_timer == nil then
-				alex_c_api.set_status_err("warning: g_victory_anim_timer is nil on anim complete")
+				alexgames.set_status_err("warning: g_victory_anim_timer is nil on anim complete")
 			else
-				alex_c_api.delete_timer(g_victory_anim_timer)
+				alexgames.delete_timer(g_victory_anim_timer)
 				g_victory_anim_timer = nil
 			end
 			--print("animation finished! Resuming timer")
-			--alex_c_api.set_timer_update_ms(0)
-			--alex_c_api.set_timer_update_ms(1000/60)
+			--alexgames.set_timer_update_ms(0)
+			--alexgames.set_timer_update_ms(1000/60)
 		end,
 	})
 end

@@ -1,6 +1,6 @@
 
 local draw = {}
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local touchpad   = require("libs/ui/touchpad")
 local core = require("games/thrust/thrust_core")
 
@@ -49,13 +49,13 @@ end
 local function draw_walls(state, player_state)
 	for _, wall_info in ipairs(state.walls) do
 		--[[
-		alex_c_api.draw_rect(WALL_COLOUR,
+		alexgames.draw_rect(WALL_COLOUR,
 		                     wall_info.y_start - state.y, wall_info.x_start - state.x,
 		                     wall_info.y_end   - state.y, wall_info.x_end   - state.x)
 		--]]
 		local pt1 = game_pt_to_screen_pt(state, player_state, { y = wall_info.y_start, x = wall_info.x_start})
 		local pt2 = game_pt_to_screen_pt(state, player_state, { y = wall_info.y_end,   x = wall_info.x_end})
-		alex_c_api.draw_line(WALL_COLOUR, WALL_THICKNESS,
+		alexgames.draw_line(WALL_COLOUR, WALL_THICKNESS,
 		                     pt1.y, pt1.x,
 		                     pt2.y, pt2.x)
 		                     
@@ -73,7 +73,7 @@ local function draw_walls(state, player_state)
 			colour = CHECKPOINT_WALL_COLOUR_UNMET
 			thickness = CHECKPOINT_THICKNESS_UNMET
 		end
-		alex_c_api.draw_line(colour, thickness,
+		alexgames.draw_line(colour, thickness,
 		                     pt1.y, pt1.x,
 		                     pt2.y, pt2.x)
 	end
@@ -88,7 +88,7 @@ local function draw_walls(state, player_state)
 		colour = CHECKPOINT_WALL_COLOUR_UNMET
 		thickness = CHECKPOINT_THICKNESS_UNMET
 	end
-	alex_c_api.draw_line(colour, thickness,
+	alexgames.draw_line(colour, thickness,
 	                     pt1.y, pt1.x,
 	                     pt2.y, pt2.x)
 
@@ -111,14 +111,14 @@ local function draw_ship(ship_type, state, player_state)
 
 
 	if player_state.thrust_on then
-	alex_c_api.draw_circle(THRUST_COLOUR,
+	alexgames.draw_circle(THRUST_COLOUR,
 	                       THRUST_COLOUR_OUTLINE,
 	                       math.floor(y_pos + thrust_offset*math.cos(thrust_angle)),
 	                       math.floor(x_pos - thrust_offset*math.sin(thrust_angle)),
 	                       math.floor(state.zoom*thrust_radius))
 	--[[
 	local thrust_angle = player_state.angle_degrees/180*math.pi
-	alex_c_api.draw_rect(THRUST_COLOUR,
+	alexgames.draw_rect(THRUST_COLOUR,
 		math.floor(player_state.y + thrust_offset*math.cos(thrust_angle)),
 		math.floor(player_state.x - thrust_width*math.sin(thrust_angle)),
 		math.floor(player_state.y + (thrust_offset+thrust_len)*math.cos(thrust_angle)),
@@ -126,7 +126,7 @@ local function draw_ship(ship_type, state, player_state)
 	--]]
 	end
 
-	alex_c_api.draw_graphic(ship_img_info.img_id,
+	alexgames.draw_graphic(ship_img_info.img_id,
 	                        math.floor(y_pos),
 	                        math.floor(x_pos),
 	                        math.floor(state.zoom*ship_img_info.height),
@@ -135,7 +135,7 @@ local function draw_ship(ship_type, state, player_state)
 	                        	angle_degrees = math.floor(player_state.angle_degrees),
 	                        })
 	--[[
-	alex_c_api.draw_rect('#ffffff', y - ship_img_info.height/2,
+	alexgames.draw_rect('#ffffff', y - ship_img_info.height/2,
 	                     x - ship_img_info.width/2,
 	                     y - ship_img_info.height/2 + ship_img_info.height,
 	                     x - ship_img_info.width/2 + ship_img_info.width)
@@ -146,7 +146,7 @@ end
 local function draw_stars_bg(state, player_state, star_move_fact)
 	star_move_fact = star_move_fact / state.zoom
 	for _, star in ipairs(state.stars) do
-		alex_c_api.draw_circle(STAR_COLOUR, STAR_COLOUR,
+		alexgames.draw_circle(STAR_COLOUR, STAR_COLOUR,
 		                       math.floor(star.y - player_state.y/star_move_fact), math.floor(star.x - player_state.x/star_move_fact),
 		                       1)
 	end
@@ -168,30 +168,30 @@ function draw.init()
 end
 
 function draw.draw_state(state, ui_state)
-	alex_c_api.draw_clear()
-	alex_c_api.draw_rect(BG_COLOUR, 0, 0, height, width)
+	alexgames.draw_clear()
+	alexgames.draw_rect(BG_COLOUR, 0, 0, height, width)
 	draw_stars_bg(state, state.players[1], 3)
 	draw_walls(state, state.players[1])
 	draw_ship(SHIP1, state, state.players[1])
 
-	alex_c_api.draw_text(format_time(state.players[1].lap_time_ms), TEXT_COLOUR,
+	alexgames.draw_text(format_time(state.players[1].lap_time_ms), TEXT_COLOUR,
 	                     TEXT_SIZE + TEXT_PADDING, TEXT_PADDING, TEXT_SIZE, 1)
 
 	for lap_idx, lap_time in ipairs(state.players[1].lap_times) do
 		local text = string.format('%d:%s', lap_idx, format_time(lap_time))
-		alex_c_api.draw_text(text, TEXT_COLOUR,
+		alexgames.draw_text(text, TEXT_COLOUR,
 		                     lap_idx*(TEXT_SIZE + TEXT_PADDING),
 		                     width - TEXT_PADDING,
 		                     TEXT_SIZE, -1)
 	end
 
-	alex_c_api.draw_graphic("hospital_ui_dirpad",
+	alexgames.draw_graphic("hospital_ui_dirpad",
 	                        ui_state.touchpad.pos.y,
 	                        ui_state.touchpad.pos.x,
 	                        2*ui_state.touchpad.radius,
 	                        2*ui_state.touchpad.radius)
 
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 function draw.handle_touch_evts(ui_state, evt_id, touches)

@@ -105,7 +105,7 @@
 			start_game(gfx.ptr);
 		}
 
-		draw_board(gfx.ptr, 0);
+		update(gfx.ptr, 0);
 	}
 
 
@@ -159,7 +159,7 @@
 		// If right clicks aren't enabled, assume the mouse down event is for the primary mouse button.
 		// Note that on iOS, when using my finger, evt.buttons seems to be 0, so no mouse events would work.
 		if (!gfx.mouse_alt_evt_enabled) {
-			evts.push(2); // alex_c_api.MOUSE_EVT_DOWN
+			evts.push(2); // alexgames.MOUSE_EVT_DOWN
 		} else {
 			const prev_mouse_btns_down = gfx.mouse_btns_down;
 			let diff = prev_mouse_btns_down ^ evt.buttons;
@@ -178,13 +178,13 @@
 			// I guess it could do that, but it would be a mess.
 	
 			if ((diff & BITMASK_MOUSE_BTN_1) > 0) {
-				evts.push(2); // alex_c_api.MOUSE_EVT_DOWN
+				evts.push(2); // alexgames.MOUSE_EVT_DOWN
 			}
 			if ((diff & BITMASK_MOUSE_BTN_2) > 0) {
-				evts.push(4); // alex_c_api.MOUSE_EVT_ALT_DOWN
+				evts.push(4); // alexgames.MOUSE_EVT_ALT_DOWN
 			}
 			if ((diff & BITMASK_MOUSE_BTN_3) > 0) {
-				evts.push(6); // alex_c_api.MOUSE_EVT_ALT2_DOWN
+				evts.push(6); // alexgames.MOUSE_EVT_ALT2_DOWN
 			}
 		}
 
@@ -217,20 +217,20 @@
 		let evts = [];
 
 		if (!gfx.mouse_alt_evt_enabled) {
-			evts.push(1); // alex_c_api.MOUSE_EVT_UP
+			evts.push(1); // alexgames.MOUSE_EVT_UP
 		} else {
 			const prev_mouse_btns_down = gfx.mouse_btns_down;
 			let diff = prev_mouse_btns_down ^ evt.buttons;
 			gfx.mouse_btns_down = evt.buttons;
 
 			if ((diff & BITMASK_MOUSE_BTN_1) > 0) {
-				evts.push(1); // alex_c_api.MOUSE_EVT_UP
+				evts.push(1); // alexgames.MOUSE_EVT_UP
 			}
 			if ((diff & BITMASK_MOUSE_BTN_2) > 0) {
-				evts.push(5); // alex_c_api.MOUSE_EVT_ALT_UP
+				evts.push(5); // alexgames.MOUSE_EVT_ALT_UP
 			}
 			if ((diff & BITMASK_MOUSE_BTN_3) > 0) {
-				evts.push(7); // alex_c_api.MOUSE_EVT_ALT2_UP
+				evts.push(7); // alexgames.MOUSE_EVT_ALT2_UP
 			}
 		}
 

@@ -6,7 +6,7 @@ local buttons = require("libs/ui/buttons")
 
 local core = require("games/poker_chips/poker_chips_core")
 
-local alex_c_api  = require("alex_c_api")
+local alexgames  = require("alexgames")
 
 
 local g_ui_params = nil
@@ -220,10 +220,10 @@ function bet_input.init(ui_params, bet_input_params)
 		local bet_val_str = string.format("$%s", numpad_val)
 		local text_size = 18
 		local text_y_start = math.floor(ADJUST_BUTTON_Y_START + ADJUST_BUTTON_HEIGHT/2 + text_size/2)
-		alex_c_api.draw_text(bet_val_str, '#000000', text_y_start, CENTRE_MONEY_INDICATOR_X_MIDDLE, text_size, 0)
-		alex_c_api.draw_text(string.format("Your chips: $%d", bet_input_state.chips), '#000000',
+		alexgames.draw_text(bet_val_str, '#000000', text_y_start, CENTRE_MONEY_INDICATOR_X_MIDDLE, text_size, 0)
+		alexgames.draw_text(string.format("Your chips: $%d", bet_input_state.chips), '#000000',
 		                     g_ui_params.margin + text_size, g_ui_params.margin + BACK_BUTTON_WIDTH + g_ui_params.padding, text_size, 1)
-		alex_c_api.draw_text(string.format("Pot: %s", core.get_pot_string(bet_input_state.pots)), '#000000',
+		alexgames.draw_text(string.format("Pot: %s", core.get_pot_string(bet_input_state.pots)), '#000000',
 		                     g_ui_params.margin + text_size, g_ui_params.board_width - g_ui_params.margin, text_size, -1)
 	end
 	bet_input_state.handle_user_clicked = function(bet_input_state, y_pos, x_pos)

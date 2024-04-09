@@ -4,7 +4,7 @@ local core = require("games/endless_runner/endless_runner_core")
 
 local buttons = require("libs/ui/buttons")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local PLAYER_FILL_COLOUR = '#ff0000'
 local PLAYER_OUTLINE_COLOUR = '#000000'
@@ -56,16 +56,16 @@ local function game_pos_to_screen_pos(state, pt)
 	return screen_pt
 end
 
-function draw.draw_board(state, dt_ms)
-	alex_c_api.draw_clear()
+function draw.update(state, dt_ms)
+	alexgames.draw_clear()
 
 	for _, wall in ipairs(state.walls) do
 		local pt1 = game_pos_to_screen_pos(state, { y = wall.y_outer, x = wall.x - core.WALL_SIZE_X/2 })
 		local pt2 = game_pos_to_screen_pos(state, { y = wall.y_inner, x = wall.x + core.WALL_SIZE_X/2 })
-		--alex_c_api.draw_line(WALL_COLOUR, WALL_THICKNESS,
+		--alexgames.draw_line(WALL_COLOUR, WALL_THICKNESS,
 		--                     pt1.y, pt1.x,
 		 --                    pt2.y, pt2.x)
-		alex_c_api.draw_rect(WALL_COLOUR,
+		alexgames.draw_rect(WALL_COLOUR,
 		                     pt1.y, pt1.x,
 		                     pt2.y, pt2.x)
 	end
@@ -74,23 +74,23 @@ function draw.draw_board(state, dt_ms)
 	local player_lr = { y = state.player_y - core.PLAYER_SIZE_Y/2, x = state.player_x + core.PLAYER_SIZE_X/2 }
 	player_ul = game_pos_to_screen_pos(state, player_ul)
 	player_lr = game_pos_to_screen_pos(state, player_lr)
-	--alex_c_api.draw_circle(PLAYER_FILL_COLOUR, PLAYER_OUTLINE_COLOUR,
+	--alexgames.draw_circle(PLAYER_FILL_COLOUR, PLAYER_OUTLINE_COLOUR,
 	--                       player_pos.y, player_pos.x, PLAYER_RADIUS)
-	alex_c_api.draw_rect(PLAYER_FILL_COLOUR,
+	alexgames.draw_rect(PLAYER_FILL_COLOUR,
 	                     player_ul.y, player_ul.x,
 	                     player_lr.y, player_lr.x)
 
 	local score_text = string.format("%d", core.score(state))
-	alex_c_api.draw_text(score_text, '#880000',
+	alexgames.draw_text(score_text, '#880000',
 	                     SCORE_TEXT_SIZE + padding,
 	                     board_width/2,
-	                     SCORE_TEXT_SIZE, alex_c_api.TEXT_ALIGN_CENTRE)
+	                     SCORE_TEXT_SIZE, alexgames.TEXT_ALIGN_CENTRE)
 
 	buttons.set_visible(buttons_state, BTN_ID_NEW_GAME, state.game_over)
 
 	buttons.draw(buttons_state)
 
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 

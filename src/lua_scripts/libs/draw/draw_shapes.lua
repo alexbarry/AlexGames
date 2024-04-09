@@ -1,12 +1,12 @@
 
 local draw_shapes = {}
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 function draw_shapes.draw_rect_outline(colour, line_width, y1, x1, y2, x2)
-	alex_c_api.draw_line(colour, line_width, y1, x1, y1, x2)
-	alex_c_api.draw_line(colour, line_width, y1, x1, y2, x1)
-	alex_c_api.draw_line(colour, line_width, y2, x2, y1, x2)
-	alex_c_api.draw_line(colour, line_width, y2, x2, y2, x1)
+	alexgames.draw_line(colour, line_width, y1, x1, y1, x2)
+	alexgames.draw_line(colour, line_width, y1, x1, y2, x1)
+	alexgames.draw_line(colour, line_width, y2, x2, y1, x2)
+	alexgames.draw_line(colour, line_width, y2, x2, y2, x1)
 end
 
 function draw_shapes.draw_triangle_lr(line_colour, line_width, bg_colour, pointing_left, y1, x1, y2, x2)
@@ -25,13 +25,13 @@ function draw_shapes.draw_triangle_lr(line_colour, line_width, bg_colour, pointi
 	if bg_colour ~= nil then
 		-- TODO this file was written before I added a "fill_triangle" API.
 		-- obviously it should use that instead
-		alex_c_api.draw_rect(bg_colour, y1, x1, y2, x2)
+		alexgames.draw_rect(bg_colour, y1, x1, y2, x2)
 	end
 
 	if line_colour ~= nil then
-		alex_c_api.draw_line(line_colour, line_width, pt1.y, pt1.x, pt2.y, pt2.x)
-		alex_c_api.draw_line(line_colour, line_width, pt2.y, pt2.x, pt3.y, pt3.x)
-		alex_c_api.draw_line(line_colour, line_width, pt3.y, pt3.x, pt1.y, pt1.x)
+		alexgames.draw_line(line_colour, line_width, pt1.y, pt1.x, pt2.y, pt2.x)
+		alexgames.draw_line(line_colour, line_width, pt2.y, pt2.x, pt3.y, pt3.x)
+		alexgames.draw_line(line_colour, line_width, pt3.y, pt3.x, pt1.y, pt1.x)
 	end
 end
 
@@ -39,9 +39,9 @@ function draw_shapes.draw_triangle_outline(line_colour, line_width,
                                            y1, x1,
                                            y2, x2,
                                            y3, x3)
-	alex_c_api.draw_line(line_colour, line_width, y1, x1, y2, x2)
-	alex_c_api.draw_line(line_colour, line_width, y2, x2, y3, x3)
-	alex_c_api.draw_line(line_colour, line_width, y3, x3, y1, x1)
+	alexgames.draw_line(line_colour, line_width, y1, x1, y2, x2)
+	alexgames.draw_line(line_colour, line_width, y2, x2, y3, x3)
+	alexgames.draw_line(line_colour, line_width, y3, x3, y1, x1)
 end
 
 return draw_shapes

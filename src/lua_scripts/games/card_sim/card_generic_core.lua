@@ -1,4 +1,4 @@
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local cards = require("libs/cards/cards")
 
 local core = {}

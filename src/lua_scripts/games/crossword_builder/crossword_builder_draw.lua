@@ -1,6 +1,6 @@
 local draw = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local core = require("games/crossword_builder/crossword_builder_core")
 
@@ -109,9 +109,9 @@ function draw.init(game_state)
 		tile_params = get_board_piece_params(),
 	})
 
-	alex_c_api.create_btn(BTN_ID_SUBMIT, "Submit", 1)
+	alexgames.create_btn(BTN_ID_SUBMIT, "Submit", 1)
 	print("hello world")
-	alex_c_api.set_btn_enabled(BTN_ID_SUBMIT, false)
+	alexgames.set_btn_enabled(BTN_ID_SUBMIT, false)
 
 	--draw_state.tiles.grids[1].tiles[2][1] = "F"
 	--draw_state.tiles.grids[1].tiles[2][2] = "A"
@@ -123,7 +123,7 @@ end
 
 
 function draw.draw(draw_state)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
 	local params = get_large_piece_params()
 
@@ -139,8 +139,8 @@ function draw.draw(draw_state)
 --]]
 
 
-	alex_c_api.set_btn_enabled(BTN_ID_SUBMIT, #draw_state.tiles.placed_tiles > 0)
-	alex_c_api.draw_refresh()
+	alexgames.set_btn_enabled(BTN_ID_SUBMIT, #draw_state.tiles.placed_tiles > 0)
+	alexgames.draw_refresh()
 
 end
 

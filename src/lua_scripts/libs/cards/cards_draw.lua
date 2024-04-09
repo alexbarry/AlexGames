@@ -1,9 +1,9 @@
 local cards = require("libs/cards/cards")
 local draw_more = require("libs/draw/draw_more")
 local draw_shapes = require("libs/draw/draw_shapes")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
--- TODO make definitions of this in alex_c_api
+-- TODO make definitions of this in alexgames
 local ALIGN_CENTRE = 0
 local ALIGN_LEFT = 1
 
@@ -19,9 +19,9 @@ function cards_draw.draw_facedown_card(y, x, width, height, higlight, angle, bri
 	brightness_percent = nil -- overriding this because I am drawing the DARK_OVERLAY over the card
 	draw_more.draw_graphic_ul("card_facedown", y, x, width, height, { angle_degrees = angle, brightness_percent = brightness_percent })
 
-	if alex_c_api.get_user_colour_pref() == "dark" then
+	if alexgames.get_user_colour_pref() == "dark" then
 		local pts = draw_more.get_rotated_pts_ul(y, x, width, height, angle)
-		alex_c_api.draw_rect(DARK_OVERLAY_COLOUR_CARD_BACK,
+		alexgames.draw_rect(DARK_OVERLAY_COLOUR_CARD_BACK,
 		                     pts.y, pts.x,
 		                     pts.y + pts.height, pts.x + pts.width)
 	end
@@ -61,10 +61,10 @@ function cards_draw.draw_card(card, y, x, width, height, font_size, highlight, a
 	-- doesn't support it.
 	-- So I will comment this out for now and just draw a transparent grey
 	-- rectangle over all the cards
-	-- Checking alex_c_api.is_feature_supported() here would be nice,
+	-- Checking alexgames.is_feature_supported() here would be nice,
 	-- but I wasn't sure how to check if these features are supported
 	-- (or even if the user is using safari or not)
-	if false and alex_c_api.get_user_colour_pref() == "dark" then
+	if false and alexgames.get_user_colour_pref() == "dark" then
 		blank_card_colour = '#444444'
 		suit_colour_red   = "#AA0000"
 		suit_colour_black = "#000000"
@@ -158,7 +158,7 @@ function cards_draw.draw_card(card, y, x, width, height, font_size, highlight, a
 	if angle ~= nil and angle ~= 0 then
 		draw_more.draw_graphic_ul("card_blank", y, x, width, height, { angle_degrees = angle });
 	else
-		alex_c_api.draw_rect(blank_card_colour, y, x, y + height, x + width)
+		alexgames.draw_rect(blank_card_colour, y, x, y + height, x + width)
 		draw_shapes.draw_rect_outline(card_outline, card_outline_thickness, y, x, y + height, x + width)
 	end
 
@@ -173,7 +173,7 @@ function cards_draw.draw_card(card, y, x, width, height, font_size, highlight, a
 		                        math.floor(width/2) - small_padding,
 		                        math.floor(1.2*width/2) - small_padding,
 		                        { angle_degrees = angle , brightness_percent = brightness_percent_suit_icon})
-		alex_c_api.draw_text(cards.val_to_string(card.val), suits_to_text_colour[card.suit],
+		alexgames.draw_text(cards.val_to_string(card.val), suits_to_text_colour[card.suit],
 		                     text_icon_little_y, text_icon_little_x,
 		                     font_size_small, ALIGN_LEFT, angle)
 	else
@@ -182,11 +182,11 @@ function cards_draw.draw_card(card, y, x, width, height, font_size, highlight, a
 		                        suit_icon_big_width, suit_icon_big_height,
 		                        { angle_degrees = angle, brightness_percent = brightness_percent_suit_icon})
 	end
-	alex_c_api.draw_text(cards.val_to_string(card.val), suits_to_text_colour[card.suit],
+	alexgames.draw_text(cards.val_to_string(card.val), suits_to_text_colour[card.suit],
 	                     text_icon_big_y, text_icon_big_x, font_size, ALIGN_CENTRE, angle)
 
-	if alex_c_api.get_user_colour_pref() == "dark" then
-		alex_c_api.draw_rect(DARK_OVERLAY_COLOUR_CARD_FACE,
+	if alexgames.get_user_colour_pref() == "dark" then
+		alexgames.draw_rect(DARK_OVERLAY_COLOUR_CARD_FACE,
 		                     y, x,
 		                     y + height, x + width)
 	end

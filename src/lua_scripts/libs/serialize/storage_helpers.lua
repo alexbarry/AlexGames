@@ -2,7 +2,7 @@ local storage_helpers = {}
 
 local utils = require("libs/utils")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 function storage_helpers.store_bool(key, val)
 	if type(val) ~= 'boolean' then
@@ -11,11 +11,11 @@ function storage_helpers.store_bool(key, val)
 
 	data = { utils.boolean_to_number(val) }
 
-	alex_c_api.store_data(key, data)
+	alexgames.store_data(key, data)
 end
 
 function storage_helpers.read_bool(key, default_val)
-	local data = alex_c_api.read_stored_data(key)
+	local data = alexgames.read_stored_data(key)
 
 	if data == nil then
 		return default_val

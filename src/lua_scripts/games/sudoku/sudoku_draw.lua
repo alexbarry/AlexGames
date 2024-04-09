@@ -18,7 +18,7 @@ local BOX_LINE_THICKNESS = 4
 
 local core       = require("games/sudoku/sudoku_core")
 local draw_shapes = require("libs/draw/draw_shapes")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local board_height = nil
 local board_width  = nil
@@ -42,7 +42,7 @@ local function draw_num_choices()
 		table.insert(choices, string.format("%d", num))
 	end
 	for choice_idx, choice_val in ipairs(choices) do
-		alex_c_api.draw_text(choice_val, TEXT_COLOUR,
+		alexgames.draw_text(choice_val, TEXT_COLOUR,
 		                     math.floor(num_choice_y_offset + TEXT_SIZE/2),
 		                     num_choice_x_offset + math.floor((choice_idx-0.5)*cell_size),
 		                     TEXT_SIZE, 0)
@@ -50,7 +50,7 @@ local function draw_num_choices()
 end
 
 function draw.draw_state(state, ui_state)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 	for y, row in ipairs(state.board) do
 		for x, cell in ipairs(row) do
 			draw_shapes.draw_rect_outline(OUTLINE_COLOUR, CELL_LINE_THICKNESS,
@@ -65,12 +65,12 @@ function draw.draw_state(state, ui_state)
 				cell_bg = SELECTED_BG_COLOUR
 			end
 			if cell_bg ~= nil then
-				alex_c_api.draw_rect(cell_bg,
+				alexgames.draw_rect(cell_bg,
 				                     (y-1)*cell_size, x_offset + (x-1)*cell_size,
 				                     y*cell_size,     x_offset +  x*cell_size)
 			end
 			if cell.val ~= 0 then
-				alex_c_api.draw_text(string.format("%d", cell.val), TEXT_COLOUR,
+				alexgames.draw_text(string.format("%d", cell.val), TEXT_COLOUR,
 				                     math.floor((y-0.5)*cell_size + TEXT_SIZE/2),
 				                     math.floor((x-0.5)*cell_size) + x_offset, 
 				                     TEXT_SIZE, 0)
@@ -79,12 +79,12 @@ function draw.draw_state(state, ui_state)
 	end
 
 	for y=1,core.BOX_SIZE-1 do
-		alex_c_api.draw_line(OUTLINE_COLOUR, BOX_LINE_THICKNESS,
+		alexgames.draw_line(OUTLINE_COLOUR, BOX_LINE_THICKNESS,
 		                     y*core.BOX_SIZE*cell_size, x_offset + 0,
 		                     y*core.BOX_SIZE*cell_size, x_offset + core.GAME_SIZE*cell_size)
 	end
 	for x=1,core.BOX_SIZE-1 do
-		alex_c_api.draw_line(OUTLINE_COLOUR, BOX_LINE_THICKNESS,
+		alexgames.draw_line(OUTLINE_COLOUR, BOX_LINE_THICKNESS,
 		                     0,                        x_offset + x*core.BOX_SIZE*cell_size,
 		                     core.GAME_SIZE*cell_size, x_offset + x*core.BOX_SIZE*cell_size)
 	end
@@ -92,7 +92,7 @@ function draw.draw_state(state, ui_state)
 	if ui_state.selected ~= nil then
 		draw_num_choices()
 	end
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 function draw.get_cell_coords(pos_y, pos_x)

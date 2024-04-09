@@ -6,8 +6,8 @@
 --       should automatically add word to "found words" if it was revealed with hints.
 --       Make sure to check for the win condition in that case, too.
 --
-local alex_c_api  = require("alex_c_api")
-local alex_dict   = require("alex_c_api.dict")
+local alexgames  = require("alexgames")
+local alex_dict   = require("alexgames.dict")
 
 local core    = require("games/crossword_letters/crossword_letters_core")
 local draw    = require("games/crossword_letters/crossword_letters_draw")
@@ -50,7 +50,7 @@ local function get_saved_state_key(puzzle_id)
 	return string.format("crossword_letters_state_%04d", puzzle_id)
 end
 
-function draw_board()
+function update()
 	draw.draw_state(state.ui_state, state.game_state)
 	update_saved_state()
 end
@@ -58,8 +58,8 @@ end
 function update_saved_state()
 	if state.game_state == nil then return end
 	local serialized_state = serialize.serialize_state(state.game_state)
-	alex_c_api.store_data(PUZZLE_IDX_KEY, tostring(state.game_state.puzzle_id))
-	alex_c_api.store_data(get_saved_state_key(state.game_state.puzzle_id), serialized_state)
+	alexgames.store_data(PUZZLE_IDX_KEY, tostring(state.game_state.puzzle_id))
+	alexgames.store_data(get_saved_state_key(state.game_state.puzzle_id), serialized_state)
 end
 
 local function str_list_to_str(str_list)
@@ -89,7 +89,7 @@ local function new_puzzle(puzzle_id)
 	state.game_state = core.new_game_from_pregen_puzzle(puzzle_id, puzzles.puzzles[puzzle_id], params)
 	draw.draw_state(state.ui_state, state.game_state)
 	local letters_list_str = str_list_to_str(state.game_state.letters)
-	alex_c_api.set_status_msg(string.format("Starting new game with letters: %s", letters_list_str))
+	alexgames.set_status_msg(string.format("Starting new game with letters: %s", letters_list_str))
 	--update_saved_state()
 end
 
@@ -113,7 +113,7 @@ local function find_puzzle_id(puzzles, game_state)
 end
 
 local function switch_puzzle(puzzle_id)
-	local serialized_state = alex_c_api.read_stored_data(get_saved_state_key(puzzle_id))
+	local serialized_state = alexgames.read_stored_data(get_saved_state_key(puzzle_id))
 
 	if serialized_state == nil then
 		new_puzzle(puzzle_id)
@@ -134,14 +134,14 @@ function get_state()
 end
 
 function start_game(session_idx, serialized_state)
-	local puzzle_idx_serialized = alex_c_api.read_stored_data(PUZZLE_IDX_KEY)
+	local puzzle_idx_serialized = alexgames.read_stored_data(PUZZLE_IDX_KEY)
 
 	if serialized_state ~= nil then
 		state.game_state = serialize.deserialize_state(serialized_state)
 	elseif puzzle_idx_serialized == nil then
 
 		-- TODO BEFORE PUBLISHING remove
-		serialized_state = alex_c_api.read_stored_data(OLD_SAVED_STATE_KEY)
+		serialized_state = alexgames.read_stored_data(OLD_SAVED_STATE_KEY)
 
 		-- legacy state, TODO BEFORE PUBLISHING remove
 		if serialized_state ~= nil then
@@ -153,7 +153,7 @@ function start_game(session_idx, serialized_state)
 			end
 	
 			if state.game_state.puzzle_id ~= nil then
-				alex_c_api.store_data(get_saved_state_key(state.game_state.puzzle_id), serialized_state)
+				alexgames.store_data(get_saved_state_key(state.game_state.puzzle_id), serialized_state)
 			end
 		-- no previous state
 		else
@@ -165,12 +165,12 @@ function start_game(session_idx, serialized_state)
 		switch_puzzle(puzzle_id)
 	end
 
-	alex_c_api.set_status_msg("Come up with as many words as you can, using the provided letters. " ..
+	alexgames.set_status_msg("Come up with as many words as you can, using the provided letters. " ..
 	                          "They should fit into the crossword. If you get stuck, press the " ..
 	                          "\"hint\" button to reveal a letter.")
-	alex_c_api.enable_evt("key")
+	alexgames.enable_evt("key")
 
-	alex_c_api.add_game_option(GAME_OPTION_RESET_PUZZLE, { label = "Reset puzzle", type = alex_c_api.OPTION_TYPE_BTN })
+	alexgames.add_game_option(GAME_OPTION_RESET_PUZZLE, { label = "Reset puzzle", type = alexgames.OPTION_TYPE_BTN })
 end
 
 function handle_game_option_evt(option_id)
@@ -198,15 +198,15 @@ local function handle_submit()
 	local rc = core.word_input(state.game_state, word)
 	if rc == core.RC_SUCCESS then
 		local msg = string.format("Revealed word \"%s\" in puzzle.", string.lower(word))
-		alex_c_api.set_status_msg(msg)
+		alexgames.set_status_msg(msg)
 		if state.game_state.finished then
 			local hint_status_str = get_hint_status_str(state.game_state)
-			alex_c_api.set_status_msg(string.format("Congratulations! You win, with %s. Press the '>' button at the top right to switch to the next puzzle.", hint_status_str))
+			alexgames.set_status_msg(string.format("Congratulations! You win, with %s. Press the '>' button at the top right to switch to the next puzzle.", hint_status_str))
 			draw.player_won(state.ui_state)
 		end
 	else
 		local msg = string.format("Word \"%s\": %s", string.lower(word), core.rc_to_msg(rc))
-		alex_c_api.set_status_err(msg)
+		alexgames.set_status_err(msg)
 	end
 	draw.clear_input(state.ui_state)
 	draw.draw_state(state.ui_state, state.game_state)
@@ -232,7 +232,7 @@ function handle_key_evt(evt_id, key_code)
 			local rc = draw.input_letter(state.ui_state, state.game_state, letter)
 			if rc ~= core.RC_SUCCESS then
 				local msg = string.format("Letter \"%s\": %s", letter, core.rc_to_msg(rc))
-				alex_c_api.set_status_err(msg)
+				alexgames.set_status_err(msg)
 			end
 			draw.draw_state(state.ui_state, state.game_state)
 		end
@@ -256,10 +256,10 @@ function handle_popup_btn_clicked(popup_id, btn_id)
 	print(string.format("handle_popup_btn_clicked(popup_id=%s, btn_id=%s)", popup_id, btn_id))
 	if popup_id == POPUP_ID_RESET_PUZZLE_CONFIRM then
 		if btn_id == 0 then
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 			-- do nothing
 		elseif btn_id == 1 then
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 			new_puzzle(state.game_state.puzzle_id)
 		end
 	end

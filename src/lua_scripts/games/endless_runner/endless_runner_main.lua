@@ -1,17 +1,17 @@
 local core = require("games/endless_runner/endless_runner_core")
 local draw = require("games/endless_runner/endless_runner_draw")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local FPS = 60
 
 local g_state = nil
 
-function draw_board(dt_ms)
+function update(dt_ms)
 	if dt_ms and dt_ms > 0 then
 		core.update_state(g_state, dt_ms)
 	end
-	draw.draw_board(g_state)
+	draw.update(g_state)
 end
 
 local jump_keys = {
@@ -38,7 +38,7 @@ function handle_key_evt(key_evt, key_id)
 end
 
 function handle_mouse_evt(evt_id, pos_y, pos_x)
-	if evt_id == alex_c_api.MOUSE_EVT_DOWN then
+	if evt_id == alexgames.MOUSE_EVT_DOWN then
 		core.jump(g_state, core.JUMP_TYPE_KEY)
 		if draw.in_new_game_btn(state, pos_y, pos_x) then
 			new_game()
@@ -62,8 +62,8 @@ end
 function start_game(session_id_arg, serialized_state_arg)
 	new_game()
 
-	alex_c_api.set_timer_update_ms(1000/FPS)
-	alex_c_api.enable_evt("key")
-	alex_c_api.enable_evt("mouse_updown")
-	alex_c_api.enable_evt("touch")
+	alexgames.set_timer_update_ms(1000/FPS)
+	alexgames.enable_evt("key")
+	alexgames.enable_evt("mouse_updown")
+	alexgames.enable_evt("touch")
 end

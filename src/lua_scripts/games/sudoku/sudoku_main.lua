@@ -5,7 +5,7 @@ local draw = require("games/sudoku/sudoku_draw")
 local ui_state = draw.init(480, 480)
 local state = core.new_game()
 
-function draw_board()
+function update()
 	draw.draw_state(state, ui_state)
 end
 
@@ -23,7 +23,7 @@ function handle_user_clicked(pos_y, pos_x)
 		core.user_enter(state, ui_state.selected.y, ui_state.selected.x, num_choice)
 	end
 
-	draw_board()
+	update()
 	
 end
 

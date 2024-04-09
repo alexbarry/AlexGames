@@ -1,7 +1,7 @@
 local go_ui = {}
 local go    = require("games/go/go_core")
 local draw_more = require("libs/draw/draw_more")
-local alex_c_api = require("alex_c_api");
+local alexgames = require("alexgames");
 
 local board_line_size = 2
 
@@ -16,8 +16,8 @@ go_ui.BTN_ID_REDO = "redo"
 go_ui.BTN_ID_PASS = "pass"
 
 local function update_undo_redo_btns(session_id)
-	alex_c_api.set_btn_enabled(go_ui.BTN_ID_UNDO, alex_c_api.has_saved_state_offset(session_id, -1))
-	alex_c_api.set_btn_enabled(go_ui.BTN_ID_REDO, alex_c_api.has_saved_state_offset(session_id,  1))
+	alexgames.set_btn_enabled(go_ui.BTN_ID_UNDO, alexgames.has_saved_state_offset(session_id, -1))
+	alexgames.set_btn_enabled(go_ui.BTN_ID_REDO, alexgames.has_saved_state_offset(session_id,  1))
 end
 
 function go_ui.get_board_piece_size()
@@ -35,18 +35,18 @@ function go_ui.init_ui(session_id, board_piece_size_arg, screen_width, screen_he
 	width  = screen_width
 	go_ui.set_board_piece_size(board_piece_size_arg)
 
-	alex_c_api.create_btn(go_ui.BTN_ID_UNDO, "Undo", 1)
-	alex_c_api.create_btn(go_ui.BTN_ID_REDO, "Redo", 1)
-	alex_c_api.create_btn(go_ui.BTN_ID_PASS, "Pass", 2)
-	alex_c_api.set_btn_enabled(go_ui.BTN_ID_UNDO, false)
-	alex_c_api.set_btn_enabled(go_ui.BTN_ID_REDO, false)
+	alexgames.create_btn(go_ui.BTN_ID_UNDO, "Undo", 1)
+	alexgames.create_btn(go_ui.BTN_ID_REDO, "Redo", 1)
+	alexgames.create_btn(go_ui.BTN_ID_PASS, "Pass", 2)
+	alexgames.set_btn_enabled(go_ui.BTN_ID_UNDO, false)
+	alexgames.set_btn_enabled(go_ui.BTN_ID_REDO, false)
 
 	update_undo_redo_btns(session_id)
 end
 
-function go_ui.draw_board(session_id, board, last_y, last_x)
+function go_ui.update(session_id, board, last_y, last_x)
 
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
 	draw_more.draw_graphic_ul("board", 0, 0, board_size, board_size)
 
@@ -58,7 +58,7 @@ function go_ui.draw_board(session_id, board, last_y, last_x)
 		local y2 = board_size - piece_space_size
 		local x1 = piece_space_size*(i+1)
 		local x2 = x1
-		alex_c_api.draw_line("#000000", board_line_size, y1, x1, y2, x2)
+		alexgames.draw_line("#000000", board_line_size, y1, x1, y2, x2)
 	end
 
 	for i=0, board_piece_size-1 do
@@ -66,7 +66,7 @@ function go_ui.draw_board(session_id, board, last_y, last_x)
 		local x2 = board_size - piece_space_size
 		local y1 = piece_space_size*(i+1)
 		local y2 = y1
-		alex_c_api.draw_line("#000000", board_line_size, y1, x1, y2, x2)
+		alexgames.draw_line("#000000", board_line_size, y1, x1, y2, x2)
 	end
 
 	for y_idx=0, board_piece_size-1 do
@@ -75,7 +75,7 @@ function go_ui.draw_board(session_id, board, last_y, last_x)
 			local x_pos = piece_space_size/2 + x_idx * piece_space_size
 			local img_id = nil
 			if y_idx > #board or x_idx > #board[1] then
-				error(string.format("draw_board: {y=%d, x=%d} out of range of board size {y=%d,x=%d}", y_idx+1, x_idx+1, #board, #board[1]))
+				error(string.format("update: {y=%d, x=%d} out of range of board size {y=%d,x=%d}", y_idx+1, x_idx+1, #board, #board[1]))
 			end
 			local piece_type = board[y_idx+1][x_idx+1]
 			-- TODO replace 1 and 2 with go.PLAYER1 and go.PLAYER2
@@ -95,7 +95,7 @@ function go_ui.draw_board(session_id, board, last_y, last_x)
 		end
 	end
 
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 	update_undo_redo_btns(session_id)
 end
 

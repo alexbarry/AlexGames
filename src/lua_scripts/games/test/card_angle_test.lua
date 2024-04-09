@@ -2,7 +2,7 @@
 local cards      = require("libs/cards/cards") 
 local cards_draw = require("libs/cards/cards_draw")
 local draw_more  = require("libs/draw/draw_more")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local padding = 50
 local card_height = 100
@@ -24,9 +24,9 @@ cards.shuffle(deck)
 local angle_offset = 0
 local cards_face_down = true
 
-function draw_board()
-	alex_c_api.set_status_msg(string.format("Drawing cards with angle offset = %d", angle_offset))
-	alex_c_api.draw_clear()
+function update()
+	alexgames.set_status_msg(string.format("Drawing cards with angle offset = %d", angle_offset))
+	alexgames.draw_clear()
 
 	if not cards_face_down then
 		cards_draw.draw_card(deck[1], pos_y + padding, pos_x,
@@ -44,7 +44,7 @@ function draw_board()
 		cards_draw.draw_card(deck[4],  pos_y, pos_x + padding,
 			card_width, card_height,
 			card_font_size, false, 270 + angle_offset)
-			alex_c_api.draw_refresh()
+			alexgames.draw_refresh()
 	else
 
 		draw_more.draw_graphic_ul("card_facedown", 0, 0, card_width, card_height, { angle_degrees =   0 + angle_offset })
@@ -54,14 +54,14 @@ function draw_board()
 		draw_more.draw_graphic_ul("card_facedown", pos_y - padding, pos_x - padding, card_width, card_height, { angle_degrees = 180 + angle_offset })
 		draw_more.draw_graphic_ul("card_facedown", pos_y - padding, pos_x + padding, card_width, card_height, { angle_degrees = 270 + angle_offset })
 	
-		alex_c_api.draw_circle('#ff0000', '#ff000055', pos_y + padding, pos_x + padding, 5)
-		alex_c_api.draw_text('1', '#000000',           pos_y + padding, pos_x + padding, 12, 0)
-		alex_c_api.draw_circle('#ff0000', '#ff000055', pos_y + padding, pos_x - padding, 5)
-		alex_c_api.draw_text('2', '#000000',           pos_y + padding, pos_x - padding, 12, 0)
-		alex_c_api.draw_circle('#ff0000', '#ff000055', pos_y - padding, pos_x - padding, 5)
-		alex_c_api.draw_text('3', '#000000',           pos_y - padding, pos_x - padding, 12, 0)
-		alex_c_api.draw_circle('#ff0000', '#ff000055', pos_y - padding, pos_x + padding, 5)
-		alex_c_api.draw_text('4', '#000000',           pos_y - padding, pos_x + padding, 12, 0)
+		alexgames.draw_circle('#ff0000', '#ff000055', pos_y + padding, pos_x + padding, 5)
+		alexgames.draw_text('1', '#000000',           pos_y + padding, pos_x + padding, 12, 0)
+		alexgames.draw_circle('#ff0000', '#ff000055', pos_y + padding, pos_x - padding, 5)
+		alexgames.draw_text('2', '#000000',           pos_y + padding, pos_x - padding, 12, 0)
+		alexgames.draw_circle('#ff0000', '#ff000055', pos_y - padding, pos_x - padding, 5)
+		alexgames.draw_text('3', '#000000',           pos_y - padding, pos_x - padding, 12, 0)
+		alexgames.draw_circle('#ff0000', '#ff000055', pos_y - padding, pos_x + padding, 5)
+		alexgames.draw_text('4', '#000000',           pos_y - padding, pos_x + padding, 12, 0)
 	end
 end
 
@@ -73,9 +73,9 @@ function handle_btn_clicked(btn_id)
 	elseif btn_id == BTN_ID_TOGGLE_FACE_DN_UP then
 		cards_face_down = not cards_face_down
 	end
-	draw_board()
+	update()
 end
 
-alex_c_api.create_btn(BTN_ID_INC_ANGLE, "Increment Angle", 1)
-alex_c_api.create_btn(BTN_ID_DEC_ANGLE, "Decrement Angle", 1)
-alex_c_api.create_btn(BTN_ID_TOGGLE_FACE_DN_UP, "Toggle face dn/up", 1)
+alexgames.create_btn(BTN_ID_INC_ANGLE, "Increment Angle", 1)
+alexgames.create_btn(BTN_ID_DEC_ANGLE, "Decrement Angle", 1)
+alexgames.create_btn(BTN_ID_TOGGLE_FACE_DN_UP, "Toggle face dn/up", 1)

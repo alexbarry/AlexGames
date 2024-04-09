@@ -1,6 +1,6 @@
 local words_lib = {}
 
-local alex_dict  = require("alex_c_api.dict")
+local alex_dict  = require("alexgames.dict")
 
 words_lib.FUN_WORD_FREQ = 3e-6
 

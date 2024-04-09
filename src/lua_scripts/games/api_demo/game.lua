@@ -17,7 +17,7 @@ local core = require("game_core") -- game_core.lua
 local draw = require("game_draw") -- game_draw.lua
 
 -- This is the API that I defined, defined in `lua_api.c`.
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 
 print(
@@ -44,13 +44,13 @@ local FPS = 60
 local MS_PER_FRAME = math.floor(1000/FPS)
 
 
--- This function is called initially, and then many times repeatedly if `alex_c_api.set_timer_update_ms(time_ms)`
+-- This function is called initially, and then many times repeatedly if `alexgames.set_timer_update_ms(time_ms)`
 -- is called, to update state.
--- TODO It really should be renamed from "draw_board" to "update" or something.
+-- TODO It really should be renamed from "update" to "update" or something.
 -- 
 -- TODO I think it would also be cleaner to move away from global symbols like this, and instead register the important methods
--- in something like `alex_c_api.init({update=draw_board})`, and register the others (key, touch, mousemove) when I enable those events.
-function draw_board()
+-- in something like `alexgames.init({update=update})`, and register the others (key, touch, mousemove) when I enable those events.
+function update()
 	local dt_ms = MS_PER_FRAME
 
 
@@ -100,7 +100,7 @@ function handle_key_evt(evt_id, key_code)
 
 	if not keys_handled[key_code] then
 		local msg = string.format("key %s not handled", key_code)
-		alex_c_api.set_status_msg(msg)
+		alexgames.set_status_msg(msg)
 		print(msg)
 		return false
 	end
@@ -133,15 +133,15 @@ end
 
 function handle_mouse_evt(evt_id, pos_y, pos_x)
 	print(string.format("handle_mouse_evt(evt_id=%d, pos_y=%d, pos_x=%d)", evt_id, pos_y, pos_x))
-	if evt_id == alex_c_api.MOUSE_EVT_DOWN then
+	if evt_id == alexgames.MOUSE_EVT_DOWN then
 		state.mouse_down = true
 		state.user_input_pos_y = pos_y
 		state.user_input_pos_x = pos_x
 		--core.set_user_input_pos(state, {y=pos_y, x=pos_x})
-	elseif evt_id == alex_c_api.MOUSE_EVT_UP then
+	elseif evt_id == alexgames.MOUSE_EVT_UP then
 		state.mouse_down = false
 		core.set_user_input_pos(state, nil)
-	elseif evt_id == alex_c_api.MOUSE_EVT_LEAVE then
+	elseif evt_id == alexgames.MOUSE_EVT_LEAVE then
 		-- not handled, but including it here as an example 
 	end
 end
@@ -181,23 +181,23 @@ end
 -- is being loaded from the history browser (for the player to play, or
 -- to render a preview), or the state is loaded from the URL parameter.
 -- session_id_arg is only used when storing state with the
--- `alex_c_api.save_state` API, it indicates whether the state of a previous
+-- `alexgames.save_state` API, it indicates whether the state of a previous
 -- game should be updated, or if a new saved state session should be created.
 function start_game(session_id_arg, state_serialized)
 	draw.init(board_height, board_width)
 	
-	-- This causes draw_board to be called every `MS_PER_FRAME` ms.
-	alex_c_api.set_timer_update_ms(MS_PER_FRAME)
+	-- This causes update to be called every `MS_PER_FRAME` ms.
+	alexgames.set_timer_update_ms(MS_PER_FRAME)
 	
 	-- This causes handle_key_evt to get key presses.
-	alex_c_api.enable_evt("key")
+	alexgames.enable_evt("key")
 	
 	-- This causes handle_mouse_evt to get events on mouse up/down.
-	alex_c_api.enable_evt("mouse_updown")
+	alexgames.enable_evt("mouse_updown")
 	
 	-- This causes handle_mousemove to get events on mouse move.
-	alex_c_api.enable_evt("mouse_move")
+	alexgames.enable_evt("mouse_move")
 	
 	-- This causes handle_touch_evt to get events on touchscreen inputs.
-	alex_c_api.enable_evt("touch")
+	alexgames.enable_evt("touch")
 end

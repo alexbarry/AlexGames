@@ -228,7 +228,7 @@ struct game_api_callbacks {
 	                      const char *prompt_msg,   size_t prompt_msg_len);
 
 	/**
-	 * Set a timer to call `draw_board` every `update_period_ms` milliseconds.
+	 * Set a timer to call `update` every `update_period_ms` milliseconds.
 	 *
 	 * Returns a handle pointing to the timer. Pass this to `delete_timer` to
 	 * stop it.
@@ -372,7 +372,7 @@ struct game_api {
 	 * Called to re-draw the board, or indicate the passage of time if
 	 * a timer was set with `update_timer_ms`.
 	 */
-	void (*draw_board)(void *L, int dt_ms);
+	void (*update)(void *L, int dt_ms);
 
 	/**
 	 * User enters a string.

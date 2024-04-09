@@ -2,7 +2,7 @@ local draw = {}
 
 local core = require("games/swarm/swarm_core")
 local touchpad = require("libs/ui/touchpad")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 draw.ACTION_PLAYER_VEC_CHANGE = 1
 
@@ -35,7 +35,7 @@ local function get_screen_pos(state, game_pos)
 end
 
 local function draw_bg(state, player_idx)
-	--alex_c_api.draw_rect(BACKGROUND_COLOUR, 0, 0, height, width)
+	--alexgames.draw_rect(BACKGROUND_COLOUR, 0, 0, height, width)
 
 	for _, bg_y_idx in ipairs({0, 1}) do
 		for _, bg_x_idx in ipairs({0, 1}) do
@@ -43,7 +43,7 @@ local function draw_bg(state, player_idx)
 				y = (math.floor(state.players[player_idx].y/height) + bg_y_idx)*height,
 				x = (math.floor(state.players[player_idx].x/width) + bg_x_idx)*width,
 			})
-			alex_c_api.draw_graphic("swarm_grass_bg1", bg.y, bg.x, height, width)
+			alexgames.draw_graphic("swarm_grass_bg1", bg.y, bg.x, height, width)
 		end
 	end
 end
@@ -57,7 +57,7 @@ local function draw_attacks_state(state, player_idx)
 		for _, pos in ipairs(positions) do
 			local screen_pos = get_screen_pos(state, pos)
 			local attack_info = core.ATTACK_INFO[attack_type]
-			alex_c_api.draw_graphic(img_id, screen_pos.y, screen_pos.x,
+			alexgames.draw_graphic(img_id, screen_pos.y, screen_pos.x,
 				attack_info.size_y, attack_info.size_x)
 		end
 	end
@@ -65,21 +65,21 @@ local function draw_attacks_state(state, player_idx)
 end
 
 function draw.draw_state(state, ui_state, player_idx)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
 	draw_bg(state, player_idx)
 
-	alex_c_api.draw_text("player", '#000000', height/2, width/2, 12, 0)
+	alexgames.draw_text("player", '#000000', height/2, width/2, 12, 0)
 	draw_attacks_state(state, player_idx)
-	--alex_c_api.draw_graphic("swarm_broccoli", height/4, width/4, 80, 80)
-	--alex_c_api.draw_graphic("swarm_hammer", height/4, width/4, 50, 50)
+	--alexgames.draw_graphic("swarm_broccoli", height/4, width/4, 80, 80)
+	--alexgames.draw_graphic("swarm_hammer", height/4, width/4, 50, 50)
 
 	for enemy_idx, enemy in ipairs(state.enemies) do
 		local screen_pos = get_screen_pos(state, enemy)
-		alex_c_api.draw_text(string.format("%d", enemy_idx), '#000000', screen_pos.y, screen_pos.x, 12, 0)
+		alexgames.draw_text(string.format("%d", enemy_idx), '#000000', screen_pos.y, screen_pos.x, 12, 0)
 	end
 
-	alex_c_api.draw_graphic('hospital_ui_dirpad',
+	alexgames.draw_graphic('hospital_ui_dirpad',
 	                        ui_state.touchpad.pos.y,
 	                        ui_state.touchpad.pos.x,
 	                        2*ui_state.touchpad.radius,

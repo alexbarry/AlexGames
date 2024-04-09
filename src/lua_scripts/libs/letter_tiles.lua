@@ -15,7 +15,7 @@ local letter_tiles = {}
 --   * show a "tap to reveal next player's tiles" for local multiplayer
 --   * serialize and save state in state browser, only when words are successfully placed.
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local draw_shapes = require("libs/draw/draw_shapes")
 
@@ -31,7 +31,7 @@ function letter_tiles.draw_piece(letter, y, x, params, more_params)
 	local x_start = x - params.size/2
 	local y_end   = y + params.size/2
 	local x_end   = x + params.size/2
-	alex_c_api.draw_rect(params.background_colour,
+	alexgames.draw_rect(params.background_colour,
 	                     y_start, x_start,
 	                     y_end,   x_end)
 
@@ -39,17 +39,17 @@ function letter_tiles.draw_piece(letter, y, x, params, more_params)
 	                              y_start, x_start,
 	                              y_end,   x_end)
 
-	alex_c_api.draw_text(letter, params.text_colour,
+	alexgames.draw_text(letter, params.text_colour,
 	                     y + params.main_text_size/2, x,
 	                     params.main_text_size,
-	                     alex_c_api.TEXT_ALIGN_CENTRE)
+	                     alexgames.TEXT_ALIGN_CENTRE)
 
 	if params.show_score then
 		local score_txt = string.format("%2d", params.get_letter_points(letter))
-		alex_c_api.draw_text(score_txt, params.text_colour,
+		alexgames.draw_text(score_txt, params.text_colour,
 		                     y + params.size/2 - params.padding_small, x + params.size/2 - params.padding_small,
 		                     params.score_text_size,
-		                     alex_c_api.TEXT_ALIGN_RIGHT)
+		                     alexgames.TEXT_ALIGN_RIGHT)
 	end
 
 	if more_params and more_params.is_tentative then
@@ -129,13 +129,13 @@ local function draw_offset(tiles_state, pos)
 		return
 	end
 
-	alex_c_api.draw_line(tiles_state.offset_line_colour, 
+	alexgames.draw_line(tiles_state.offset_line_colour, 
 	                     tiles_state.offset_line_width, 
 	                     pos.y - tiles_state.cursor_offset_y,
 	                     pos.x - tiles_state.cursor_offset_x,
 	                     pos.y,
 	                     pos.x)
-	alex_c_api.draw_circle(tiles_state.offset_line_colour_fill, tiles_state.offset_line_colour,
+	alexgames.draw_circle(tiles_state.offset_line_colour_fill, tiles_state.offset_line_colour,
 	                       pos.y - tiles_state.cursor_offset_y,
 	                       pos.x - tiles_state.cursor_offset_x,
 	                       20)
@@ -210,7 +210,7 @@ function letter_tiles.draw_grids(tiles_state)
 
 		local grid_y_start = letter_tiles.get_grid_cell_pos(grid_info, 1, 1).y_start - padding
 		local grid_x_start = letter_tiles.get_grid_cell_pos(grid_info, 1, 1).x_start - padding
-		alex_c_api.draw_rect(grid_info.bg_colour,
+		alexgames.draw_rect(grid_info.bg_colour,
 		                     grid_y_start,          grid_x_start,
 		                     grid_y_start + y_size, grid_x_start + x_size)
 		for y_idx=1,#grid_info.tiles+1 do
@@ -222,7 +222,7 @@ function letter_tiles.draw_grids(tiles_state)
 			else
 				y_pos = letter_tiles.get_grid_cell_pos(grid_info, #grid_info.tiles, 1).y_end
 			end
-			alex_c_api.draw_line(grid_info.line_colour,
+			alexgames.draw_line(grid_info.line_colour,
 			                     1,
 				                 y_pos, grid_info.x_pos - padding,
 				                 y_pos, grid_info.x_pos + x_size - padding)
@@ -237,7 +237,7 @@ function letter_tiles.draw_grids(tiles_state)
 			else
 				x_pos = letter_tiles.get_grid_cell_pos(grid_info, 1, #grid_info.tiles).x_end
 			end
-			alex_c_api.draw_line(grid_info.line_colour,
+			alexgames.draw_line(grid_info.line_colour,
 			                     1,
 				                 grid_info.y_pos - padding, x_pos,
 				                 grid_info.y_pos + y_size - padding,  x_pos)
@@ -502,7 +502,7 @@ function letter_tiles.handle_mouse_evt(tiles_state, evt_id, pos_y, pos_x, params
 	update_offset(tiles_state, params)
 	local pos = { y = pos_y, x = pos_x }
 	--pos = add_offset(tiles_state, pos)
-	if evt_id == alex_c_api.MOUSE_EVT_DOWN then
+	if evt_id == alexgames.MOUSE_EVT_DOWN then
 		local pos_selected = get_tile_at_pos(tiles_state, pos)
 		local letter = get_letter_at_pos(tiles_state, pos_selected)
 		if pos_selected ~= nil and letter ~= nil and letter ~= letter_tiles.LETTER_EMPTY then
@@ -522,7 +522,7 @@ function letter_tiles.handle_mouse_evt(tiles_state, evt_id, pos_y, pos_x, params
 
 			clear_tile(tiles_state, pos_selected)
 		end
-	elseif evt_id == alex_c_api.MOUSE_EVT_UP then
+	elseif evt_id == alexgames.MOUSE_EVT_UP then
 		pos = add_offset(tiles_state, pos)
 		local tile_drop_pos = get_tile_at_pos(tiles_state, pos)
 		if tiles_state.held_letter ~= nil and tiles_state.held_letter ~= letter_tiles.LETTER_EMPTY then

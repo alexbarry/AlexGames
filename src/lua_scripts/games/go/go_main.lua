@@ -6,12 +6,12 @@ local go      = require("games/go/go_core")
 local go_ui   = require("games/go/go_ui")
 local go_ctrl = require("games/go/go_ctrl")
 
-local alex_c_api = require("alex_c_api");
+local alexgames = require("alexgames");
 
 -- e.g. either 9x9, 13x13, or 19x19
 local go_game_size = 19
 local local_multiplayer = nil
-local session_id = alex_c_api.get_new_session_id()
+local session_id = alexgames.get_new_session_id()
 local state = go.new_game(go_game_size)
 
 -- state was received either from another player or
@@ -28,8 +28,8 @@ local ctrl_state = go_ctrl.new_state()
 local height = 480
 local width = 480
 go_ui.init_ui(session_id, go_game_size, width, height)
-alex_c_api.send_message("all", "get_state:")
-alex_c_api.set_status_msg("Choose piece colour")
+alexgames.send_message("all", "get_state:")
+alexgames.set_status_msg("Choose piece colour")
 
 local PLAYER_CHOICE_POPUP_ID = "choose_player_colour"
 local PLAYER_CHOICE_BTNS = {
@@ -104,9 +104,9 @@ function handle_user_string_input(row_col)
 	return rc
 end
 
-function draw_board() 
+function update() 
 	if state ~= nil then
-		go_ui.draw_board(session_id, state.board, state.last_move_y, state.last_move_x)
+		go_ui.update(session_id, state.board, state.last_move_y, state.last_move_x)
 	end
 end
 
@@ -118,7 +118,7 @@ function get_user_input()
 end
 
 local function save_state()
-	alex_c_api.save_state(session_id, go.serialize_state(state))
+	alexgames.save_state(session_id, go.serialize_state(state))
 end
 
 function get_state()
@@ -131,19 +131,19 @@ function handle_user_clicked(pos_y, pos_x)
 	local rc = go.player_move(state, player, pos.y, pos.x)
 	if rc == go.SUCCESS then
 		if not local_multiplayer then
-			alex_c_api.send_message("all", string.format("move:%d,%d,%d", player, pos.y, pos.x));
-			alex_c_api.set_status_err("")
+			alexgames.send_message("all", string.format("move:%d,%d,%d", player, pos.y, pos.x));
+			alexgames.set_status_err("")
 		end
 		save_state()
 	else
-		alex_c_api.set_status_err(go.err_code_to_str(rc))
+		alexgames.set_status_err(go.err_code_to_str(rc))
 	end
-	draw_board()
+	update()
 	update_status_msg_turn(state, ctrl_state)
 end
 
 local function broadcast_state()
-	alex_c_api.send_message("all", "state:"..go.serialize_state(state))
+	alexgames.send_message("all", "state:"..go.serialize_state(state))
 end
 
 local function set_state(state_arg)
@@ -182,8 +182,8 @@ function handle_msg_received(src, msg)
 			return
 		end
 		go.player_move(state, player, row, col)
-		alex_c_api.set_status_err("")
-		draw_board()
+		alexgames.set_status_err("")
+		update()
 		update_status_msg_turn(state, ctrl_state)
 		save_state()
 	elseif header == "get_state" then
@@ -196,8 +196,8 @@ function handle_msg_received(src, msg)
 		if go_ui.get_board_piece_size() ~= #new_state.board then
 			go_ui.set_board_piece_size(#new_state.board)
 		end
-		draw_board()
-		alex_c_api.set_status_err("")
+		update()
+		alexgames.set_status_err("")
 		update_status_msg_turn(state, ctrl_state)
 	elseif header == "player_left" and src == "ctrl" then
 		-- do nothing
@@ -207,20 +207,20 @@ function handle_msg_received(src, msg)
 end
 
 local function load_saved_state_offset(move_id_offset)
-	local serialized_state = alex_c_api.get_saved_state_offset(session_id, move_id_offset)
+	local serialized_state = alexgames.get_saved_state_offset(session_id, move_id_offset)
 	if serialized_state == nil then
 		error(string.format("get_saved_state_offset(offset=%d) returned nil", move_id_offset))
 	end
 	internal_load_state(session_id, serialized_state)
-	draw_board()
+	update()
 end
 
 local function handle_pass(player)
 	local rc = go.player_pass(state, player)
 	if rc ~= go.SUCCESS then
-		alex_c_api.set_status_err(go.err_code_to_str(rc))
+		alexgames.set_status_err(go.err_code_to_str(rc))
 	else
-		draw_board()
+		update()
 		save_state()
 		update_status_msg_turn(state, ctrl_state)
 
@@ -259,7 +259,7 @@ function update_status_msg_turn(state, ctrl_state)
 	if not local_multiplayer then
 		display_name = string.format("%s (%s)", display_name, get_player_name(state.player_turn))
 	end
-	alex_c_api.set_status_msg(string.format("Waiting for %s to move", display_name))
+	alexgames.set_status_msg(string.format("Waiting for %s to move", display_name))
 	print(string.format("State is now: %s", utils.binstr_to_hr_str(go.serialize_state(state))))
 end
 
@@ -268,25 +268,25 @@ function handle_popup_btn_clicked(popup_id, btn_idx)
 		-- handled, no action here
 	elseif popup_id == POPUP_ID_GAME_SIZE_SELECTION then
 		local desired_game_size = POPUP_GAME_SIZE_SEL_BTNS_TO_SIZE[btn_idx+1]
-		alex_c_api.hide_popup()
-		alex_c_api.set_status_msg(string.format("Setting board size to %s", desired_game_size))
+		alexgames.hide_popup()
+		alexgames.set_status_msg(string.format("Setting board size to %s", desired_game_size))
 		set_state(go.new_game(desired_game_size))
 		go_ui.set_board_piece_size(desired_game_size)
 		print(string.format("state.board: %s", state.board))
-		draw_board()
+		update()
 		broadcast_state()
 	elseif popup_id == POPUP_ID_START_NEW_GAME_PROMPT then
 		if btn_idx == 0 then
 			state_init = false
 			prompt_game_size()
 		elseif btn_idx == 1 then
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 		else
 			error(string.format("popup btn_idx %s not handled for start new game prompt", btn_idx))
 		end
 	else
 		print(string.format("Unexpected popup_id \"%s\"", popup_id));
-		alex_c_api.hide_popup()
+		alexgames.hide_popup()
 	end
 end
 
@@ -409,9 +409,9 @@ function start_game(session_id, state_serialized)
 	if state_serialized ~= nil then
 		internal_load_state(session_id, state_serialized)
 	else
-		local session_id = alex_c_api.get_last_session_id()
+		local session_id = alexgames.get_last_session_id()
 		if session_id ~= nil then
-			state_serialized = alex_c_api.get_saved_state_offset(session_id, 0)
+			state_serialized = alexgames.get_saved_state_offset(session_id, 0)
 			internal_load_state(session_id, state_serialized)
 		end
 	end
@@ -420,7 +420,7 @@ function start_game(session_id, state_serialized)
 	-- and without it, the player arg is nil and the game can't progress
 	two_player_init()
 
-	alex_c_api.add_game_option(OPTION_ID_NEW_GAME, { type = alex_c_api.OPTION_TYPE_BTN, label = "New Game"})
+	alexgames.add_game_option(OPTION_ID_NEW_GAME, { type = alexgames.OPTION_TYPE_BTN, label = "New Game"})
 end
 
 function lua_main()

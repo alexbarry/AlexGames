@@ -11,7 +11,7 @@
 local core = require("games/spider_swing/spider_swing_core")
 local draw = require("games/spider_swing/spider_swing_draw")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local state = {}
 state.game = core.new_state()
@@ -24,7 +24,7 @@ local TIME_PER_FRAME_MS = 1000/FPS
 
 local GAME_OPTION_NEW_GAME = "option_new_game"
 
-function draw_board(dt_ms)
+function update(dt_ms)
 	if state.game.game_over then 
 		state.game.game_over = false
 		core.reset_player_state(state.game, player_idx)
@@ -87,9 +87,9 @@ function get_state()
 end
 
 function start_game()
-	alex_c_api.set_timer_update_ms(TIME_PER_FRAME_MS)
-	alex_c_api.enable_evt("mouse_updown")
-	alex_c_api.enable_evt("touch")
+	alexgames.set_timer_update_ms(TIME_PER_FRAME_MS)
+	alexgames.enable_evt("mouse_updown")
+	alexgames.enable_evt("touch")
 
-	alex_c_api.add_game_option(GAME_OPTION_NEW_GAME, { label = "New game", type = alex_c_api.OPTION_TYPE_BTN })
+	alexgames.add_game_option(GAME_OPTION_NEW_GAME, { label = "New game", type = alexgames.OPTION_TYPE_BTN })
 end

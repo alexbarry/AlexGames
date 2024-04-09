@@ -1030,7 +1030,7 @@ select_user_colour_pref.addEventListener("change", function () {
 	let value = select_user_colour_pref.options[idx].value;
 	set_user_colour_pref(value);
 	set_html_colour_theme(value);
-	draw_board(gfx.ptr);
+	update(gfx.ptr);
 });
 
 document.getElementById("btn_force_refresh").addEventListener('click', function () {

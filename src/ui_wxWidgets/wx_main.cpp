@@ -1100,12 +1100,12 @@ void MyCanvas::OnPaint(wxPaintEvent &event) {
 		dt_ms = current_time_ms - g_last_draw_board;
 	}
 	g_last_draw_board = current_time_ms;
-	//std::cout << "calling draw_board with dt_ms=" << dt_ms << ", current_time=" << current_time_ms << std::endl;
+	//std::cout << "calling update with dt_ms=" << dt_ms << ", current_time=" << current_time_ms << std::endl;
 
-	if (game_api != NULL && game_api->draw_board != NULL) {
-		game_api->draw_board(L, dt_ms);
+	if (game_api != NULL && game_api->update != NULL) {
+		game_api->update(L, dt_ms);
 	} else {
-		std::cerr << "Warning: game_api->draw_board is not set, perhaps the game failed to load?" << std::endl;
+		std::cerr << "Warning: game_api->update is not set, perhaps the game failed to load?" << std::endl;
 	}
 
 	wx_draw_clear_internal();
@@ -1829,7 +1829,7 @@ bool MyApp::OnInit()
     // created initially)
     g_frame->Show(true);
 
-	//draw_board(L);
+	//update(L);
 
     // success: wxApp::OnRun() will be called which will enter the main message
     // loop and the application will run. If we returned false here, the
