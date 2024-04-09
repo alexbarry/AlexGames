@@ -150,7 +150,7 @@ local function load_prev_state()
 	-- If the player presses undo, we want all the previous state
 	-- except we want the time elapsed to stay the same.
 	local time_elapsed = state.time_elapsed
-	local prev_state_serialized = alexgames.get_saved_state_offset(session_id, -1)
+	local prev_state_serialized = alexgames.adjust_saved_state_offset(session_id, -1)
 	if prev_state_serialized ~= nil then
 		draw.stop_move_animations()
 		state = serialize.deserialize_state(prev_state_serialized)
@@ -440,7 +440,7 @@ function start_game(session_id_arg, state_serialized)
 		--local state_serialized = alexgames.read_stored_data(DATA_ID_STATE)
 		local last_session_id = alexgames.get_last_session_id()
 		if last_session_id ~= nil then
-			state_serialized = alexgames.get_saved_state_offset(last_session_id, 0)
+			state_serialized = alexgames.adjust_saved_state_offset(last_session_id, 0)
 		end
 
 		-- this shouldn't usually be possible, but I think it happens if I manage to increment the session ID

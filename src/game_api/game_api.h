@@ -307,10 +307,10 @@ struct game_api_callbacks {
 	 * Returns number of bytes actually read. Returns a negative number if an
 	 * error occurred.
 	 *
-	 * TODO: rename this from "get_saved_state_offset" to something that makes it clear that
+	 * TODO: rename this from "adjust_saved_state_offset" to something that makes it clear that
 	 *       the current move ID is adjusted.
 	 */
-	int (*get_saved_state_offset)(int session_id, int move_id_offset, uint8_t *state, size_t state_len);
+	int (*adjust_saved_state_offset)(int session_id, int move_id_offset, uint8_t *state, size_t state_len);
 
 	/** Draws one of the extra canvases on the active canvas */
 	void (*draw_extra_canvas)(const char *img_id,

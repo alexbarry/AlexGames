@@ -46,7 +46,7 @@ function handle_user_clicked(pos_y, pos_x)
 end
 
 function load_state_offset(move_offset)
-	local state_serialized = alexgames.get_saved_state_offset(g_session_id, move_offset)
+	local state_serialized = alexgames.adjust_saved_state_offset(g_session_id, move_offset)
 	g_state = serialize.deserialize(state_serialized)
 	g_win_anim_shown = false
 	update()
@@ -85,7 +85,7 @@ function start_game(session_id, state_serialized)
 		print(string.format("Read previous session ID %s", prev_session_id))
 		if prev_session_id ~= nil then
 			g_session_id = prev_session_id
-			state_serialized = alexgames.get_saved_state_offset(g_session_id, 0)
+			state_serialized = alexgames.adjust_saved_state_offset(g_session_id, 0)
 			g_state = serialize.deserialize(state_serialized)
 			alexgames.set_status_msg(string.format("Loaded saved state from session %d", g_session_id))
 		else

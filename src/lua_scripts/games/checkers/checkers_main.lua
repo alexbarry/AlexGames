@@ -205,7 +205,7 @@ function two_player_init()
 end
 
 local function load_state_move_offset(move_id_offset)
-	local serialized_state = alexgames.get_saved_state_offset(session_id, move_id_offset)
+	local serialized_state = alexgames.adjust_saved_state_offset(session_id, move_id_offset)
 	state = serialize.deserialize_state(serialized_state)
 	update()
 	broadcast_state("all")
@@ -225,7 +225,7 @@ function start_game(session_id_arg, serialized_state)
 		session_id = session_id_arg
 		state = serialize.deserialize_state(serialized_state)
 	elseif last_sess_id ~= nil then
-		serialized_state = alexgames.get_saved_state_offset(last_sess_id, 0)
+		serialized_state = alexgames.adjust_saved_state_offset(last_sess_id, 0)
 		session_id = last_sess_id
 		state = serialize.deserialize_state(serialized_state)
 	end

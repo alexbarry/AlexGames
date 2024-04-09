@@ -368,9 +368,9 @@ local function load_state(session_id_arg, serialized_state)
 end
 
 local function load_saved_state_offset(move_id_offset)
-	local serialized_state = alexgames.get_saved_state_offset(session_id, move_id_offset)
+	local serialized_state = alexgames.adjust_saved_state_offset(session_id, move_id_offset)
 	if serialized_state == nil then
-		error(string.format("get_saved_state_offset(offset=%d) returned nil", move_id_offset))
+		error(string.format("adjust_saved_state_offset(offset=%d) returned nil", move_id_offset))
 	end
 	load_state(session_id, serialized_state)
 	update()
@@ -576,7 +576,7 @@ function start_game(session_id_arg, serialized_state)
 	else
 		local last_sess_id = alexgames.get_last_session_id()
 		if last_sess_id ~= nil then
-			serialized_state = alexgames.get_saved_state_offset(last_sess_id, 0)
+			serialized_state = alexgames.adjust_saved_state_offset(last_sess_id, 0)
 			if serialized_state ~= nil then
 				load_state(last_sess_id, serialized_state)
 			end

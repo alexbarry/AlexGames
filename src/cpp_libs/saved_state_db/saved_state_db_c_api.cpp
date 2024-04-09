@@ -33,5 +33,5 @@ bool saved_state_db_has_saved_state_offset(void *handle, int session_id, int mov
 int saved_state_db_get_saved_state_offset(void *handle, int session_id, int move_id_offset, uint8_t *state, size_t state_len) {
 	SavedStateDb *db = (SavedStateDb*)handle;
 
-	return db->get_saved_state_offset(session_id, move_id_offset, state, state_len);
+	return db->adjust_saved_state_offset(session_id, move_id_offset, state, state_len);
 }

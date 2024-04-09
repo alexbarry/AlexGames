@@ -254,7 +254,7 @@ local function load_state(session_id_arg, state_serialized)
 end
 
 local function load_state_offset(session_id_arg, move_offset)
-	local state_serialized = alexgames.get_saved_state_offset(session_id_arg, move_offset)
+	local state_serialized = alexgames.adjust_saved_state_offset(session_id_arg, move_offset)
 	if state_serialized == nil then
 		error(string.format("state_serialized is nil"))
 	end
