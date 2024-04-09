@@ -649,9 +649,11 @@ void *init_game_api(const char *game_str, int game_str_len) {
 	return handle;
 }
 
+#if 0
 // If you don't provide a main function, then it looks like the Lua main takes over
 // and starts prompting for text via stdin, which causes a big popup in a browser.
 // Though I don't actually know CMake allows for multiple main definitions like this.
 int main(void) {
 	print_ver_info();
 }
+#endif

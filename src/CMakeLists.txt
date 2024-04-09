@@ -149,7 +149,12 @@ message("Building with LUA_SRC_DIR ${LUA_SRC_DIR}")
 #)
 
 aux_source_directory(${LUA_SRC_DIR} LUA_CORE_SRC_LIST)
+# This is a duplicate of all the other C files in the repo.
+# Including this would cause duplicate function linker errors.
 list(FILTER LUA_CORE_SRC_LIST EXCLUDE REGEX "\/onelua.c$")
+# This is the standalone interpreter, which defines a main function that
+# I do not want to include.
+list(FILTER LUA_CORE_SRC_LIST EXCLUDE REGEX "\/lua.c$")
 
 # not currently using lua_user_cfg.h, loading my library manually in C instead
 #include_directories(${SRC_DIR}/main)
