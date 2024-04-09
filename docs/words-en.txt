@@ -93,7 +93,7 @@ abb,5.8e-7
 abba,1.4e-6
 abbacies,0
 abbacy,2.1e-8
-abbas,2.6e-6
+abbas,2.6e-6,1
 abbasi,1.9e-7
 abbatial,0
 abbe,2.8e-7
@@ -1524,7 +1524,7 @@ actability,0
 actable,0
 actant,0
 acted,1.9e-5
-actin,1.4e-6
+actin,1.4e-6,1
 actinal,0
 actinally,0
 acting,6.6e-5
@@ -8986,7 +8986,7 @@ arhatship,0
 arhatships,0
 aria,2.4e-6
 ariary,0
-arias,1.3e-6
+arias,1.3e-6,1
 ariboflavinoses,0
 ariboflavinosis,0
 arid,2.3e-6
@@ -12381,7 +12381,7 @@ bafflingly,5e-8
 baffs,0
 baffy,0
 baft,1.1e-8
-bafta,1.2e-6
+bafta,1.2e-6,1
 bafts,0
 bag,6.2e-5
 bagass,0
@@ -12801,11 +12801,11 @@ banana,1e-5
 bananas,5e-6
 banausic,0
 banc,3.9e-7
-banco,1.1e-6
+banco,1.1e-6,1
 bancos,1.7e-8
 bancs,1.1e-8
 band,8.3e-5
-banda,1e-6
+banda,1e-6,1
 bandage,1.7e-6
 bandaged,5.1e-7
 bandager,0
@@ -13147,7 +13147,7 @@ barbut,0
 barbuts,0
 barbwire,4.5e-8
 barbwires,0
-barca,2.6e-6
+barca,2.6e-6,1
 barcarole,0
 barcaroles,0
 barcarolle,2.6e-8
@@ -13462,7 +13462,7 @@ barroom,1.5e-7
 barrooms,1.3e-8
 barrow,2.4e-6
 barrows,5.9e-7
-barry,1.8e-5
+barry,1.8e-5,1
 bars,2.8e-5
 barstool,2.4e-7
 barstools,4.2e-8
@@ -13738,7 +13738,7 @@ bate,5.8e-7
 bateau,1.1e-7
 bateaux,3.2e-8
 bated,2.1e-7
-bates,4.4e-6
+bates,4.4e-6,1
 batfish,1.7e-8
 batfishes,0
 batfowl,0
@@ -13959,7 +13959,7 @@ bayberries,0
 bayberry,5.1e-8
 baye,5.4e-8
 bayed,3e-8
-bayer,1.8e-6
+bayer,1.8e-6,1
 bayes,3.2e-7
 bayest,0
 bayfront,1e-7
@@ -13975,7 +13975,7 @@ bayoneting,2.1e-8
 bayonets,5.8e-7
 bayonetted,1.3e-8
 bayonetting,0
-bayou,1.4e-6
+bayou,1.4e-6,1
 bayous,9.6e-8
 bays,2.1e-6
 bayside,5e-7
@@ -14597,7 +14597,7 @@ beebee,4.1e-8
 beebees,0
 beebread,0
 beebreads,0
-beech,1.9e-6
+beech,1.9e-6,1
 beechdrops,0
 beechen,2.5e-8
 beeches,1.4e-7
@@ -15376,7 +15376,7 @@ bennets,2.5e-8
 benni,5.9e-8
 bennies,6.3e-8
 bennis,8.9e-8
-benny,3e-6
+benny,3e-6,1
 benomyl,0
 benomyls,0
 bens,1.6e-7
@@ -15893,7 +15893,7 @@ betting,1e-5
 bettings,0
 bettor,1.2e-7
 bettors,1.5e-7
-betty,8.3e-6
+betty,8.3e-6,1
 between,5.9e-4
 betweenbrain,0
 betweenbrains,0
@@ -16364,7 +16364,7 @@ biggins,1.4e-7
 biggish,4.1e-8
 biggity,0
 biggon,0
-biggs,1.1e-6
+biggs,1.1e-6,1
 biggy,1e-7
 bigha,2.1e-8
 bighead,8.3e-8
@@ -18631,7 +18631,7 @@ bobblier,0
 bobbliest,0
 bobbling,3.9e-8
 bobbly,2.6e-8
-bobby,1.7e-5
+bobby,1.7e-5,1
 bobbysox,0
 bobcat,6.3e-7
 bobcats,9.1e-7
@@ -19109,7 +19109,7 @@ boneheads,6e-8
 boneless,5.6e-7
 bonemeal,2.9e-8
 bonemeals,0
-boner,1.6e-6
+boner,1.6e-6,1
 boners,2.6e-7
 bones,2.1e-5
 boneset,1.5e-8
@@ -19219,7 +19219,7 @@ boodlers,0
 boodles,3.5e-8
 boodling,0
 boody,3.3e-8
-booed,1.2e-6
+booed,1.2e-6,1
 boofy,0
 boogaloo,2.5e-7
 boogalooed,0
@@ -19980,7 +19980,7 @@ bowhunters,2.2e-8
 bowhunting,5.2e-8
 bowhuntings,0
 bowhunts,0
-bowie,3.5e-6
+bowie,3.5e-6,1
 bowing,1.4e-6
 bowingly,0
 bowings,1.1e-8
@@ -20916,7 +20916,7 @@ brigs,8.9e-8
 brigue,0
 brik,3.2e-8
 briks,0
-brill,1.2e-6
+brill,1.2e-6,1
 briller,0
 brillest,0
 brilliance,2.4e-6
@@ -21035,7 +21035,7 @@ briths,0
 brits,3.5e-6,1
 britska,0
 britskas,0
-britt,1.5e-6
+britt,1.5e-6,1
 brittania,4.5e-8
 brittanias,0
 brittle,1.9e-6
@@ -21132,7 +21132,7 @@ brochettes,0
 brochs,1.1e-8
 brochure,2.3e-6
 brochures,1.2e-6
-brock,5.1e-6
+brock,5.1e-6,1
 brockage,0
 brockages,0
 brocket,5.8e-8
@@ -21595,7 +21595,7 @@ bubalis,0
 bubalises,0
 bubals,0
 bubas,0
-bubba,2e-6
+bubba,2e-6,1
 bubbas,2.5e-8
 bubbe,2.3e-8
 bubbes,0
@@ -21800,8 +21800,8 @@ buffoonery,1.5e-7
 buffoonish,3.6e-8
 buffoons,2e-7
 buffos,0
-buffs,1.1e-6
-buffy,2.6e-6
+buffs,1.1e-6,1
+buffy,2.6e-6,1
 bufo,9.6e-8
 bufos,0
 bug,1.6e-5
@@ -22374,7 +22374,7 @@ burins,1.2e-8
 burk,2.4e-7
 burka,3.9e-7
 burkas,1.1e-7
-burke,7.4e-6
+burke,7.4e-6,1
 burked,0
 burker,0
 burkers,0
@@ -22665,7 +22665,7 @@ bustlines,0
 bustling,1.5e-6
 bustlingly,0
 busts,1.5e-6
-busty,1.2e-6
+busty,1.2e-6,1
 busulfan,1.3e-8
 busulfans,0
 busy,5.6e-5
@@ -22721,7 +22721,7 @@ buts,4.4e-7
 butt,1.9e-5
 buttal,0
 buttals,0
-butte,1.2e-6
+butte,1.2e-6,1
 butted,3.8e-7
 butter,2.5e-5
 butterball,1.1e-7
@@ -23567,7 +23567,7 @@ calico,7.6e-7
 calicoes,1.1e-8
 calicos,1.8e-8
 calid,0
-calif,6.8e-6
+calif,6.8e-6,1
 califate,0
 califates,0
 californium,3.6e-8
@@ -24617,7 +24617,7 @@ cappuccino,7.4e-7
 cappuccinos,1.3e-7
 caprese,9.1e-8
 capreses,0
-capri,1.2e-6
+capri,1.2e-6,1
 capric,1.7e-8
 capricci,0
 capriccio,5.9e-8
@@ -25709,7 +25709,7 @@ castanet,2.4e-8
 castanets,1e-7
 castaway,4.1e-7
 castaways,2.2e-7
-caste,3e-6
+caste,3e-6,1
 casted,3.5e-7
 casteism,6e-8
 casteisms,0
@@ -26454,7 +26454,7 @@ celadon,1.4e-7
 celadons,0
 celandine,3e-8
 celandines,0
-celeb,1e-6
+celeb,1e-6,1
 celebrant,2.4e-7
 celebrants,1.4e-7
 celebrate,3.1e-5
@@ -27330,7 +27330,7 @@ chandlers,9.1e-8
 chandlery,3.7e-8
 chanfron,0
 chanfrons,0
-chang,5.4e-6
+chang,5.4e-6,1
 change,3.5e-4
 changeabilities,0
 changeability,2e-8
@@ -28029,7 +28029,7 @@ chemist,3.2e-6
 chemistries,1e-7
 chemistry,2.2e-5
 chemists,1.8e-6
-chemo,1.8e-6
+chemo,1.8e-6,1
 chemoautotrophic,0
 chemoautotrophies,0
 chemoautotrophy,0
@@ -28183,7 +28183,7 @@ chevron,1.9e-6
 chevrons,1.6e-7
 chevrotin,0
 chevrotins,0
-chevy,3.4e-6
+chevy,3.4e-6,1
 chevying,0
 chew,4.6e-6
 chewable,1.3e-7
@@ -28286,7 +28286,7 @@ chicles,0
 chicly,0
 chicness,0
 chicnesses,0
-chico,1.6e-6
+chico,1.6e-6,1
 chicories,0
 chicory,2.4e-7
 chicos,5.4e-8
@@ -28379,7 +28379,7 @@ childproofing,1.1e-8
 childproofs,0
 children,2e-4
 childs,1.5e-6
-chile,1.1e-5
+chile,1.1e-5,1
 chiles,6e-7
 chili,5.4e-6
 chiliad,1.4e-8
@@ -28477,7 +28477,7 @@ chimpanzee,9.1e-7
 chimpanzees,9.3e-7
 chimps,7.9e-7
 chin,1e-5
-china,1.3e-4
+china,1.3e-4,1
 chinaberries,0
 chinaberry,1.3e-8
 chinar,2.1e-8
@@ -28502,7 +28502,7 @@ chinchy,0
 chine,3.3e-7
 chined,0
 chines,9.8e-8
-ching,2.3e-6
+ching,2.3e-6,1
 chings,0
 chining,0
 chink,4.1e-7
@@ -28517,7 +28517,7 @@ chinky,5.8e-8
 chinless,3.5e-8
 chinned,6.6e-8
 chinning,2e-8
-chino,1.1e-6
+chino,1.1e-6,1
 chinois,5.8e-8
 chinoiserie,7.1e-8
 chinoiseries,0
@@ -29939,7 +29939,7 @@ cirsoid,0
 cis,3.9e-6
 cisalpine,4.6e-8
 cisatlantic,0
-cisco,3.1e-6
+cisco,3.1e-6,1
 ciscoes,0
 ciscos,0
 cislunar,1.9e-8
@@ -30777,7 +30777,7 @@ clinometer,1.4e-8
 clinometers,0
 clinquant,0
 clinquants,0
-clint,3.4e-6
+clint,3.4e-6,1
 clintonia,0
 clintonias,0
 cliometric,0
@@ -33308,7 +33308,7 @@ commove,0
 commoved,0
 commoves,0
 commoving,0
-comms,1.2e-6
+comms,1.2e-6,1
 communal,4.8e-6
 communalism,1.4e-7
 communalisms,0
@@ -34340,7 +34340,7 @@ conepates,0
 conepatl,0
 conepatls,0
 cones,2.4e-6
-coney,1.2e-6
+coney,1.2e-6,1
 coneys,2.9e-8
 confab,9.3e-8
 confabbed,0
@@ -34659,7 +34659,7 @@ conglutinates,0
 conglutinating,0
 conglutination,0
 conglutinations,0
-congo,5.6e-6
+congo,5.6e-6,1
 congoes,0
 congos,2.6e-8
 congou,0
@@ -37082,7 +37082,7 @@ cosseting,1.1e-8
 cossets,0
 cossie,1.3e-8
 cost,1.7e-4
-costa,1.4e-5
+costa,1.4e-5,1
 costae,2.1e-8
 costal,3e-7
 costally,0
@@ -37987,7 +37987,7 @@ cow,1.4e-5
 cowabunga,6.8e-8
 cowage,0
 cowages,0
-cowan,1.5e-6
+cowan,1.5e-6,1
 coward,4.7e-6
 cowardice,1.3e-6
 cowardices,0
@@ -39206,7 +39206,7 @@ croquettes,1.6e-7
 croquignole,0
 croquignoles,0
 croquis,1.4e-8
-crore,2.3e-6
+crore,2.3e-6,1
 crores,1.3e-6
 crosier,5.1e-8
 crosiers,0
@@ -41663,8 +41663,8 @@ darbar,7.6e-8
 darbars,0
 darbies,0
 darbs,0
-darby,1.5e-6
-darcy,2.1e-6
+darby,1.5e-6,1
+darcy,2.1e-6,1
 dare,2e-5
 dared,3.3e-6
 daredevil,1.9e-6
@@ -44489,7 +44489,7 @@ denigratory,0
 denim,3.3e-6
 denimed,0
 denims,7.4e-8
-denis,4.2e-6
+denis,4.2e-6,1
 denitrate,0
 denitrated,0
 denitrates,0
@@ -45192,7 +45192,7 @@ derringers,1.8e-8
 derris,3.5e-8
 derrises,0
 derro,0
-derry,1.6e-6
+derry,1.6e-6,1
 derth,0
 derv,0
 dervish,2.5e-7
@@ -46098,7 +46098,7 @@ devolve,6e-7
 devolved,1.4e-6
 devolves,2.2e-7
 devolving,2.9e-7
-devon,6.9e-6
+devon,6.9e-6,1
 devonian,7.9e-7
 devons,4.4e-8
 devote,3.4e-6
@@ -49748,7 +49748,7 @@ divvying,4.5e-8
 diwan,1e-7
 diwans,0
 dixi,2.3e-8
-dixie,2.3e-6
+dixie,2.3e-6,1
 dixit,3.4e-7
 dixits,0
 dixy,1.6e-8
@@ -50136,7 +50136,7 @@ dojo,9.8e-7
 dojos,6.2e-8
 dol,7.8e-7
 dolabrate,0
-dolce,1.2e-6
+dolce,1.2e-6,1
 dolcetto,1.9e-8
 dolcettos,0
 dolci,4.4e-8
@@ -50358,7 +50358,7 @@ donkeymen,0
 donkeys,1.2e-6
 donkeywork,0
 donkeyworks,0
-donna,6.9e-6
+donna,6.9e-6,1
 donnas,1e-7
 donne,5.6e-7
 donned,6.3e-7
@@ -51199,7 +51199,7 @@ draining,3.6e-6
 drainpipe,1.1e-7
 drainpipes,3.7e-8
 drains,3.6e-6
-drake,9.1e-6
+drake,9.1e-6,1
 drakes,3.7e-7
 dram,8.7e-7
 drama,4.7e-5
@@ -51954,7 +51954,7 @@ duces,5.9e-8
 duchess,5.8e-6
 duchesses,8.7e-8
 duchies,1.5e-7
-duchy,1e-6
+duchy,1e-6,1
 duci,0
 duck,1.6e-5
 duckbill,4.9e-8
@@ -52278,7 +52278,7 @@ dunnest,0
 dunning,7.1e-7
 dunnite,0
 dunnites,0
-dunno,5.8e-6
+dunno,5.8e-6,1
 dunny,7.1e-8
 duns,2.1e-7
 dunsh,0
@@ -52989,7 +52989,7 @@ ebonizes,0
 ebonizing,0
 ebons,0
 ebony,2.2e-6
-ebook,5.1e-6
+ebook,5.1e-6,1
 ebooks,2.3e-6
 ebullience,3.6e-8
 ebulliences,0
@@ -54851,7 +54851,7 @@ emerse,0
 emersed,1.6e-8
 emersion,3.3e-8
 emersions,0
-emery,2e-6
+emery,2e-6,1
 emes,5.1e-8
 emeses,0
 emesis,7.8e-8
@@ -57501,7 +57501,7 @@ ergotized,0
 ergots,0
 ergs,5.4e-8
 erhu,3.2e-8
-erica,3.6e-6
+erica,3.6e-6,1
 ericaceous,2.2e-8
 ericas,1.4e-8
 ericoid,0
@@ -57947,7 +57947,7 @@ esteem,7.9e-6
 esteemed,1.9e-6
 esteeming,1.4e-8
 esteems,4.3e-8
-ester,1.2e-6
+ester,1.2e-6,1
 esterase,6.3e-8
 esterases,2.8e-8
 esterification,6.3e-8
@@ -58550,7 +58550,7 @@ euroland,2.3e-8
 eurolands,0
 europium,9.3e-8
 europiums,0
-euros,6e-6
+euros,6e-6,1
 eurozone,1.5e-6
 eurozones,0
 eurybath,0
@@ -59263,7 +59263,7 @@ execrations,0
 execrative,0
 execrator,0
 execrators,0
-execs,1e-6
+execs,1e-6,1
 executable,6.3e-7
 executables,1.1e-7
 executant,0
@@ -61438,7 +61438,7 @@ farthings,8.7e-8
 farting,9.3e-7
 fartlek,2.6e-8
 fartleks,0
-farts,1.6e-6
+farts,1.6e-6,1
 fas,1.1e-6
 fasces,5.4e-8
 fascia,9.6e-7
@@ -61939,7 +61939,7 @@ federative,8.1e-8
 federatively,0
 federator,0
 federators,0
-fedex,2.6e-6
+fedex,2.6e-6,1
 fedexed,0
 fedexes,0
 fedexing,0
@@ -62071,7 +62071,7 @@ felines,2.7e-7
 felinities,0
 felinity,0
 fell,7.1e-5
-fella,3.1e-6
+fella,3.1e-6,1
 fellable,0
 fellah,5.1e-8
 fellaheen,0
@@ -62196,7 +62196,7 @@ feminize,3.4e-8
 feminized,2e-7
 feminizes,0
 feminizing,6e-8
-femme,1.6e-6
+femme,1.6e-6,1
 femmes,5.1e-7
 femora,5.8e-8
 femoral,7.8e-7
@@ -63124,7 +63124,7 @@ fillisters,0
 fillo,1.1e-8
 fillos,0
 fills,5.1e-6
-filly,1.4e-6
+filly,1.4e-6,1
 film,1.6e-4
 filmable,0
 filmcard,0
@@ -63580,7 +63580,7 @@ firstly,5.4e-6
 firstness,0
 firstnesses,0
 firsts,9.1e-7
-firth,1.5e-6
+firth,1.5e-6,1
 firths,1.4e-8
 fisc,1.2e-7
 fiscal,1.8e-5
@@ -63701,7 +63701,7 @@ fistulate,0
 fistulous,0
 fisty,1.7e-8
 fit,8.9e-5
-fitch,1.8e-6
+fitch,1.8e-6,1
 fitchee,0
 fitches,0
 fitchet,0
@@ -63737,7 +63737,7 @@ fivefold,2.1e-7
 fivepins,0
 fiver,5.1e-7
 fivers,4.7e-8
-fives,1.3e-6
+fives,1.3e-6,1
 fix,5.6e-5
 fixable,2.3e-7
 fixate,2e-7
@@ -65316,7 +65316,7 @@ foldouts,0
 folds,2.7e-6
 foldup,0
 foldups,0
-foley,3.2e-6
+foley,3.2e-6,1
 foleys,2e-8
 folia,7.2e-8
 foliaceous,1.1e-8
@@ -65332,7 +65332,7 @@ foliation,6.6e-8
 foliations,2.3e-8
 folic,5.1e-7
 folie,1.2e-7
-folio,1.3e-6
+folio,1.3e-6,1
 folioed,0
 folioing,0
 foliolate,0
@@ -65623,7 +65623,7 @@ footwells,0
 footwork,1.3e-6
 footworks,0
 footworn,0
-footy,1.4e-6
+footy,1.4e-6,1
 foozle,0
 foozled,0
 foozler,0
@@ -66062,7 +66062,7 @@ forewomen,0
 foreword,1.4e-6
 forewords,2.9e-8
 foreworn,0
-forex,4.4e-6
+forex,4.4e-6,1
 forexes,0
 foreyard,0
 foreyards,0
@@ -68364,7 +68364,7 @@ gabfests,0
 gabies,0
 gabion,2.3e-8
 gabions,2.3e-8
-gable,1.2e-6
+gable,1.2e-6,1
 gabled,1.4e-7
 gablelike,0
 gables,8.3e-7
@@ -69205,7 +69205,7 @@ garter,9.3e-7
 gartered,1e-8
 gartering,0
 garters,2.1e-7
-garth,2e-6
+garth,2e-6,1
 garths,0
 garuda,3.4e-7
 garum,2.1e-8
@@ -69790,7 +69790,7 @@ gemination,2.2e-8
 geminations,0
 geminy,0
 gemlike,0
-gemma,2.1e-6
+gemma,2.1e-6,1
 gemmae,1.4e-8
 gemman,0
 gemmate,0
@@ -69975,7 +69975,7 @@ genned,0
 gennel,0
 genning,0
 genny,1.5e-7
-genoa,1.5e-6
+genoa,1.5e-6,1
 genoas,0
 genocidal,6.3e-7
 genocide,8.1e-6
@@ -70722,7 +70722,7 @@ gimleting,0
 gimlets,2.1e-8
 gimmal,0
 gimmals,0
-gimme,3.7e-6
+gimme,3.7e-6,1
 gimmer,0
 gimmes,4.2e-8
 gimmick,1.6e-6
@@ -71995,7 +71995,7 @@ goe,2.2e-7
 goel,2.2e-7
 goels,0
 goer,3.9e-7
-goers,1.2e-6
+goers,1.2e-6,1
 goes,1.7e-4
 goest,5.6e-8
 goeth,1.7e-7
@@ -72083,7 +72083,7 @@ goldfinch,2.7e-7
 goldfinches,4.7e-8
 goldfish,1.9e-6
 goldfishes,1.8e-8
-golds,1.4e-6
+golds,1.4e-6,1
 goldsmith,1.6e-6
 goldsmiths,3.9e-7
 goldstone,2.8e-7
@@ -72197,7 +72197,7 @@ gonion,0
 gonium,0
 gonk,3e-8
 gonks,0
-gonna,1.9e-4
+gonna,1.9e-4,1
 gonococcal,4.3e-8
 gonococci,0
 gonococcus,0
@@ -72491,7 +72491,7 @@ gothics,1.2e-8
 gothite,0
 gothites,0
 goths,5.8e-7
-gotta,8.9e-5
+gotta,8.9e-5,1
 gotten,2.9e-5
 gouache,2.3e-7
 gouaches,2.2e-8
@@ -73286,7 +73286,7 @@ greedy,5.6e-6
 greegree,0
 greegrees,0
 greeing,0
-greek,3.2e-5
+greek,3.2e-5,1
 green,1.3e-4
 greenback,3.7e-7
 greenbacker,0
@@ -74812,7 +74812,7 @@ gypster,0
 gypsters,0
 gypsum,8.5e-7
 gypsums,0
-gypsy,3.6e-6
+gypsy,3.6e-6,1
 gypsydom,0
 gypsydoms,0
 gypsying,0
@@ -75006,7 +75006,7 @@ haddock,6.8e-7
 haddocks,1.5e-8
 hade,1.1e-7
 haded,0
-hades,1.6e-6
+hades,1.6e-6,1
 hading,0
 hadith,9.8e-7
 hadiths,1.9e-7
@@ -75858,7 +75858,7 @@ hankers,1.9e-8
 hankie,6e-8
 hankies,6.8e-8
 hanking,0
-hanks,1.7e-6
+hanks,1.7e-6,1
 hanky,2.3e-7
 hansa,1.7e-7
 hansas,0
@@ -75960,7 +75960,7 @@ haptoglobins,0
 hapu,2.9e-8
 hapuku,0
 hapus,0
-haram,2.7e-6
+haram,2.7e-6,1
 harangue,1.2e-7
 harangued,9.3e-8
 haranguer,0
@@ -76249,7 +76249,7 @@ harrumph,3.7e-8
 harrumphed,1.6e-8
 harrumphing,0
 harrumphs,1.3e-8
-harry,5.2e-5
+harry,5.2e-5,1
 harrying,6.8e-8
 harsh,1.4e-5
 harshen,0
@@ -77689,7 +77689,7 @@ henpecked,6.2e-8
 henpecking,0
 henpecks,0
 henries,2.1e-8
-henry,5.5e-5
+henry,5.5e-5,1
 henrys,9.3e-8
 hens,1.8e-6
 hent,2e-8
@@ -78976,7 +78976,7 @@ hoer,0
 hoers,0
 hoes,8.9e-7
 hog,3.7e-6
-hogan,4.3e-6
+hogan,4.3e-6,1
 hogans,4.9e-8
 hogback,4.5e-8
 hogbacks,1.2e-8
@@ -79318,7 +79318,7 @@ homeport,6.9e-8
 homeported,1.5e-8
 homeporting,0
 homeports,0
-homer,7.8e-6
+homer,7.8e-6,1
 homered,2.9e-7
 homeric,3.2e-7
 homering,2.2e-8
@@ -79367,7 +79367,7 @@ homicidal,5.4e-7
 homicidally,0
 homicide,6.3e-6
 homicides,1.3e-6
-homie,1.8e-6
+homie,1.8e-6,1
 homier,1.8e-8
 homies,6.5e-7
 homiest,0
@@ -79566,7 +79566,7 @@ honchoes,0
 honchoing,0
 honchos,7.1e-8
 hond,3.6e-8
-honda,8.3e-6
+honda,8.3e-6,1
 hondas,1.2e-7
 hondle,0
 hondled,0
@@ -80436,7 +80436,7 @@ howdahs,0
 howdie,0
 howdied,0
 howdies,0
-howdy,1.2e-6
+howdy,1.2e-6,1
 howdying,0
 howe,3.3e-6
 howes,5.2e-7
@@ -80494,7 +80494,7 @@ hubbies,3.2e-8
 hubbly,0
 hubbub,3.2e-7
 hubbubs,0
-hubby,2.6e-6
+hubby,2.6e-6,1
 hubcap,7.1e-8
 hubcaps,1.4e-7
 hubless,0
@@ -80896,7 +80896,7 @@ hurriers,0
 hurries,2.8e-7
 hurry,1.4e-5
 hurrying,5.4e-7
-hurst,1.3e-6
+hurst,1.3e-6,1
 hursts,0
 hurt,8.7e-5
 hurter,2.7e-8
@@ -81046,7 +81046,7 @@ hydathode,0
 hydathodes,0
 hydatid,2.9e-8
 hydatids,0
-hydra,2e-6
+hydra,2e-6,1
 hydracid,0
 hydracids,0
 hydrae,0
@@ -89614,7 +89614,7 @@ jackroll,0
 jackrolled,0
 jackrolling,0
 jackrolls,0
-jacks,2.6e-6
+jacks,2.6e-6,1
 jackscrew,1.3e-8
 jackscrews,0
 jackshaft,1.3e-8
@@ -89773,7 +89773,7 @@ jambu,3.7e-8
 jambul,0
 jambuster,0
 jambusters,0
-james,1.3e-4
+james,1.3e-4,1
 jamjar,0
 jamlike,0
 jammable,0
@@ -89826,7 +89826,7 @@ jannyings,0
 jansky,2.9e-8
 janty,0
 jap,9.8e-7
-japan,7.8e-5
+japan,7.8e-5,1
 japanize,0
 japanized,0
 japanizes,0
@@ -90122,7 +90122,7 @@ jeniquen,0
 jennet,5.2e-8
 jennets,0
 jennies,3.6e-8
-jenny,7.8e-6
+jenny,7.8e-6,1
 jeon,5.1e-7
 jeopard,0
 jeoparded,0
@@ -90175,7 +90175,7 @@ jerricans,0
 jerrid,0
 jerrids,0
 jerries,2.3e-8
-jerry,1.8e-5
+jerry,1.8e-5,1
 jerrycan,1.9e-8
 jerrycans,1.1e-8
 jersey,4.6e-5
@@ -90185,7 +90185,7 @@ jess,4.6e-6
 jessamine,9.6e-8
 jessamines,0
 jessant,0
-jesse,1.1e-5
+jesse,1.1e-5,1
 jessed,0
 jesses,3.7e-8
 jessing,0
@@ -90248,7 +90248,7 @@ jettisoning,9.6e-8
 jettisons,2.6e-8
 jetton,1.4e-8
 jettons,0
-jetty,1.1e-6
+jetty,1.1e-6,1
 jettying,0
 jetway,4.6e-8
 jetways,0
@@ -90343,7 +90343,7 @@ jigsawed,0
 jigsawing,0
 jigsawn,0
 jigsaws,4.1e-8
-jihad,3.1e-6
+jihad,3.1e-6,1
 jihadi,7.8e-7
 jihadis,5.1e-7
 jihadism,1.2e-7
@@ -90368,7 +90368,7 @@ jimmie,1.1e-6
 jimmied,1.7e-8
 jimmies,8.7e-8
 jimminy,0
-jimmy,2.8e-5
+jimmy,2.8e-5,1
 jimmying,0
 jimp,0
 jimper,0
@@ -90561,7 +90561,7 @@ johnnies,7.8e-8
 johnny,2.2e-5
 johnnycake,0
 johnnycakes,0
-johns,6.9e-6
+johns,6.9e-6,1
 johnson,5.2e-5
 johnsongrass,0
 johnsongrasses,0
@@ -90663,7 +90663,7 @@ jolty,0
 jomo,1.8e-7
 jomon,3.6e-8
 jomos,0
-jones,5.4e-5
+jones,5.4e-5,1
 jonesed,0
 joneses,2.3e-7
 jonesing,9.3e-8
@@ -90857,7 +90857,7 @@ jubiles,0
 juco,1.1e-7
 jucos,0
 jud,6.6e-7
-judas,2.3e-6
+judas,2.3e-6,1
 judases,1.1e-8
 judder,4.4e-8
 juddered,0
@@ -91089,7 +91089,7 @@ junks,1.6e-7
 junky,2.6e-7
 junkyard,5.6e-7
 junkyards,6.3e-8
-junta,2.2e-6
+junta,2.2e-6,1
 juntas,1.4e-7
 junto,7.6e-8
 juntos,6.5e-8
@@ -91454,7 +91454,7 @@ kanga,1.4e-7
 kangaroo,3.2e-6
 kangaroos,1.1e-6
 kangs,1.9e-8
-kanji,1e-6
+kanji,1e-6,1
 kanjis,0
 kans,6.8e-8
 kant,1.3e-6
@@ -91790,7 +91790,7 @@ kelims,0
 kell,4.9e-7
 kellies,0
 kells,2.2e-7
-kelly,2.8e-5
+kelly,2.8e-5,1
 keloid,7.9e-8
 keloidal,0
 keloids,4.5e-8
@@ -91960,7 +91960,7 @@ kerpow,0
 kerria,0
 kerrias,0
 kerries,1e-8
-kerry,7.1e-6
+kerry,7.1e-6,1
 kersey,1.8e-7
 kerseymere,0
 kerseymeres,0
@@ -92240,7 +92240,7 @@ kidding,1.6e-5
 kiddingly,0
 kiddish,1.7e-8
 kiddle,3.2e-8
-kiddo,1.7e-6
+kiddo,1.7e-6,1
 kiddoes,0
 kiddos,7.1e-7
 kiddush,6.6e-8
@@ -92414,7 +92414,7 @@ kinase,1.8e-6
 kinases,3.8e-7
 kincob,0
 kind,2.8e-4
-kinda,3.9e-5
+kinda,3.9e-5,1
 kinder,2e-6
 kindergarten,6.2e-6
 kindergartener,6.8e-8
@@ -92546,7 +92546,7 @@ kinkinesses,0
 kinking,3.2e-8
 kinkle,1.2e-8
 kinks,1.5e-6
-kinky,2.3e-6
+kinky,2.3e-6,1
 kinless,0
 kinnikinnick,1.1e-8
 kinnikinnicks,0
@@ -93223,7 +93223,7 @@ kraaling,0
 kraals,2.2e-8
 krab,1.6e-7
 krabs,2.8e-7
-kraft,2.4e-6
+kraft,2.4e-6,1
 krafts,1.9e-8
 krai,8.3e-8
 krais,0
@@ -93444,7 +93444,7 @@ kyes,1.5e-8
 kyle,1.4e-5
 kyles,1.3e-7
 kylices,0
-kylie,3.5e-6
+kylie,3.5e-6,1
 kylikes,0
 kylin,3e-8
 kylins,0
@@ -93467,7 +93467,7 @@ kypes,0
 kyphoses,0
 kyphosis,6e-8
 kyphotic,0
-kyrie,2e-6
+kyrie,2e-6,1
 kyries,2.9e-8
 kyte,7.1e-8
 kytes,0
@@ -93881,7 +93881,7 @@ lain,7.4e-7
 lair,1.7e-6
 lairage,0
 lairages,0
-laird,1.5e-6
+laird,1.5e-6,1
 lairdly,0
 lairds,6.2e-8
 lairdship,0
@@ -94844,7 +94844,7 @@ laundromats,6.6e-8
 laundry,1.1e-5
 laundryman,2.2e-8
 laundrymen,0
-laura,1.7e-5
+laura,1.7e-5,1
 laurae,0
 lauras,1.8e-8
 laureate,1.7e-6
@@ -95715,7 +95715,7 @@ lentoid,0
 lentoids,0
 lentor,0
 lentos,0
-leone,4.4e-6
+leone,4.4e-6,1
 leones,4.5e-8
 leonine,6.3e-8
 leopard,3.9e-6
@@ -96008,7 +96008,7 @@ levigates,0
 levigating,0
 levigation,0
 levigations,0
-levin,2.6e-6
+levin,2.6e-6,1
 levins,6.2e-8
 levirate,2.7e-8
 levirates,0
@@ -96113,7 +96113,7 @@ liana,3.4e-7
 lianas,4.8e-8
 liane,1.7e-7
 lianes,0
-liang,1.4e-6
+liang,1.4e-6,1
 liangs,0
 lianoid,0
 liar,1e-5
@@ -97974,7 +97974,7 @@ logways,0
 logwood,3.1e-8
 logwoods,0
 logy,5.9e-8
-lohan,1e-6
+lohan,1e-6,1
 loiases,0
 loiasis,0
 loid,1.5e-8
@@ -98388,7 +98388,7 @@ lotos,5.1e-8
 lotoses,0
 lots,7.6e-5
 lotsa,1.8e-7
-lotta,1.6e-6
+lotta,1.6e-6,1
 lotte,9.8e-7
 lotted,1.1e-8
 lotter,4.2e-8
@@ -98425,9 +98425,9 @@ loudspeaker,8.9e-7
 loudspeakers,6.2e-7
 lough,6.9e-7
 loughs,1.8e-8
-louie,2.4e-6
+louie,2.4e-6,1
 louies,0
-louis,6.6e-5
+louis,6.6e-5,1
 louma,0
 loumas,0
 loun,1.3e-8
@@ -98614,7 +98614,7 @@ lowpass,4.8e-8
 lowps,0
 lowrider,9.8e-8
 lowriders,4.7e-8
-lowry,2.2e-6
+lowry,2.2e-6,1
 lows,2.8e-6
 lowse,0
 lowt,0
@@ -99506,7 +99506,7 @@ macks,5.5e-8
 macle,0
 macled,0
 macles,0
-macon,1.4e-6
+macon,1.4e-6,1
 macons,0
 macrame,1e-7
 macrames,0
@@ -100278,7 +100278,7 @@ malignly,0
 maligns,1.4e-8
 malihini,0
 malihinis,0
-malik,4.2e-6
+malik,4.2e-6,1
 maline,1.1e-8
 malines,3.1e-8
 malinger,1.5e-8
@@ -101085,7 +101085,7 @@ margate,5.6e-7
 margates,0
 margay,1.7e-8
 margays,0
-marge,1.2e-6
+marge,1.2e-6,1
 margent,0
 margented,0
 margenting,0
@@ -101125,7 +101125,7 @@ margravines,0
 margs,2.7e-8
 marguerite,1.3e-6
 marguerites,1.1e-8
-maria,2.2e-5
+maria,2.2e-5,1
 mariachi,6.5e-7
 mariachis,5.1e-8
 mariculture,3.3e-8
@@ -101520,7 +101520,7 @@ masquerading,7.4e-7
 masquers,1.4e-8
 masques,1.1e-7
 mass,7.4e-5
-massa,1.3e-6
+massa,1.3e-6,1
 massacre,8.1e-6
 massacred,1.3e-6
 massacrer,0
@@ -101538,7 +101538,7 @@ massasauga,0
 massasaugas,0
 masscult,0
 masscults,0
-masse,1.4e-6
+masse,1.4e-6,1
 massed,6.8e-7
 massedly,0
 masses,8.7e-6
@@ -101710,7 +101710,7 @@ matelot,1.4e-8
 matelote,0
 matelotes,0
 matelots,0
-mater,2e-6
+mater,2e-6,1
 materfamilias,0
 materfamiliases,0
 material,8.9e-5
@@ -102015,7 +102015,7 @@ maxwell,5.9e-6
 maxwells,4.4e-8
 may,9.5e-4
 maya,7.4e-6
-mayan,1.3e-6
+mayan,1.3e-6,1
 mayapple,0
 mayapples,0
 mayas,9.8e-8
@@ -102224,7 +102224,7 @@ meazel,0
 mebos,0
 mecamylamine,1e-8
 mecamylamines,0
-mecca,2.4e-6
+mecca,2.4e-6,1
 meccas,3.2e-8
 mech,1.3e-6
 mechanic,6.2e-6
@@ -103243,7 +103243,7 @@ merk,1.4e-7
 merkin,1e-7
 merks,3.7e-8
 merl,9.6e-8
-merle,1.1e-6
+merle,1.1e-6,1
 merles,1.3e-8
 merlin,2.6e-6
 merlins,4.6e-8
@@ -106812,7 +106812,7 @@ misyoke,0
 misyoked,0
 misyokes,0
 misyoking,0
-mitch,8.1e-6
+mitch,8.1e-6,1
 mite,1.2e-6
 miter,2.4e-7
 mitered,3.2e-8
@@ -107214,7 +107214,7 @@ moilers,0
 moiling,0
 moilingly,0
 moils,0
-moira,1.4e-6
+moira,1.4e-6,1
 moirai,1.4e-8
 moire,9.8e-8
 moires,0
@@ -107341,7 +107341,7 @@ mollusk,1.9e-7
 molluskan,0
 molluskans,0
 mollusks,3.5e-7
-molly,7.4e-6
+molly,7.4e-6,1
 mollycoddle,3.2e-8
 mollycoddled,2.5e-8
 mollycoddler,0
@@ -107460,7 +107460,7 @@ monaxon,0
 monaxons,0
 monazite,7.2e-8
 monazites,0
-monde,1.1e-6
+monde,1.1e-6,1
 mondegreen,1.4e-8
 mondegreens,0
 mondes,6.2e-8
@@ -107968,7 +107968,7 @@ montagnard,4.2e-8
 montagnards,2.9e-8
 montane,2e-7
 montanes,0
-monte,4.9e-6
+monte,4.9e-6,1
 monteith,3.4e-7
 monteiths,0
 montem,1.3e-8
@@ -107987,7 +107987,7 @@ monties,0
 montmorillonite,4.8e-8
 montmorillonites,0
 montmorillonitic,0
-monty,3.6e-6
+monty,3.6e-6,1
 monument,7.9e-6
 monumental,3.2e-6
 monumentalities,0
@@ -108135,7 +108135,7 @@ moorings,4.4e-7
 moorish,5.8e-7
 moorland,4.8e-7
 moorlands,9.3e-8
-moors,1.5e-6
+moors,1.5e-6,1
 moorwort,0
 moorworts,0
 moory,0
@@ -108242,7 +108242,7 @@ moratoria,1.9e-8
 moratorium,1.2e-6
 moratoriums,3.3e-8
 moratory,0
-moray,1.1e-6
+moray,1.1e-6,1
 morays,2.3e-8
 morbid,1.8e-6
 morbidities,7.4e-8
@@ -108475,7 +108475,7 @@ moschatels,0
 mose,3.7e-7
 moselle,1.8e-7
 moselles,0
-moses,9.6e-6
+moses,9.6e-6,1
 mosey,1.5e-7
 moseyed,1.9e-8
 moseying,2.6e-8
@@ -110699,7 +110699,7 @@ nancier,0
 nancies,1.9e-8
 nanciest,0
 nancified,0
-nancy,1.4e-5
+nancy,1.4e-5,1
 nancys,2.5e-8
 nandin,0
 nandina,1.2e-8
@@ -111187,7 +111187,7 @@ naysayings,0
 naysays,0
 naze,5e-8
 nazes,0
-nazi,1.9e-5
+nazi,1.9e-5,1
 nazification,2.4e-8
 nazifications,0
 nazified,0
@@ -111195,7 +111195,7 @@ nazifies,0
 nazify,0
 nazifying,0
 nazir,3.6e-7
-nazis,8.7e-6
+nazis,8.7e-6,1
 ne,1.1e-5
 neal,4.4e-6,1
 neals,2.5e-8
@@ -111550,7 +111550,7 @@ nektonic,0
 nektons,0
 nellie,1.3e-6
 nellies,2.3e-8
-nelly,1.5e-6
+nelly,1.5e-6,1
 nelson,1.7e-5
 nelsons,9.6e-8
 nelumbium,0
@@ -112378,7 +112378,7 @@ nicknamer,0
 nicknamers,0
 nicknames,1.7e-6
 nicknaming,4.7e-8
-nicks,1.2e-6
+nicks,1.2e-6,1
 nicoise,3.3e-8
 nicol,6e-7
 nicols,4.8e-8
@@ -114822,7 +114822,7 @@ norks,1.4e-8
 norland,1.6e-7
 norlands,0
 norm,8.5e-6
-norma,2.1e-6
+norma,2.1e-6,1
 normal,1e-4
 normalcies,0
 normalcy,6.8e-7
@@ -116928,7 +116928,7 @@ olla,1.1e-7
 ollamh,0
 ollas,1.1e-8
 ollav,0
-ollie,2e-6
+ollie,2e-6,1
 ollied,0
 ollieing,0
 ollies,3.2e-8
@@ -117493,7 +117493,7 @@ opioid,2.1e-6
 opioids,1.1e-6
 opisthobranch,0
 opisthobranchs,0
-opium,2.9e-6
+opium,2.9e-6,1
 opiumism,0
 opiumisms,0
 opiums,0
@@ -118255,7 +118255,7 @@ orzo,5.9e-8
 orzos,0
 os,1.3e-5
 osar,0
-oscar,2e-5
+oscar,2e-5,1
 oscars,3e-6
 oscillate,2.6e-7
 oscillated,1.1e-7
@@ -119927,7 +119927,7 @@ outswore,0
 outsworn,0
 outswum,0
 outswung,0
-outta,1.3e-5
+outta,1.3e-5,1
 outtake,1.9e-7
 outtakes,4.3e-7
 outtalk,0
@@ -121479,7 +121479,7 @@ overruling,1.7e-7
 overrun,2.3e-6
 overrunning,1.7e-7
 overruns,4.1e-7
-overs,3.6e-6
+overs,3.6e-6,1
 oversad,0
 oversale,0
 oversales,0
@@ -122441,7 +122441,7 @@ paddock,1.3e-6
 paddocked,0
 paddocking,0
 paddocks,3.2e-7
-paddy,4.2e-6
+paddy,4.2e-6,1
 paddywack,0
 paddywacked,0
 paddywacking,0
@@ -122463,7 +122463,7 @@ padnag,0
 padnags,0
 padouk,0
 padouks,0
-padre,1.3e-6
+padre,1.3e-6,1
 padres,1.7e-6
 padri,1.6e-8
 padrona,1.6e-8
@@ -123003,7 +123003,7 @@ palsied,1.9e-8
 palsier,0
 palsies,2.1e-8
 palsiest,0
-palsy,1.6e-6
+palsy,1.6e-6,1
 palsying,0
 palsylike,0
 palter,2.6e-8
@@ -123358,7 +123358,7 @@ pantywaist,0
 pantywaists,0
 panzer,8.5e-7
 panzers,1.1e-7
-paolo,2.5e-6
+paolo,2.5e-6,1
 pap,1.9e-6
 papa,8.1e-6
 papacies,0
@@ -124037,7 +124037,7 @@ parietes,0
 parimutuel,3e-8
 paring,3.5e-7
 parings,2.2e-8
-paris,6.6e-5
+paris,6.6e-5,1
 parises,0
 parish,1.3e-5
 parishes,2.1e-6
@@ -124387,7 +124387,7 @@ paseo,2.5e-7
 paseos,1.1e-8
 pases,0
 pash,1.2e-7
-pasha,1.4e-6
+pasha,1.4e-6,1
 pashadom,0
 pashadoms,0
 pashalic,0
@@ -126085,7 +126085,7 @@ peppinesses,0
 pepping,2.1e-8
 peppy,3.4e-7
 peps,9.8e-8
-pepsi,2.8e-6
+pepsi,2.8e-6,1
 pepsin,6.5e-8
 pepsinate,0
 pepsinated,0
@@ -126783,7 +126783,7 @@ perquisites,4.4e-8
 perries,0
 perron,2.5e-7
 perrons,0
-perry,1.7e-5
+perry,1.7e-5,1
 persalt,0
 persalts,0
 perse,1.7e-7
@@ -127035,7 +127035,7 @@ peskiness,0
 peskinesses,0
 pesky,1.3e-6
 peso,1e-6
-pesos,1.7e-6
+pesos,1.7e-6,1
 pessaries,2.8e-8
 pessary,3.7e-8
 pessimism,9.3e-7
@@ -127107,7 +127107,7 @@ petcocks,0
 petechia,1.5e-8
 petechiae,5e-8
 petechial,5.2e-8
-peter,7.6e-5
+peter,7.6e-5,1
 petered,1.7e-7
 petering,3e-8
 peters,5e-6
@@ -130333,7 +130333,7 @@ plausiblenesses,0
 plausibly,4.2e-7
 plausive,0
 play,4.1e-4
-playa,1.5e-6
+playa,1.5e-6,1
 playabilities,0
 playability,1e-7
 playable,2.5e-6
@@ -131540,7 +131540,7 @@ polluting,1.2e-6
 pollution,1.6e-5
 pollutions,3.5e-8
 pollutive,0
-polly,2.5e-6
+polly,2.5e-6,1
 pollywog,1.3e-8
 pollywogs,0
 polo,5.9e-6
@@ -132161,7 +132161,7 @@ popelike,0
 popera,0
 poperies,0
 popery,7.4e-8
-popes,1.2e-6
+popes,1.2e-6,1
 popeyed,0
 popgun,2.6e-8
 popguns,0
@@ -132310,7 +132310,7 @@ porky,4.7e-7
 porn,3.2e-5
 pornier,0
 porniest,0
-porno,2.3e-6
+porno,2.3e-6,1
 pornographer,1.1e-7
 pornographers,1.6e-7
 pornographic,1.5e-6
@@ -133060,8 +133060,8 @@ pottle,3.9e-8
 pottles,0
 potto,3.1e-8
 pottos,0
-potts,1.4e-6
-potty,1.8e-6
+potts,1.4e-6,1
+potty,1.8e-6,1
 potzer,0
 potzers,0
 pouch,2.7e-6
@@ -135513,7 +135513,7 @@ prilled,0
 prilling,0
 prills,1.1e-8
 prim,7.4e-7
-prima,2.2e-6
+prima,2.2e-6,1
 primacies,0
 primacy,7.6e-7
 primage,0
@@ -137082,7 +137082,7 @@ protistic,0
 protists,6.3e-8
 protium,1.6e-8
 protiums,0
-proto,1.7e-6
+proto,1.7e-6,1
 protoceratops,1.4e-8
 protoceratopses,0
 protocol,1.4e-5
@@ -140670,7 +140670,7 @@ rallyings,0
 rallyist,0
 rallyists,0
 raloxifene,5.1e-8
-ralph,1.3e-5
+ralph,1.3e-5,1
 ralphed,0
 ralphing,0
 ralphs,1.1e-7
@@ -140856,7 +140856,7 @@ randomness,7.9e-7
 randomnesses,0
 randoms,2.7e-7
 rands,1.4e-7
-randy,8.3e-6
+randy,8.3e-6,1
 ranee,3.6e-8
 ranees,0
 rang,5.2e-6
@@ -143106,7 +143106,7 @@ reddled,0
 reddles,0
 reddling,0
 redds,3.4e-8
-reddy,1.2e-6
+reddy,1.2e-6,1
 rede,2.1e-7
 redeal,1.1e-8
 redear,1.1e-8
@@ -149366,7 +149366,7 @@ rikshaws,0
 rile,3.1e-7
 riled,6.9e-7
 riles,1.6e-7
-riley,7.9e-6
+riley,7.9e-6,1
 rilievi,0
 rilievo,1e-8
 rilievos,0
@@ -150147,7 +150147,7 @@ rondelle,1.4e-8
 rondelles,0
 rondels,0
 rondes,0
-rondo,1.1e-6
+rondo,1.1e-6,1
 rondos,2.9e-8
 rondure,0
 rondures,0
@@ -150297,7 +150297,7 @@ ropedancers,0
 ropedancing,0
 ropedancings,0
 ropelike,0
-roper,1.2e-6
+roper,1.2e-6,1
 roperies,0
 ropers,4.8e-8
 ropery,0
@@ -150742,7 +150742,7 @@ rovingly,0
 rovings,1.4e-8
 row,3e-5
 rowable,0
-rowan,2.1e-6
+rowan,2.1e-6,1
 rowanberries,0
 rowanberry,0
 rowans,2.6e-8
@@ -150964,7 +150964,7 @@ ruddling,0
 ruddock,1.3e-7
 ruddocks,0
 rudds,1.4e-8
-ruddy,1e-6
+ruddy,1e-6,1
 ruddying,0
 rude,1.8e-5
 rudely,7.8e-7
@@ -151461,7 +151461,7 @@ sabermetricians,0
 sabermetrics,5.5e-8
 sabers,2.4e-7
 sabes,6.2e-8
-sabha,1.3e-6
+sabha,1.3e-6,1
 sabicu,0
 sabicus,0
 sabin,3.1e-7
@@ -152014,7 +152014,7 @@ salivator,0
 salivators,0
 salix,2.2e-7
 sall,1.6e-7
-salle,1.5e-6
+salle,1.5e-6,1
 sallee,4.1e-8
 sallet,1.8e-8
 sallets,0
@@ -152033,7 +152033,7 @@ sallowness,0
 sallownesses,0
 sallows,1.7e-8
 sallowy,0
-sally,9.3e-6
+sally,9.3e-6,1
 sallying,1.4e-8
 salmagundi,3.6e-8
 salmagundis,0
@@ -152236,7 +152236,7 @@ samariums,0
 samarskite,0
 samarskites,0
 samas,3.5e-8
-samba,1.5e-6
+samba,1.5e-6,1
 sambaed,0
 sambaing,0
 sambal,1.4e-7
@@ -152583,7 +152583,7 @@ santims,0
 santimu,0
 santir,0
 santirs,0
-santo,2.3e-6
+santo,2.3e-6,1
 santol,0
 santolina,0
 santolinas,0
@@ -153172,7 +153172,7 @@ savourily,0
 savouring,1.3e-7
 savours,5.8e-8
 savoury,6.5e-7
-savoy,1.2e-6
+savoy,1.2e-6,1
 savoys,0
 savs,2.4e-8
 savvied,0
@@ -153310,7 +153310,7 @@ scag,6.6e-8
 scagliola,1.2e-8
 scagliolas,0
 scags,0
-scala,1e-6
+scala,1e-6,1
 scalabilities,0
 scalability,4.9e-7
 scalable,8.5e-7
@@ -154075,7 +154075,7 @@ sciolisms,0
 sciolist,0
 sciolistic,0
 sciolists,0
-scion,1.1e-6
+scion,1.1e-6,1
 scions,1.9e-7
 scirocco,8.3e-8
 sciroccos,0
@@ -155827,14 +155827,14 @@ semelparous,0
 sememe,0
 sememes,0
 sememic,0
-semen,2.4e-6
+semen,2.4e-6,1
 semens,0
 semes,1.2e-8
 semester,1.1e-5
 semesters,1e-6
 semestral,0
 semestrial,0
-semi,3.2e-5
+semi,3.2e-5,1
 semiabstract,0
 semiabstraction,0
 semiabstractions,0
@@ -156051,7 +156051,7 @@ semirigid,0
 semiround,0
 semirounds,0
 semirural,1.3e-8
-semis,1.2e-6
+semis,1.2e-6,1
 semisacred,0
 semisecret,0
 semisedentary,0
@@ -156576,7 +156576,7 @@ serfhoods,0
 serfish,0
 serflike,0
 serfs,5e-7
-serge,1.7e-6
+serge,1.7e-6,1
 sergeancies,0
 sergeancy,0
 sergeant,1.3e-5
@@ -157532,7 +157532,7 @@ shawling,0
 shawls,3.4e-7
 shawm,1.5e-8
 shawms,0
-shawn,6.5e-6
+shawn,6.5e-6,1
 shaws,8.7e-8
 shay,1.4e-6
 shaykh,3.9e-7
@@ -157600,7 +157600,7 @@ shedding,2.5e-6
 shedlike,0
 sheds,3e-6
 sheel,1.9e-8
-sheen,2.2e-6
+sheen,2.2e-6,1
 sheened,0
 sheeney,0
 sheeneys,0
@@ -158147,7 +158147,7 @@ shitworks,0
 shiur,1.9e-8
 shiurim,1.1e-8
 shiv,1.2e-6
-shiva,2.1e-6
+shiva,2.1e-6,1
 shivah,1.5e-8
 shivahs,0
 shivaree,1.3e-8
@@ -159429,7 +159429,7 @@ silurid,0
 silurids,0
 siluroid,0
 siluroids,0
-silva,5.9e-6
+silva,5.9e-6,1
 silvae,1.6e-8
 silvan,1.1e-7
 silvans,0
@@ -160542,7 +160542,7 @@ slackly,0
 slackness,6.6e-8
 slacknesses,0
 slacks,7.8e-7
-slade,1.8e-6
+slade,1.8e-6,1
 slae,0
 slaes,0
 slag,1.6e-6
@@ -161679,7 +161679,7 @@ smugness,2e-7
 smugnesses,0
 smugs,0
 smur,0
-smurf,1.3e-6
+smurf,1.3e-6,1
 smurs,0
 smush,8.9e-8
 smushed,7.1e-8
@@ -164392,7 +164392,7 @@ spense,1.3e-8
 spenses,0
 spent,1.1e-4
 speos,0
-sperm,6.9e-6
+sperm,6.9e-6,1
 spermaceti,3.4e-8
 spermacetis,0
 spermagonia,0
@@ -172051,7 +172051,7 @@ swagmen,0
 swags,9.6e-8
 swail,2.1e-8
 swails,1.6e-8
-swain,1e-6
+swain,1e-6,1
 swainish,0
 swainishness,0
 swainishnesses,0
@@ -172068,7 +172068,7 @@ swallows,1.6e-6
 swallowtail,1.1e-7
 swallowtails,2.5e-8
 swam,2.2e-6
-swami,1.1e-6
+swami,1.1e-6,1
 swamies,0
 swamis,3.2e-8
 swamp,6.9e-6
@@ -172238,7 +172238,7 @@ sweatshops,2.1e-7
 sweatsuit,3.5e-8
 sweatsuits,1.3e-8
 sweaty,3.6e-6
-swede,1.1e-6
+swede,1.1e-6,1
 swedes,1.8e-6
 swee,1.6e-7
 sweed,2.1e-8
@@ -172649,7 +172649,7 @@ syens,0
 syes,0
 syke,5.5e-8
 syker,0
-sykes,1.9e-6
+sykes,1.9e-6,1
 syli,0
 sylis,0
 syllabaries,1.3e-8
@@ -173078,7 +173078,7 @@ synizesis,0
 synkarya,0
 synkaryon,0
 synkaryons,0
-synod,2.1e-6
+synod,2.1e-6,1
 synodal,4.7e-8
 synodic,5.9e-8
 synodical,4.7e-8
@@ -173136,7 +173136,7 @@ syntagmatic,1.1e-8
 syntagms,0
 syntax,3.4e-6
 syntaxes,2.6e-8
-synth,2.2e-6
+synth,2.2e-6,1
 synthase,4.5e-7
 synthases,3e-8
 syntheses,1.7e-7
@@ -173706,7 +173706,7 @@ takeup,2.8e-8
 takeups,0
 takhi,0
 taki,3.6e-7
-takin,1.6e-6
+takin,1.6e-6,1
 taking,2.4e-4
 takingly,0
 takings,4.7e-7
@@ -173933,7 +173933,7 @@ tamises,0
 tammar,0
 tammie,9.8e-8
 tammies,0
-tammy,2.2e-6
+tammy,2.2e-6,1
 tamoxifen,2.7e-7
 tamoxifens,0
 tamp,2e-7
@@ -175304,7 +175304,7 @@ tellurizing,0
 tellurometer,0
 tellurometers,0
 tellurous,0
-telly,1.6e-6
+telly,1.6e-6,1
 tellys,0
 telnet,3.3e-7
 telneted,0
@@ -175421,7 +175421,7 @@ temporizes,0
 temporizing,2.3e-8
 temporomandibular,1.1e-7
 tempos,2.3e-7
-temps,2.1e-6
+temps,2.1e-6,1
 tempt,1.7e-6
 temptable,0
 temptation,5.2e-6
@@ -175896,7 +175896,7 @@ terpinols,0
 terpolymer,0
 terpolymers,0
 terpsichorean,1.6e-8
-terra,2.8e-6
+terra,2.8e-6,1
 terrace,7.6e-6
 terraced,1e-6
 terraces,1.9e-6
@@ -175994,7 +175994,7 @@ terrorizes,1.4e-7
 terrorizing,6.5e-7
 terrorless,0
 terrors,8.7e-7
-terry,1.7e-5
+terry,1.7e-5,1
 terse,4.7e-7
 tersely,8.7e-8
 terseness,2.4e-8
@@ -176244,7 +176244,7 @@ tewhit,0
 tewing,0
 tews,2.3e-8
 tex,3.3e-6
-texas,7.8e-5
+texas,7.8e-5,1
 texases,0
 texes,0
 text,1e-4
@@ -177029,7 +177029,7 @@ tholoi,0
 tholos,2.4e-8
 tholus,0
 thon,7.2e-7
-thong,1.5e-6
+thong,1.5e-6,1
 thonged,0
 thongier,0
 thongiest,0
@@ -178289,7 +178289,7 @@ tittupped,0
 tittupping,0
 tittuppy,0
 tittups,0
-titty,1e-6
+titty,1e-6,1
 titubant,0
 titular,7.9e-7
 titularies,0
@@ -178685,7 +178685,7 @@ tomium,0
 tommed,0
 tommies,8.1e-8
 tomming,0
-tommy,1.4e-5
+tommy,1.4e-5,1
 tommycod,0
 tommycods,0
 tommyrot,0
@@ -182593,7 +182593,7 @@ turkey,3.6e-5
 turkeys,1.7e-6
 turkois,0
 turkoises,0
-turks,4.6e-6
+turks,4.6e-6,1
 turm,2.5e-8
 turmeric,7.4e-7
 turmerics,0
@@ -188473,7 +188473,7 @@ upmarket,4.4e-7
 upmost,1.4e-7
 upo,4.1e-8
 upon,1.3e-4
-upped,1.2e-6
+upped,1.2e-6,1
 upper,5.2e-5
 uppercase,2.9e-7
 uppercased,0
@@ -190851,7 +190851,7 @@ vibronic,2.1e-8
 vibs,1.6e-8
 viburnum,1.1e-7
 viburnums,0
-vicar,2.3e-6
+vicar,2.3e-6,1
 vicarage,5e-7
 vicarages,1.5e-8
 vicarate,0
@@ -192639,14 +192639,14 @@ wakikis,0
 waking,8.9e-6
 wakings,1.9e-8
 wald,4.6e-7
-waldo,1.9e-6
+waldo,1.9e-6,1
 waldoes,0
 walds,0
 wale,4.7e-7
 waled,0
 waler,1.4e-8
 walers,0
-wales,3e-5
+wales,3e-5,1
 wali,3e-7
 walie,0
 walies,0
@@ -192722,7 +192722,7 @@ wallpapered,4.7e-8
 wallpapering,3.5e-8
 wallpapers,1.1e-6
 walls,4.2e-5
-wally,2.8e-6
+wally,2.8e-6,1
 wallyball,0
 wallyballs,0
 wallydrag,0
@@ -192816,7 +192816,7 @@ wankle,0
 wanks,7.4e-8
 wanky,5.9e-8
 wanly,2.7e-8
-wanna,1.1e-4
+wanna,1.1e-4,1
 wannabe,1.8e-6
 wannabee,2.5e-8
 wannabees,2.8e-8
@@ -193978,7 +193978,7 @@ wellspring,2.4e-7
 wellsprings,3.5e-8
 welly,1.6e-7
 wels,8.1e-8
-welsh,1.4e-5
+welsh,1.4e-5,1
 welshed,0
 welsher,0
 welshers,0
@@ -194734,7 +194734,7 @@ whoomp,3e-8
 whoomph,0
 whoomphs,0
 whoomps,0
-whoop,1.6e-6
+whoop,1.6e-6,1
 whooped,3.4e-7
 whoopee,1.4e-7
 whoopees,0
@@ -194946,7 +194946,7 @@ wiftier,0
 wiftiest,0
 wifty,0
 wig,4.4e-6
-wigan,2.6e-6
+wigan,2.6e-6,1
 wigans,0
 wigeon,5.4e-8
 wigeons,0
@@ -194969,7 +194969,7 @@ wiggliest,0
 wiggling,4.1e-7
 wiggly,3.1e-7
 wiggy,8.3e-8
-wight,1.7e-6
+wight,1.7e-6,1
 wights,5.6e-8
 wigless,0
 wiglet,0
@@ -195091,7 +195091,7 @@ willowy,8.5e-8
 willpower,1.1e-6
 willpowers,0
 wills,4.1e-6
-willy,4.1e-6
+willy,4.1e-6,1
 willyard,0
 willyart,0
 willying,0
@@ -196019,7 +196019,7 @@ woodworkings,0
 woodworks,6.9e-8
 woodworm,4.4e-8
 woodworms,0
-woody,6.6e-6
+woody,6.6e-6,1
 woodyard,8.1e-8
 woodyards,0
 wooed,3.3e-7
@@ -196783,7 +196783,7 @@ xeroses,0
 xerosis,1.3e-8
 xerothermic,0
 xerotic,0
-xerox,1e-6
+xerox,1e-6,1
 xeroxed,3.5e-8
 xeroxes,1.6e-8
 xeroxing,1.3e-8
@@ -197034,7 +197034,7 @@ yatagans,0
 yataghan,0
 yataghans,0
 yate,7.4e-8
-yates,3e-6
+yates,3e-6,1
 yatra,3.3e-7
 yatter,0
 yattered,0

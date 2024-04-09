@@ -3522,9 +3522,9 @@ local function load_state(session_id_arg, serialized_state)
 end
 
 local function load_saved_state_offset(move_id_offset)
-	local serialized_state = alexgames.get_saved_state_offset(session_id, move_id_offset)
+	local serialized_state = alexgames.adjust_saved_state_offset(session_id, move_id_offset)
 	if serialized_state == nil then
-		error(string.format("get_saved_state_offset(offset=%d) returned nil", move_id_offset))
+		error(string.format("adjust_saved_state_offset(offset=%d) returned nil", move_id_offset))
 	end
 	load_state(session_id, serialized_state)
 	update()
@@ -3730,7 +3730,7 @@ function start_game(session_id_arg, serialized_state)
 	else
 		local last_sess_id = alexgames.get_last_session_id()
 		if last_sess_id ~= nil then
-			serialized_state = alexgames.get_saved_state_offset(last_sess_id, 0)
+			serialized_state = alexgames.adjust_saved_state_offset(last_sess_id, 0)
 			if serialized_state ~= nil then
 				load_state(last_sess_id, serialized_state)
 			end
@@ -8856,7 +8856,7 @@ function two_player_init()
 end
 
 local function load_state_move_offset(move_id_offset)
-	local serialized_state = alexgames.get_saved_state_offset(session_id, move_id_offset)
+	local serialized_state = alexgames.adjust_saved_state_offset(session_id, move_id_offset)
 	state = serialize.deserialize_state(serialized_state)
 	update()
 	broadcast_state("all")
@@ -8876,7 +8876,7 @@ function start_game(session_id_arg, serialized_state)
 		session_id = session_id_arg
 		state = serialize.deserialize_state(serialized_state)
 	elseif last_sess_id ~= nil then
-		serialized_state = alexgames.get_saved_state_offset(last_sess_id, 0)
+		serialized_state = alexgames.adjust_saved_state_offset(last_sess_id, 0)
 		session_id = last_sess_id
 		state = serialize.deserialize_state(serialized_state)
 	end
@@ -10007,7 +10007,7 @@ local function load_state(session_id_arg, state_serialized)
 end
 
 local function load_state_offset(session_id_arg, move_offset)
-	local state_serialized = alexgames.get_saved_state_offset(session_id_arg, move_offset)
+	local state_serialized = alexgames.adjust_saved_state_offset(session_id_arg, move_offset)
 	if state_serialized == nil then
 		error(string.format("state_serialized is nil"))
 	end
@@ -18659,7 +18659,7 @@ function handle_user_clicked(pos_y, pos_x)
 end
 
 function load_state_offset(move_offset)
-	local state_serialized = alexgames.get_saved_state_offset(g_session_id, move_offset)
+	local state_serialized = alexgames.adjust_saved_state_offset(g_session_id, move_offset)
 	g_state = serialize.deserialize(state_serialized)
 	g_win_anim_shown = false
 	update()
@@ -18698,7 +18698,7 @@ function start_game(session_id, state_serialized)
 		print(string.format("Read previous session ID %s", prev_session_id))
 		if prev_session_id ~= nil then
 			g_session_id = prev_session_id
-			state_serialized = alexgames.get_saved_state_offset(g_session_id, 0)
+			state_serialized = alexgames.adjust_saved_state_offset(g_session_id, 0)
 			g_state = serialize.deserialize(state_serialized)
 			alexgames.set_status_msg(string.format("Loaded saved state from session %d", g_session_id))
 		else
@@ -19411,9 +19411,9 @@ function handle_msg_received(src, msg)
 end
 
 local function load_saved_state_offset(move_id_offset)
-	local serialized_state = alexgames.get_saved_state_offset(session_id, move_id_offset)
+	local serialized_state = alexgames.adjust_saved_state_offset(session_id, move_id_offset)
 	if serialized_state == nil then
-		error(string.format("get_saved_state_offset(offset=%d) returned nil", move_id_offset))
+		error(string.format("adjust_saved_state_offset(offset=%d) returned nil", move_id_offset))
 	end
 	internal_load_state(session_id, serialized_state)
 	update()
@@ -19615,7 +19615,7 @@ function start_game(session_id, state_serialized)
 	else
 		local session_id = alexgames.get_last_session_id()
 		if session_id ~= nil then
-			state_serialized = alexgames.get_saved_state_offset(session_id, 0)
+			state_serialized = alexgames.adjust_saved_state_offset(session_id, 0)
 			internal_load_state(session_id, state_serialized)
 		end
 	end
@@ -23188,7 +23188,7 @@ function start_game(session_id, state_serialized)
 	else
 		local last_sess_id = alexgames.get_last_session_id()
 		if last_sess_id ~= nil then
-			state_serialized = alexgames.get_saved_state_offset(last_sess_id, 0) 
+			state_serialized = alexgames.adjust_saved_state_offset(last_sess_id, 0) 
 			g_session_id = last_sess_id
 			state = serialize.deserialize_state(state_serialized)
 			state_set = true
@@ -24736,7 +24736,7 @@ end
 
 local function load_state_offset(offset)
 	local ui_states = core.copy_player_ui_states(state)
-	local state_serialized = alexgames.get_saved_state_offset(g_session_id, offset) 
+	local state_serialized = alexgames.adjust_saved_state_offset(g_session_id, offset) 
 	if state_serialized ~= nil then
 		state = serialize.deserialize_state(state_serialized)
 		core.apply_player_ui_states(state, ui_states)
@@ -24768,7 +24768,7 @@ function start_game(session_id, state_serialized)
 	else
 		local last_sess_id = alexgames.get_last_session_id()
 		if last_sess_id ~= nil then
-			state_serialized = alexgames.get_saved_state_offset(last_sess_id, 0) 
+			state_serialized = alexgames.adjust_saved_state_offset(last_sess_id, 0) 
 			g_session_id = last_sess_id
 			state = serialize.deserialize_state(state_serialized)
 			state_set = true
@@ -27402,7 +27402,7 @@ local function load_prev_state()
 	-- If the player presses undo, we want all the previous state
 	-- except we want the time elapsed to stay the same.
 	local time_elapsed = state.time_elapsed
-	local prev_state_serialized = alexgames.get_saved_state_offset(session_id, -1)
+	local prev_state_serialized = alexgames.adjust_saved_state_offset(session_id, -1)
 	if prev_state_serialized ~= nil then
 		draw.stop_move_animations()
 		state = serialize.deserialize_state(prev_state_serialized)
@@ -27692,7 +27692,7 @@ function start_game(session_id_arg, state_serialized)
 		--local state_serialized = alexgames.read_stored_data(DATA_ID_STATE)
 		local last_session_id = alexgames.get_last_session_id()
 		if last_session_id ~= nil then
-			state_serialized = alexgames.get_saved_state_offset(last_session_id, 0)
+			state_serialized = alexgames.adjust_saved_state_offset(last_session_id, 0)
 		end
 
 		-- this shouldn't usually be possible, but I think it happens if I manage to increment the session ID
@@ -32781,7 +32781,7 @@ end
 
 
 function load_state_move_offset(move_offset)
-	local serialized_state = alexgames.get_saved_state_offset(session_id, move_offset)
+	local serialized_state = alexgames.adjust_saved_state_offset(session_id, move_offset)
 	load_state_helper(session_id, serialized_state)
 	update()
 	send_state()
@@ -32810,7 +32810,7 @@ function start_game(session_id_arg, serialized_state)
 		load_state_helper(session_id_arg, serialized_state)
 	elseif last_sess_id ~= nil then
 		print("Loading autosaved state")
-		serialized_state = alexgames.get_saved_state_offset(last_sess_id, 0)
+		serialized_state = alexgames.adjust_saved_state_offset(last_sess_id, 0)
 		load_state_helper(last_sess_id, serialized_state)
 	else
 		print("Starting new game, no URL param or autosaved state found")
