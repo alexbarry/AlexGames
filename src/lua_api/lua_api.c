@@ -497,15 +497,15 @@ void *init_lua_game(const struct game_api_callbacks *api_callbacks_arg, const ch
 	luaL_openlibs(L);
 
 #ifdef ENABLE_WORD_DICT
-	// TODO why does alex_c_api.dict have to be initialized before alex_c_api?
+	// TODO why does alexgames.dict have to be initialized before alexgames?
 	// maybe I have a bug causing it to fail when they're reversed.
 
 	// TODO remove this, this is the old dictionary API
-	//luaL_requiref(L, "alex_c_api.dict",  luaopen_alexdictlib, 0);
+	//luaL_requiref(L, "alexgames.dict",  luaopen_alexdictlib, 0);
 
-	init_lua_alex_dict(L, "alex_c_api.dict", get_game_dict_api());
+	init_lua_alex_dict(L, "alexgames.dict", get_game_dict_api());
 #endif
-	luaL_requiref(L, "alex_c_api", luaopen_alexlib, 0);
+	luaL_requiref(L, "alexgames", luaopen_alexlib, 0);
 	// luaL_requiref leaves a copy of the library on the stack, so we need to pop it
 	lua_pop(L, -1);
 	lua_pop(L, -1);

@@ -1,4 +1,4 @@
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local core = require("games/crossword_builder/crossword_builder_core")
 local draw = require("games/crossword_builder/crossword_builder_draw")
@@ -72,20 +72,20 @@ function handle_btn_clicked(btn_id)
 		local submit_info = core.submit(state.game, player_idx, placed_tiles)
 		print(string.format("submit returned: %s, %d", submit_info, submit_info.rc))
 		if submit_info.rc == core.RC_SUCCESS then
-			alex_c_api.set_status_msg(string.format("Successfully formed words: %s", submit_info.word))
+			alexgames.set_status_msg(string.format("Successfully formed words: %s", submit_info.word))
 			draw.update_state(state.draw, state.game)
 			draw.draw(state.draw)
 		else
 			local msg = core.submit_info_to_msg(submit_info)
 			print("rc is not success... " .. msg)
-			alex_c_api.set_status_err(msg)
+			alexgames.set_status_err(msg)
 		end
 	end
 end
 
 function start_game()
-	alex_c_api.enable_evt("mouse_updown")
-	alex_c_api.enable_evt("mouse_move")
+	alexgames.enable_evt("mouse_updown")
+	alexgames.enable_evt("mouse_move")
 	state.touch_to_mouse_evts = touch_to_mouse_evts.init({
 		handle_mouse_evt  = handle_mouse_evt,
 		handle_mousemove  = handle_mousemove,

@@ -1,5 +1,5 @@
 local wait_for_players = require("libs/multiplayer/wait_for_players")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local core = require("games/card_sim/card_generic_core")
 local draw = require("games/card_sim/card_generic_draw")
@@ -64,7 +64,7 @@ local function send_state_updates_if_host()
 			goto next_player
 		end
 		local serialized_state = serialize.serialize_state_for_client(state, i)
-		alex_c_api.send_message(players[i], "state:" .. serialized_state)
+		alexgames.send_message(players[i], "state:" .. serialized_state)
 		::next_player::
 	end
 end
@@ -74,15 +74,15 @@ function draw_board()
 	draw.draw(state, player)
 end
 
-alex_c_api.enable_evt("mouse_move")
-alex_c_api.enable_evt("mouse_updown")
+alexgames.enable_evt("mouse_move")
+alexgames.enable_evt("mouse_updown")
 
 function handle_user_clicked(pos_y, pos_x)
 end
 
 local last_move_time = nil
 function handle_mousemove(pos_y, pos_x)
-	local time = alex_c_api.get_time_ms()
+	local time = alexgames.get_time_ms()
 	if last_move_time ~= nil and time - last_move_time < MAX_MOVE_PERIOD_MS then
 			throttled_count = throttled_count + 1
 		return
@@ -91,7 +91,7 @@ function handle_mousemove(pos_y, pos_x)
 	if not is_client then
 		core.handle_mousemove(state, player, pos_y, pos_x)
 	else
-		alex_c_api.send_message("all", string.format("move:%d,%d,%s,%d,%d", player, 3, 'mouse', pos_y, pos_x))
+		alexgames.send_message("all", string.format("move:%d,%d,%s,%d,%d", player, 3, 'mouse', pos_y, pos_x))
 	end
 	send_state_updates_if_host()
 	draw_board()
@@ -101,7 +101,7 @@ function handle_mouse_evt(evt_id, pos_y, pos_x)
 	if not is_client then
 		core.handle_mouse_evt(state, player, evt_id, pos_y, pos_x)
 	else
-		alex_c_api.send_message("all", string.format("move:%d,%d,%s,%d,%d", player, evt_id, 'mouse', pos_y, pos_x))
+		alexgames.send_message("all", string.format("move:%d,%d,%s,%d,%d", player, evt_id, 'mouse', pos_y, pos_x))
 	end
 	send_state_updates_if_host()
 	draw_board()
@@ -193,7 +193,7 @@ end
 -- TODO I really don't want to have to serialize all of this...
 function handle_touch_evt(evt_id, changed_touches)
 	if evt_id == "touchmove" then
-		local time = alex_c_api.get_time_ms()
+		local time = alexgames.get_time_ms()
 		if last_move_time ~= nil and time - last_move_time < MAX_MOVE_PERIOD_MS then
 			throttled_count = throttled_count + 1
 			return
@@ -207,7 +207,7 @@ function handle_touch_evt(evt_id, changed_touches)
 		for _, move in ipairs(moves) do
 			local move_msg = string.format("move:%d,%d,%s,%d,%d",
 			                               move.player, move.move_type, move.input_src, move.y, move.x)
-			alex_c_api.send_message("all", move_msg)
+			alexgames.send_message("all", move_msg)
 		end
 	end
 	send_state_updates_if_host()
@@ -215,7 +215,7 @@ function handle_touch_evt(evt_id, changed_touches)
 end
 
 
-alex_c_api.enable_evt('touch')
+alexgames.enable_evt('touch')
 
 wait_for_players.init(players, player, start_host_game, start_client_game)
 draw.init(args)

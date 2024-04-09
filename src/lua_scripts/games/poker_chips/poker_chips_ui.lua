@@ -1,7 +1,7 @@
 -- Author: Alex Barry (github.com/alexbarry)
 local ui = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local ui_pane_bet_input   = require("games/poker_chips/ui/bet_input")
 local ui_pane_control     = require("games/poker_chips/ui/control")
 local ui_pane_view_others = require("games/poker_chips/ui/view_others")
@@ -72,7 +72,7 @@ function ui.init()
 end
 
 function ui.draw(ui_state)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 	ui_state.active_state.draw(ui_state.active_state)
 end
 

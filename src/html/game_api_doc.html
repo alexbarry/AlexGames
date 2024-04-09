@@ -167,8 +167,8 @@
 		<li><strong>User input</strong> <span id="callbacks_user_input_toggle_collapsed"></span></li>
 		<ul id="callbacks_user_input_body">
 			<li><a class="api_link" href="#handle_user_clicked">handle_user_clicked</a>: <span class="collapsable collapsed">Called when the user clicks (or touches) a point on the screen. Note that this is different from a mouse up/down event. This is the <code>"click"</code> event in HTML, which seems to have some debouncing, so that it's only sent if the user presses and releases at the same spot, rather than clicking and dragging.</span></li>
-			<li><a class="api_link" href="#handle_mousemove">handle_mousemove</a>: <span class="collapsable collapsed">Sent when the user moves the mouse over the canvas. Must be enabled by calling <code>alex_c_api.enable_evt("mouse_move")</code></span></li>
-			<li><a class="api_link" href="#handle_mouse_evt">handle_mouse_evt</a><span class="collapsable collapsed">Sent when the presses or releases a mouse button. Must be enabled by calling <code>alex_c_api.enable_evt("mouse_updown")</code></span></li>
+			<li><a class="api_link" href="#handle_mousemove">handle_mousemove</a>: <span class="collapsable collapsed">Sent when the user moves the mouse over the canvas. Must be enabled by calling <code>alexgames.enable_evt("mouse_move")</code></span></li>
+			<li><a class="api_link" href="#handle_mouse_evt">handle_mouse_evt</a><span class="collapsable collapsed">Sent when the presses or releases a mouse button. Must be enabled by calling <code>alexgames.enable_evt("mouse_updown")</code></span></li>
 			<li><a class="api_link" href="#handle_wheel_changed">handle_wheel_changed</a></li>
 			<li><a class="api_link" href="#handle_key_evt">handle_key_evt</a></li>
 			<li><a class="api_link" href="#handle_touch_evt">handle_touch_evt</a></li>
@@ -205,7 +205,7 @@
 <p>If you have no idea what any of this, then just use a search engine to find "HTML colour picker", where you should find a UI that can generate these hex codes for you. Browser developer tools may have this built in, too.</p>
 
 <h4 id="draw_graphic">draw_graphic</h4>
-<code>alex_c_api.draw_graphic(img_id, y, x, width, height, params)</code>
+<code>alexgames.draw_graphic(img_id, y, x, width, height, params)</code>
 <ul>
 	<li><code>img_id</code>: string identifying the image. See images in the <code>&lt;div class="preload"&gt;</code> of <code>index.html</code>.</li>
 	<li><code>y</code>, <code>x</code>: <i>y</i> and <i>x</i> position to draw the centre of the image. (0,0) is the top left. See <a href="#coords">coordinate system</a> for more information.</li>
@@ -220,7 +220,7 @@
 </ul>
 
 <h4 id="draw_line">draw_line</h4>
-<code>alex_c_api.draw_line(colour, line_size, y1, x1, y2, x2)</code>
+<code>alexgames.draw_line(colour, line_size, y1, x1, y2, x2)</code>
 <ul>
 	<li><code>colour</code>: hexademical colour string, starting with a number sign (<code>#</code>) just like HTML. e.g. <code>#000000</code> is black, <code>#ff0000</code> is red, and <code>#00ff0088</code> is green at 50% opacity.</li>
 	<li><code>line_size</code>: width of the line, in scaled pixels.</li>
@@ -229,24 +229,24 @@
 </ul>
 
 <h4 id="draw_text">draw_text</h4>
-<code>alex_c_api.draw_text(text_str, colour, y, x, size, align)</code>
+<code>alexgames.draw_text(text_str, colour, y, x, size, align)</code>
 <ul>
 	<li><code>text_str</code>: String of text to draw.</li>
 	<li><code>colour</code>: Hexadecimal colour string, for more info see the description in the <a href="#draw_line"><code>draw_line</code></a> documentation</li>
 	<li><code>y</code>, <code>x</code>: Position to start drawing the text. This can be the left-most point, centre, or right-most point depending on the <code>align</code> argument.</li>
 	<li><code>size</code>: Font size of the text.</li>
-	<li><code>align</code>: Text alignment. <code>alex_c_api.TEXT_ALIGN_LEFT</code>, <code>alex_c_api.TEXT_ALIGN_CENTRE</code>, or <code>alex_c_api.TEXT_ALIGN_RIGHT</code>.</li>
+	<li><code>align</code>: Text alignment. <code>alexgames.TEXT_ALIGN_LEFT</code>, <code>alexgames.TEXT_ALIGN_CENTRE</code>, or <code>alexgames.TEXT_ALIGN_RIGHT</code>.</li>
 </ul>
 
 <h4 id="draw_rect">draw_rect</h4>
-<code>alex_c_api.draw_rect(fill_colour, y_start, x_start, y_end, x_end)</code>
+<code>alexgames.draw_rect(fill_colour, y_start, x_start, y_end, x_end)</code>
 <p>Draws a filled rectangle at the specifed position. To draw an outline, see the <code>draw_shapes.draw_rect_outline</code> library, available by loading <code>libs/draw/draw_shapes</code>. (Note that this is simply a helper function that calls the <code>draw_line</code> API four times.)</p>
 <ul>
 	<li><code>fill_colour</code>: Hexadecimal colour string, for more info see the description in the <a href="#draw_line"><code>draw_line</code></a> documentation.</li>
 </ul>
 
 <h4 id="draw_circle">draw_circle</h4>
-<code>alex_c_api.draw_circle(fill_colour, outline_colour, y, x, radius)</code>
+<code>alexgames.draw_circle(fill_colour, outline_colour, y, x, radius)</code>
 <p>Draws a circle at the specified position. Note that the fill or outline can be invisible by providing a colour string with 8 bytes specified, e.g. <code>#00000000</code>, the same way that HTML colours work.</p>
 <ul>
 	<li><code>fill_colour</code>: Hexadecimal colour string specifying the colour of the inside of the circle. For more info on hexadecimal colour strings, see the <a class="api_link" href="#draw_line">draw_line</a> documentation.</li>
@@ -256,11 +256,11 @@
 </ul>
 
 <h4 id="draw_clear">draw_clear</h4>
-<code>alex_c_api.draw_clear()</code>
+<code>alexgames.draw_clear()</code>
 <p>Clears the screen of all drawn content. Generally you'll want to call this every time you start drawing the game state.</p>
 
 <h4 id="draw_refresh">draw_refresh</h4>
-<code>alex_c_api.draw_refresh()</code>
+<code>alexgames.draw_refresh()</code>
 <p>Causes any previously draw API calls to take effect (e.g. write the buffer to the screen). On HTML this has no effect since the draw APIs already draw directly onto the screen, but it is needed on some other clients. This should be called when you're done drawing the game state.</p>
 
 <h3>Network APIs and callbacks</h3>
@@ -276,7 +276,7 @@
 <p>In the future, I would like to add some standard for adding a player chosen name that could be used, but nothing like that is currently implemented.</p>
 
 <h4 id="send_message">send_message</h4>
-<code>alex_c_api.send_message(dst, msg)</code>
+<code>alexgames.send_message(dst, msg)</code>
 <p>Sends a message over the network to player <code>dst</code>. If <code>dst</code> is <code>"all"</code> then the message is broadcast to all players.</p>
 <ul>
 	<li><code>dst</code>: Identifier of the player you want to message, or <code>"all"</code> to broadcast to all players. See <a href="#network_player_identifiers">network player identifiers</a> for more information</li>
@@ -290,7 +290,7 @@
 <h3>UI APIs</h3>
 
 <h4 id="create_btn">create_btn</h4>
-<code>alex_c_api.create_btn(btn_id, btn_text, weight)</code>
+<code>alexgames.create_btn(btn_id, btn_text, weight)</code>
 
 <p>Creates a button on the UI, probably at the bottom.</p>
 <p>When players press this button, the <a class="api_link" href="#handle_btn_clicked">handle_btn_clicked</a> callback is called.</p>
@@ -302,18 +302,18 @@
 </ul>
 
 <h4 id="set_btn_enabled">set_btn_enabled</h4>
-<code>alex_c_api.set_btn_enabled(btn_id, enabled)</code>
+<code>alexgames.set_btn_enabled(btn_id, enabled)</code>
 
 <p>Enables or disables the specified button. An enabled button can be pressed, but a disabled button can not be pressed, and appears greyed out.</p>
 
 <h4 id="set_btn_visible">set_btn_visible</h4>
-<code>alex_c_api.set_btn_visible(btn_id, visible)</code>
+<code>alexgames.set_btn_visible(btn_id, visible)</code>
 
 <p>Sets whether or not the specified button is visible.</p>
 
 <h4 id="show_popup">show_popup</h4>
 
-<code>alex_c_api.show_popup(popup_id, popup_info)</code>
+<code>alexgames.show_popup(popup_id, popup_info)</code>
 
 <pre>
 popup_info = {
@@ -323,21 +323,21 @@ popup_info = {
 	-- Table containing list of different items that are to be displayed in the popup
 	-- One of each possibility is shown below as an example.
 	items = {
-		{ item_type = alex_c_api.POPUP_ITEM_MSG, msg = "This is text shown to the user." },
+		{ item_type = alexgames.POPUP_ITEM_MSG, msg = "This is text shown to the user." },
 
 		-- This is a button displaying "My Action" that the user can click.
 		-- If the user clicks it, the `handle_popup_btn_clicked` callback is called,
 		-- with the id 1 passed as an argument to identify which button.
 		-- Note that the state of other popup elements (e.g. the dropdown, defined next) is
 		-- is also passed to the game through this callback.
-		{ item_type = alex_c_api.POPUP_ITEM_BTN, id = 1, text = "My action" },
+		{ item_type = alexgames.POPUP_ITEM_BTN, id = 1, text = "My action" },
 
 		-- This displays a dropdown with two choices: "White" and "Black", and the label
 		-- label "Choose a colour".
 		-- Once a button on the popup is pressed, the selected dropdown item is identified
 		-- by an integer starting from 1 (e.g. 1 is the first option, 2 is the 2nd, etc).
 		{
-			item_type = alex_c_api.POPUP_ITEM_DROPDOWN,
+			item_type = alexgames.POPUP_ITEM_DROPDOWN,
 			id        = 2,
 			label     = "Choose a colour",
 			options   = {
@@ -358,25 +358,25 @@ popup_info = {
 <p>Hides any currently visible popups.</p>
 
 <h4 id="set_status_msg">set_status_msg</h4>
-<code>alex_c_api.set_status_msg(msg)</code>
+<code>alexgames.set_status_msg(msg)</code>
 
 <p>Displays a string to the user, usually indiciating the result of some action they performed, or some event (e.g. player joined). Previous messages are shown in a scrollable UI element, along with timestamps.</p>
 
 
 <h4 id="set_status_err">set_status_err</h4>
-<code>alex_c_api.set_status_err(msg)</code>
+<code>alexgames.set_status_err(msg)</code>
 
 <p>Same as <a class="api_link" href="#set_status_msg">set_status_msg</a> defined above, but with red text, indicating an error. This is used both for programming errors (usually showing a full Lua stacktrace), or to alert the user that their move was invalid.</p>
 
 <h4 id="prompt_string">prompt_string</h4>
-<code>alex_c_api.prompt_string(prompt_title, prompt_msg)</code>
+<code>alexgames.prompt_string(prompt_title, prompt_msg)</code>
 
 <p>Shows a popup to the user with a title and message, and a text box for them to enter a string. This is useful for games that occasionally need text input, but are not centred around providing text input. (e.g. a word game should have their own UI with a keyboard or similar, but a game where you can enter your name should use this).</p>
 
 <p>This likely isn't a great experience for games played with a mouse and keyboard, but it is essential on mobile-- I don't know how else you could bring up the soft keyboard on phones.</p>
 
 <h4 id="enable_evt">enable_evt</h4>
-<code>alex_c_api.enable_evt(evt_type)</code>
+<code>alexgames.enable_evt(evt_type)</code>
 
 <p>Enables the event specified by <code>evt_type</code>, which is one of the following strings:</p>
 <ul>
@@ -393,7 +393,7 @@ popup_info = {
 
 <h4 id="set_update_timer_ms">set_update_timer_ms</h4>
 
-<code>alex_c_api.set_update_timer_ms(update_time_period_ms)</code>
+<code>alexgames.set_update_timer_ms(update_time_period_ms)</code>
 
 <p>When called, causes <a class="api_link" href="#draw_board">draw_board</a> to be called every <code>update_time_period_ms</code> milliseconds.</p>
 
@@ -404,24 +404,24 @@ popup_info = {
 <p>These APIs are the raw storage APIs that the client implements directly, but many games may be better off using the <a href="#persistent_saved_state">Persistent Saved State</a> APIs discussed later. Those APIs allow for simply calling a "save_state" API whenever the user makes a move, and a separate UI is offered for the user to view all their different saved games' states together, and cycle through the previous moves.</p>
 
 <h4 id="store_data">store_data</h4>
-<code>alex_c_api.store_data(key, value)</code>
+<code>alexgames.store_data(key, value)</code>
 
 <p>Stores the bytearray <code>value</code> to persistent storage, under string <code>key</code>. On HTML this uses <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage">Window: localStorage</a>. This may be getting cleared after some period of inactivity on iOS. I'd like to mitigate that but I haven't looked into it yet.
 
 <h4 id="read_stored_data">read_stored_data</h4>
-<code>alex_c_api.read_stored_data(key)</code>
+<code>alexgames.read_stored_data(key)</code>
 
 <h3 id="persistent_saved_state">Persistent Saved State APIs</h3>
 
 <p>These APIs are meant to be used for games to save the state every time the user makes a move. The game client provides a separate UI for the user to browse previous games' states and cycle through their moves.
 
 <h4 id="get_new_session_id">get_new_session_id</h4>
-<code>alex_c_api.get_new_session_id()</code>
+<code>alexgames.get_new_session_id()</code>
 
 <p>Returns a new saved state ID. This is meant to be called when the user starts a new game, then the ID should be used whenever calling the <a class="api_link" href="#save_state">save_state</a> API, so that states from the same game can be grouped together.</p>
 
 <h4 id="save_state">save_state</h4>
-<code>alex_c_api.save_state(session_id, state)</code>
+<code>alexgames.save_state(session_id, state)</code>
 
 <p>Saves the <code>state</code> argument to persistent storage in a history database. This history database can be viewed by the user by pressing the <i>"Options"</i> button and then pressing the <i>"Load autosaved game"</i> button.</p>
 
@@ -434,19 +434,19 @@ popup_info = {
 <h3>Miscellaneous APIs</h3>
 
 <h4 id="get_time_ms">get_time_ms</h4>
-<code>alex_c_api.get_time_ms()</code>
+<code>alexgames.get_time_ms()</code>
 
 <p>Returns the current time in milliseconds.</p>
 
 <h4 id="get_time_of_day">get_time_of_day</h4>
-<code>alex_c_api.get_time_of_day()</code>
+<code>alexgames.get_time_of_day()</code>
 
 <p>Returns the current date and time in <code>yyyy-mm-dd HH:MM:SS</code> format, in the device's local timezone.</p>
 
 <p>This is intended to be used to show the user when their last move was.</p>
 
 <h4 id="get_user_colour_pref">get_user_colour_pref</h4>
-<code>alex_c_api.get_user_colour_pref()</code>
+<code>alexgames.get_user_colour_pref()</code>
 
 <p>Returns the user's colour preference, either <code>"light"</code>, <code>"dark"</code>, or <code>"very_dark"</code>.</p>
 
@@ -498,16 +498,16 @@ popup_info = {
 <h4 id="handle_mouse_evt">handle_mouse_evt</h4>
 <code>handle_mouse_evt(evt_id, pos_y, pos_x, buttons)</code>
 
-<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alex_c_api.enable_evt("mouse_updown")</a>. This will send events for the primary (usually left) mouse button. To receive events for the secondary (usually right) mouse button and third (usually the wheel) mouse button, enable <i>alternate</i> button mouse events by also calling <a class="api_link" href="#enable_evt">alex_c_api.enable_evt("mouse_alt_updown")</a> (you should still enable <code>mouse_updown</code> events). This will also disable the context menu that normally shows up when pressing the alternate (usually right) mouse button.</p>
+<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("mouse_updown")</a>. This will send events for the primary (usually left) mouse button. To receive events for the secondary (usually right) mouse button and third (usually the wheel) mouse button, enable <i>alternate</i> button mouse events by also calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("mouse_alt_updown")</a> (you should still enable <code>mouse_updown</code> events). This will also disable the context menu that normally shows up when pressing the alternate (usually right) mouse button.</p>
 <p>If enabled, this callback is called whenever the user presses or releases their mouse over the game screen.</p>
 
 <ul>
 	<li><code>evt_id</code>: one of:
 	<ul>
-		<li><code>alex_c_api.MOUSE_EVT_UP</code>, <code>alex_c_api.MOUSE_EVT_DOWN</code>: <strong>primary mouse button released or pressed</strong>. Primary usually means the left mouse button, but this can be remapped in software or the mouse itself (e.g. for some left handed users)</li>
-		<li><code>alex_c_api.MOUSE_EVT_LEAVE</code>: user's mouse has <strong>moved off screen</strong>. When it returns, different mouse buttons may be pressed.</li>
-		<li><code>alex_c_api.MOUSE_EVT_ALT_DOWN</code>, <code>alex_c_api.MOUSE_EVT_ALT_UP</code>: <strong>secondary mouse button released or pressed</strong>. Secondary usually means the right mouse button, but this can be changed (e.g. for some left handed users)</li>
-		<li><code>alex_c_api.MOUSE_EVT_ALT2_DOWN</code>, <code>alex_c_api.MOUSE_EVT_ALT2_UP</code>: <strong>third mouse button released or pressed</strong>. This is usually the middle mouse button (which is likely a wheel).</li>
+		<li><code>alexgames.MOUSE_EVT_UP</code>, <code>alexgames.MOUSE_EVT_DOWN</code>: <strong>primary mouse button released or pressed</strong>. Primary usually means the left mouse button, but this can be remapped in software or the mouse itself (e.g. for some left handed users)</li>
+		<li><code>alexgames.MOUSE_EVT_LEAVE</code>: user's mouse has <strong>moved off screen</strong>. When it returns, different mouse buttons may be pressed.</li>
+		<li><code>alexgames.MOUSE_EVT_ALT_DOWN</code>, <code>alexgames.MOUSE_EVT_ALT_UP</code>: <strong>secondary mouse button released or pressed</strong>. Secondary usually means the right mouse button, but this can be changed (e.g. for some left handed users)</li>
+		<li><code>alexgames.MOUSE_EVT_ALT2_DOWN</code>, <code>alexgames.MOUSE_EVT_ALT2_UP</code>: <strong>third mouse button released or pressed</strong>. This is usually the middle mouse button (which is likely a wheel).</li>
 	</ul>
 	</li>
 	<li><code>pos_y</code>, <code>pos_x</code>: <i>y</i> and <i>x</i> position of the mouse. See <a class="api_link" href="#coords">coordinates</a> for more information.</li>
@@ -517,7 +517,7 @@ popup_info = {
 <h4 id="handle_mousemove">handle_mousemove</h4>
 <code>handle_mousemove(pos_y, pos_x, buttons)</code>
 
-<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alex_c_api.enable_evt("mousemove")</a>.</p>
+<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("mousemove")</a>.</p>
 <p>If enabled, this callback is called whenever the user moves their mouse over the game screen.</p>
 <ul>
 	<li><code>pos_y, pos_x</code>: <i>y</i> and <i>x</i> coordinates showing where the user's mouse currently is. See <a class="api_link" href="#coords">coordinates</a> for more information.</li>
@@ -527,13 +527,13 @@ popup_info = {
 <h4 id="handle_wheel_changed">handle_wheel_changed</h4>
 <code>handle_wheel_changed(delta_y, delta_x)</code>
 
-<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alex_c_api.enable_evt("wheel")</a>.</p>
+<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("wheel")</a>.</p>
 <p>Mouse wheel changed. This is generally only used for scrolling or zooming.</p>
 <p>See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/wheel_event">HTML Wheel event</a> for more detail.</p>
 
 <h4 id="handle_key_evt">handle_key_evt</h4>
 <code>handle_key_evt(evt_id, key_code)</code>
-<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alex_c_api.enable_evt("key")</a>.</p>
+<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("key")</a>.</p>
 <p>The user pressed a button on the keyboard while focused on the game.</p>
 <ul>
 	<li><code>evt_id</code>: either <code>"keydown"</code> for when a key is pressed, or <code>"keyup"</code> for when a key is released. (Same as the HTML key event names).</li>
@@ -557,7 +557,7 @@ example_touch = {
 }
 </pre>
 
-<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alex_c_api.enable_evt("touch")</a>.</p>
+<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("touch")</a>.</p>
 <p>Called when the user touches the screen, either first pressing a finger to the screen, moving the finger, releasing the finger, or moving the finger off screen.</p>
 <p>Note that touches are unlike mouse events in that the user can use multiple fingers to touch the screen at once. So you need to pay attention to the <code>id</code> of each touch event.</p>
 <ul>

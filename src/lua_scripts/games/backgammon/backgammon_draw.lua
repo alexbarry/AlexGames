@@ -1,7 +1,7 @@
 -- Game:   Backgammon
 -- author: Alex Barry (github.com/alexbarry)
 local draw = {}
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local draw_more    = require("libs/draw/draw_more")
 local draw_shapes  = require("libs/draw/draw_shapes")
 local draw_colours = require("libs/draw/draw_colours")
@@ -70,7 +70,7 @@ local DICE2_OFFSET = 10
 
 local TIMER_Y_POS = math.floor(board_height/2 - TEXT_SIZE/2 - TEXT_PADDING/2)
 local TIMER_X_POS = math.floor(board_width/2 - MIDDLE_LINE_SIZE - TEXT_PADDING)
-local TIMER_TEXT_ALIGN = alex_c_api.TEXT_ALIGN_RIGHT
+local TIMER_TEXT_ALIGN = alexgames.TEXT_ALIGN_RIGHT
 
 local DBL_TEXT_Y_POS = math.floor(board_height/2 + TEXT_SIZE/2 + TEXT_PADDING/2)
 local DBL_TEXT_X_POS = math.floor(board_width/2 - MIDDLE_LINE_SIZE - TEXT_PADDING)
@@ -132,12 +132,12 @@ local PLAYER_IDX_TO_COLOUR_MAP = {
 	[core.PLAYER_BLACK] = '#222222',
 }
 
-if alex_c_api.get_user_colour_pref() == "dark" then
+if alexgames.get_user_colour_pref() == "dark" then
 	BOARD_COLOUR = '#4f2d0f'
 	brightness_percent = 60
 	DICE_BG_COLOUR = '#666666'
 	TEXT_COLOUR = '#6666ff'
-	if alex_c_api.is_feature_supported("draw_graphic_invert") then
+	if alexgames.is_feature_supported("draw_graphic_invert") then
 		dice_invert = true
 		DICE_BG_COLOUR = '#000000'
 	end
@@ -178,12 +178,12 @@ local function should_highlight_piece(state, coords, piece_idx)
 end
 
 function draw.init(state, params)
-	alex_c_api.create_btn(draw.BTN_ID_UNDO, "Undo", 1)
-	alex_c_api.create_btn(draw.BTN_ID_REDO, "Redo", 1)
-	alex_c_api.create_btn(draw.BTN_ID_CANT_MOVE, "Can't move", 2)
-	alex_c_api.set_btn_enabled(draw.BTN_ID_CANT_MOVE, false)
-	alex_c_api.set_btn_enabled(draw.BTN_ID_UNDO, false)
-	alex_c_api.set_btn_enabled(draw.BTN_ID_REDO, false)
+	alexgames.create_btn(draw.BTN_ID_UNDO, "Undo", 1)
+	alexgames.create_btn(draw.BTN_ID_REDO, "Redo", 1)
+	alexgames.create_btn(draw.BTN_ID_CANT_MOVE, "Can't move", 2)
+	alexgames.set_btn_enabled(draw.BTN_ID_CANT_MOVE, false)
+	alexgames.set_btn_enabled(draw.BTN_ID_UNDO, false)
+	alexgames.set_btn_enabled(draw.BTN_ID_REDO, false)
 
 	draw_state = {}
 	draw_state.buttons_state = buttons.new_state()
@@ -291,7 +291,7 @@ local function draw_piece_highlight(state, highlight_type, player, piece_pos_y, 
 	end
 
 	if piece_highlight_fill ~= nil then
-		alex_c_api.draw_circle(piece_highlight_fill, piece_highlight_outline,
+		alexgames.draw_circle(piece_highlight_fill, piece_highlight_outline,
 		                       piece_pos_y, piece_pos_x, piece_radius + HIGHLIGHT_OUTLINE_WIDTH, HIGHLIGHT_OUTLINE_WIDTH)
 	end
 end
@@ -321,7 +321,7 @@ local function draw_triangle(state, player, y_pos, x_tri_pos,
 					outline_colour = draw_colours.HIGHLIGHT_OUTLINE_REMOTE
 				end
 
-				alex_c_api.draw_triangle(fill_colour,
+				alexgames.draw_triangle(fill_colour,
 				                         y1, x1,
 				                         y2, x2,
 				                         y3, x3)
@@ -333,8 +333,8 @@ end
 
 
 function draw.draw_state(state, session_id, player)
-	alex_c_api.draw_clear()
-	alex_c_api.draw_rect(BOARD_COLOUR, 0, 0, board_height, board_width)
+	alexgames.draw_clear()
+	alexgames.draw_rect(BOARD_COLOUR, 0, 0, board_height, board_width)
 	for y_idx=1,2 do
 		local y_idx_draw = y_idx-1
 		for x_idx=1,BACKGAMMON_COLS do
@@ -397,15 +397,15 @@ function draw.draw_state(state, session_id, player)
 				if y_idx == 2 then
 					piece_pos_y = piece_pos_y - 2*piece_radius
 				end
-				alex_c_api.draw_circle(player_colour, LINE_COLOUR,
+				alexgames.draw_circle(player_colour, LINE_COLOUR,
 				                       piece_pos_y, piece_pos_x, piece_radius)
 				if piece_idx == 1 then
 					local extra_pieces = math.max(0, piece_count - MAX_PIECES_TO_DRAW_PER_DST)
 					if extra_pieces > 0 then
 						local extra_pieces_txt = string.format("+%d", extra_pieces)
-						alex_c_api.draw_text(extra_pieces_txt, get_piece_text_colour(player_idx),
+						alexgames.draw_text(extra_pieces_txt, get_piece_text_colour(player_idx),
 						                     piece_pos_y + PIECE_TEXT_SIZE/2, piece_pos_x,
-						                     PIECE_TEXT_SIZE, alex_c_api.TEXT_ALIGN_CENTRE)
+						                     PIECE_TEXT_SIZE, alexgames.TEXT_ALIGN_CENTRE)
 					end
 				end
 
@@ -415,7 +415,7 @@ function draw.draw_state(state, session_id, player)
 		end
 	end
 
-	alex_c_api.draw_line(LINE_COLOUR, MIDDLE_LINE_SIZE, 
+	alexgames.draw_line(LINE_COLOUR, MIDDLE_LINE_SIZE, 
 	                     0,            board_width/2,
 	                     board_height, board_width/2)
 
@@ -430,14 +430,14 @@ function draw.draw_state(state, session_id, player)
 
 		for i=1,#pieces_in_middle do
 			local piece_pos_y = piece_pos_base_y + (i-1)*pos_y_offset_sign*MIDDLE_STACK_OFFSET_Y
-			alex_c_api.draw_circle(player_colour, LINE_COLOUR,
+			alexgames.draw_circle(player_colour, LINE_COLOUR,
 			                       piece_pos_y, piece_pos_x,
 			                       piece_radius)
 			local highlight_type = get_piece_highlight_type(state, player, core.get_middle_coords(), i)
 			draw_piece_highlight(state, highlight_type, player, piece_pos_y, piece_pos_x, piece_radius)
 			--[[
 			if should_highlight_piece(state, core.get_middle_coords(), i) then
-				alex_c_api.draw_circle(HIGHLIGHT_COLOUR, HIGHLIGHT_OUTLINE,
+				alexgames.draw_circle(HIGHLIGHT_COLOUR, HIGHLIGHT_OUTLINE,
 				                       piece_pos_y, piece_pos_x, piece_radius)
 			end
 			--]]
@@ -453,9 +453,9 @@ function draw.draw_state(state, session_id, player)
 	end
 
 	if state.dice_loading then
-		alex_c_api.draw_text(TEXT_DICE_LOADING, TEXT_COLOUR,
+		alexgames.draw_text(TEXT_DICE_LOADING, TEXT_COLOUR,
 		                     dice_y_pos_start + TEXT_SIZE/2 + DICE_Y_SIZE/2, dice_x_pos_start,
-		                     TEXT_SIZE, alex_c_api.TEXT_ALIGN_LEFT)
+		                     TEXT_SIZE, alexgames.TEXT_ALIGN_LEFT)
 		                     
 	end
 
@@ -491,27 +491,27 @@ function draw.draw_state(state, session_id, player)
 	end
 
 	if core.piece_can_bear_off(state, player, state.player_selected) then
-		alex_c_api.draw_graphic("arrow",
+		alexgames.draw_graphic("arrow",
 		                        BEARING_OFF_BUTTON_Y_POS, BEARING_OFF_BUTTON_X_POS,
 		                        BEARING_OFF_BUTTON_WIDTH, BEARING_OFF_BUTTON_HEIGHT)
 	end
 
 
 	if state.move_timer ~= nil then
-		alex_c_api.draw_text(format_time(state.move_timer), TEXT_COLOUR,
+		alexgames.draw_text(format_time(state.move_timer), TEXT_COLOUR,
 		                     TIMER_Y_POS, TIMER_X_POS, TEXT_SIZE,
 		                     TIMER_TEXT_ALIGN)
 	end
 
 	if state.double_val > 1 then
-		alex_c_api.draw_text(get_double_text(state), TEXT_COLOUR,
+		alexgames.draw_text(get_double_text(state), TEXT_COLOUR,
 		                     DBL_TEXT_Y_POS, DBL_TEXT_X_POS, TEXT_SIZE,
 		                     TIMER_TEXT_ALIGN)
 	end
 
-	alex_c_api.set_btn_enabled(draw.BTN_ID_CANT_MOVE, state.player_cant_move)
-	alex_c_api.set_btn_enabled(draw.BTN_ID_UNDO, alex_c_api.has_saved_state_offset(session_id, -1))
-	alex_c_api.set_btn_enabled(draw.BTN_ID_REDO, alex_c_api.has_saved_state_offset(session_id,  1))
+	alexgames.set_btn_enabled(draw.BTN_ID_CANT_MOVE, state.player_cant_move)
+	alexgames.set_btn_enabled(draw.BTN_ID_UNDO, alexgames.has_saved_state_offset(session_id, -1))
+	alexgames.set_btn_enabled(draw.BTN_ID_REDO, alexgames.has_saved_state_offset(session_id,  1))
 
 
 	local can_player_double = core.can_player_double_request(state, player)
@@ -528,7 +528,7 @@ function draw.draw_state(state, session_id, player)
 
 	buttons.draw(draw_state.buttons_state)
 
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 function draw.double_request(state)

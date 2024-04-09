@@ -1,6 +1,6 @@
 local draw = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local cards      = require("libs/cards/cards")
 local cards_draw = require("libs/cards/cards_draw")
@@ -22,7 +22,7 @@ local PADDING = 3
 draw.show_move_count_and_elapsed_time = nil
 
 local function get_bg_colour()
-	if alex_c_api.get_user_colour_pref() == "dark" then
+	if alexgames.get_user_colour_pref() == "dark" then
 		return BACKGROUND_COLOUR_DARK
 	else
 		return BACKGROUND_COLOUR
@@ -30,7 +30,7 @@ local function get_bg_colour()
 end
 
 local function get_card_space_colour()
-	if alex_c_api.get_user_colour_pref() == "dark" then
+	if alexgames.get_user_colour_pref() == "dark" then
 		return CARD_SPACE_COLOUR_DARK
 	else
 		return CARD_SPACE_COLOUR
@@ -39,7 +39,7 @@ local function get_card_space_colour()
 end
 
 local function get_text_colour()
-	if alex_c_api.get_user_colour_pref() == "dark" then
+	if alexgames.get_user_colour_pref() == "dark" then
 		return TEXT_COLOUR_DARK
 	else
 		return TEXT_COLOUR_LIGHT
@@ -115,9 +115,9 @@ function draw.init(board_width_arg, board_height_arg)
 	card_padding = math.floor(card_width_max * card_padding_ratio)
 
 
-	alex_c_api.create_btn(draw.BTN_ID_UNDO,          "Undo",          1)
-	alex_c_api.create_btn(draw.BTN_ID_NEW_GAME,      "New Game",      1)
-	alex_c_api.create_btn(draw.BTN_ID_AUTO_COMPLETE, "Auto-Complete", 1)
+	alexgames.create_btn(draw.BTN_ID_UNDO,          "Undo",          1)
+	alexgames.create_btn(draw.BTN_ID_NEW_GAME,      "New Game",      1)
+	alexgames.create_btn(draw.BTN_ID_AUTO_COMPLETE, "Auto-Complete", 1)
 end
 
 
@@ -195,13 +195,13 @@ end
 
 
 function draw.draw_state(session_id, state)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
-	alex_c_api.draw_rect(get_bg_colour(), 0, 0, board_height, board_width)
+	alexgames.draw_rect(get_bg_colour(), 0, 0, board_height, board_width)
 
 	for i=1,core.NUM_GOAL_STACKS do
 		local pos = draw.get_pos(state, core.SECTION_GOAL_STACKS, i)
-		alex_c_api.draw_rect(get_card_space_colour(),
+		alexgames.draw_rect(get_card_space_colour(),
 		                     pos.y, pos.x,
 		                     pos.y + card_height,
 		                     pos.x + card_width)
@@ -217,12 +217,12 @@ function draw.draw_state(session_id, state)
 				             false,
 				             0)
 		local text_size = 24
-		alex_c_api.draw_text("Press \"New Game\" button",
+		alexgames.draw_text("Press \"New Game\" button",
 		                     "#000000",
 		                     board_height/2 - text_size,
 		                     board_width/2,
 		                     text_size,
-		                     alex_c_api.TEXT_ALIGN_CENTRE)
+		                     alexgames.TEXT_ALIGN_CENTRE)
 		return
 	end
 
@@ -265,7 +265,7 @@ function draw.draw_state(session_id, state)
 	else
 		-- TODO draw some sort of an icon, like a green circle,
 		-- to indicate that this can be clicked?
-		alex_c_api.draw_rect(get_card_space_colour(),
+		alexgames.draw_rect(get_card_space_colour(),
 		                     pos.y, pos.x,
 		                     pos.y + card_height,
 		                     pos.x + card_width)
@@ -357,28 +357,28 @@ function draw.draw_state(session_id, state)
 
 	if draw.show_move_count_and_elapsed_time and state.move_count ~= nil then
 		local moves_str = string.format('Moves: %d', state.move_count)
-		alex_c_api.draw_text(moves_str, get_text_colour(),
+		alexgames.draw_text(moves_str, get_text_colour(),
 		                     board_height - PADDING,
 		                     PADDING,
-		                     TEXT_SIZE, alex_c_api.TEXT_ALIGN_LEFT)
+		                     TEXT_SIZE, alexgames.TEXT_ALIGN_LEFT)
 	end
 	if draw.show_move_count_and_elapsed_time and state.time_elapsed ~= nil then
 		local mins_elapsed = math.floor(state.time_elapsed / 60)
 		local secs_elapsed = state.time_elapsed % 60
 		local time_str = string.format('%d:%02d', mins_elapsed, secs_elapsed)
-		alex_c_api.draw_text(time_str, get_text_colour(),
+		alexgames.draw_text(time_str, get_text_colour(),
 		                     board_height - PADDING,
 		                     board_width - PADDING,
-		                     TEXT_SIZE, alex_c_api.TEXT_ALIGN_RIGHT)
+		                     TEXT_SIZE, alexgames.TEXT_ALIGN_RIGHT)
 	end
 
 	draw_celebration_anim.draw(anim_state)
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 
 
 	-- TODO uncomment once testing is done on this
-	--alex_c_api.set_btn_enabled(draw.BTN_ID_AUTO_COMPLETE, core.autocomplete_available(state))
-	alex_c_api.set_btn_enabled(draw.BTN_ID_UNDO, alex_c_api.has_saved_state_offset(session_id, -1))
+	--alexgames.set_btn_enabled(draw.BTN_ID_AUTO_COMPLETE, core.autocomplete_available(state))
+	alexgames.set_btn_enabled(draw.BTN_ID_UNDO, alexgames.has_saved_state_offset(session_id, -1))
 end
 
 
@@ -479,7 +479,7 @@ local function start_anim(state, item)
 		local dst_pos = draw.get_pos(state, item.item.dst.section_type, item.item.dst.col)
 		card_anim_dst_y = dst_pos.y
 		card_anim_dst_x = dst_pos.x
-		anim_start_time_ms = alex_c_api.get_time_ms()
+		anim_start_time_ms = alexgames.get_time_ms()
 		anim_end_time_ms   = item.time
 
 		card_anim_pos_y = card_anim_src_y
@@ -487,7 +487,7 @@ local function start_anim(state, item)
 		core.inc_move_count(state)
 	elseif item.item.move == core.ACTION_DECK_NEXT then
 		core.next_in_deck(state)
-		anim_start_time_ms = alex_c_api.get_time_ms()
+		anim_start_time_ms = alexgames.get_time_ms()
 		anim_end_time_ms   = item.time
 	else
 		error(string.format("unexpected item.item.move=%s", item.item.move))
@@ -518,7 +518,7 @@ function draw.animate_moves(state, move_list_arg, on_anim_finished)
 		return
 	end
 
-	local current_time_ms = alex_c_api.get_time_ms()
+	local current_time_ms = alexgames.get_time_ms()
 	for i, item in ipairs(move_list_arg) do
 		local anim_item = {
 			item = item,
@@ -549,7 +549,7 @@ function draw.update_animations(state, dt_ms)
 	if dt_ms == 0 then
 		return
 	end 
-	local current_time_ms = alex_c_api.get_time_ms()
+	local current_time_ms = alexgames.get_time_ms()
 	--local time_diff = last_animation_update_time - current_time_ms
 	if current_time_ms < move_list[1].time then
 		if move_list[1].item.move == core.ACTION_MOVE then
@@ -583,18 +583,18 @@ function draw.victory_animation(fps)
 	if g_victory_anim_timer ~= nil then
 		error(string.format("victory_animation: anim_timer is not nil"))
 	end
-	g_victory_anim_timer = alex_c_api.set_timer_update_ms(1000/fps)
+	g_victory_anim_timer = alexgames.set_timer_update_ms(1000/fps)
 	draw_celebration_anim.fireworks_display(anim_state, {
 		on_finish = function ()
 			if g_victory_anim_timer == nil then
-				alex_c_api.set_status_err("warning: g_victory_anim_timer is nil on anim complete")
+				alexgames.set_status_err("warning: g_victory_anim_timer is nil on anim complete")
 			else
-				alex_c_api.delete_timer(g_victory_anim_timer)
+				alexgames.delete_timer(g_victory_anim_timer)
 				g_victory_anim_timer = nil
 			end
 			--print("animation finished! Resuming timer")
-			--alex_c_api.set_timer_update_ms(0)
-			--alex_c_api.set_timer_update_ms(1000/60)
+			--alexgames.set_timer_update_ms(0)
+			--alexgames.set_timer_update_ms(1000/60)
 		end,
 	})
 end

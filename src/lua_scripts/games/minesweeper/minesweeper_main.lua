@@ -5,7 +5,7 @@ local serialize = require("games/minesweeper/minesweeper_serialize")
 
 local wait_for_players = require("libs/multiplayer/wait_for_players")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 -- TODO add:
 --    * vibrate phone when flag has appeared? Show red circle so user knows when flag appears
@@ -32,7 +32,7 @@ local cell_size = core.cell_size
 local state = core.new_state(player_count, game_size_y, game_size_x, cell_size)
 local win_anim_shown = false
 local state_set = false
-local g_session_id = alex_c_api.get_new_session_id()
+local g_session_id = alexgames.get_new_session_id()
 --local state = nil
 local user_input_down = false
 local user_input_down_timer_fired = false
@@ -71,7 +71,7 @@ local USER_INPUT_DOWN_TIME_THRESHOLD_MS = 300
 local function handle_move_client(state, player, move, y, x)
 	local msg = string.format("move:%d,%d,%d,%d", player, move, y, x)
 	-- TODO only message the host in the future?
-	alex_c_api.send_message("all", msg)
+	alexgames.send_message("all", msg)
 	return core.RC_SUCCESS
 end
 
@@ -86,7 +86,7 @@ local function handle_move(state, player, move, y, x)
 	if move == core.MOVE_FLAG_CELL then
 		draw.draw_flag_flash = true
 	end
-	alex_c_api.save_state(g_session_id, state_serialized)
+	alexgames.save_state(g_session_id, state_serialized)
 
 	if core.is_game_over(state) and not win_anim_shown then
 		print('alex showing victory animation')
@@ -100,7 +100,7 @@ local function check_for_input_time_done()
 		return
 	end
 
-	local time_diff = alex_c_api.get_time_ms() - user_input_down_time
+	local time_diff = alexgames.get_time_ms() - user_input_down_time
 	if user_input_down and 
 	   time_diff >= USER_INPUT_DOWN_TIME_THRESHOLD_MS and
 		not user_input_moved and
@@ -123,7 +123,7 @@ function draw_board(dt_ms)
 end
 
 local function handle_user_input_down(pos_y, pos_x)
-		user_input_down_time = alex_c_api.get_time_ms()
+		user_input_down_time = alexgames.get_time_ms()
 		user_input_down = true
 		user_input_moved = false
 		user_input_down_timer_fired = false
@@ -138,7 +138,7 @@ end
 local function handle_user_input_release(pos_y, pos_x, cancel)
 	if not cancel and not user_input_moved and not user_input_down_timer_fired then
 		local cell_coords = draw.pos_to_cell_coords(state, player, pos_y, pos_x)
-		local time_diff = alex_c_api.get_time_ms() - user_input_down_time
+		local time_diff = alexgames.get_time_ms() - user_input_down_time
 		local move_type = nil
 		if time_diff <= USER_INPUT_DOWN_TIME_THRESHOLD_MS then
 			move_type = core.MOVE_CLICK_CELL
@@ -154,13 +154,13 @@ local function handle_user_input_release(pos_y, pos_x, cancel)
 end
 
 function handle_mouse_evt(evt_id, pos_y, pos_x)
-	if evt_id == alex_c_api.MOUSE_EVT_DOWN then
+	if evt_id == alexgames.MOUSE_EVT_DOWN then
 		handle_user_input_down(pos_y, pos_x)
-	elseif evt_id == alex_c_api.MOUSE_EVT_UP then
+	elseif evt_id == alexgames.MOUSE_EVT_UP then
 		handle_user_input_release(pos_y, pos_x, false)
-	elseif evt_id == alex_c_api.MOUSE_EVT_LEAVE then
+	elseif evt_id == alexgames.MOUSE_EVT_LEAVE then
 		handle_user_input_release(pos_y, pos_x, true)
-	elseif evt_id == alex_c_api.MOUSE_EVT_ALT_DOWN then
+	elseif evt_id == alexgames.MOUSE_EVT_ALT_DOWN then
 		local cell_coords = draw.pos_to_cell_coords(state, player, pos_y, pos_x)
 		handle_move(state, player, core.MOVE_FLAG_CELL, cell_coords.y, cell_coords.x)
 	else
@@ -226,7 +226,7 @@ function handle_touch_evt(evt_id, changed_touches)
 				end
 				local touch_dist_fact = get_touch_dist() / user_init_touch_dist
 				local zoom_fact = init_zoom * touch_dist_fact
-				--alex_c_api.set_status_msg(
+				--alexgames.set_status_msg(
 				--     string.format("Touch dist fact is %.3f, dist=%.0f, orig=%.0f",
 				--                   touch_dist_fact, get_touch_dist(), user_init_touch_dist))
 				core.set_zoom_fact(state, player, zoom_fact)
@@ -275,7 +275,7 @@ function send_state_updates_if_host()
 		end
 		print("Sending state update")
 		local state_msg = "state:" .. serialize.serialize_client_game_state(state, dst_player)
-		alex_c_api.send_message(player_name, state_msg)
+		alexgames.send_message(player_name, state_msg)
 		::next_player::
 	end
 end
@@ -284,7 +284,7 @@ function new_game(player_count)
 	print(string.format("Starting game with %d players", player_count))
 	state = core.new_state(player_count, game_size_y, game_size_x, cell_size)
 	win_anim_shown = false
-	g_session_id = alex_c_api.get_new_session_id()
+	g_session_id = alexgames.get_new_session_id()
 end
 
 
@@ -392,9 +392,9 @@ function start_game(session_id, state_serialized)
 		state = serialize.deserialize_state(state_serialized)
 		state_set = true
 	else
-		local last_sess_id = alex_c_api.get_last_session_id()
+		local last_sess_id = alexgames.get_last_session_id()
 		if last_sess_id ~= nil then
-			state_serialized = alex_c_api.get_saved_state_offset(last_sess_id, 0) 
+			state_serialized = alexgames.get_saved_state_offset(last_sess_id, 0) 
 			g_session_id = last_sess_id
 			state = serialize.deserialize_state(state_serialized)
 			state_set = true
@@ -402,19 +402,19 @@ function start_game(session_id, state_serialized)
 	end
 	wait_for_players.init(players, player, start_host_game, start_client_game)
 
-	alex_c_api.enable_evt("mouse_move")
-	alex_c_api.enable_evt("mouse_updown")
-	alex_c_api.enable_evt("mouse_alt_updown")
-	alex_c_api.enable_evt("touch")
-	alex_c_api.enable_evt("wheel")
+	alexgames.enable_evt("mouse_move")
+	alexgames.enable_evt("mouse_updown")
+	alexgames.enable_evt("mouse_alt_updown")
+	alexgames.enable_evt("touch")
+	alexgames.enable_evt("wheel")
 
-	alex_c_api.add_game_option(GAME_OPT_NEW_GAME, {
-		type  = alex_c_api.OPTION_TYPE_BTN,
+	alexgames.add_game_option(GAME_OPT_NEW_GAME, {
+		type  = alexgames.OPTION_TYPE_BTN,
 		label = "New Game"
 	})
 
 	-- Kind of sucks that I only need this timer for measuring touch/mouse down time.
 	-- Would be ideal if I could just set a 300 ms one off timer?
-	alex_c_api.set_timer_update_ms(50)
+	alexgames.set_timer_update_ms(50)
 
 end

@@ -1,6 +1,6 @@
 local buttons = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local draw_shapes = require("libs/draw/draw_shapes")
 
 buttons.BTN_SHAPE_RECT     = "rect" -- sending nil instead of this works too
@@ -106,7 +106,7 @@ function buttons.draw(state)
 				text_align = -1
 			end
 		else
-			alex_c_api.draw_rect(bg_colour,
+			alexgames.draw_rect(bg_colour,
 			                     btn_info.y_start, btn_info.x_start,
 			                     btn_info.y_end,   btn_info.x_end)
 			draw_shapes.draw_rect_outline(outline_colour, btn_info.outline_width,
@@ -115,7 +115,7 @@ function buttons.draw(state)
 		end
 
 		local text_y_start = math.floor((btn_info.y_start + btn_info.y_end + btn_info.text_size)/2)
-		alex_c_api.draw_text(btn_info.text, fg_colour,
+		alexgames.draw_text(btn_info.text, fg_colour,
 		                     text_y_start, math.floor(btn_info.x_start + btn_width/2),
 		                     btn_info.text_size, text_align)
 		::next_button::

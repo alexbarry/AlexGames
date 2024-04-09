@@ -2,7 +2,7 @@
 local control = {}
 
 local buttons = require("libs/ui/buttons")
-local alex_c_api  = require("alex_c_api")
+local alexgames  = require("alexgames")
 
 local core = require("games/poker_chips/poker_chips_core")
 

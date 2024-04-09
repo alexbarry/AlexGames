@@ -1,6 +1,6 @@
 local touch_to_mouse_evts = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 function touch_to_mouse_evts.init(funcs)
 	local state = {
@@ -8,7 +8,7 @@ function touch_to_mouse_evts.init(funcs)
 		handle_mouse_evt = funcs.handle_mouse_evt,
 		handle_mousemove = funcs.handle_mousemove,
 	}
-	alex_c_api.enable_evt("touch")
+	alexgames.enable_evt("touch")
 	return state
 end
 
@@ -23,10 +23,10 @@ function touch_to_mouse_evts.handle_touch_evt(state, evt_id, changed_touches)
 			if evt_id == 'touchmove' then
 				state.handle_mousemove(y, x)
 			elseif evt_id == 'touchend' then
-				state.handle_mouse_evt(alex_c_api.MOUSE_EVT_UP, y, x, params)
+				state.handle_mouse_evt(alexgames.MOUSE_EVT_UP, y, x, params)
 				state.active_touch = nil
 			elseif evt_id == 'touchcancel' then
-				state.handle_mouse_evt(alex_c_api.MOUSE_EVT_DOWN, y, x, params)
+				state.handle_mouse_evt(alexgames.MOUSE_EVT_DOWN, y, x, params)
 				state.active_touch = nil
 			end
 		end
@@ -34,7 +34,7 @@ function touch_to_mouse_evts.handle_touch_evt(state, evt_id, changed_touches)
 		if evt_id == 'touchstart' then
 			if state.active_touch == nil then
 				state.active_touch = touch.id
-				state.handle_mouse_evt(alex_c_api.MOUSE_EVT_DOWN, y, x, params)
+				state.handle_mouse_evt(alexgames.MOUSE_EVT_DOWN, y, x, params)
 			end
 		end
 	end

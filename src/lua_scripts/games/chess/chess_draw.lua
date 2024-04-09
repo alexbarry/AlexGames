@@ -3,7 +3,7 @@
 
 local draw = {}
 
-local alex_c_api   = require("alex_c_api")
+local alexgames   = require("alexgames")
 local draw_more    = require("libs/draw/draw_more")
 local draw_shapes  = require("libs/draw/draw_shapes")
 local draw_colours = require("libs/draw/draw_colours")
@@ -37,9 +37,9 @@ local PIECE_SEL_HIGHLIGHT_OUTLINE_REMOTE = draw_colours.ALT_HIGHLIGHT_OUTLINE_RE
 local PIECE_SEL_HIGHLIGHT_COLOUR_REMOTE = draw_colours.ALT_HIGHLIGHT_FILL_REMOTE
 
 local function get_cell_colour_white()
-	if alex_c_api.get_user_colour_pref() == "very_dark" then
+	if alexgames.get_user_colour_pref() == "very_dark" then
 		return '#352215cc'
-	elseif alex_c_api.get_user_colour_pref() == "dark" then
+	elseif alexgames.get_user_colour_pref() == "dark" then
 		return '#453225'
 	else
 		return CELL_COLOUR_WHITE
@@ -47,9 +47,9 @@ local function get_cell_colour_white()
 end
 
 local function get_cell_colour_black()
-	if alex_c_api.get_user_colour_pref() == "very_dark" then
+	if alexgames.get_user_colour_pref() == "very_dark" then
 		return '#201000cc'
-	elseif alex_c_api.get_user_colour_pref() == "dark" then
+	elseif alexgames.get_user_colour_pref() == "dark" then
 		return '#302005'
 	else
 		return CELL_COLOUR_BLACK
@@ -136,7 +136,7 @@ function draw_rect_at_pos(colour, outline_colour, y, x)
 
 	cell_end_y   = border_padding + (y  )*cell_size
 	cell_end_x   = border_padding + (x  )*cell_size
-	alex_c_api.draw_rect(colour,
+	alexgames.draw_rect(colour,
 	                     cell_start_y, cell_start_x,
 	                     cell_end_y  , cell_end_x)
 	if outline_colour then
@@ -155,9 +155,9 @@ local function get_row_label(row)
 end
 
 local function get_piece_brightness(player)
-	if alex_c_api.get_user_colour_pref() == "very_dark" then
+	if alexgames.get_user_colour_pref() == "very_dark" then
 		return 35
-	elseif alex_c_api.get_user_colour_pref() == "dark" then
+	elseif alexgames.get_user_colour_pref() == "dark" then
 		return 50
 	else
 		return 100
@@ -170,7 +170,7 @@ local function draw_piece_graphic(player, piece_type, pos_y, pos_x, size_y, size
 	local invert = false
 	
 	local brightness = get_piece_brightness(player)
-	local user_colour_pref = alex_c_api.get_user_colour_pref()
+	local user_colour_pref = alexgames.get_user_colour_pref()
 	if user_colour_pref == "very_dark" or user_colour_pref == "dark" then
 		if player == core.PLAYER_BLACK then
 			img_id = get_piece_graphic_id(core.PLAYER_BLACK, piece_type, {is_dark = true})
@@ -187,8 +187,8 @@ end
 
 
 function draw.draw_state(state, params)
-	alex_c_api.draw_clear()
-	alex_c_api.draw_rect('#000000', 0, 0, board_height, board_width)
+	alexgames.draw_clear()
+	alexgames.draw_rect('#000000', 0, 0, board_height, board_width)
 	-- Draw checkerboard
 	for y=1,core.BOARD_SIZE do
 		for x=1,core.BOARD_SIZE do
@@ -207,7 +207,7 @@ function draw.draw_state(state, params)
 		for _, y_pos in ipairs({border_padding-text_y_buffer, border_padding + core.BOARD_SIZE*cell_size+LABEL_FONT_SIZE}) do
 			for x=1,core.BOARD_SIZE do
 				local label = get_col_label(x)
-				alex_c_api.draw_text(label, LABEL_COLOUR,
+				alexgames.draw_text(label, LABEL_COLOUR,
 				                     y_pos,  border_padding + math.floor(cell_size*(x-0.5)),
 				                     LABEL_FONT_SIZE, 0)
 			end
@@ -216,7 +216,7 @@ function draw.draw_state(state, params)
 		for _, x_pos_info in ipairs({{pos = border_padding, align=-1}, {pos = board_width-border_padding, align=1}}) do
 			for y=1,core.BOARD_SIZE do
 				local label = get_row_label(y)
-				alex_c_api.draw_text(label, LABEL_COLOUR,
+				alexgames.draw_text(label, LABEL_COLOUR,
 				                     border_padding + math.floor(cell_size*(y-0.5)), x_pos_info.pos,
 				                     LABEL_FONT_SIZE, x_pos_info.align)
 			end
@@ -266,7 +266,7 @@ function draw.draw_state(state, params)
 		end
 	end
 
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 return draw

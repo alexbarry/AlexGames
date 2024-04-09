@@ -3,7 +3,7 @@ local core = require("games/spider_swing/spider_swing_core")
 
 local draw_celebration_anim = require("libs/draw/draw_celebration_anim")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local PLAYER_COLOURS = {
 	[1] = { fill = '#cc8888', outline = '#ff0000', },
@@ -56,10 +56,10 @@ local function draw_finish_line(screen_x_pos, bg_height)
 
 	local FINISH_LINE_OUTLINE_COLOUR = '#888888'
 
-	alex_c_api.draw_line(FINISH_LINE_OUTLINE_COLOUR, 1,
+	alexgames.draw_line(FINISH_LINE_OUTLINE_COLOUR, 1,
 	                     0,   screen_x_pos,
 	                     bg_height, screen_x_pos)
-	alex_c_api.draw_line(FINISH_LINE_OUTLINE_COLOUR, 1,
+	alexgames.draw_line(FINISH_LINE_OUTLINE_COLOUR, 1,
 	                     0,   screen_x_pos + checker_size * checker_count_x,
 	                     bg_height, screen_x_pos + checker_size * checker_count_x)
 
@@ -72,7 +72,7 @@ local function draw_finish_line(screen_x_pos, bg_height)
 				checker_colour = '#ffffff'
 			end
 
-			alex_c_api.draw_rect(checker_colour,
+			alexgames.draw_rect(checker_colour,
 			                     (i  )*checker_size, screen_x_pos + (j  )*checker_size,
 			                     (i+1)*checker_size, screen_x_pos + (j+1)*checker_size)
 		end
@@ -81,9 +81,9 @@ end
 
 function draw.draw_state(game_state, player_idx, dt_ms)
 	local camera = get_camera_pos(game_state, player_idx)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
-	--alex_c_api.draw_rect('#aaaaaa', 0, 0, 480, 480)
+	--alexgames.draw_rect('#aaaaaa', 0, 0, 480, 480)
 	local bg_height = 480
 	local bg_width = 480
 	local screen_bg_pos = {
@@ -101,9 +101,9 @@ function draw.draw_state(game_state, player_idx, dt_ms)
 		--if camera.x + (i+1)*bg_width > game_state.max_x then
 		--	goto draw_bg_continue
 		--end
-		alex_c_api.draw_rect('#aaaaaa', math.floor(screen_bg_pos.y),             math.floor(screen_bg_pos.x + i * bg_width-offset),
+		alexgames.draw_rect('#aaaaaa', math.floor(screen_bg_pos.y),             math.floor(screen_bg_pos.x + i * bg_width-offset),
 		                                math.floor(screen_bg_pos.y) + bg_height, math.floor(screen_bg_pos.x + i * bg_width-offset) + bg_width)
-		alex_c_api.draw_graphic('brick_wall',
+		alexgames.draw_graphic('brick_wall',
 		                        screen_bg_pos.y + bg_height/2, i*(bg_width-offset) + math.floor(screen_bg_pos.x) + bg_width/2, bg_width, bg_height)
 		::draw_bg_continue::
 	end
@@ -111,13 +111,13 @@ function draw.draw_state(game_state, player_idx, dt_ms)
 	draw_finish_line(game_state.finish_line_x - camera.x, bg_height)
 
 	for player_idx, player in ipairs(game_state.players) do
-		--alex_c_api.draw_circle(PLAYER_COLOURS[player_idx].fill, PLAYER_COLOURS[player_idx].outline,
+		--alexgames.draw_circle(PLAYER_COLOURS[player_idx].fill, PLAYER_COLOURS[player_idx].outline,
 		--                       math.floor(player.y - camera.y), math.floor(player.x - camera.x), PLAYER_RADIUS)
 		local angle = 0
 		if player.angle then
 			angle = -math.floor(player.angle*180/math.pi)
 		end
-		alex_c_api.draw_graphic("spider",
+		alexgames.draw_graphic("spider",
 		                       math.floor(player.y - camera.y), math.floor(player.x - camera.x), PLAYER_WIDTH, PLAYER_HEIGHT, { angle_degrees = angle })
 		if player.swinging_on ~= nil then
 			--local y2 = player.y + 30 * math.sin(player.swing_angle + math.pi/2)
@@ -127,7 +127,7 @@ function draw.draw_state(game_state, player_idx, dt_ms)
 			local x1 = player.x - WEB_OFFSET * math.sin(player.angle)
 			local y2 = node.y
 			local x2 = node.x
-			alex_c_api.draw_line('#dddddd', ROPE_THICKNESS, math.floor(y1 - camera.y), math.floor(x1 - camera.x), math.floor(y2 - camera.y), math.floor(x2 - camera.x))
+			alexgames.draw_line('#dddddd', ROPE_THICKNESS, math.floor(y1 - camera.y), math.floor(x1 - camera.x), math.floor(y2 - camera.y), math.floor(x2 - camera.x))
 
 			--[[
 			local dy = player.y - node.y
@@ -135,15 +135,15 @@ function draw.draw_state(game_state, player_idx, dt_ms)
 			local angle = math.atan(dy,dx) - math.pi/2
 			local y3 = player.y + 30 * math.sin(angle)
 			local x3 = player.x + 30 * math.cos(angle)
-			alex_c_api.draw_line('#00ff00', 2, math.floor(player.y - camera.y), math.floor(player.x - camera.x), math.floor(y3 - camera.y), math.floor(x3 - camera.x))
+			alexgames.draw_line('#00ff00', 2, math.floor(player.y - camera.y), math.floor(player.x - camera.x), math.floor(y3 - camera.y), math.floor(x3 - camera.x))
 			--]]
 		end
-		alex_c_api.draw_text(string.format("E: %5.0f", math.floor(core.get_energy(game_state, player_idx)/100)), '#ff0000', 24, 5, 24, 1)
-		alex_c_api.draw_text(string.format("pos: %5.0f", math.floor(player.x/10)), '#ff0000', 24, 480-150, 24, 1)
+		alexgames.draw_text(string.format("E: %5.0f", math.floor(core.get_energy(game_state, player_idx)/100)), '#ff0000', 24, 5, 24, 1)
+		alexgames.draw_text(string.format("pos: %5.0f", math.floor(player.x/10)), '#ff0000', 24, 480-150, 24, 1)
 	end
 
 	for _, node in ipairs(game_state.swing_spots) do
-		alex_c_api.draw_circle(SWING_SPOT_COLOUR.fill, SWING_SPOT_COLOUR.outline,
+		alexgames.draw_circle(SWING_SPOT_COLOUR.fill, SWING_SPOT_COLOUR.outline,
 		                       math.floor(node.y - camera.y), math.floor(node.x - camera.x), SWING_SPOT_RADIUS)
 	end
 
@@ -151,7 +151,7 @@ function draw.draw_state(game_state, player_idx, dt_ms)
 		draw_celebration_anim.update(anim_state, dt_ms/1000.0)
 	end
 	draw_celebration_anim.draw(anim_state)
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 function draw.player_finished()

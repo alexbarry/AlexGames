@@ -1,5 +1,5 @@
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local core = require("games/solitaire/solitaire_core")
 local draw = require("games/solitaire/solitaire_draw")
@@ -132,33 +132,33 @@ function handle_mousemove(pos_y, pos_x)
 end
 
 local function save_state()
-	local prev_state_serialized = alex_c_api.read_stored_data(DATA_ID_STATE)
+	local prev_state_serialized = alexgames.read_stored_data(DATA_ID_STATE)
 	if prev_state_serialized ~= nil then
-		alex_c_api.store_data(DATA_ID_PREV_STATE, prev_state_serialized)
+		alexgames.store_data(DATA_ID_PREV_STATE, prev_state_serialized)
 	end
 	local state_serialized = serialize.serialize_state(state)
-	alex_c_api.store_data(DATA_ID_STATE, state_serialized)
+	alexgames.store_data(DATA_ID_STATE, state_serialized)
 	-- TODO this is now kind of redundant, consider how to remove the old way of saving state
-	alex_c_api.save_state(session_id, state_serialized)
+	alexgames.save_state(session_id, state_serialized)
 end
 
 local function load_prev_state()
 --[[
-	local prev_state_serialized = alex_c_api.read_stored_data(DATA_ID_PREV_STATE)
+	local prev_state_serialized = alexgames.read_stored_data(DATA_ID_PREV_STATE)
 --]]
 	print(string.format("loading prev state for session %s", session_id))
 	-- If the player presses undo, we want all the previous state
 	-- except we want the time elapsed to stay the same.
 	local time_elapsed = state.time_elapsed
-	local prev_state_serialized = alex_c_api.get_saved_state_offset(session_id, -1)
+	local prev_state_serialized = alexgames.get_saved_state_offset(session_id, -1)
 	if prev_state_serialized ~= nil then
 		draw.stop_move_animations()
 		state = serialize.deserialize_state(prev_state_serialized)
 		state.time_elapsed = time_elapsed
 		draw_board()
-		alex_c_api.set_status_msg("Loaded previous state")
+		alexgames.set_status_msg("Loaded previous state")
 	else
-		alex_c_api.set_status_err("Can not load previous state, not found")
+		alexgames.set_status_err("Can not load previous state, not found")
 	end
 end
 
@@ -185,23 +185,23 @@ local function mouse_evt_id_to_touch_evt(evt_id)
 end
 
 local function new_game()
-	alex_c_api.show_popup(POPUP_ID_NEW_GAME, {
+	alexgames.show_popup(POPUP_ID_NEW_GAME, {
 	                          title = "New Game",
 	                          items  = {
 	                              {
 	                                  id        = POPUP_ITEM_ID_DRAW_TYPE,
-	                                  item_type = alex_c_api.POPUP_ITEM_TYPE_DROPDOWN,
+	                                  item_type = alexgames.POPUP_ITEM_TYPE_DROPDOWN,
 	                                  label     = "Draw",
 	                                  options   = { "One", "Three" },
 	                              },
 	                              {
 	                                  id        = POPUP_ITEM_ID_BTN_START_GAME,
-	                                  item_type = alex_c_api.POPUP_ITEM_TYPE_BTN,
+	                                  item_type = alexgames.POPUP_ITEM_TYPE_BTN,
 	                                  text      = "Start game",
 	                              },
 	                              {
 	                                  id        = POPUP_ITEM_ID_BTN_CANCEL,
-	                                  item_type = alex_c_api.POPUP_ITEM_TYPE_BTN,
+	                                  item_type = alexgames.POPUP_ITEM_TYPE_BTN,
 	                                  text      = "Cancel",
 	                              },
 	                          },
@@ -215,7 +215,7 @@ end
 
 function handle_mouse_evt(evt_id, pos_y, pos_x)
 	if state == nil then 
-		if evt_id == alex_c_api.MOUSE_EVT_DOWN or evt_id == alex_c_api.MOUSE_EVT_UP then
+		if evt_id == alexgames.MOUSE_EVT_DOWN or evt_id == alexgames.MOUSE_EVT_UP then
 			handle_nil_state_click()
 		end
 		return
@@ -280,7 +280,7 @@ local function on_anim_finished()
 	if g_anim_timer_handle == nil then
 		print("on_anim_finished: g_anim_timer_handle is nil")
 	else
-		alex_c_api.delete_timer(g_anim_timer_handle)
+		alexgames.delete_timer(g_anim_timer_handle)
 		g_anim_timer_handle = nil
 	end
 end
@@ -288,24 +288,24 @@ end
 local function handle_move_list_animation(move_list)
 
 	if g_anim_timer_handle ~= nil then
-		alex_c_api.set_status_err("warning: g_anim_timer_handle was not nil on auto complete btn pressed")
-		alex_c_api.delete_timer(g_anim_timer_handle)
+		alexgames.set_status_err("warning: g_anim_timer_handle was not nil on auto complete btn pressed")
+		alexgames.delete_timer(g_anim_timer_handle)
 		g_anim_timer_handle = nil
 	end
-	g_anim_timer_handle = alex_c_api.set_timer_update_ms(1000/FPS)
+	g_anim_timer_handle = alexgames.set_timer_update_ms(1000/FPS)
 
 	draw.animate_moves(state, move_list, on_anim_finished)
 end
 
 local function start_new_game(draw_type)
 	g_shown_victory_animation = false
-	session_id = alex_c_api.get_new_session_id()
+	session_id = alexgames.get_new_session_id()
 	local params = {}
 	state = core.new_game(player_count, draw_type, params)
 	print(string.format("Starting new game (session=%d) (seed %016x %016x) with state: %s",
 	      session_id, state.seed_x, state.seed_y,
 	      utils.binstr_to_hr_str(serialize.serialize_board_state(state))))
-	alex_c_api.set_status_msg(string.format("Generated new grame with seed %x %x", state.seed_x, state.seed_y))
+	alexgames.set_status_msg(string.format("Generated new grame with seed %x %x", state.seed_x, state.seed_y))
 	draw.stop_move_animations()
 	save_state()
 	draw_board_internal()
@@ -335,9 +335,9 @@ function handle_popup_btn_clicked(popup_id, btn_id, popup_state)
 				error(string.format("Unhandled new game popup dropdown sel %s", draw_type_dropdown_selected))
 			end
 			start_new_game(draw_type)
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 		elseif btn_id == POPUP_ITEM_ID_BTN_CANCEL then
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 		else
 			error(string.format("Unhandled new game popup btn id %s", btn_id))
 		end
@@ -350,7 +350,7 @@ function handle_btn_clicked(btn_id)
 	if btn_id == draw.BTN_ID_AUTO_COMPLETE then
 		core.autocomplete(state, handle_move_list_animation)
 	elseif btn_id == draw.BTN_ID_NEW_GAME then
-		--alex_c_api.set_status_msg("Starting new game")
+		--alexgames.set_status_msg("Starting new game")
 		new_game()
 	elseif btn_id == draw.BTN_ID_UNDO then
 		load_prev_state()
@@ -368,7 +368,7 @@ function load_hr_binstr_state(version, hr_binstr_state)
 end
 
 function load_saved_state(session_id_arg, state_serialized)
-	alex_c_api.set_status_msg(string.format("Loading saved state: %d bytes", #state_serialized)) -- TODO show date of last played?
+	alexgames.set_status_msg(string.format("Loading saved state: %d bytes", #state_serialized)) -- TODO show date of last played?
 	local hr_state_serialized = utils.binstr_to_hr_str(state_serialized)
 	print("Serialized state: " .. hr_state_serialized)
 	session_id = session_id_arg
@@ -425,9 +425,9 @@ draw.init(480, 480)
 function start_game(session_id_arg, state_serialized) 
 	print(string.format("start_game(session_id=%d, state_serialized=%s)", session_id_arg, state_serialized))
 
-	alex_c_api.enable_evt('mouse_move')
-	alex_c_api.enable_evt('mouse_updown')
-	alex_c_api.enable_evt('touch')
+	alexgames.enable_evt('mouse_move')
+	alexgames.enable_evt('mouse_updown')
+	alexgames.enable_evt('touch')
 	
 	if state_serialized ~= nil then
 		print(string.format("start_game: loading from state param"))
@@ -437,10 +437,10 @@ function start_game(session_id_arg, state_serialized)
 	else
 		-- this shouldn't be happening anymore, right?
 		--print(string.format("start_game: no state param provided, checking if saved game stored in persistent storage"))
-		--local state_serialized = alex_c_api.read_stored_data(DATA_ID_STATE)
-		local last_session_id = alex_c_api.get_last_session_id()
+		--local state_serialized = alexgames.read_stored_data(DATA_ID_STATE)
+		local last_session_id = alexgames.get_last_session_id()
 		if last_session_id ~= nil then
-			state_serialized = alex_c_api.get_saved_state_offset(last_session_id, 0)
+			state_serialized = alexgames.get_saved_state_offset(last_session_id, 0)
 		end
 
 		-- this shouldn't usually be possible, but I think it happens if I manage to increment the session ID
@@ -448,17 +448,17 @@ function start_game(session_id_arg, state_serialized)
 		if state_serialized ~= nil then
 			load_saved_state(last_session_id, state_serialized)
 		else
-			alex_c_api.set_status_msg("No saved state found, starting new game")
+			alexgames.set_status_msg("No saved state found, starting new game")
 			new_game()
 		end
 	end
 
-	alex_c_api.add_game_option(GAME_OPTION_SHOW_TIME_AND_MOVE_COUNT, {
-		type  = alex_c_api.OPTION_TYPE_TOGGLE,
+	alexgames.add_game_option(GAME_OPTION_SHOW_TIME_AND_MOVE_COUNT, {
+		type  = alexgames.OPTION_TYPE_TOGGLE,
 		label = "Show elapsed time and move count",
 		value = draw.show_move_count_and_elapsed_time,
 	} )
 	
 	-- Set a timer for every second, to update the "time elapsed" in the corner
-	alex_c_api.set_timer_update_ms(1000)
+	alexgames.set_timer_update_ms(1000)
 end

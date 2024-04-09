@@ -1,6 +1,6 @@
 local draw_celebration_anim = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local function get_random_fireworks_colour(is_fill)
 	local fills = {
@@ -93,7 +93,7 @@ local function draw_firework_state(state)
 	for _, particle in ipairs(state.particles) do
 		for line_segment_idx, line_info in ipairs(particle.lines) do
 			--print(string.format("line_info: %s %s %s %s", line_info.y1, line_info.x1, line_info.y2, line_info.x2))
-			alex_c_api.draw_line(get_line_colour(state, particle, line_segment_idx, line_info.colour), state.params.line_width,
+			alexgames.draw_line(get_line_colour(state, particle, line_segment_idx, line_info.colour), state.params.line_width,
 			                     line_info.y1, line_info.x1,
 			                     line_info.y2, line_info.x2)
 		end
@@ -108,17 +108,17 @@ local function draw_firework_state(state)
 			start.x = particle.lines[#particle.lines].x1
 		end
 
-		alex_c_api.draw_line(get_line_colour(state, particle, #particle.lines, state.params.colour_fill), state.params.line_width,
+		alexgames.draw_line(get_line_colour(state, particle, #particle.lines, state.params.colour_fill), state.params.line_width,
 		                     start.y, start.x,
 		                     particle.y, particle.x)
 
 
 		--[[
-		alex_c_api.draw_circle(state.params.colour_fill,
+		alexgames.draw_circle(state.params.colour_fill,
 		                       state.params.colour_outline,
 		                       particle.y, particle.x,
 		                       state.params.particle_radius)
-		alex_c_api.draw_circle(state.params.fill_centre,
+		alexgames.draw_circle(state.params.fill_centre,
 		                       state.colour_outline,
 		                       particle.y, particle.x,
 		                       state.params.centre_radius)
@@ -246,7 +246,7 @@ function draw_celebration_anim.fireworks_display(anim_state, params)
 		colour_pref = params.colour_pref
 	end
 	if colour_pref == nil then
-		colour_pref = alex_c_api.get_user_colour_pref()
+		colour_pref = alexgames.get_user_colour_pref()
 	end
 	if not colour_pref or colour_pref == "light" then
 		local backdrop_state = {
@@ -263,7 +263,7 @@ function draw_celebration_anim.fireworks_display(anim_state, params)
 			end,
 			draw = function (anim_state)
 				local colour = string.format('#000000%02x', anim_state.brightness)
-				alex_c_api.draw_rect(colour, 0, 0, 480, 480)
+				alexgames.draw_rect(colour, 0, 0, 480, 480)
 			end,
 	
 			brightness = 100,

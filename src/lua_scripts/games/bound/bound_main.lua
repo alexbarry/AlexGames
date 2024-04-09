@@ -5,7 +5,7 @@ local serialize = require("games/bound/bound_serialize")
 
 local wait_for_players = require("libs/multiplayer/wait_for_players")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 --[[
 	TODO:
@@ -190,7 +190,7 @@ local function handle_actions_client(actions, player)
 	for _, action in ipairs(actions) do
 		local payload = ""
 		if action.action == core.ACTION_DIR_PAD_POS_CHANGE then
-			local curr_time = alex_c_api.get_time_ms()
+			local curr_time = alexgames.get_time_ms()
 			if action.vec_y ~= 0 and action.vec_x ~= 0 and
 			   last_dirpad_update_time ~= nil and
 			   curr_time - last_dirpad_update_time < MIN_DIRPAD_POS_UPDATE_PERIOD_MS then
@@ -201,7 +201,7 @@ local function handle_actions_client(actions, player)
 			                                 math.floor(action.vec_x*1000))
 		end
 		local msg = string.format("action:%d,%s", action.action, payload)
-		alex_c_api.send_message("all", msg)
+		alexgames.send_message("all", msg)
 		::next_action::
 	end
 end
@@ -337,7 +337,7 @@ function send_state_updates_if_host()
 			goto next_player
 		end
 		local state_msg = "state:" .. serialize.serialize_state(state)
-		alex_c_api.send_message(player_name, state_msg)
+		alexgames.send_message(player_name, state_msg)
 		::next_player::
 	end
 end
@@ -400,8 +400,8 @@ function handle_popup_btn_clicked(popup_id, btn_idx)
 end
 
 
-alex_c_api.enable_evt('touch')
-alex_c_api.enable_evt('key')
-alex_c_api.set_timer_update_ms(math.floor(dt))
+alexgames.enable_evt('touch')
+alexgames.enable_evt('key')
+alexgames.set_timer_update_ms(math.floor(dt))
 
 wait_for_players.init(players, player, start_host_game, start_client_game)

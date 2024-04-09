@@ -18,7 +18,7 @@
 
 local two_player = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local show_buttons_popup = require("libs/ui/show_buttons_popup")
 
 -- This message is sent by a player who chooses if they want to be e.g. black or white.
@@ -160,11 +160,11 @@ function two_player.init(args)
 	else
 		show_player_choice_popup()
 	end
-	alex_c_api.send_message("all", string.format("%s:", MSG_HEADER_PLAYER_JOINED))
+	alexgames.send_message("all", string.format("%s:", MSG_HEADER_PLAYER_JOINED))
 end
 
 local function broadcast_this_player_choice(player_choice)
-	alex_c_api.send_message("all", string.format("%s:%d", MSG_HEADER_AM_PLAYER, player_choice))
+	alexgames.send_message("all", string.format("%s:%d", MSG_HEADER_AM_PLAYER, player_choice))
 end
 
 local function add_player(state, src)
@@ -231,12 +231,12 @@ function two_player.handle_msg_received(src, msg)
 				show_player_choice_popup()
 			end
 		else
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 		end
 		-- Make sure that `hide_popup` isn't called after calling this, since
 		-- the client may show their own popup that this library shouldn't hide.
 		g_args.handle_player_choice(src, other_player)
-		alex_c_api.set_status_msg(string.format("Player %s chose to be %s", src, g_args.player_id_to_nice_name(other_player)))
+		alexgames.set_status_msg(string.format("Player %s chose to be %s", src, g_args.player_id_to_nice_name(other_player)))
 		return true
 	elseif header == MSG_HEADER_PLAYER_JOINED then
 		-- When new players join, if the local player has already chosen, then tell them.
@@ -245,13 +245,13 @@ function two_player.handle_msg_received(src, msg)
 		if this_player_choice ~= nil then
 			broadcast_this_player_choice(this_player_choice)
 		end
-		alex_c_api.set_status_msg(string.format("Player %s joined", src))
+		alexgames.set_status_msg(string.format("Player %s joined", src))
 		return true
 	elseif header == "player_left" and src == "ctrl" then
 		print("player left")
 		local player_name = payload
 		local player_id = g_args.player_name_to_id[player_name]
-		alex_c_api.set_status_msg(string.format("Player %s (%s) left", player_name, g_args.player_id_to_nice_name(player_id)))
+		alexgames.set_status_msg(string.format("Player %s (%s) left", player_name, g_args.player_id_to_nice_name(player_id)))
 		g_args.player_name_to_id[player_name] = nil
 		remove_player(g_state, player_name)
 		-- TODO I don't see how this was ever true,
@@ -283,16 +283,16 @@ function two_player.handle_popup_btn_clicked(popup_id, btn_idx)
 		g_args.player_name_to_id[two_player.THIS_PLAYER] = player_idx
 		add_player(g_state, two_player.THIS_PLAYER)
 		broadcast_this_player_choice(player_idx)
-		alex_c_api.hide_popup()
+		alexgames.hide_popup()
 		g_args.handle_player_choice(two_player.LOCAL_PLAYER, player_idx)
 		return true
 	elseif popup_id == two_player.MULTIPLAYER_TYPE_POPUP_ID then
 		if btn_idx == multiplayer_type_btn_local then
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 			g_state.multiplayer_type_selected = two_player.MULTIPLAYER_TYPE_LOCAL
 			g_args.handle_multiplayer_type_choice(two_player.MULTIPLAYER_TYPE_LOCAL)
 		elseif btn_idx == multiplayer_type_btn_network then
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 			g_state.multiplayer_type_selected = two_player.MULTIPLAYER_TYPE_NETWORK
 			g_args.handle_multiplayer_type_choice(two_player.MULTIPLAYER_TYPE_NETWORK)
 			show_player_choice_popup()

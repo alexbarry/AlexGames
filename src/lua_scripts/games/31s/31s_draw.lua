@@ -3,7 +3,7 @@ game31s_draw = {}
 local game31s_core = require("games/31s/31s_core")
 local cards_draw = require("libs/cards/cards_draw")
 local cards = require("libs/cards/cards")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local cards_per_hand = 3
 
@@ -226,7 +226,7 @@ end
 
 function game31s_draw.draw(state, player)
 
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
 	local highlight_hand_and_staging = false
 	local highlight_draw_and_discard = false
@@ -239,7 +239,7 @@ function game31s_draw.draw(state, player)
 	draw_deck_and_discard(state, highlight_draw_and_discard)
 
 	if state == nil then
-		alex_c_api.draw_refresh()
+		alexgames.draw_refresh()
 		return
 	end
 
@@ -266,7 +266,7 @@ function game31s_draw.draw(state, player)
 	local staging_area_pos = player_idx_to_board_pos(player, state.player_turn, state.player_count)
 	draw_staging_area(state, player, staging_area_pos, highlight_hand_and_staging)
 
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 function game31s_draw.coords_to_ui_elem(y, x)

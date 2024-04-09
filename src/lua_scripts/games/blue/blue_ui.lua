@@ -2,7 +2,7 @@ local ui = {}
 
 local core = require("games/blue/blue_core")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 ui.UI_STATE_VIEW_OTHER_PLAYERS = 1
 ui.UI_STATE_SELECT_PILE        = 2
@@ -71,7 +71,7 @@ function ui.handle_action(ui_state, player, action, action_arg_idx)
 			ui_state.selected_pile         = nil
 			ui_state.selected_piece_colour = nil
 		else
-			alex_c_api.set_status_err(core.rc_to_string(rc))
+			alexgames.set_status_err(core.rc_to_string(rc))
 			return
 		end
 	elseif action == ui.ACTION_SELECT_DISCARD_PIECE_COLOUR then
@@ -81,7 +81,7 @@ function ui.handle_action(ui_state, player, action, action_arg_idx)
 		error(string.format("unhandled action %s", action))
 	end
 
-	alex_c_api.set_status_msg(get_status_msg(ui_state))
+	alexgames.set_status_msg(get_status_msg(ui_state))
 	
 end
 

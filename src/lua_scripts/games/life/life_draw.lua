@@ -1,4 +1,4 @@
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local lua_draw = {}
 
@@ -8,7 +8,7 @@ local cell_size_x = nil
 local present_colour = '#000000'
 local absent_colour  = '#ffffff'
 
-if alex_c_api.get_user_colour_pref() == "dark" then
+if alexgames.get_user_colour_pref() == "dark" then
 	present_colour = '#888888'
 	absent_colour  = '#000000'
 end
@@ -19,7 +19,7 @@ function lua_draw.init(cell_size)
 end
 
 function lua_draw.draw_board(board)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 	for y=1,#board do
 		for x=1,#board[y] do
 			local fill_colour
@@ -28,12 +28,12 @@ function lua_draw.draw_board(board)
 			else
 				fill_colour = absent_colour
 			end
-			alex_c_api.draw_rect(fill_colour,
+			alexgames.draw_rect(fill_colour,
 			                     (y-1)*cell_size_y, (x-1)*cell_size_x,
 			                      y *  cell_size_y,  x *  cell_size_x)
 		end
 	end
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 function lua_draw.coords_to_cell_idx(coords_y, coords_x)

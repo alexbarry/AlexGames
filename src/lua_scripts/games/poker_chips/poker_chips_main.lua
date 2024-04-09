@@ -18,7 +18,7 @@ TODO:
 * show dashed line above person who last raised
 
 --]]
-local alex_c_api  = require("alex_c_api")
+local alexgames  = require("alexgames")
 local ui = require("games/poker_chips/poker_chips_ui")
 local core = require("games/poker_chips/poker_chips_core")
 local serialize = require("games/poker_chips/poker_chips_serialize")
@@ -73,7 +73,7 @@ local function update_state()
 		if player == "You" then goto next_player end
 		local serialized_state = serialize.serialize_state(state.game)
 		print(string.format("Broadcasting state to player \"%s\", bytes %d", player, #serialized_state))
-		alex_c_api.send_message(player, "state:" .. serialized_state)
+		alexgames.send_message(player, "state:" .. serialized_state)
 		::next_player::
 	end
 
@@ -81,19 +81,19 @@ end
 
 function handle_user_string_input(str_input, is_cancelled)
 	print(string.format("handle_user_string_input(str_input=\"%s\", is_cancelled=%q)", str_input, is_cancelled))
-	alex_c_api.set_status_msg(string.format("handle_user_string_input(str_input=\"%s\", is_cancelled=%q)", str_input, is_cancelled))
+	alexgames.set_status_msg(string.format("handle_user_string_input(str_input=\"%s\", is_cancelled=%q)", str_input, is_cancelled))
 end
 
 function handle_user_clicked(y_pos, x_pos)
 	local actions = ui.handle_user_clicked(state.ui, y_pos, x_pos)
 	for _, action in ipairs(actions) do
-		alex_c_api.set_status_msg(string.format("Received action %s", core.action_to_string(action)))
+		alexgames.set_status_msg(string.format("Received action %s", core.action_to_string(action)))
 		local rc = core.handle_action(state.game, action)
 		if rc ~= core.RC_SUCCESS then
 			if rc == core.RC_BET_TOO_SMALL then
-				alex_c_api.set_status_err(string.format("Your bet (%d) is lower than the minimum bet (%d)", action.param, state.game.min_bet))
+				alexgames.set_status_err(string.format("Your bet (%d) is lower than the minimum bet (%d)", action.param, state.game.min_bet))
 			else
-				alex_c_api.set_status_err(core.rc_to_string(rc))
+				alexgames.set_status_err(core.rc_to_string(rc))
 			end
 		else
 			update_state()

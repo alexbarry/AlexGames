@@ -1,6 +1,6 @@
 local life_core = require("games/life/life_core")
 local life_draw = require("games/life/life_draw")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local BTN_ID_TOGGLE_PLAY_PAUSE = "toggle_play_pause"
 local BTN_ID_STEP              = "step"
@@ -62,12 +62,12 @@ end
 life_draw.init(cell_size)
 
 function start_game()
-	alex_c_api.create_btn(BTN_ID_TOGGLE_PLAY_PAUSE, "Play/pause", 1)
-	alex_c_api.create_btn(BTN_ID_STEP,              "Step",       1)
-	alex_c_api.create_btn(BTN_ID_RANDOM,            "Random",     1)
-	alex_c_api.create_btn(BTN_ID_CLEAR,             "Clear",      1)
+	alexgames.create_btn(BTN_ID_TOGGLE_PLAY_PAUSE, "Play/pause", 1)
+	alexgames.create_btn(BTN_ID_STEP,              "Step",       1)
+	alexgames.create_btn(BTN_ID_RANDOM,            "Random",     1)
+	alexgames.create_btn(BTN_ID_CLEAR,             "Clear",      1)
 	
 	state = life_core.new_state(cells_y, cells_x)
 	
-	alex_c_api.set_timer_update_ms(math.floor(1000/20))
+	alexgames.set_timer_update_ms(math.floor(1000/20))
 end

@@ -3,7 +3,7 @@ local wait_for_players = require("libs/multiplayer/wait_for_players")
 local game31s_draw = require("games/31s/31s_draw")
 local game31s      = require("games/31s/31s_core")
 
-local alex_c_api   = require("alex_c_api")
+local alexgames   = require("alexgames")
 local show_buttons_popup = require("libs/ui/show_buttons_popup")
 
 local utils = require("libs/utils")
@@ -50,7 +50,7 @@ local POPUP_GAME_OVER_BTNS = {
 
 function init_ui()
 	game31s_draw.init_ui(width, height)
-	alex_c_api.create_btn(BTN_ID_KNOCK, "Knock", 1)
+	alexgames.create_btn(BTN_ID_KNOCK, "Knock", 1)
 end
 
 
@@ -97,19 +97,19 @@ function handle_user_clicked(y,x)
 		if not is_client then
 			rc = game31s.draw_from_deck(state, player)
 		else
-			alex_c_api.send_message("all", string.format("%s:%d,%d", game31s.MSG_DRAW, player, 1))
+			alexgames.send_message("all", string.format("%s:%d,%d", game31s.MSG_DRAW, player, 1))
 		end
 	elseif ui_elem == game31s_draw.DISCARD then
 		if not is_client then
 			rc = game31s.draw_from_discard(state, player)
 		else
-			alex_c_api.send_message("all", string.format("%s:%d,%d", game31s.MSG_DRAW, player, 2))
+			alexgames.send_message("all", string.format("%s:%d,%d", game31s.MSG_DRAW, player, 2))
 		end
 	elseif ui_elem == game31s_draw.STAGING_AREA then
 		if not is_client then
 			rc = game31s.player_discard_staged(state, player)
 		else
-			alex_c_api.send_message("all", string.format("%s:%d,%d", game31s.MSG_DISCARD, player, 0))
+			alexgames.send_message("all", string.format("%s:%d,%d", game31s.MSG_DISCARD, player, 0))
 		end
 	elseif ui_elem == game31s_draw.HAND_1 or
 	       ui_elem == game31s_draw.HAND_2 or
@@ -118,12 +118,12 @@ function handle_user_clicked(y,x)
 		if not is_client then
 			rc = game31s.player_swap_card(state, player, card_idx)
 		else
-			alex_c_api.send_message("all", string.format("%s:%d,%d", game31s.MSG_DISCARD, player, card_idx))
+			alexgames.send_message("all", string.format("%s:%d,%d", game31s.MSG_DISCARD, player, card_idx))
 		end
 	end
 	
 	if rc ~= game31s.SUCCESS then
-		alex_c_api.set_status_err(game31s.err_code_to_str(rc))
+		alexgames.set_status_err(game31s.err_code_to_str(rc))
 	end
 
 	draw_board()
@@ -140,10 +140,10 @@ function handle_btn_clicked(btn_id)
 				send_state_updates_if_host()
 				draw_board()
 			else
-				alex_c_api.set_status_err(game31s.err_code_to_str(rc))
+				alexgames.set_status_err(game31s.err_code_to_str(rc))
 			end
 		else
-			alex_c_api.send_message("all", string.format("%s:%d", game31s.MSG_KNOCK, player))
+			alexgames.send_message("all", string.format("%s:%d", game31s.MSG_KNOCK, player))
 		end
 	else
 		error("Unexpected button id " .. btn_id)
@@ -191,7 +191,7 @@ function send_state_updates_if_host()
 			goto next_player
 		end
 		local state_msg = "state:" .. game31s.serialize_state_for_client(state, dst_player)
-		alex_c_api.send_message(players[dst_player], state_msg)
+		alexgames.send_message(players[dst_player], state_msg)
 		print("Sending state msg: " .. state_msg)
 		::next_player::
 	end
@@ -199,7 +199,7 @@ end
 
 function send_err(rc, other_player)
 	if rc ~= game31s.SUCCESS then
-		alex_c_api.send_message("all", string.format("err:%s", game31s.err_code_to_str(rc)))
+		alexgames.send_message("all", string.format("err:%s", game31s.err_code_to_str(rc)))
 	end
 end
 
@@ -242,7 +242,7 @@ function handle_msg_received(src, msg)
 			local err_msg = (string.format("Received msg to move player %d from " ..
 			                               "\"%s\" who is expected to be player %s",
 			                               other_player, src, player_name_to_idx[src]))
-			alex_c_api.set_status_err(err_msg)
+			alexgames.set_status_err(err_msg)
 			return
 		end
 		if draw_src == 1 then
@@ -271,7 +271,7 @@ function handle_msg_received(src, msg)
 			local err_msg = (string.format("Received msg to move player %d from " ..
 			                               "\"%s\" who is expected to be player %s",
 			                               other_player, src, player_name_to_idx[src]))
-			alex_c_api.set_status_err(err_msg)
+			alexgames.set_status_err(err_msg)
 			return
 		end
 
@@ -284,7 +284,7 @@ function handle_msg_received(src, msg)
 			send_err(rc, other_player)
 		end
 	elseif header == "err" then
-		alex_c_api.set_status_err(payload)
+		alexgames.set_status_err(payload)
 	elseif header == game31s.MSG_KNOCK then
 		if state == nil then
 			print("Can not process player move until game has started")
@@ -300,7 +300,7 @@ function handle_msg_received(src, msg)
 			local err_msg = (string.format("Received msg to move player %d from " ..
 			                               "\"%s\" who is expected to be player %s",
 			                               other_player, src, player_name_to_idx[src]))
-			alex_c_api.set_status_err(err_msg)
+			alexgames.set_status_err(err_msg)
 			return
 		end
 

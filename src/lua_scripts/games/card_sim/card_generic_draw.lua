@@ -1,4 +1,4 @@
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local cards = require("libs/cards/cards")
 local card_draw = require("libs/cards/cards_draw")
 
@@ -36,20 +36,20 @@ function draw.init(args)
 end
 
 function draw.draw(state, player)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
 	if state == nil then
 		return
 	end
 
-	alex_c_api.draw_rect(REVEAL_AREA_COLOUR,
+	alexgames.draw_rect(REVEAL_AREA_COLOUR,
 		0, 0, reveal_area, width)
-	alex_c_api.draw_text(REVEAL_AREA_TEXT, REVEAL_AREA_TEXT_COLOUR,
+	alexgames.draw_text(REVEAL_AREA_TEXT, REVEAL_AREA_TEXT_COLOUR,
 		text_y_size, 0, REVEAL_AREA_TEXT_SIZE, 1, 0)
 
-	alex_c_api.draw_rect(REVEAL_AREA_COLOUR,
+	alexgames.draw_rect(REVEAL_AREA_COLOUR,
 		height - reveal_area, 0, height, width)
-	alex_c_api.draw_text(REVEAL_AREA_TEXT, REVEAL_AREA_TEXT_COLOUR,
+	alexgames.draw_text(REVEAL_AREA_TEXT, REVEAL_AREA_TEXT_COLOUR,
 		height - reveal_area + text_y_size, 0, REVEAL_AREA_TEXT_SIZE, 1, 0)
 	for _, card_info in ipairs(state.cards) do
 		local card = nil
@@ -69,14 +69,14 @@ function draw.draw(state, player)
 		   state.player_states[i].x == nil then
 			goto next_player_cursor
 		end
-		alex_c_api.draw_circle(PLAYER_COLOURS[i].fill, PLAYER_COLOURS[i].outline,
+		alexgames.draw_circle(PLAYER_COLOURS[i].fill, PLAYER_COLOURS[i].outline,
 			state.player_states[i].y,
 			state.player_states[i].x,
 			PLAYER_CURSOR_RADIUS)
 		::next_player_cursor::
 	end
 
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 return draw

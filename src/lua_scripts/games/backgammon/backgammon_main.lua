@@ -81,9 +81,9 @@ local serialize = require("games/backgammon/backgammon_serialize")
 local two_player = require("libs/multiplayer/two_player")
 local utils = require("libs/utils")
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
-local session_id = alex_c_api.get_new_session_id()
+local session_id = alexgames.get_new_session_id()
 local state = core.new_game()
 
 -- I uncomment this when testing bearing off, without having to play a full game
@@ -152,7 +152,7 @@ end
 
 local function save_state()
 	local serialized_state = serialize.serialize_state(state)
-	alex_c_api.save_state(session_id, serialized_state)
+	alexgames.save_state(session_id, serialized_state)
 end
 
 function draw_board()
@@ -160,7 +160,7 @@ function draw_board()
 	draw.draw_state(state, session_id, get_player())
 	print(string.format("Game state is %d", state.game_state))
 	--core.print_state(state)
-	--alex_c_api.set_status_msg(core.get_status_msg(state))
+	--alexgames.set_status_msg(core.get_status_msg(state))
 end
 
 local function handle_rc(rc)
@@ -176,11 +176,11 @@ local function handle_rc(rc)
 		else
 			invalid_dst_in_a_row = 0
 		end
-		alex_c_api.set_status_err(err_msg)
+		alexgames.set_status_err(err_msg)
 	else
 		invalid_dst_in_a_row = 0
 		local msg = core.get_status_msg(state)
-		alex_c_api.set_status_msg(msg)
+		alexgames.set_status_msg(msg)
 
 		-- TODO only do this if a move was actually made
 		if rc == core.SUCCESS then
@@ -190,7 +190,7 @@ local function handle_rc(rc)
 end
 
 local function double_request(player)
-	alex_c_api.set_status_msg(string.format("%s has proposed doubling the value of winning the match.", core.get_player_name(player)))
+	alexgames.set_status_msg(string.format("%s has proposed doubling the value of winning the match.", core.get_player_name(player)))
 	local rc = core.double_request(state, get_player())
 	draw.double_request(state)
 	return rc
@@ -262,7 +262,7 @@ function send_cmd(cmd, player, params)
 	local msg = string.format("%s:%s,%s,%s", game_msg_prefix, cmd, player, params_str)
 	print(string.format("sending msg %s", msg))
 	--print(string.format("pieces were: cmd (%s), player (%s), params_str(%s)", cmd, player, params_str))
-	alex_c_api.send_message("all", msg)
+	alexgames.send_message("all", msg)
 end
 
 local function str_ary_to_number_ary(str_ary)
@@ -368,7 +368,7 @@ local function load_state(session_id_arg, serialized_state)
 end
 
 local function load_saved_state_offset(move_id_offset)
-	local serialized_state = alex_c_api.get_saved_state_offset(session_id, move_id_offset)
+	local serialized_state = alexgames.get_saved_state_offset(session_id, move_id_offset)
 	if serialized_state == nil then
 		error(string.format("get_saved_state_offset(offset=%d) returned nil", move_id_offset))
 	end
@@ -419,7 +419,7 @@ function handle_popup_btn_clicked(popup_id, btn_id)
 			error(string.format("Unhandled popup btn id %s, in popup id %s", btn_id, popup_id))
 		end
 		core.double_response(state, get_player(), accepted)
-		alex_c_api.hide_popup()
+		alexgames.hide_popup()
 		draw_board()
 	else
 		error(string.format("Unhandled popup_id = %s", popup_id))
@@ -427,8 +427,8 @@ function handle_popup_btn_clicked(popup_id, btn_id)
 end
 
 local function new_game()
-	alex_c_api.set_status_msg("Starting new game")
-	session_id = alex_c_api.get_new_session_id()
+	alexgames.set_status_msg("Starting new game")
+	session_id = alexgames.get_new_session_id()
 	state = core.new_game()
 	draw_board()
 end
@@ -436,7 +436,7 @@ end
 function handle_game_option_evt(option_id)
 	if option_id == GAME_OPTION_NEW_GAME then
 		new_game()
-		alex_c_api.send_message("all", "derp hello world test to see if this is sent to sender")
+		alexgames.send_message("all", "derp hello world test to see if this is sent to sender")
 	else
 		error(string.format("unhandled game option id %s", option_id))
 	end
@@ -481,16 +481,16 @@ function handle_msg_received(src, msg)
 		handle_rc(rc,  true)
 
 		if rc ~= core.SUCCESS then
-			alex_c_api.set_status_err("Other player made an invalid move")
+			alexgames.set_status_err("Other player made an invalid move")
 		else
-			alex_c_api.set_status_msg("Your move")
+			alexgames.set_status_msg("Your move")
 			draw_board()
 			save_state()
 		end
 
 --]]
 	elseif header == "get_state" then
-		alex_c_api.send_message(src, "state:" .. serialize.serialize_state(state))
+		alexgames.send_message(src, "state:" .. serialize.serialize_state(state))
 	elseif header == "state" then
 		local recvd_state = serialize.deserialize_state(payload)
 		print("Recieved state:")
@@ -574,9 +574,9 @@ function start_game(session_id_arg, serialized_state)
 	if serialized_state ~= nil then
 		load_state(session_id_arg, serialized_state)
 	else
-		local last_sess_id = alex_c_api.get_last_session_id()
+		local last_sess_id = alexgames.get_last_session_id()
 		if last_sess_id ~= nil then
-			serialized_state = alex_c_api.get_saved_state_offset(last_sess_id, 0)
+			serialized_state = alexgames.get_saved_state_offset(last_sess_id, 0)
 			if serialized_state ~= nil then
 				load_state(last_sess_id, serialized_state)
 			end
@@ -589,14 +589,14 @@ function start_game(session_id_arg, serialized_state)
 
 	-- TODO call new game if no loaded state
 
-	alex_c_api.add_game_option(GAME_OPTION_NEW_GAME, { label = "New game", type = alex_c_api.OPTION_TYPE_BTN })
+	alexgames.add_game_option(GAME_OPTION_NEW_GAME, { label = "New game", type = alexgames.OPTION_TYPE_BTN })
 
-	alex_c_api.set_timer_update_ms(1000)
+	alexgames.set_timer_update_ms(1000)
 
 	local msg = core.get_status_msg(state)
-	alex_c_api.set_status_msg(msg)
+	alexgames.set_status_msg(msg)
 
-	alex_c_api.send_message("all", "get_state:")
+	alexgames.send_message("all", "get_state:")
 	two_player_init()
 end
 

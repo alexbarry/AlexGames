@@ -1,7 +1,7 @@
 local core = {}
 
 -- TODO remove, only for debugging
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local Y_MIN =  0
 local Y_MAX = 10
@@ -125,7 +125,7 @@ function core.update_state(state, dt_ms)
 				local debug_str = string.format("wall { y_outer: %s, y_inner: %s, x: %s },  player = { y: %s, x: %s }",
 				                    wall.y_outer, wall.y_inner, wall.x, state.player_y, state.player_x)
 				-- TODO remove
-				alex_c_api.set_status_msg("Wall collision! Debug info: " .. debug_str)
+				alexgames.set_status_msg("Wall collision! Debug info: " .. debug_str)
 				state.game_over = true
 				break
 			end

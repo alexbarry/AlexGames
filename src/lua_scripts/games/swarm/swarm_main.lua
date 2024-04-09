@@ -12,7 +12,7 @@
 local core = require("games/swarm/swarm_core")
 local draw = require("games/swarm/swarm_draw")
 local keyboard_input = require("games/swarm/swarm_keyboard_input")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local FPS = 60
 --local FPS = 2
@@ -47,7 +47,7 @@ function handle_key_evt(evt, code)
 		else
 			pause_str = "unpaused"
 		end
-		alex_c_api.set_status_msg(string.format("Game %s. (Press \"P\" to toggle)", pause_str))
+		alexgames.set_status_msg(string.format("Game %s. (Press \"P\" to toggle)", pause_str))
 		handled = true
 	end
 	local info = keyboard_input.get_move_vec_from_key_evt(g_state.key_state, evt, code)
@@ -65,6 +65,6 @@ function handle_touch_evt(evt, touches)
 	end
 end
 
-alex_c_api.set_timer_update_ms(MS_PER_FRAME)
-alex_c_api.enable_evt("key")
-alex_c_api.enable_evt("touch")
+alexgames.set_timer_update_ms(MS_PER_FRAME)
+alexgames.enable_evt("key")
+alexgames.enable_evt("touch")

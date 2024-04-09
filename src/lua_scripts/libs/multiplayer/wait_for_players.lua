@@ -8,7 +8,7 @@
 
 local wait_for_players = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local show_buttons_popup = require("libs/ui/show_buttons_popup")
 
 local POPUP_ID_WAITING_FOR_PLAYERS = "waiting_for_players"
@@ -34,9 +34,9 @@ function wait_for_players.init(players_arg, player_arg,
 	start_game_host_func = start_game_host_arg
 	start_game_client_func = start_game_client_arg 
 
-	alex_c_api.set_status_msg("Waiting for players to join as host")
+	alexgames.set_status_msg("Waiting for players to join as host")
 	wait_for_players.show_waiting_for_players_popup()
-	alex_c_api.send_message("all", string.format("joined:"))
+	alexgames.send_message("all", string.format("joined:"))
 end
 
 local function get_vacant_player_spot(players)
@@ -90,9 +90,9 @@ end
 function wait_for_players.handle_popup_btn_clicked(popup_id, btn_idx)
 	if popup_id == POPUP_ID_WAITING_FOR_PLAYERS then
 		if btn_idx == 0 then
-			alex_c_api.send_message("all", "start_game:")
+			alexgames.send_message("all", "start_game:")
 			start_game_host_func(players, player, player_name_to_idx)
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 			return true
 		end
 	end
@@ -100,7 +100,7 @@ function wait_for_players.handle_popup_btn_clicked(popup_id, btn_idx)
 end
 
 local function become_client_player(player_idx, player_name)
-	alex_c_api.set_status_msg(string.format("You are player %d (client), %s", player_idx, player_name))
+	alexgames.set_status_msg(string.format("You are player %d (client), %s", player_idx, player_name))
 	is_client = true
 	player = player_idx
 	players = { [player_idx] = "You" }
@@ -129,7 +129,7 @@ function wait_for_players.handle_msg_received(src, msg)
 		local m = payload:gmatch("(%d+),(.*)")
 		local new_player_idx, new_player_name = m()
 		new_player_idx = tonumber(new_player_idx)
-		alex_c_api.set_status_msg(string.format("Player %d joined from %s", new_player_idx, new_player_name))
+		alexgames.set_status_msg(string.format("Player %d joined from %s", new_player_idx, new_player_name))
 		players[new_player_idx] = new_player_name
 		player_name_to_idx[new_player_name] = new_player_idx
 		wait_for_players.show_waiting_for_players_popup()
@@ -141,7 +141,7 @@ function wait_for_players.handle_msg_received(src, msg)
 		local player_left_name = payload
 		local player_left_idx = player_name_to_idx[player_left_name]
 		local player_left_msg = string.format("Player %s \"%s\" left", player_left_idx, player_left_name)
-		alex_c_api.set_status_msg(player_left_msg)
+		alexgames.set_status_msg(player_left_msg)
 		if player_left_idx == nil then
 			print(string.format("Player leaving \"%s\" is not in players map", player_left_name))
 			return
@@ -149,15 +149,15 @@ function wait_for_players.handle_msg_received(src, msg)
 		table.remove(players, player_left_idx)
 		player_name_to_idx[player_left_name] = nil
 
-		alex_c_api.send_message("all", "clear_players:")
+		alexgames.send_message("all", "clear_players:")
 		-- Must update all players with their number, since
 		-- they've changed (if player 2 leaves, player 3 will now be player 2)
 		for player_idx,_ in ipairs(players) do
 			local player_name = players[player_idx]
-			alex_c_api.send_message(player_name, string.format("player:%d,%s", player_idx, player_name))
+			alexgames.send_message(player_name, string.format("player:%d,%s", player_idx, player_name))
 		end
 		for player_idx,_ in ipairs(players) do
-			alex_c_api.send_message("all", string.format("add_player:%d,%s", player_idx, players[player_idx]))
+			alexgames.send_message("all", string.format("add_player:%d,%s", player_idx, players[player_idx]))
 		end
 		wait_for_players.show_waiting_for_players_popup()
 	elseif header == "joined" then
@@ -171,7 +171,7 @@ function wait_for_players.handle_msg_received(src, msg)
 			-- TODO don't show this if the game has started?
 			wait_for_players.show_waiting_for_players_popup()
 
-			alex_c_api.send_message(src, string.format("player:%d,%s", new_player_idx, src))
+			alexgames.send_message(src, string.format("player:%d,%s", new_player_idx, src))
 			for player_id, player_name in pairs(players) do
 				if player_id == new_player_idx then
 					goto next_player
@@ -179,13 +179,13 @@ function wait_for_players.handle_msg_received(src, msg)
 				if player_name == "You" then
 					player_name = "Host"
 				end
-				alex_c_api.send_message(src, string.format("add_player:%d,%s", player_id, player_name))
+				alexgames.send_message(src, string.format("add_player:%d,%s", player_id, player_name))
 				::next_player::
 			end
 			-- Should loop through existing players and tell only this new one
 			-- who else has already joined
-			alex_c_api.send_message("all", string.format("add_player:%d,%s", new_player_idx, src))
-			alex_c_api.set_status_msg(string.format("Player %d joined from %s", new_player_idx, src))
+			alexgames.send_message("all", string.format("add_player:%d,%s", new_player_idx, src))
+			alexgames.set_status_msg(string.format("Player %d joined from %s", new_player_idx, src))
 
 			-- TODO originally, in 31's, I called this here.
 			-- Need to re-examine all this if a game is ongoing...
@@ -193,7 +193,7 @@ function wait_for_players.handle_msg_received(src, msg)
 		end
 	elseif header == "start_game" then
 		if is_client then
-			alex_c_api.hide_popup()
+			alexgames.hide_popup()
 			start_game_client_func(players, player, player_name_to_idx)
 		end
 	else

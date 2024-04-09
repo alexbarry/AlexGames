@@ -1,6 +1,6 @@
 local core = {}
 
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 local shuffle = require("libs/shuffle")
 
 core.GAME_SIZE = 9
@@ -370,7 +370,7 @@ function core.new_game()
 		end
 	end
 
-	local start_time_ms = alex_c_api.get_time_ms()
+	local start_time_ms = alexgames.get_time_ms()
 	state.board = solve_board(state.board)
 	local i = 0
 	while i < 400 do
@@ -393,10 +393,10 @@ function core.new_game()
 		end
 	end
 	::done_generating_game::
-	local end_time_ms = alex_c_api.get_time_ms()
+	local end_time_ms = alexgames.get_time_ms()
 
 
-	alex_c_api.set_status_msg(string.format("Generated a game in %.3f seconds", (end_time_ms - start_time_ms)/1000))
+	alexgames.set_status_msg(string.format("Generated a game in %.3f seconds", (end_time_ms - start_time_ms)/1000))
 	--local soln_count = get_num_possib_solutions(state.board, 5)
 	--print("found " .. soln_count .. " possible solutions (max 5)")
 	

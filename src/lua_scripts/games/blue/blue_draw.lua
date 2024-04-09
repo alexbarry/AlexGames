@@ -3,7 +3,7 @@ local draw = {}
 local ui   = require("games/blue/blue_ui")
 local core = require("games/blue/blue_core")
 local draw_shapes = require("libs/draw/draw_shapes")
-local alex_c_api = require("alex_c_api")
+local alexgames = require("alexgames")
 
 local BTN_SELECT_BACKGROUND = '#55555588'
 
@@ -111,12 +111,12 @@ local function draw_game_card(state, params, player_idx)
 			local y_pos = params.y_pos + (y-1)*params.square_size
 			local x_pos = params.x_pos + (x-1)*params.square_size
 
-			alex_c_api.draw_rect(colour.empty,
+			alexgames.draw_rect(colour.empty,
 			                     y_pos, x_pos,
 			                     y_pos + params.square_size, x_pos + params.square_size)
 
 			if state.game_state.player_states[player_idx].card[y][x] ~= core.PIECE_EMPTY then
-				alex_c_api.draw_circle(colour.filled, '#000000',
+				alexgames.draw_circle(colour.filled, '#000000',
 				                       math.floor(y_pos + params.square_size/2),
 				                       math.floor(x_pos + params.square_size/2),
 				                       math.floor(params.square_size*0.8/2))
@@ -159,7 +159,7 @@ local function draw_game_staging_area(state, params, player_idx)
 			if staging_row.count > y - x then
 				local square_colour_type = core.get_card_piece_type(y,x)
 				local colour = COLOUR_MAP[staging_row.colour]
-				alex_c_api.draw_circle(colour.filled, colour.outline,
+				alexgames.draw_circle(colour.filled, colour.outline,
 				                       math.floor(y_pos + params.square_size/2),
 				                       math.floor(x_pos + params.square_size/2),
 				                       math.floor(params.square_size/2 - small_padding))
@@ -167,7 +167,7 @@ local function draw_game_staging_area(state, params, player_idx)
 		end
 		local row_info = get_game_staging_row_info(params, y)
 		if params.highlight_rows[y] then
-			alex_c_api.draw_rect(HIGHLIGHT_COLOUR_BG,
+			alexgames.draw_rect(HIGHLIGHT_COLOUR_BG,
 			                     row_info.y_start, row_info.x_start,
 			                     row_info.y_end,   row_info.x_end)
 			local padding = 3
@@ -219,10 +219,10 @@ local function draw_back_btn()
 	draw_shapes.draw_rect_outline('#000000', 1,
 	                              back_btn_y_start, back_btn_x_start,
 	                              back_btn_y_end,   back_btn_x_end)
-	alex_c_api.draw_rect(BTN_SELECT_BACKGROUND,
+	alexgames.draw_rect(BTN_SELECT_BACKGROUND,
 	                     back_btn_y_start, back_btn_x_start,
 	                     back_btn_y_end,   back_btn_x_end)
-	alex_c_api.draw_text("Back", '#000000',
+	alexgames.draw_text("Back", '#000000',
 	                     back_btn_y_start + (back_btn_y_end - back_btn_y_start)/2 + text_size/2,
 	                     back_btn_x_start + (back_btn_x_end - back_btn_x_start)/2,
 	                     text_size,
@@ -266,7 +266,7 @@ local function draw_player_state(state, params, player_idx)
 	draw_game_staging_area(state, card_params, player_idx)
 
 	local score = state.game_state.player_states[player_idx].score
-	alex_c_api.draw_text(string.format("%3d", score), '#000000',
+	alexgames.draw_text(string.format("%3d", score), '#000000',
 	                     params.y_pos + params.text_size + params.square_size,
 	                     params.x_pos - 3*params.square_size,
 	                     params.text_size,
@@ -320,13 +320,13 @@ local function piece_idx_to_pos(pile_pos, pile_params, piece_idx)
 end
 
 local function draw_pile(state, params, pile, pos, selected_colour)
-	alex_c_api.draw_circle(BTN_SELECT_BACKGROUND, '#000000',
+	alexgames.draw_circle(BTN_SELECT_BACKGROUND, '#000000',
 	                       pos.y, pos.x, params.pile_radius)
 	if params.highlight_colour ~= nil then
-		alex_c_api.draw_circle(params.highlight_colour_bg, params.highlight_colour,
+		alexgames.draw_circle(params.highlight_colour_bg, params.highlight_colour,
 		                       pos.y, pos.x, params.pile_radius + 2)
 	end
-	alex_c_api.draw_circle(BTN_SELECT_BACKGROUND, '#000000',
+	alexgames.draw_circle(BTN_SELECT_BACKGROUND, '#000000',
 	                       pos.y, pos.x, params.pile_radius)
 	for piece_idx, piece_colour_type in ipairs(pile) do
 		local colour = COLOUR_MAP[piece_colour_type].filled
@@ -341,14 +341,14 @@ local function draw_pile(state, params, pile, pos, selected_colour)
 			highlight_colour    = SELECTED_COLOUR_OUTLINE
 		end
 		if highlight_colour ~= nil then
-			alex_c_api.draw_circle(highlight_colour, highlight_colour,
+			alexgames.draw_circle(highlight_colour, highlight_colour,
 			                       piece_pos.y, piece_pos.x,
 			                       math.floor(piece_pos.radius/2))
 		end
-		alex_c_api.draw_circle(colour, '#000000',
+		alexgames.draw_circle(colour, '#000000',
 		                       piece_pos.y, piece_pos.x, piece_pos.radius)
 		if highlight_colour ~= nil then
-			alex_c_api.draw_circle(highlight_colour_bg, highlight_colour,
+			alexgames.draw_circle(highlight_colour_bg, highlight_colour,
 			                       piece_pos.y, piece_pos.x,
 			                       math.floor(piece_pos.radius/2))
 		end
@@ -418,7 +418,7 @@ end
 local function draw_discard_pile(state, params, highlight_params)
 		local pile_info = get_discard_pile_info(params)
 		if highlight_params.highlight_bg then
-			alex_c_api.draw_rect(HIGHLIGHT_COLOUR_BG,
+			alexgames.draw_rect(HIGHLIGHT_COLOUR_BG,
 			                    pile_info.y_start, pile_info.x_start,
 			                    pile_info.y_end,   pile_info.x_end)
 			draw_shapes.draw_rect_outline('#000000', 1,
@@ -449,12 +449,12 @@ local function draw_discard_pile(state, params, highlight_params)
 				radius = discard_piece_info.radius
 				-- I want a slight grey outline so that you can count the number of
 				-- black pieces when they're stacked in the middle
-				alex_c_api.draw_circle(PIECE_OUTLINE_COLOUR, PIECE_OUTLINE_COLOUR,
+				alexgames.draw_circle(PIECE_OUTLINE_COLOUR, PIECE_OUTLINE_COLOUR,
 				                       discard_piece_info.y,
 				                       discard_piece_info.x,
 				                       discard_piece_info.radius)
 
-				alex_c_api.draw_circle(colour.filled, PIECE_OUTLINE_COLOUR,
+				alexgames.draw_circle(colour.filled, PIECE_OUTLINE_COLOUR,
 				                       discard_piece_info.y,
 				                       discard_piece_info.x,
 				                       discard_piece_info.radius - 1)
@@ -468,7 +468,7 @@ local function draw_discard_pile(state, params, highlight_params)
 					highlight_colour_outline = HIGHLIGHT_COLOUR_OUTLINE
 				end
 				if highlight_colour_bg ~= nil then
-					alex_c_api.draw_circle(highlight_colour_bg, highlight_colour_outline,
+					alexgames.draw_circle(highlight_colour_bg, highlight_colour_outline,
 					                       discard_piece_info.y,
 					                       discard_piece_info.x,
 					                       math.floor(discard_piece_info.radius/2))
@@ -482,7 +482,7 @@ local function draw_discard_pile(state, params, highlight_params)
 				y = pile_info.y_end + text_size + radius,
 				x = pile_info.x_start + math.floor((pile_info.x_end - pile_info.x_start)/2),
 			}
-			alex_c_api.draw_circle(PENALTY_TEXT_ICON_COLOUR_BG, PENALTY_TEXT_ICON_COLOUR_OUTLINE,
+			alexgames.draw_circle(PENALTY_TEXT_ICON_COLOUR_BG, PENALTY_TEXT_ICON_COLOUR_OUTLINE,
 			                       penalty_text_pos.y - text_size/2,
 			                       penalty_text_pos.x,
 			                       text_size)
@@ -493,13 +493,13 @@ local function draw_discard_pile(state, params, highlight_params)
 				highlight_colour_outline = SELECTED_COLOUR_OUTLINE
 			end
 			if highlight_colour_bg ~= nil then
-				alex_c_api.draw_circle(highlight_colour_bg, highlight_colour_outline,
+				alexgames.draw_circle(highlight_colour_bg, highlight_colour_outline,
 				                       penalty_text_pos.y - text_size/2,
 				                       penalty_text_pos.x,
 				                       math.floor(text_size/2))
 			end
 
-			alex_c_api.draw_text("-1", "#000000", penalty_text_pos.y, penalty_text_pos.x, text_size, 0)
+			alexgames.draw_text("-1", "#000000", penalty_text_pos.y, penalty_text_pos.x, text_size, 0)
 		end
 end
 
@@ -559,12 +559,12 @@ end
 local function draw_piles(state, is_big)
 	local params = get_pile_params(is_big)
 	if not is_big then
-		alex_c_api.draw_rect(BTN_SELECT_BACKGROUND, params.y_start, params.x_start,
+		alexgames.draw_rect(BTN_SELECT_BACKGROUND, params.y_start, params.x_start,
 		                     view_players_select_piles_y_end, view_players_select_piles_x_end)
 		draw_shapes.draw_rect_outline('#000000', 1,
 		                              params.y_start, params.x_start,
 		                              view_players_select_piles_y_end, view_players_select_piles_x_end)
-		alex_c_api.draw_rect(HIGHLIGHT_COLOUR_BG, params.y_start, params.x_start,
+		alexgames.draw_rect(HIGHLIGHT_COLOUR_BG, params.y_start, params.x_start,
 		                     view_players_select_piles_y_end, view_players_select_piles_x_end)
 		draw_shapes.draw_rect_outline(HIGHLIGHT_COLOUR_OUTLINE, 3,
 		                              params.y_start, params.x_start,
@@ -593,7 +593,7 @@ local function draw_piles(state, is_big)
 end
 
 local function draw_player_states(state)
-	alex_c_api.draw_clear()
+	alexgames.draw_clear()
 
 	for player_idx, _ in ipairs(state.game_state.player_states) do
 		local player_pos = player_idx -- TODO
@@ -736,8 +736,8 @@ function draw.pos_to_action(state, y_pos, x_pos)
 end
 
 function draw.draw_state(state, player)
-	-- alex_c_api.draw_rect('#ffffff', 0, 0, 480, 480)
-	alex_c_api.draw_clear()
+	-- alexgames.draw_rect('#ffffff', 0, 0, 480, 480)
+	alexgames.draw_clear()
 	if state.ui_state == ui.UI_STATE_VIEW_OTHER_PLAYERS then
 		draw_player_states(state)
 	elseif state.ui_state == ui.UI_STATE_SELECT_PILE then
@@ -766,7 +766,7 @@ function draw.draw_state(state, player)
 	else
 		error(string.format("Unhandled ui state %s", state.ui_state))
 	end
-	alex_c_api.draw_refresh()
+	alexgames.draw_refresh()
 end
 
 return draw
