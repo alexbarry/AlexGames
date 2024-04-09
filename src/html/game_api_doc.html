@@ -136,6 +136,9 @@
 	<ul id="persistent_saved_state_apis_body">
 		<li><a class="api_link" href="#get_new_session_id">get_new_session_id</a></li>
 		<li><a class="api_link" href="#save_state">save_state</a></li>
+		<li><a class="api_link" href="#get_last_session_id">get_last_session_id</a></li>
+		<li><a class="api_link" href="#has_saved_state_offset">has_saved_state_offset</a></li>
+		<li><a class="api_link" href="#adjust_saved_state_offset">adjust_saved_state_offset</a></li>
 	</ul>
 
 	<li><strong>Miscellaneous APIs</strong> <span id="misc_apis_toggle_collapsed"></span></li>
@@ -429,6 +432,32 @@ popup_info = {
 <ul>
 	<li><code>session_id</code>: Identifier for this game session. This should be the value returned by <a class="api_link" href="#get_new_session_id">get_new_session_id</a> called at the beginning of a new game.</li>
 	<li><code>state</code>: A byte array of game state.</li>
+</ul>
+
+
+<h4 id="get_last_session_id">get_last_session_id</h4>
+<code>alexgames.get_last_session_id()</code>
+
+<p>Returns the last session ID for your current game. Returns <code>nil</code> if no previous session ID is present for this game.</p>
+
+<p>The only expected use case for this API is when the game is first started, you can check if this is set, and then call <a class="api_link">adjust_saved_state_offset(session_id, 0)</a> to load the previously saved state.</p>
+
+<h4 id="has_saved_state_offset">has_saved_state_offset</h4>
+<code>alexgames.has_saved_state_offset(session_id, move_id_offset)</code>
+
+<p>Returns <code>true</code> if a saved state is defined at the session ID, and (current move ID plus <code>move_id_offset</code>), returns <code>false</code> otherwise.</p>
+
+<p>The only expected use case for this API is for <i>Undo</i> and <i>Redo</i> buttons. This can be checked each time the screen is updated, to decide whether or not to enable (allow to be pressed) the Undo/Redo buttons.</p>
+
+<h4 id="adjust_saved_state_offset">adjust_saved_state_offset</h4>
+<code>alexgames.adjust_saved_state_offset(session_id, move_id_offset)</code>
+
+<p>Returns the saved state for the session ID and (current move ID plus <code>move_id_offset</code>), and increments the move ID by <code>mode_id_offset</code>.</p>
+
+<p>This API is expected to be used for two cases:</p>
+<ul>
+	<li><i>Undo</i> and <i>Redo</i> buttons: when the user presses one of thes buttons, call this API to get the saved state, and update the move ID.</li>
+	<li>When a game is started, if no saved state is passed as a parameter, if <a class="api_link">get_last_session_id</a> returns a non-nil value, then call this API with a <code>move_id_offset</code> of <code>0</code> to get the last saved state.</li>
 </ul>
 
 <h3>Miscellaneous APIs</h3>
