@@ -736,6 +736,11 @@ for (let game_choice_row_info of game_choice_row_infos) {
 </div>
 
 <script>
+
+	// TODO make this a better abstraction to allow for overriding the messaging API
+	// to use something other than websockets
+	const send_message = ws_send_message;
+
 	set_unset_game_instructions_visible(false);
 	const status_msg = document.getElementById("status");
 

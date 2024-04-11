@@ -142,14 +142,14 @@
 				console.log("Connected to session:", g_session_id);
 				session_id_input.value = g_session_id;
 				update_url_args(gfx.game_id, g_session_id);
-				send_message("all", "player_joined:");
+				ws_send_message("all", "player_joined:");
 				state = WAITING_FOR_OTHER_PLAYER
 				break;
 			}
 
 			case "player_joined": {
 				state = CONNECTION_ESTABLISHED;
-				//send_message("all", "ready:");
+				//ws_send_message("all", "ready:");
 				break;
 			}
 
@@ -179,15 +179,15 @@
 
 	}
 
-	function send_message(dst, msg) {
-		return send_message_internal(dst, msg, false);
+	function ws_send_message(dst, msg) {
+		return ws_send_message_internal(dst, msg, false);
 	}
 
-	function send_message_ctrl(msg) {
-		return send_message_internal("ctrl", msg, true);
+	function ws_send_message_ctrl(msg) {
+		return ws_send_message_internal("ctrl", msg, true);
 	}
 
-	function send_message_internal(dst, msg, is_ctrl) {
+	function ws_send_message_internal(dst, msg, is_ctrl) {
 		if (gfx.no_ws) {
 			return;
 		} else if (ws == null) {
@@ -208,7 +208,7 @@
 			let enc_str = msg.map(function (val) { return String.fromCharCode(val); }).join('');
 			msg_str += enc_str;
 		}
-		//console.debug(`send_message dst=${dst}, msg=${msg}, msg_str=${msg_str}`);
+		//console.debug(`ws_send_message dst=${dst}, msg=${msg}, msg_str=${msg_str}`);
 		//console.debug("sending msg", binasciistr_to_nice_str(msg_str));
 		try {
 			ws.send(msg_str);
@@ -230,8 +230,8 @@
 		console.log("Connecting to session ID", URL_args.id);
 		ws.onopen = function (event) {
 			console.debug("ws.onopen");
-			send_message_ctrl("session: " + URL_args.id);
-			send_message("all", "player_joined:");
+			ws_send_message_ctrl("session: " + URL_args.id);
+			ws_send_message("all", "player_joined:");
 			set_status_msg(gfx, "Connected to websocket server " + ws.url);
 			on_ws_ready();
 		}
@@ -241,7 +241,7 @@
 		console.log("Found no ID arg, requesting new session");
 		ws.onopen = function (event) {
 			console.debug("ws.onopen");
-			send_message_ctrl("new_session");
+			ws_send_message_ctrl("new_session");
 			on_ws_ready();
 		}
 	}
