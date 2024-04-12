@@ -1,0 +1,7 @@
+A collection of simple Lua games, and a web engine for playing them including an English dictionary (for word puzzles), websocket multiplayer, state sharing via URL, and auto saving with undo/redo. You can also upload your own games and play them.
+
+The android app bundles the web version for offline play. (For network multiplayer, try the web version at https://alexbarry.github.io/AlexGames).
+
+On the Android version there are two prototype features:
+* you can host an HTTP/websocket server on your phone, to allow people on your local network to play web games together.
+* you can play the Android native version. The web version is more polished, but the Android one demonstrates how games can be played without using a browser or webview at all.
