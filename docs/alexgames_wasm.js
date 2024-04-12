@@ -1,7 +1,7 @@
 
 var createMyModule = (() => {
-  var _scriptDir = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : undefined;
-  if (typeof __filename !== 'undefined') _scriptDir ||= __filename;
+  var _scriptDir = typeof document != 'undefined' ? document.currentScript?.src : undefined;
+  if (typeof __filename != 'undefined') _scriptDir ||= __filename;
   return (
 function(moduleArg = {}) {
 
@@ -23,13 +23,13 @@ var Module = moduleArg;
 
 // Set up the promise that indicates the Module is initialized
 var readyPromiseResolve, readyPromiseReject;
-Module['ready'] = new Promise((resolve, reject) => {
+var readyPromise = new Promise((resolve, reject) => {
   readyPromiseResolve = resolve;
   readyPromiseReject = reject;
 });
 ["_malloc","_free","getExceptionMessage","$incrementExceptionRefcount","$decrementExceptionRefcount","_memory","_get_game_count","_get_game_name","_start_game","_update","_handle_user_string_input","_handle_user_clicked","_handle_mousemove","_handle_mouse_evt","_handle_wheel_changed","_handle_key_evt","_handle_touch_evt","_handle_msg_received","_handle_btn_clicked","_handle_popup_btn_clicked","_handle_game_option_evt","_start_game_b64","_get_state","_get_init_state","_lua_run_cmd","_destroy_game","_new_file","_write_to_file","_close_file","_dump_file","_unzip_file","_init_game_api","_js_draw_graphic_raw","_js_draw_text","_js_draw_line","_js_draw_rect","_js_draw_triangle","_js_draw_circle","_js_draw_clear","_js_draw_refresh","_js_send_message","_js_create_btn","_js_set_btn_enabled","_js_set_btn_visible","_js_show_popup_json","_js_add_game_option_json_str","_js_prompt_string","_js_hide_popup","_js_set_status_msg","_js_set_status_err","_js_update_timer_ms","_js_delete_timer","_js_enable_evt","_js_disable_evt","_js_get_time_ms","_js_store_data","_js_read_stored_data","_js_draw_extra_canvas","_js_new_extra_canvas","_js_set_active_canvas","_js_delete_extra_canvases","_js_get_user_colour_pref","_js_is_feature_supported","_js_get_time_of_day","_js_set_game_handle2","_js_get_game_id","_js_destroy_all","___indirect_function_table","_update_dict","_em_js_dict_init","onRuntimeInitialized"].forEach((prop) => {
-  if (!Object.getOwnPropertyDescriptor(Module['ready'], prop)) {
-    Object.defineProperty(Module['ready'], prop, {
+  if (!Object.getOwnPropertyDescriptor(readyPromise, prop)) {
+    Object.defineProperty(readyPromise, prop, {
       get: () => abort('You are getting ' + prop + ' on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js'),
       set: () => abort('You are setting ' + prop + ' on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js'),
     });
@@ -38,7 +38,7 @@ Module['ready'] = new Promise((resolve, reject) => {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpv_73sq43.js
+// include: /tmp/tmpx_8t4pvu.js
 
   if (!Module.expectedDataFileDownloads) {
     Module.expectedDataFileDownloads = 0;
@@ -254,21 +254,21 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
 
   })();
 
-// end include: /tmp/tmpv_73sq43.js
-// include: /tmp/tmppocnqvs2.js
+// end include: /tmp/tmpx_8t4pvu.js
+// include: /tmp/tmpky2_dyn8.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['ENVIRONMENT_IS_PTHREAD'] || Module['$ww']) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmppocnqvs2.js
-// include: /tmp/tmpkg2y0vxl.js
+  // end include: /tmp/tmpky2_dyn8.js
+// include: /tmp/tmpyhpjn7fw.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach(function(task) {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpkg2y0vxl.js
+  // end include: /tmp/tmpyhpjn7fw.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -382,70 +382,6 @@ readAsync = (filename, onload, onerror, binary = true) => {
 if (ENVIRONMENT_IS_SHELL) {
 
   if ((typeof process == 'object' && typeof require === 'function') || typeof window == 'object' || typeof importScripts == 'function') throw new Error('not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)');
-
-  if (typeof read != 'undefined') {
-    read_ = read;
-  }
-
-  readBinary = (f) => {
-    if (typeof readbuffer == 'function') {
-      return new Uint8Array(readbuffer(f));
-    }
-    let data = read(f, 'binary');
-    assert(typeof data == 'object');
-    return data;
-  };
-
-  readAsync = (f, onload, onerror) => {
-    setTimeout(() => onload(readBinary(f)));
-  };
-
-  if (typeof clearTimeout == 'undefined') {
-    globalThis.clearTimeout = (id) => {};
-  }
-
-  if (typeof setTimeout == 'undefined') {
-    // spidermonkey lacks setTimeout but we use it above in readAsync.
-    globalThis.setTimeout = (f) => (typeof f == 'function') ? f() : abort();
-  }
-
-  if (typeof scriptArgs != 'undefined') {
-    arguments_ = scriptArgs;
-  } else if (typeof arguments != 'undefined') {
-    arguments_ = arguments;
-  }
-
-  if (typeof quit == 'function') {
-    quit_ = (status, toThrow) => {
-      // Unlike node which has process.exitCode, d8 has no such mechanism. So we
-      // have no way to set the exit code and then let the program exit with
-      // that code when it naturally stops running (say, when all setTimeouts
-      // have completed). For that reason, we must call `quit` - the only way to
-      // set the exit code - but quit also halts immediately.  To increase
-      // consistency with node (and the web) we schedule the actual quit call
-      // using a setTimeout to give the current stack and any exception handlers
-      // a chance to run.  This enables features such as addOnPostRun (which
-      // expected to be able to run code after main returns).
-      setTimeout(() => {
-        if (!(toThrow instanceof ExitStatus)) {
-          let toLog = toThrow;
-          if (toThrow && typeof toThrow == 'object' && toThrow.stack) {
-            toLog = [toThrow, toThrow.stack];
-          }
-          err(`exiting due to exception: ${toLog}`);
-        }
-        quit(status);
-      });
-      throw toThrow;
-    };
-  }
-
-  if (typeof print != 'undefined') {
-    // Prefer to use print/printErr where they exist, as they usually work better.
-    if (typeof console == 'undefined') console = /** @type{!Console} */({});
-    console.log = /** @type{!function(this:Console, ...*): undefined} */ (print);
-    console.warn = console.error = /** @type{!function(this:Console, ...*): undefined} */ (typeof printErr != 'undefined' ? printErr : print);
-  }
 
 } else
 
@@ -949,11 +885,13 @@ var isDataURI = (filename) => filename.startsWith(dataURIPrefix);
  */
 var isFileURI = (filename) => filename.startsWith('file://');
 // end include: URIUtils.js
-function createExportWrapper(name) {
+function createExportWrapper(name, nargs) {
   return (...args) => {
     assert(runtimeInitialized, `native function \`${name}\` called before runtime initialization`);
     var f = wasmExports[name];
     assert(f, `exported native function \`${name}\` not found`);
+    // Only assert for too many arguments. Too few can be valid since the missing arguments will be zero filled.
+    assert(args.length <= nargs, `native function \`${name}\` called with ${args.length} args but expects ${nargs}`);
     return f(...args);
   };
 }
@@ -1175,7 +1113,7 @@ function isExportedByForceFilesystem(name) {
 }
 
 function missingGlobal(sym, msg) {
-  if (typeof globalThis !== 'undefined') {
+  if (typeof globalThis != 'undefined') {
     Object.defineProperty(globalThis, sym, {
       configurable: true,
       get() {
@@ -1190,7 +1128,7 @@ missingGlobal('buffer', 'Please use HEAP8.buffer or wasmMemory.buffer');
 missingGlobal('asm', 'Please use wasmExports instead');
 
 function missingLibrarySymbol(sym) {
-  if (typeof globalThis !== 'undefined' && !Object.getOwnPropertyDescriptor(globalThis, sym)) {
+  if (typeof globalThis != 'undefined' && !Object.getOwnPropertyDescriptor(globalThis, sym)) {
     Object.defineProperty(globalThis, sym, {
       configurable: true,
       get() {
@@ -1243,7 +1181,7 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  225435: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  226627: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
@@ -1303,7 +1241,9 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
 
   
   
+  var stackSave = () => _emscripten_stack_get_current();
   
+  var stackRestore = (val) => __emscripten_stack_restore(val);
   var withStackSave = (f) => {
       var stack = stackSave();
       var ret = f();
@@ -1311,6 +1251,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       return ret;
     };
   
+  var stackAlloc = (sz) => __emscripten_stack_alloc(sz);
   
   var UTF8Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf8') : undefined;
   
@@ -1455,6 +1396,8 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
     }
   }
 
+
+
   var warnOnce = (text) => {
       warnOnce.shown ||= {};
       if (!warnOnce.shown[text]) {
@@ -1581,6 +1524,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
     };
   
   
+  var setTempRet0 = (val) => __emscripten_tempret_set(val);
   var findMatchingCatch = (args) => {
       var thrown =
         exceptionLast?.excPtr;
@@ -4429,22 +4373,14 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         var buffer = HEAPU8.slice(addr, addr + len);
         FS.msync(stream, buffer, offset, len, flags);
       },
-  varargs:undefined,
-  get() {
-        assert(SYSCALLS.varargs != undefined);
-        // the `+` prepended here is necessary to convince the JSCompiler that varargs is indeed a number.
-        var ret = HEAP32[((+SYSCALLS.varargs)>>2)];
-        SYSCALLS.varargs += 4;
-        return ret;
-      },
-  getp() { return SYSCALLS.get() },
-  getStr(ptr) {
-        var ret = UTF8ToString(ptr);
-        return ret;
-      },
   getStreamFromFD(fd) {
         var stream = FS.getStreamChecked(fd);
         return stream;
+      },
+  varargs:undefined,
+  getStr(ptr) {
+        var ret = UTF8ToString(ptr);
+        return ret;
       },
   };
   function ___syscall_chmod(path, mode) {
@@ -4514,6 +4450,17 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   }
   }
 
+  /** @suppress {duplicate } */
+  function syscallGetVarargI() {
+      assert(SYSCALLS.varargs != undefined);
+      // the `+` prepended here is necessary to convince the JSCompiler that varargs is indeed a number.
+      var ret = HEAP32[((+SYSCALLS.varargs)>>2)];
+      SYSCALLS.varargs += 4;
+      return ret;
+    }
+  var syscallGetVarargP = syscallGetVarargI;
+  
+  
   function ___syscall_fcntl64(fd, cmd, varargs) {
   SYSCALLS.varargs = varargs;
   try {
@@ -4521,7 +4468,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       var stream = SYSCALLS.getStreamFromFD(fd);
       switch (cmd) {
         case 0: {
-          var arg = SYSCALLS.get();
+          var arg = syscallGetVarargI();
           if (arg < 0) {
             return -28;
           }
@@ -4538,12 +4485,12 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         case 3:
           return stream.flags;
         case 4: {
-          var arg = SYSCALLS.get();
+          var arg = syscallGetVarargI();
           stream.flags |= arg;
           return 0;
         }
         case 12: {
-          var arg = SYSCALLS.getp();
+          var arg = syscallGetVarargP();
           var offset = 0;
           // We're always unlocked.
           HEAP16[(((arg)+(offset))>>1)] = 2;
@@ -4571,6 +4518,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   }
   }
 
+  
   function ___syscall_ioctl(fd, op, varargs) {
   SYSCALLS.varargs = varargs;
   try {
@@ -4585,7 +4533,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           if (!stream.tty) return -59;
           if (stream.tty.ops.ioctl_tcgets) {
             var termios = stream.tty.ops.ioctl_tcgets(stream);
-            var argp = SYSCALLS.getp();
+            var argp = syscallGetVarargP();
             HEAP32[((argp)>>2)] = termios.c_iflag || 0;
             HEAP32[(((argp)+(4))>>2)] = termios.c_oflag || 0;
             HEAP32[(((argp)+(8))>>2)] = termios.c_cflag || 0;
@@ -4608,7 +4556,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         case 21508: {
           if (!stream.tty) return -59;
           if (stream.tty.ops.ioctl_tcsets) {
-            var argp = SYSCALLS.getp();
+            var argp = syscallGetVarargP();
             var c_iflag = HEAP32[((argp)>>2)];
             var c_oflag = HEAP32[(((argp)+(4))>>2)];
             var c_cflag = HEAP32[(((argp)+(8))>>2)];
@@ -4623,7 +4571,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         }
         case 21519: {
           if (!stream.tty) return -59;
-          var argp = SYSCALLS.getp();
+          var argp = syscallGetVarargP();
           HEAP32[((argp)>>2)] = 0;
           return 0;
         }
@@ -4632,7 +4580,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           return -28; // not supported
         }
         case 21531: {
-          var argp = SYSCALLS.getp();
+          var argp = syscallGetVarargP();
           return FS.ioctl(stream, op, argp);
         }
         case 21523: {
@@ -4641,7 +4589,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           if (!stream.tty) return -59;
           if (stream.tty.ops.ioctl_tiocgwinsz) {
             var winsize = stream.tty.ops.ioctl_tiocgwinsz(stream.tty);
-            var argp = SYSCALLS.getp();
+            var argp = syscallGetVarargP();
             HEAP16[((argp)>>1)] = winsize[0];
             HEAP16[(((argp)+(2))>>1)] = winsize[1];
           }
@@ -4710,13 +4658,14 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   }
   }
 
+  
   function ___syscall_openat(dirfd, path, flags, varargs) {
   SYSCALLS.varargs = varargs;
   try {
   
       path = SYSCALLS.getStr(path);
       path = SYSCALLS.calculateAt(dirfd, path);
-      var mode = varargs ? SYSCALLS.get() : 0;
+      var mode = varargs ? syscallGetVarargI() : 0;
       return FS.open(path, flags, mode).fd;
     } catch (e) {
     if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
@@ -4968,6 +4917,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
     return BigInt(ret);
   };
 
+  
   var __tzset_js = (timezone, daylight, std_name, dst_name) => {
       // TODO: Use (malleable) environment variables instead of system settings.
       var currentYear = new Date().getFullYear();
@@ -4993,19 +4943,20 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   
       HEAP32[((daylight)>>2)] = Number(winterOffset != summerOffset);
   
-      function extractZone(date) {
-        var match = date.toTimeString().match(/\(([A-Za-z ]+)\)$/);
-        return match ? match[1] : "GMT";
-      };
+      var extractZone = (date) => date.toLocaleTimeString(undefined, {hour12:false, timeZoneName:'short'}).split(' ')[1];
       var winterName = extractZone(winter);
       var summerName = extractZone(summer);
+      assert(winterName);
+      assert(summerName);
+      assert(lengthBytesUTF8(winterName) <= 16, `timezone name truncated to fit in TZNAME_MAX (${winterName})`);
+      assert(lengthBytesUTF8(summerName) <= 16, `timezone name truncated to fit in TZNAME_MAX (${summerName})`);
       if (summerOffset < winterOffset) {
         // Northern hemisphere
-        stringToUTF8(winterName, std_name, 7);
-        stringToUTF8(summerName, dst_name, 7);
+        stringToUTF8(winterName, std_name, 17);
+        stringToUTF8(summerName, dst_name, 17);
       } else {
-        stringToUTF8(winterName, dst_name, 7);
-        stringToUTF8(summerName, std_name, 7);
+        stringToUTF8(winterName, dst_name, 17);
+        stringToUTF8(summerName, std_name, 17);
       }
     };
 
@@ -5284,7 +5235,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         if (curr < 0) return -1;
         ret += curr;
         if (curr < len) break; // nothing more to read
-        if (typeof offset !== 'undefined') {
+        if (typeof offset != 'undefined') {
           offset += curr;
         }
       }
@@ -5334,7 +5285,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         var curr = FS.write(stream, HEAP8, ptr, len, offset);
         if (curr < 0) return -1;
         ret += curr;
-        if (typeof offset !== 'undefined') {
+        if (typeof offset != 'undefined') {
           offset += curr;
         }
       }
@@ -5679,6 +5630,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   
   
   
+  
   var stringToUTF8OnStack = (str) => {
       var size = lengthBytesUTF8(str) + 1;
       var ret = stackAlloc(size);
@@ -5989,55 +5941,54 @@ var wasmImports = {
   strftime_l: _strftime_l
 };
 var wasmExports = createWasm();
-var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors');
-var _get_game_count = Module['_get_game_count'] = createExportWrapper('get_game_count');
-var _get_game_name = Module['_get_game_name'] = createExportWrapper('get_game_name');
-var _start_game = Module['_start_game'] = createExportWrapper('start_game');
-var _update = Module['_update'] = createExportWrapper('update');
-var _handle_user_string_input = Module['_handle_user_string_input'] = createExportWrapper('handle_user_string_input');
-var _handle_user_clicked = Module['_handle_user_clicked'] = createExportWrapper('handle_user_clicked');
-var _handle_mousemove = Module['_handle_mousemove'] = createExportWrapper('handle_mousemove');
-var _handle_mouse_evt = Module['_handle_mouse_evt'] = createExportWrapper('handle_mouse_evt');
-var _handle_wheel_changed = Module['_handle_wheel_changed'] = createExportWrapper('handle_wheel_changed');
-var _handle_key_evt = Module['_handle_key_evt'] = createExportWrapper('handle_key_evt');
-var _handle_touch_evt = Module['_handle_touch_evt'] = createExportWrapper('handle_touch_evt');
-var _handle_msg_received = Module['_handle_msg_received'] = createExportWrapper('handle_msg_received');
-var _handle_btn_clicked = Module['_handle_btn_clicked'] = createExportWrapper('handle_btn_clicked');
-var _handle_popup_btn_clicked = Module['_handle_popup_btn_clicked'] = createExportWrapper('handle_popup_btn_clicked');
-var _handle_game_option_evt = Module['_handle_game_option_evt'] = createExportWrapper('handle_game_option_evt');
-var _malloc = Module['_malloc'] = createExportWrapper('malloc');
-var _free = Module['_free'] = createExportWrapper('free');
-var _start_game_b64 = Module['_start_game_b64'] = createExportWrapper('start_game_b64');
-var _get_state = Module['_get_state'] = createExportWrapper('get_state');
-var _get_init_state = Module['_get_init_state'] = createExportWrapper('get_init_state');
-var _lua_run_cmd = Module['_lua_run_cmd'] = createExportWrapper('lua_run_cmd');
-var _destroy_game = Module['_destroy_game'] = createExportWrapper('destroy_game');
-var _new_file = Module['_new_file'] = createExportWrapper('new_file');
-var _write_to_file = Module['_write_to_file'] = createExportWrapper('write_to_file');
-var _close_file = Module['_close_file'] = createExportWrapper('close_file');
-var _dump_file = Module['_dump_file'] = createExportWrapper('dump_file');
-var _unzip_file = Module['_unzip_file'] = createExportWrapper('unzip_file');
-var _init_game_api = Module['_init_game_api'] = createExportWrapper('init_game_api');
-var _update_dict = Module['_update_dict'] = createExportWrapper('update_dict');
-var ___cxa_free_exception = createExportWrapper('__cxa_free_exception');
-var _fflush = createExportWrapper('fflush');
-var setTempRet0 = createExportWrapper('setTempRet0');
-var _setThrew = createExportWrapper('setThrew');
+var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
+var _get_game_count = Module['_get_game_count'] = createExportWrapper('get_game_count', 0);
+var _get_game_name = Module['_get_game_name'] = createExportWrapper('get_game_name', 1);
+var _start_game = Module['_start_game'] = createExportWrapper('start_game', 4);
+var _update = Module['_update'] = createExportWrapper('update', 2);
+var _handle_user_string_input = Module['_handle_user_string_input'] = createExportWrapper('handle_user_string_input', 4);
+var _handle_user_clicked = Module['_handle_user_clicked'] = createExportWrapper('handle_user_clicked', 3);
+var _handle_mousemove = Module['_handle_mousemove'] = createExportWrapper('handle_mousemove', 4);
+var _handle_mouse_evt = Module['_handle_mouse_evt'] = createExportWrapper('handle_mouse_evt', 5);
+var _handle_wheel_changed = Module['_handle_wheel_changed'] = createExportWrapper('handle_wheel_changed', 3);
+var _handle_key_evt = Module['_handle_key_evt'] = createExportWrapper('handle_key_evt', 3);
+var _handle_touch_evt = Module['_handle_touch_evt'] = createExportWrapper('handle_touch_evt', 5);
+var _handle_msg_received = Module['_handle_msg_received'] = createExportWrapper('handle_msg_received', 5);
+var _handle_btn_clicked = Module['_handle_btn_clicked'] = createExportWrapper('handle_btn_clicked', 2);
+var _handle_popup_btn_clicked = Module['_handle_popup_btn_clicked'] = createExportWrapper('handle_popup_btn_clicked', 4);
+var _handle_game_option_evt = Module['_handle_game_option_evt'] = createExportWrapper('handle_game_option_evt', 4);
+var _malloc = Module['_malloc'] = createExportWrapper('malloc', 1);
+var _free = Module['_free'] = createExportWrapper('free', 1);
+var _start_game_b64 = Module['_start_game_b64'] = createExportWrapper('start_game_b64', 4);
+var _get_state = Module['_get_state'] = createExportWrapper('get_state', 3);
+var _get_init_state = Module['_get_init_state'] = createExportWrapper('get_init_state', 3);
+var _lua_run_cmd = Module['_lua_run_cmd'] = createExportWrapper('lua_run_cmd', 3);
+var _destroy_game = Module['_destroy_game'] = createExportWrapper('destroy_game', 1);
+var _new_file = Module['_new_file'] = createExportWrapper('new_file', 2);
+var _write_to_file = Module['_write_to_file'] = createExportWrapper('write_to_file', 4);
+var _close_file = Module['_close_file'] = createExportWrapper('close_file', 2);
+var _dump_file = Module['_dump_file'] = createExportWrapper('dump_file', 2);
+var _unzip_file = Module['_unzip_file'] = createExportWrapper('unzip_file', 3);
+var _init_game_api = Module['_init_game_api'] = createExportWrapper('init_game_api', 2);
+var _update_dict = Module['_update_dict'] = createExportWrapper('update_dict', 0);
+var ___cxa_free_exception = createExportWrapper('__cxa_free_exception', 1);
+var _fflush = createExportWrapper('fflush', 1);
+var _setThrew = createExportWrapper('setThrew', 2);
+var __emscripten_tempret_set = createExportWrapper('_emscripten_tempret_set', 1);
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports['emscripten_stack_init'])();
 var _emscripten_stack_get_free = () => (_emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'])();
 var _emscripten_stack_get_base = () => (_emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'])();
 var _emscripten_stack_get_end = () => (_emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'])();
-var stackSave = createExportWrapper('stackSave');
-var stackRestore = createExportWrapper('stackRestore');
-var stackAlloc = createExportWrapper('stackAlloc');
+var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['_emscripten_stack_restore'])(a0);
+var __emscripten_stack_alloc = (a0) => (__emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'])(a0);
 var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'])();
-var ___cxa_decrement_exception_refcount = createExportWrapper('__cxa_decrement_exception_refcount');
-var ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_exception_refcount');
-var ___get_exception_message = createExportWrapper('__get_exception_message');
-var ___cxa_can_catch = createExportWrapper('__cxa_can_catch');
-var ___cxa_is_pointer_type = createExportWrapper('__cxa_is_pointer_type');
-var ___start_em_js = Module['___start_em_js'] = 217960;
-var ___stop_em_js = Module['___stop_em_js'] = 225435;
+var ___cxa_decrement_exception_refcount = createExportWrapper('__cxa_decrement_exception_refcount', 1);
+var ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_exception_refcount', 1);
+var ___get_exception_message = createExportWrapper('__get_exception_message', 3);
+var ___cxa_can_catch = createExportWrapper('__cxa_can_catch', 3);
+var ___cxa_is_pointer_type = createExportWrapper('__cxa_is_pointer_type', 1);
+var ___start_em_js = Module['___start_em_js'] = 219152;
+var ___stop_em_js = Module['___stop_em_js'] = 226627;
 function invoke_vi(index,a1) {
   var sp = stackSave();
   try {
@@ -6341,15 +6292,14 @@ var missingLibrarySymbols = [
   'convertI32PairToI53',
   'convertI32PairToI53Checked',
   'convertU32PairToI53',
+  'getTempRet0',
   'inetPton4',
   'inetNtop4',
   'inetPton6',
   'inetNtop6',
   'readSockaddr',
   'writeSockaddr',
-  'getCallstack',
   'emscriptenLog',
-  'convertPCtoSourceLocation',
   'runMainThreadEmAsm',
   'jstoi_q',
   'listenOnce',
@@ -6433,7 +6383,8 @@ var missingLibrarySymbols = [
   'setCanvasElementSize',
   'getCanvasElementSize',
   'jsStackTrace',
-  'stackTrace',
+  'getCallstack',
+  'convertPCtoSourceLocation',
   'checkWasiClock',
   'wasiRightsToMuslOFlags',
   'wasiOFlagsToMuslOFlags',
@@ -6478,6 +6429,7 @@ var missingLibrarySymbols = [
   'writeAsciiToMemory',
   'setErrNo',
   'demangle',
+  'stackTrace',
 ];
 missingLibrarySymbols.forEach(missingLibrarySymbol)
 
@@ -6497,16 +6449,15 @@ var unexportedSymbols = [
   'abort',
   'wasmMemory',
   'wasmExports',
-  'stackAlloc',
-  'stackSave',
-  'stackRestore',
-  'getTempRet0',
-  'setTempRet0',
   'writeStackCookie',
   'checkStackCookie',
   'MAX_INT53',
   'MIN_INT53',
   'bigintToI53Checked',
+  'stackSave',
+  'stackRestore',
+  'stackAlloc',
+  'setTempRet0',
   'ptrToString',
   'zeroMemory',
   'exitJS',
@@ -6530,7 +6481,6 @@ var unexportedSymbols = [
   'randomFill',
   'timers',
   'warnOnce',
-  'UNWIND_CACHE',
   'readEmAsmArgsArray',
   'readEmAsmArgs',
   'runEmAsmFunction',
@@ -6563,6 +6513,7 @@ var unexportedSymbols = [
   'findCanvasEventTarget',
   'currentFullscreenStrategy',
   'restoreOldWindowedStyle',
+  'UNWIND_CACHE',
   'ExitStatus',
   'getEnvStrings',
   'doReadv',
@@ -6727,7 +6678,7 @@ run();
 
 
 
-  return moduleArg.ready
+  return readyPromise
 }
 );
 })();
