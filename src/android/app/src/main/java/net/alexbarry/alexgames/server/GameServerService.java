@@ -183,7 +183,8 @@ public class GameServerService extends Service {
     private Notification buildNotification(String msg) {
         Intent stopIntent = new Intent();
         stopIntent.setAction(STOP_SERVICE_ACTION);
-        PendingIntent pendingStopIntent = PendingIntent.getBroadcast(this, 0, stopIntent, 0);
+        // TODO not sure if this is mutable or not
+        PendingIntent pendingStopIntent = PendingIntent.getBroadcast(this, 0, stopIntent, PendingIntent.FLAG_MUTABLE);
 
         //Intent openServiceMonitoringIntent = new Intent();
         //openServiceMonitoringIntent.setAction(".server.ServerMonitoringActivity");
@@ -191,7 +192,8 @@ public class GameServerService extends Service {
 
         Intent openServiceMonitoringIntent = new Intent(this, ServerMonitorActivity.class);
         openServiceMonitoringIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingOpenServiceMonitoringIntent = PendingIntent.getActivity(this, 0, openServiceMonitoringIntent, 0);
+        // TODO not sure if this is mutable or not
+        PendingIntent pendingOpenServiceMonitoringIntent = PendingIntent.getActivity(this, 0, openServiceMonitoringIntent, PendingIntent.FLAG_MUTABLE);
 
         // TODO make it so you can click the notification and open
         // an activity that will show more server info
