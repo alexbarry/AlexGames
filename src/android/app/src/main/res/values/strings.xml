@@ -38,4 +38,5 @@
     <string name="share">Share</string>
     <string name="open">Open</string>
     <string name="server_address_description2">**NOTE** that it will likely only work if both you and them are on the same home network (e.g. wifi). Some public wifi networks do not allow devices to communicate with each other directly. Technically you could enable port forwarding on your home router and then give them your public IP address, but this is probably not a good idea. To play with someone on a different network, please visit the public site at https://alexbarry.net/games</string>
+    <string name="choose_different_game">Choose Different Game</string>
 </resources>

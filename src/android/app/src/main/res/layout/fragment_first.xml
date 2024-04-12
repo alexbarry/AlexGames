@@ -14,21 +14,11 @@
         app:layout_constraintLeft_toLeftOf="parent" />
 
     <Button
-        android:id="@+id/button_first"
+        android:id="@+id/btn_choose_different_game"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/next"
+        android:text="@string/choose_different_game"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/button_to_root_test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="To new root"
-        app:layout_constraintTop_toBottomOf="@id/button_first"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
