@@ -29,6 +29,10 @@
 	<script type="text/javascript" src="js/alexgames_c_dict.js"></script>
 
 	<script type="text/javascript" src="js/url_args.js"></script>
+
+	<!--<script src="https://unpkg.com/matrix-widget-api@0.1.0/dist/api.min.js"></script>-->
+	<script src="https://unpkg.com/matrix-widget-api@1.6.0/dist/api.min.js"></script>
+
 	<link rel="manifest" href="manifest.json">
 	<link rel="stylesheet" type="text/css" href="css/style_very_dark.css">
 	<link rel="stylesheet" type="text/css" href="css/style_dark.css">
@@ -737,12 +741,42 @@ for (let game_choice_row_info of game_choice_row_infos) {
 
 <script>
 
-	// TODO make this a better abstraction to allow for overriding the messaging API
-	// to use something other than websockets
-	const send_message = ws_send_message;
+	const status_msg = document.getElementById("status");
+
+	// https://github.com/matrix-org/matrix-widget-api
+	//const widgetId = 'net.alexbarry.alexgames.matrix'; // if you know the widget ID, supply it.
+	const widgetId = URL_args.matrix_widget_id;
+	const mx = new mxwidgets();
+	const api = new mx.WidgetApi(widgetId);
+
+
+	const ALEXGAMES_MSG = "net.alexbarry.alexgames.matrix.game_msg";
+
+    api.on("ready", function() {
+		set_status_msg(gfx, "Matrix API ready!")
+	
+		// TODO send "player_joined" message
+    });
+
+	set_status_msg({ "status_msg": status_msg }, "Calling matrix api start");
+	api.start();
+
+	api.sendContentLoaded();
+
+	api.on(ALEXGAMES_MSG, (msg) => {
+		set_status_msg(gfx, `Received message from ${msg.dst}, body: ${msg.msg}`);
+		handle_msg_received(gfx, msg.dst, msg.msg);
+	});
+
+	function matrix_send_msg(dst, msg) {
+		set_status_msg(gfx, `Sending message to ${dst}, body: ${msg}`);
+		api.transport.send(ALEXGAMES_MSG, { dst: dst, msg: msg });
+	}
+
+	//const send_message = ws_send_message;
+	const send_message = matrix_send_msg;
 
 	set_unset_game_instructions_visible(false);
-	const status_msg = document.getElementById("status");
 
 	if (typeof WebAssembly === 'undefined') {
 		let msg = 'WebAssembly is disabled or not supported. One possible cause is having "Lockdown Mode" enabled on Apple devices.';
