@@ -21,6 +21,7 @@
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	color: #888888;
+	overflow: hidden;
 } 
 
 /* TODO not sure how to make this work */
