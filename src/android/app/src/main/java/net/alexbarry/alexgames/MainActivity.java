@@ -41,15 +41,6 @@ public class MainActivity extends AppCompatActivity {
 
         this.viewModel = new ViewModelProvider(this).get(AlexGamesViewModel.class);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(AlexConstants.HOST_SERVER_SERVICE_NOTIFICATION_CHANNEL_ID,
                     getString(R.string.service_notification_channel_name),
