@@ -929,6 +929,10 @@ for (let game_choice_row_info of game_choice_row_infos) {
 	let g_options_visible = false;
 
 	let gfx = new_gfx(canvas, graphics_map, popup, status_msg, status_err, game_options_div);
+
+	// TODO only set for matrix widget
+	gfx.disable_local_storage = true;
+
 	gfx.game_options_none_placeholder = document.getElementById("game_options_none_placeholder");
 	gfx.game_choice_popup = document.getElementById("game_choice_popup");
 	if (URL_args.state) {

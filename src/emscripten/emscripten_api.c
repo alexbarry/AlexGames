@@ -420,6 +420,11 @@ EM_JS(long, js_get_time_ms, (), {
 });
 
 EM_JS(void, js_store_data, (void *L, const char *key_ptr, const uint8_t *val_ptr, size_t val_len), {
+	if (gfx.disable_local_storage) {
+		console.debug("Ignoring call to js_store_data because gfx.disable_local_storage is set");
+		return;
+	}
+
 	let key_str = UTF8ToString(key_ptr);
 
 	if (window.localStorage == null) {
@@ -453,6 +458,11 @@ EM_JS(void, js_store_data, (void *L, const char *key_ptr, const uint8_t *val_ptr
 });
 
 EM_JS(size_t, js_read_stored_data, (void *L, const char *key_ptr, uint8_t *buff_out, size_t buff_max), {
+	if (gfx.disable_local_storage) {
+		console.debug("Ignoring call to js_read_stored_data because gfx.disable_local_storage is set");
+		return -1;
+	}
+
 
 	let key_str = UTF8ToString(key_ptr);
 

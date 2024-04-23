@@ -9,9 +9,13 @@ function user_colour_pref_to_game_format(colour_pref) {
 }
 
 function get_user_colour_pref() {
-	let storedPref = window.localStorage[STORAGE_KEY_USER_COLOUR_PREF];
-	if (storedPref) {
-		return user_colour_pref_to_game_format(storedPref);
+	if (gfx.disable_local_storage) {
+		console.debug("get_user_colour_pref not reading from local storage because gfx.disable_local_storage is set");
+	} else {
+		let storedPref = window.localStorage[STORAGE_KEY_USER_COLOUR_PREF];
+		if (storedPref) {
+			return user_colour_pref_to_game_format(storedPref);
+		}
 	}
 
 	if (window.matchMedia("(prefers-color-scheme: dark)")) {
@@ -23,6 +27,10 @@ function get_user_colour_pref() {
 
 
 function set_user_colour_pref(pref) {
+	if (gfx.disable_local_storage) {
+		console.debug("set_user_colour_pref not writing to local storage because gfx.disable_local_storage is set");
+		return;
+	}
 	window.localStorage[STORAGE_KEY_USER_COLOUR_PREF] = pref;
 }
 
