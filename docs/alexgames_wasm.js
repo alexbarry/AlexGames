@@ -1,15 +1,16 @@
 
 var createMyModule = (() => {
-  var _scriptDir = typeof document != 'undefined' ? document.currentScript?.src : undefined;
-  if (typeof __filename != 'undefined') _scriptDir ||= __filename;
+  var _scriptName = typeof document != 'undefined' ? document.currentScript?.src : undefined;
+  if (typeof __filename != 'undefined') _scriptName ||= __filename;
   return (
 function(moduleArg = {}) {
+  var moduleRtn;
 
 // include: shell.js
 // The Module object: Our interface to the outside world. We import
 // and export values on it. There are various ways Module can be used:
 // 1. Not defined. We create it here
-// 2. A function parameter, function(Module) { ..generated code.. }
+// 2. A function parameter, function(moduleArg) => Promise<Module>
 // 3. pre-run appended it, var Module = {}; ..generated code..
 // 4. External script tag defines var Module.
 // We need to check if Module already exists (e.g. case 3 above).
@@ -19,7 +20,7 @@ function(moduleArg = {}) {
 // after the generated code, you will need to define   var Module = {};
 // before the code. Then that object will be used in the code, and you
 // can continue to use Module afterwards as well.
-var Module = moduleArg;
+var Module = Object.assign({}, moduleArg);
 
 // Set up the promise that indicates the Module is initialized
 var readyPromiseResolve, readyPromiseReject;
@@ -36,19 +37,44 @@ var readyPromise = new Promise((resolve, reject) => {
   }
 });
 
+// Determine the runtime environment we are in. You can customize this by
+// setting the ENVIRONMENT setting at compile time (see settings.js).
+
+// Attempt to auto-detect the environment
+var ENVIRONMENT_IS_WEB = typeof window == 'object';
+var ENVIRONMENT_IS_WORKER = typeof importScripts == 'function';
+// N.b. Electron.js environment is simultaneously a NODE-environment, but
+// also a web environment.
+var ENVIRONMENT_IS_NODE = typeof process == 'object' && typeof process.versions == 'object' && typeof process.versions.node == 'string';
+var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONMENT_IS_WORKER;
+
+if (Module['ENVIRONMENT']) {
+  throw new Error('Module.ENVIRONMENT has been deprecated. To force the environment, use the ENVIRONMENT compile-time option (for example, -sENVIRONMENT=web or -sENVIRONMENT=node)');
+}
+
+if (ENVIRONMENT_IS_NODE) {
+  // `require()` is no-op in an ESM module, use `createRequire()` to construct
+  // the require()` function.  This is only necessary for multi-environment
+  // builds, `-sENVIRONMENT=node` emits a static import declaration instead.
+  // TODO: Swap all `require()`'s with `import()`'s?
+
+}
+
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpo_p2baa5.js
+// include: /tmp/tmpmia7k7po.js
 
   if (!Module.expectedDataFileDownloads) {
     Module.expectedDataFileDownloads = 0;
   }
 
   Module.expectedDataFileDownloads++;
-  (function() {
+  (() => {
     // Do not attempt to redownload the virtual filesystem data when in a pthread or a Wasm Worker context.
-    if (Module['ENVIRONMENT_IS_PTHREAD'] || Module['$ww']) return;
-    var loadPackage = function(metadata) {
+    var isPthread = typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD;
+    var isWasmWorker = typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER;
+    if (isPthread || isWasmWorker) return;
+    function loadPackage(metadata) {
 
       var PACKAGE_PATH = '';
       if (typeof window === 'object') {
@@ -250,25 +276,25 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/preload/games/31s/31s_core.lua", "start": 0, "end": 12412}, {"filename": "/preload/games/31s/31s_draw.lua", "start": 12412, "end": 20896}, {"filename": "/preload/games/31s/31s_main.lua", "start": 20896, "end": 30790}, {"filename": "/preload/games/api_demo/game.lua", "start": 30790, "end": 38503}, {"filename": "/preload/games/api_demo/game_core.lua", "start": 38503, "end": 40676}, {"filename": "/preload/games/api_demo/game_draw.lua", "start": 40676, "end": 47078}, {"filename": "/preload/games/backgammon/backgammon_core.lua", "start": 47078, "end": 75309}, {"filename": "/preload/games/backgammon/backgammon_draw.lua", "start": 75309, "end": 97653}, {"filename": "/preload/games/backgammon/backgammon_main.lua", "start": 97653, "end": 116547}, {"filename": "/preload/games/backgammon/backgammon_serialize.lua", "start": 116547, "end": 120921}, {"filename": "/preload/games/blue/blue_core.lua", "start": 120921, "end": 124376}, {"filename": "/preload/games/blue/blue_draw.lua", "start": 124376, "end": 151752}, {"filename": "/preload/games/blue/blue_main.lua", "start": 151752, "end": 152751}, {"filename": "/preload/games/blue/blue_ui.lua", "start": 152751, "end": 155651}, {"filename": "/preload/games/bound/bound_core.lua", "start": 155651, "end": 184208}, {"filename": "/preload/games/bound/bound_draw.lua", "start": 184208, "end": 207246}, {"filename": "/preload/games/bound/bound_main.lua", "start": 207246, "end": 219315}, {"filename": "/preload/games/bound/bound_serialize.lua", "start": 219315, "end": 230302}, {"filename": "/preload/games/card_sim/card_generic_core.lua", "start": 230302, "end": 238325}, {"filename": "/preload/games/card_sim/card_generic_draw.lua", "start": 238325, "end": 240532}, {"filename": "/preload/games/card_sim/card_generic_main.lua", "start": 240532, "end": 246685}, {"filename": "/preload/games/card_sim/card_generic_serialize.lua", "start": 246685, "end": 249907}, {"filename": "/preload/games/checkers/checkers_core.lua", "start": 249907, "end": 259914}, {"filename": "/preload/games/checkers/checkers_draw.lua", "start": 259914, "end": 264143}, {"filename": "/preload/games/checkers/checkers_main.lua", "start": 264143, "end": 271471}, {"filename": "/preload/games/checkers/checkers_serialize.lua", "start": 271471, "end": 273625}, {"filename": "/preload/games/chess/chess_core.lua", "start": 273625, "end": 287894}, {"filename": "/preload/games/chess/chess_draw.lua", "start": 287894, "end": 297201}, {"filename": "/preload/games/chess/chess_main.lua", "start": 297201, "end": 307196}, {"filename": "/preload/games/chess/chess_serialize.lua", "start": 307196, "end": 308122}, {"filename": "/preload/games/crib/crib_core.lua", "start": 308122, "end": 344205}, {"filename": "/preload/games/crib/crib_draw.lua", "start": 344205, "end": 359241}, {"filename": "/preload/games/crib/crib_main.lua", "start": 359241, "end": 365811}, {"filename": "/preload/games/crib/crib_serialize.lua", "start": 365811, "end": 371683}, {"filename": "/preload/games/crib/crib_test.lua", "start": 371683, "end": 375520}, {"filename": "/preload/games/crossword_builder/crossword_builder_core.lua", "start": 375520, "end": 390041}, {"filename": "/preload/games/crossword_builder/crossword_builder_draw.lua", "start": 390041, "end": 394345}, {"filename": "/preload/games/crossword_builder/crossword_builder_main.lua", "start": 394345, "end": 397927}, {"filename": "/preload/games/crossword_letters/crossword_letters_core.lua", "start": 397927, "end": 416922}, {"filename": "/preload/games/crossword_letters/crossword_letters_draw.lua", "start": 416922, "end": 428034}, {"filename": "/preload/games/crossword_letters/crossword_letters_gen_puzzles.lua", "start": 428034, "end": 432415}, {"filename": "/preload/games/crossword_letters/crossword_letters_main.lua", "start": 432415, "end": 441352}, {"filename": "/preload/games/crossword_letters/crossword_letters_puzzles.lua", "start": 441352, "end": 566728}, {"filename": "/preload/games/crossword_letters/crossword_letters_serialize.lua", "start": 566728, "end": 570390}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters.py", "start": 570390, "end": 578820}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters2.py", "start": 578820, "end": 592779}, {"filename": "/preload/games/crossword_letters/list_puzzle_words.lua", "start": 592779, "end": 593673}, {"filename": "/preload/games/crossword_letters/list_right_diffs.py", "start": 593673, "end": 594028}, {"filename": "/preload/games/endless_runner/endless_runner_core.lua", "start": 594028, "end": 599228}, {"filename": "/preload/games/endless_runner/endless_runner_draw.lua", "start": 599228, "end": 602158}, {"filename": "/preload/games/endless_runner/endless_runner_main.lua", "start": 602158, "end": 603595}, {"filename": "/preload/games/fluid_mix/fluid_mix_core.lua", "start": 603595, "end": 605838}, {"filename": "/preload/games/fluid_mix/fluid_mix_draw.lua", "start": 605838, "end": 611646}, {"filename": "/preload/games/fluid_mix/fluid_mix_main.lua", "start": 611646, "end": 614642}, {"filename": "/preload/games/fluid_mix/fluid_mix_serialize.lua", "start": 614642, "end": 616797}, {"filename": "/preload/games/go/go_core.lua", "start": 616797, "end": 626220}, {"filename": "/preload/games/go/go_ctrl.lua", "start": 626220, "end": 626970}, {"filename": "/preload/games/go/go_main.lua", "start": 626970, "end": 640160}, {"filename": "/preload/games/go/go_ui.lua", "start": 640160, "end": 643550}, {"filename": "/preload/games/hospital/hospital_core.lua", "start": 643550, "end": 669816}, {"filename": "/preload/games/hospital/hospital_draw.lua", "start": 669816, "end": 692272}, {"filename": "/preload/games/hospital/hospital_main.lua", "start": 692272, "end": 701083}, {"filename": "/preload/games/hospital/hospital_serialize.lua", "start": 701083, "end": 711093}, {"filename": "/preload/games/life/life_core.lua", "start": 711093, "end": 713839}, {"filename": "/preload/games/life/life_draw.lua", "start": 713839, "end": 714829}, {"filename": "/preload/games/life/life_main.lua", "start": 714829, "end": 717002}, {"filename": "/preload/games/minesweeper/minesweeper_core.lua", "start": 717002, "end": 725925}, {"filename": "/preload/games/minesweeper/minesweeper_draw.lua", "start": 725925, "end": 731366}, {"filename": "/preload/games/minesweeper/minesweeper_main.lua", "start": 731366, "end": 743911}, {"filename": "/preload/games/minesweeper/minesweeper_serialize.lua", "start": 743911, "end": 749114}, {"filename": "/preload/games/minesweeper_life/minesweeper_draw.lua", "start": 749114, "end": 754719}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_core.lua", "start": 754719, "end": 770483}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_main.lua", "start": 770483, "end": 789419}, {"filename": "/preload/games/minesweeper_life/minesweeper_serialize.lua", "start": 789419, "end": 794632}, {"filename": "/preload/games/poker_chips/poker_chips_core.lua", "start": 794632, "end": 800003}, {"filename": "/preload/games/poker_chips/poker_chips_main.lua", "start": 800003, "end": 804198}, {"filename": "/preload/games/poker_chips/poker_chips_serialize.lua", "start": 804198, "end": 806813}, {"filename": "/preload/games/poker_chips/poker_chips_ui.lua", "start": 806813, "end": 809186}, {"filename": "/preload/games/poker_chips/ui/bet_input.lua", "start": 809186, "end": 817625}, {"filename": "/preload/games/poker_chips/ui/control.lua", "start": 817625, "end": 821665}, {"filename": "/preload/games/poker_chips/ui/view_others.lua", "start": 821665, "end": 827613}, {"filename": "/preload/games/solitaire/solitaire_core.lua", "start": 827613, "end": 847309}, {"filename": "/preload/games/solitaire/solitaire_draw.lua", "start": 847309, "end": 865651}, {"filename": "/preload/games/solitaire/solitaire_main.lua", "start": 865651, "end": 882933}, {"filename": "/preload/games/solitaire/solitaire_serialize.lua", "start": 882933, "end": 887986}, {"filename": "/preload/games/solitaire/solitaire_solve.lua", "start": 887986, "end": 905967}, {"filename": "/preload/games/spider_swing/spider_swing_core.lua", "start": 905967, "end": 911418}, {"filename": "/preload/games/spider_swing/spider_swing_draw.lua", "start": 911418, "end": 917539}, {"filename": "/preload/games/spider_swing/spider_swing_main.lua", "start": 917539, "end": 920259}, {"filename": "/preload/games/sudoku/sudoku_core.lua", "start": 920259, "end": 930762}, {"filename": "/preload/games/sudoku/sudoku_draw.lua", "start": 930762, "end": 934746}, {"filename": "/preload/games/sudoku/sudoku_main.lua", "start": 934746, "end": 935467}, {"filename": "/preload/games/swarm/swarm_core.lua", "start": 935467, "end": 949816}, {"filename": "/preload/games/swarm/swarm_draw.lua", "start": 949816, "end": 953133}, {"filename": "/preload/games/swarm/swarm_keyboard_input.lua", "start": 953133, "end": 954701}, {"filename": "/preload/games/swarm/swarm_main.lua", "start": 954701, "end": 956745}, {"filename": "/preload/games/test/card_angle_test.lua", "start": 956745, "end": 959965}, {"filename": "/preload/games/test/draw_graphics_test.lua", "start": 959965, "end": 961876}, {"filename": "/preload/games/test/timer_test.lua", "start": 961876, "end": 964031}, {"filename": "/preload/games/thrust/thrust_core.lua", "start": 964031, "end": 974985}, {"filename": "/preload/games/thrust/thrust_draw.lua", "start": 974985, "end": 982036}, {"filename": "/preload/games/thrust/thrust_keyboard_input.lua", "start": 982036, "end": 983901}, {"filename": "/preload/games/thrust/thrust_main.lua", "start": 983901, "end": 986165}, {"filename": "/preload/games/touch_test/touch_test.lua", "start": 986165, "end": 988515}, {"filename": "/preload/games/word_mastermind/word_mastermind_core.lua", "start": 988515, "end": 995255}, {"filename": "/preload/games/word_mastermind/word_mastermind_draw.lua", "start": 995255, "end": 1004776}, {"filename": "/preload/games/word_mastermind/word_mastermind_main.lua", "start": 1004776, "end": 1010890}, {"filename": "/preload/games/word_mastermind/word_mastermind_serialize.lua", "start": 1010890, "end": 1012814}, {"filename": "/preload/games/wu/wu_core.lua", "start": 1012814, "end": 1018938}, {"filename": "/preload/games/wu/wu_ctrl.lua", "start": 1018938, "end": 1019759}, {"filename": "/preload/games/wu/wu_main.lua", "start": 1019759, "end": 1029398}, {"filename": "/preload/libs/cards/card_test.lua", "start": 1029398, "end": 1030192}, {"filename": "/preload/libs/cards/cards.lua", "start": 1030192, "end": 1035599}, {"filename": "/preload/libs/cards/cards_draw.lua", "start": 1035599, "end": 1045168}, {"filename": "/preload/libs/cards/cards_set.lua", "start": 1045168, "end": 1045519}, {"filename": "/preload/libs/combinations.lua", "start": 1045519, "end": 1047811}, {"filename": "/preload/libs/dice/dice.lua", "start": 1047811, "end": 1048070}, {"filename": "/preload/libs/dice/dice_draw.lua", "start": 1048070, "end": 1049505}, {"filename": "/preload/libs/draw/draw_celebration_anim.lua", "start": 1049505, "end": 1058919}, {"filename": "/preload/libs/draw/draw_colours.lua", "start": 1058919, "end": 1059740}, {"filename": "/preload/libs/draw/draw_keyboard.lua", "start": 1059740, "end": 1064549}, {"filename": "/preload/libs/draw/draw_more.lua", "start": 1064549, "end": 1068516}, {"filename": "/preload/libs/draw/draw_shapes.lua", "start": 1068516, "end": 1070141}, {"filename": "/preload/libs/letter_tiles.lua", "start": 1070141, "end": 1093320}, {"filename": "/preload/libs/multiplayer/two_player.lua", "start": 1093320, "end": 1104699}, {"filename": "/preload/libs/multiplayer/wait_for_players.lua", "start": 1104699, "end": 1111362}, {"filename": "/preload/libs/serialize/bit_pack.lua", "start": 1111362, "end": 1114385}, {"filename": "/preload/libs/serialize/serialize.lua", "start": 1114385, "end": 1119826}, {"filename": "/preload/libs/serialize/storage_helpers.lua", "start": 1119826, "end": 1120606}, {"filename": "/preload/libs/shuffle.lua", "start": 1120606, "end": 1120959}, {"filename": "/preload/libs/touch_to_mouse_evts.lua", "start": 1120959, "end": 1122092}, {"filename": "/preload/libs/ui/buttons.lua", "start": 1122092, "end": 1125981}, {"filename": "/preload/libs/ui/show_buttons_popup.lua", "start": 1125981, "end": 1126760}, {"filename": "/preload/libs/ui/soft_numpad.lua", "start": 1126760, "end": 1130753}, {"filename": "/preload/libs/ui/touchpad.lua", "start": 1130753, "end": 1132091}, {"filename": "/preload/libs/utils.lua", "start": 1132091, "end": 1136617}, {"filename": "/preload/libs/words.lua", "start": 1136617, "end": 1139918}], "remote_package_size": 1139918});
+    loadPackage({"files": [{"filename": "/preload/games/31s/31s_core.lua", "start": 0, "end": 12412}, {"filename": "/preload/games/31s/31s_draw.lua", "start": 12412, "end": 20896}, {"filename": "/preload/games/31s/31s_main.lua", "start": 20896, "end": 30790}, {"filename": "/preload/games/api_demo/game.lua", "start": 30790, "end": 38423}, {"filename": "/preload/games/api_demo/game_core.lua", "start": 38423, "end": 40596}, {"filename": "/preload/games/api_demo/game_draw.lua", "start": 40596, "end": 46998}, {"filename": "/preload/games/backgammon/backgammon_core.lua", "start": 46998, "end": 75229}, {"filename": "/preload/games/backgammon/backgammon_draw.lua", "start": 75229, "end": 97573}, {"filename": "/preload/games/backgammon/backgammon_main.lua", "start": 97573, "end": 116467}, {"filename": "/preload/games/backgammon/backgammon_serialize.lua", "start": 116467, "end": 120841}, {"filename": "/preload/games/blue/blue_core.lua", "start": 120841, "end": 124296}, {"filename": "/preload/games/blue/blue_draw.lua", "start": 124296, "end": 151672}, {"filename": "/preload/games/blue/blue_main.lua", "start": 151672, "end": 152671}, {"filename": "/preload/games/blue/blue_ui.lua", "start": 152671, "end": 155571}, {"filename": "/preload/games/bound/bound_core.lua", "start": 155571, "end": 184128}, {"filename": "/preload/games/bound/bound_draw.lua", "start": 184128, "end": 207166}, {"filename": "/preload/games/bound/bound_main.lua", "start": 207166, "end": 219235}, {"filename": "/preload/games/bound/bound_serialize.lua", "start": 219235, "end": 230222}, {"filename": "/preload/games/card_sim/card_generic_core.lua", "start": 230222, "end": 238245}, {"filename": "/preload/games/card_sim/card_generic_draw.lua", "start": 238245, "end": 240452}, {"filename": "/preload/games/card_sim/card_generic_main.lua", "start": 240452, "end": 246605}, {"filename": "/preload/games/card_sim/card_generic_serialize.lua", "start": 246605, "end": 249827}, {"filename": "/preload/games/checkers/checkers_core.lua", "start": 249827, "end": 259834}, {"filename": "/preload/games/checkers/checkers_draw.lua", "start": 259834, "end": 264063}, {"filename": "/preload/games/checkers/checkers_main.lua", "start": 264063, "end": 271391}, {"filename": "/preload/games/checkers/checkers_serialize.lua", "start": 271391, "end": 273545}, {"filename": "/preload/games/chess/chess_core.lua", "start": 273545, "end": 287814}, {"filename": "/preload/games/chess/chess_draw.lua", "start": 287814, "end": 297121}, {"filename": "/preload/games/chess/chess_main.lua", "start": 297121, "end": 307116}, {"filename": "/preload/games/chess/chess_serialize.lua", "start": 307116, "end": 308042}, {"filename": "/preload/games/crib/crib_core.lua", "start": 308042, "end": 344125}, {"filename": "/preload/games/crib/crib_draw.lua", "start": 344125, "end": 359161}, {"filename": "/preload/games/crib/crib_main.lua", "start": 359161, "end": 365731}, {"filename": "/preload/games/crib/crib_serialize.lua", "start": 365731, "end": 371603}, {"filename": "/preload/games/crib/crib_test.lua", "start": 371603, "end": 375440}, {"filename": "/preload/games/crossword_builder/crossword_builder_core.lua", "start": 375440, "end": 389961}, {"filename": "/preload/games/crossword_builder/crossword_builder_draw.lua", "start": 389961, "end": 394265}, {"filename": "/preload/games/crossword_builder/crossword_builder_main.lua", "start": 394265, "end": 397847}, {"filename": "/preload/games/crossword_letters/crossword_letters_core.lua", "start": 397847, "end": 416842}, {"filename": "/preload/games/crossword_letters/crossword_letters_draw.lua", "start": 416842, "end": 427954}, {"filename": "/preload/games/crossword_letters/crossword_letters_gen_puzzles.lua", "start": 427954, "end": 432335}, {"filename": "/preload/games/crossword_letters/crossword_letters_main.lua", "start": 432335, "end": 441272}, {"filename": "/preload/games/crossword_letters/crossword_letters_puzzles.lua", "start": 441272, "end": 566648}, {"filename": "/preload/games/crossword_letters/crossword_letters_serialize.lua", "start": 566648, "end": 570310}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters.py", "start": 570310, "end": 578740}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters2.py", "start": 578740, "end": 592699}, {"filename": "/preload/games/crossword_letters/list_puzzle_words.lua", "start": 592699, "end": 593593}, {"filename": "/preload/games/crossword_letters/list_right_diffs.py", "start": 593593, "end": 593948}, {"filename": "/preload/games/endless_runner/endless_runner_core.lua", "start": 593948, "end": 599148}, {"filename": "/preload/games/endless_runner/endless_runner_draw.lua", "start": 599148, "end": 602078}, {"filename": "/preload/games/endless_runner/endless_runner_main.lua", "start": 602078, "end": 603515}, {"filename": "/preload/games/fluid_mix/fluid_mix_core.lua", "start": 603515, "end": 605758}, {"filename": "/preload/games/fluid_mix/fluid_mix_draw.lua", "start": 605758, "end": 611566}, {"filename": "/preload/games/fluid_mix/fluid_mix_main.lua", "start": 611566, "end": 614562}, {"filename": "/preload/games/fluid_mix/fluid_mix_serialize.lua", "start": 614562, "end": 616717}, {"filename": "/preload/games/go/go_core.lua", "start": 616717, "end": 626140}, {"filename": "/preload/games/go/go_ctrl.lua", "start": 626140, "end": 626890}, {"filename": "/preload/games/go/go_main.lua", "start": 626890, "end": 640080}, {"filename": "/preload/games/go/go_ui.lua", "start": 640080, "end": 643470}, {"filename": "/preload/games/hospital/hospital_core.lua", "start": 643470, "end": 669736}, {"filename": "/preload/games/hospital/hospital_draw.lua", "start": 669736, "end": 692192}, {"filename": "/preload/games/hospital/hospital_main.lua", "start": 692192, "end": 701003}, {"filename": "/preload/games/hospital/hospital_serialize.lua", "start": 701003, "end": 711013}, {"filename": "/preload/games/life/life_core.lua", "start": 711013, "end": 713759}, {"filename": "/preload/games/life/life_draw.lua", "start": 713759, "end": 714749}, {"filename": "/preload/games/life/life_main.lua", "start": 714749, "end": 716922}, {"filename": "/preload/games/minesweeper/minesweeper_core.lua", "start": 716922, "end": 725845}, {"filename": "/preload/games/minesweeper/minesweeper_draw.lua", "start": 725845, "end": 731286}, {"filename": "/preload/games/minesweeper/minesweeper_main.lua", "start": 731286, "end": 743831}, {"filename": "/preload/games/minesweeper/minesweeper_serialize.lua", "start": 743831, "end": 749034}, {"filename": "/preload/games/minesweeper_life/minesweeper_draw.lua", "start": 749034, "end": 754639}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_core.lua", "start": 754639, "end": 770403}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_main.lua", "start": 770403, "end": 789339}, {"filename": "/preload/games/minesweeper_life/minesweeper_serialize.lua", "start": 789339, "end": 794552}, {"filename": "/preload/games/poker_chips/poker_chips_core.lua", "start": 794552, "end": 799923}, {"filename": "/preload/games/poker_chips/poker_chips_main.lua", "start": 799923, "end": 804118}, {"filename": "/preload/games/poker_chips/poker_chips_serialize.lua", "start": 804118, "end": 806733}, {"filename": "/preload/games/poker_chips/poker_chips_ui.lua", "start": 806733, "end": 809106}, {"filename": "/preload/games/poker_chips/ui/bet_input.lua", "start": 809106, "end": 817545}, {"filename": "/preload/games/poker_chips/ui/control.lua", "start": 817545, "end": 821585}, {"filename": "/preload/games/poker_chips/ui/view_others.lua", "start": 821585, "end": 827533}, {"filename": "/preload/games/solitaire/solitaire_core.lua", "start": 827533, "end": 847229}, {"filename": "/preload/games/solitaire/solitaire_draw.lua", "start": 847229, "end": 865571}, {"filename": "/preload/games/solitaire/solitaire_main.lua", "start": 865571, "end": 882853}, {"filename": "/preload/games/solitaire/solitaire_serialize.lua", "start": 882853, "end": 887906}, {"filename": "/preload/games/solitaire/solitaire_solve.lua", "start": 887906, "end": 905887}, {"filename": "/preload/games/spider_swing/spider_swing_core.lua", "start": 905887, "end": 911338}, {"filename": "/preload/games/spider_swing/spider_swing_draw.lua", "start": 911338, "end": 917459}, {"filename": "/preload/games/spider_swing/spider_swing_main.lua", "start": 917459, "end": 920179}, {"filename": "/preload/games/sudoku/sudoku_core.lua", "start": 920179, "end": 930682}, {"filename": "/preload/games/sudoku/sudoku_draw.lua", "start": 930682, "end": 934666}, {"filename": "/preload/games/sudoku/sudoku_main.lua", "start": 934666, "end": 935387}, {"filename": "/preload/games/swarm/swarm_core.lua", "start": 935387, "end": 949736}, {"filename": "/preload/games/swarm/swarm_draw.lua", "start": 949736, "end": 953053}, {"filename": "/preload/games/swarm/swarm_keyboard_input.lua", "start": 953053, "end": 954621}, {"filename": "/preload/games/swarm/swarm_main.lua", "start": 954621, "end": 956665}, {"filename": "/preload/games/test/card_angle_test.lua", "start": 956665, "end": 959885}, {"filename": "/preload/games/test/draw_graphics_test.lua", "start": 959885, "end": 961796}, {"filename": "/preload/games/test/timer_test.lua", "start": 961796, "end": 963951}, {"filename": "/preload/games/thrust/thrust_core.lua", "start": 963951, "end": 974905}, {"filename": "/preload/games/thrust/thrust_draw.lua", "start": 974905, "end": 981956}, {"filename": "/preload/games/thrust/thrust_keyboard_input.lua", "start": 981956, "end": 983821}, {"filename": "/preload/games/thrust/thrust_main.lua", "start": 983821, "end": 986085}, {"filename": "/preload/games/touch_test/touch_test.lua", "start": 986085, "end": 988435}, {"filename": "/preload/games/word_mastermind/word_mastermind_core.lua", "start": 988435, "end": 995175}, {"filename": "/preload/games/word_mastermind/word_mastermind_draw.lua", "start": 995175, "end": 1004696}, {"filename": "/preload/games/word_mastermind/word_mastermind_main.lua", "start": 1004696, "end": 1010810}, {"filename": "/preload/games/word_mastermind/word_mastermind_serialize.lua", "start": 1010810, "end": 1012734}, {"filename": "/preload/games/wu/wu_core.lua", "start": 1012734, "end": 1018858}, {"filename": "/preload/games/wu/wu_ctrl.lua", "start": 1018858, "end": 1019679}, {"filename": "/preload/games/wu/wu_main.lua", "start": 1019679, "end": 1029318}, {"filename": "/preload/libs/cards/card_test.lua", "start": 1029318, "end": 1030112}, {"filename": "/preload/libs/cards/cards.lua", "start": 1030112, "end": 1035519}, {"filename": "/preload/libs/cards/cards_draw.lua", "start": 1035519, "end": 1045088}, {"filename": "/preload/libs/cards/cards_set.lua", "start": 1045088, "end": 1045439}, {"filename": "/preload/libs/combinations.lua", "start": 1045439, "end": 1047731}, {"filename": "/preload/libs/dice/dice.lua", "start": 1047731, "end": 1047990}, {"filename": "/preload/libs/dice/dice_draw.lua", "start": 1047990, "end": 1049425}, {"filename": "/preload/libs/draw/draw_celebration_anim.lua", "start": 1049425, "end": 1058839}, {"filename": "/preload/libs/draw/draw_colours.lua", "start": 1058839, "end": 1059660}, {"filename": "/preload/libs/draw/draw_keyboard.lua", "start": 1059660, "end": 1064469}, {"filename": "/preload/libs/draw/draw_more.lua", "start": 1064469, "end": 1068436}, {"filename": "/preload/libs/draw/draw_shapes.lua", "start": 1068436, "end": 1070061}, {"filename": "/preload/libs/letter_tiles.lua", "start": 1070061, "end": 1093240}, {"filename": "/preload/libs/multiplayer/two_player.lua", "start": 1093240, "end": 1104619}, {"filename": "/preload/libs/multiplayer/wait_for_players.lua", "start": 1104619, "end": 1111282}, {"filename": "/preload/libs/serialize/bit_pack.lua", "start": 1111282, "end": 1114305}, {"filename": "/preload/libs/serialize/serialize.lua", "start": 1114305, "end": 1119746}, {"filename": "/preload/libs/serialize/storage_helpers.lua", "start": 1119746, "end": 1120526}, {"filename": "/preload/libs/shuffle.lua", "start": 1120526, "end": 1120879}, {"filename": "/preload/libs/touch_to_mouse_evts.lua", "start": 1120879, "end": 1122012}, {"filename": "/preload/libs/ui/buttons.lua", "start": 1122012, "end": 1125901}, {"filename": "/preload/libs/ui/show_buttons_popup.lua", "start": 1125901, "end": 1126680}, {"filename": "/preload/libs/ui/soft_numpad.lua", "start": 1126680, "end": 1130673}, {"filename": "/preload/libs/ui/touchpad.lua", "start": 1130673, "end": 1132011}, {"filename": "/preload/libs/utils.lua", "start": 1132011, "end": 1136537}, {"filename": "/preload/libs/words.lua", "start": 1136537, "end": 1139838}], "remote_package_size": 1139838});
 
   })();
 
-// end include: /tmp/tmpo_p2baa5.js
-// include: /tmp/tmpl6raxple.js
+// end include: /tmp/tmpmia7k7po.js
+// include: /tmp/tmp2xk0k126.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
-    if (Module['ENVIRONMENT_IS_PTHREAD'] || Module['$ww']) Module['preRun'] = [];
+    if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpl6raxple.js
-// include: /tmp/tmpcb87ff1h.js
+  // end include: /tmp/tmp2xk0k126.js
+// include: /tmp/tmpyov67x39.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach(function(task) {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpcb87ff1h.js
+  // end include: /tmp/tmpyov67x39.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -283,21 +309,6 @@ var thisProgram = './this.program';
 var quit_ = (status, toThrow) => {
   throw toThrow;
 };
-
-// Determine the runtime environment we are in. You can customize this by
-// setting the ENVIRONMENT setting at compile time (see settings.js).
-
-// Attempt to auto-detect the environment
-var ENVIRONMENT_IS_WEB = typeof window == 'object';
-var ENVIRONMENT_IS_WORKER = typeof importScripts == 'function';
-// N.b. Electron.js environment is simultaneously a NODE-environment, but
-// also a web environment.
-var ENVIRONMENT_IS_NODE = typeof process == 'object' && typeof process.versions == 'object' && typeof process.versions.node == 'string';
-var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONMENT_IS_WORKER;
-
-if (Module['ENVIRONMENT']) {
-  throw new Error('Module.ENVIRONMENT has been deprecated. To force the environment, use the ENVIRONMENT compile-time option (for example, -sENVIRONMENT=web or -sENVIRONMENT=node)');
-}
 
 // `/` should be present at the end if `scriptDirectory` is not empty
 var scriptDirectory = '';
@@ -324,10 +335,6 @@ if (ENVIRONMENT_IS_NODE) {
     throw new Error('This emscripten-generated code requires node v16.0.0 (detected v' + nodeVersion + ')');
   }
 
-  // `require()` is no-op in an ESM module, use `createRequire()` to construct
-  // the require()` function.  This is only necessary for multi-environment
-  // builds, `-sENVIRONMENT=node` emits a static import declaration instead.
-  // TODO: Swap all `require()`'s with `import()`'s?
   // These modules will usually be used on Node.js. Load them eagerly to avoid
   // the complexity of lazy-loading.
   var fs = require('fs');
@@ -396,8 +403,8 @@ if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
   }
   // When MODULARIZE, this JS may be executed later, after document.currentScript
   // is gone, so we saved it, and we use it here instead of any other info.
-  if (_scriptDir) {
-    scriptDirectory = _scriptDir;
+  if (_scriptName) {
+    scriptDirectory = _scriptName;
   }
   // blob urls look like blob:http://site.com/etc/etc and we cannot infer anything from them.
   // otherwise, slice off the final part of the url to find the script directory.
@@ -413,8 +420,6 @@ if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
 
   if (!(typeof window == 'object' || typeof importScripts == 'function')) throw new Error('not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)');
 
-  // Differentiate the Web Worker from the Node Worker case, as reading must
-  // be done differently.
   {
 // include: web_or_worker_shell_read.js
 read_ = (url) => {
@@ -1008,14 +1013,18 @@ function instantiateAsync(binary, binaryFile, imports, callback) {
   return instantiateArrayBuffer(binaryFile, imports, callback);
 }
 
+function getWasmImports() {
+  // prepare imports
+  return {
+    'env': wasmImports,
+    'wasi_snapshot_preview1': wasmImports,
+  }
+}
+
 // Create the wasm instance.
 // Receives the wasm imports, returns the exports.
 function createWasm() {
-  // prepare imports
-  var info = {
-    'env': wasmImports,
-    'wasi_snapshot_preview1': wasmImports,
-  };
+  var info = getWasmImports();
   // Load the wasm module and create an instance of using native support in the JS engine.
   // handle a generated wasm instance, receiving its exports and
   // performing other necessary setup
@@ -1064,7 +1073,6 @@ function createWasm() {
   // Also pthreads and wasm workers initialize the wasm instance through this
   // path.
   if (Module['instantiateWasm']) {
-
     try {
       return Module['instantiateWasm'](info, receiveInstance);
     } catch(e) {
@@ -1244,12 +1252,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   var stackSave = () => _emscripten_stack_get_current();
   
   var stackRestore = (val) => __emscripten_stack_restore(val);
-  var withStackSave = (f) => {
-      var stack = stackSave();
-      var ret = f();
-      stackRestore(stack);
-      return ret;
-    };
   
   var stackAlloc = (sz) => __emscripten_stack_alloc(sz);
   
@@ -1326,7 +1328,8 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       assert(typeof ptr == 'number', `UTF8ToString expects a number (got ${typeof ptr})`);
       return ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead) : '';
     };
-  var getExceptionMessageCommon = (ptr) => withStackSave(() => {
+  var getExceptionMessageCommon = (ptr) => {
+      var sp = stackSave();
       var type_addr_addr = stackAlloc(4);
       var message_addr_addr = stackAlloc(4);
       ___get_exception_message(ptr, type_addr_addr, message_addr_addr);
@@ -1339,8 +1342,9 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         message = UTF8ToString(message_addr);
         _free(message_addr);
       }
+      stackRestore(sp);
       return [type, message];
-    });
+    };
   var getExceptionMessage = (ptr) => getExceptionMessageCommon(ptr);
   Module['getExceptionMessage'] = getExceptionMessage;
 
@@ -5790,7 +5794,7 @@ var wasmImports = {
   /** @export */
   abort: _abort,
   /** @export */
-  em_js_dict_init: em_js_dict_init,
+  em_js_dict_init,
   /** @export */
   emscripten_asm_const_double: _emscripten_asm_const_double,
   /** @export */
@@ -5816,125 +5820,125 @@ var wasmImports = {
   /** @export */
   fd_write: _fd_write,
   /** @export */
-  invoke_diii: invoke_diii,
+  invoke_diii,
   /** @export */
-  invoke_fiii: invoke_fiii,
+  invoke_fiii,
   /** @export */
-  invoke_i: invoke_i,
+  invoke_i,
   /** @export */
-  invoke_ii: invoke_ii,
+  invoke_ii,
   /** @export */
-  invoke_iii: invoke_iii,
+  invoke_iii,
   /** @export */
-  invoke_iiii: invoke_iiii,
+  invoke_iiii,
   /** @export */
-  invoke_iiiii: invoke_iiiii,
+  invoke_iiiii,
   /** @export */
-  invoke_iiiiii: invoke_iiiiii,
+  invoke_iiiiii,
   /** @export */
-  invoke_iiiiiii: invoke_iiiiiii,
+  invoke_iiiiiii,
   /** @export */
-  invoke_iiiiiiii: invoke_iiiiiiii,
+  invoke_iiiiiiii,
   /** @export */
-  invoke_iiiiiiiiiii: invoke_iiiiiiiiiii,
+  invoke_iiiiiiiiiii,
   /** @export */
-  invoke_iiiiiiiiiiii: invoke_iiiiiiiiiiii,
+  invoke_iiiiiiiiiiii,
   /** @export */
-  invoke_iiiiiiiiiiiii: invoke_iiiiiiiiiiiii,
+  invoke_iiiiiiiiiiiii,
   /** @export */
-  invoke_jiiii: invoke_jiiii,
+  invoke_jiiii,
   /** @export */
-  invoke_v: invoke_v,
+  invoke_v,
   /** @export */
-  invoke_vi: invoke_vi,
+  invoke_vi,
   /** @export */
-  invoke_vii: invoke_vii,
+  invoke_vii,
   /** @export */
-  invoke_viii: invoke_viii,
+  invoke_viii,
   /** @export */
-  invoke_viiii: invoke_viiii,
+  invoke_viiii,
   /** @export */
-  invoke_viiiii: invoke_viiiii,
+  invoke_viiiii,
   /** @export */
-  invoke_viiiiii: invoke_viiiiii,
+  invoke_viiiiii,
   /** @export */
-  invoke_viiiiiii: invoke_viiiiiii,
+  invoke_viiiiiii,
   /** @export */
-  invoke_viiiiiiii: invoke_viiiiiiii,
+  invoke_viiiiiiii,
   /** @export */
-  invoke_viiiiiiiiii: invoke_viiiiiiiiii,
+  invoke_viiiiiiiiii,
   /** @export */
-  invoke_viiiiiiiiiiiiiii: invoke_viiiiiiiiiiiiiii,
+  invoke_viiiiiiiiiiiiiii,
   /** @export */
-  js_add_game_option_json_str: js_add_game_option_json_str,
+  js_add_game_option_json_str,
   /** @export */
-  js_create_btn: js_create_btn,
+  js_create_btn,
   /** @export */
-  js_delete_extra_canvases: js_delete_extra_canvases,
+  js_delete_extra_canvases,
   /** @export */
-  js_delete_timer: js_delete_timer,
+  js_delete_timer,
   /** @export */
-  js_destroy_all: js_destroy_all,
+  js_destroy_all,
   /** @export */
-  js_disable_evt: js_disable_evt,
+  js_disable_evt,
   /** @export */
-  js_draw_circle: js_draw_circle,
+  js_draw_circle,
   /** @export */
-  js_draw_clear: js_draw_clear,
+  js_draw_clear,
   /** @export */
-  js_draw_extra_canvas: js_draw_extra_canvas,
+  js_draw_extra_canvas,
   /** @export */
-  js_draw_graphic_raw: js_draw_graphic_raw,
+  js_draw_graphic_raw,
   /** @export */
-  js_draw_line: js_draw_line,
+  js_draw_line,
   /** @export */
-  js_draw_rect: js_draw_rect,
+  js_draw_rect,
   /** @export */
-  js_draw_refresh: js_draw_refresh,
+  js_draw_refresh,
   /** @export */
-  js_draw_text: js_draw_text,
+  js_draw_text,
   /** @export */
-  js_draw_triangle: js_draw_triangle,
+  js_draw_triangle,
   /** @export */
-  js_enable_evt: js_enable_evt,
+  js_enable_evt,
   /** @export */
-  js_get_game_id: js_get_game_id,
+  js_get_game_id,
   /** @export */
-  js_get_time_ms: js_get_time_ms,
+  js_get_time_ms,
   /** @export */
-  js_get_time_of_day: js_get_time_of_day,
+  js_get_time_of_day,
   /** @export */
-  js_get_user_colour_pref: js_get_user_colour_pref,
+  js_get_user_colour_pref,
   /** @export */
-  js_hide_popup: js_hide_popup,
+  js_hide_popup,
   /** @export */
-  js_is_feature_supported: js_is_feature_supported,
+  js_is_feature_supported,
   /** @export */
-  js_new_extra_canvas: js_new_extra_canvas,
+  js_new_extra_canvas,
   /** @export */
-  js_prompt_string: js_prompt_string,
+  js_prompt_string,
   /** @export */
-  js_read_stored_data: js_read_stored_data,
+  js_read_stored_data,
   /** @export */
-  js_send_message: js_send_message,
+  js_send_message,
   /** @export */
-  js_set_active_canvas: js_set_active_canvas,
+  js_set_active_canvas,
   /** @export */
-  js_set_btn_enabled: js_set_btn_enabled,
+  js_set_btn_enabled,
   /** @export */
-  js_set_btn_visible: js_set_btn_visible,
+  js_set_btn_visible,
   /** @export */
-  js_set_game_handle2: js_set_game_handle2,
+  js_set_game_handle2,
   /** @export */
-  js_set_status_err: js_set_status_err,
+  js_set_status_err,
   /** @export */
-  js_set_status_msg: js_set_status_msg,
+  js_set_status_msg,
   /** @export */
-  js_show_popup_json: js_show_popup_json,
+  js_show_popup_json,
   /** @export */
-  js_store_data: js_store_data,
+  js_store_data,
   /** @export */
-  js_update_timer_ms: js_update_timer_ms,
+  js_update_timer_ms,
   /** @export */
   strftime: _strftime,
   /** @export */
@@ -6676,9 +6680,35 @@ run();
 
 // end include: postamble.js
 
+// include: postamble_modularize.js
+// In MODULARIZE mode we wrap the generated code in a factory function
+// and return either the Module itself, or a promise of the module.
+//
+// We assign to the `moduleRtn` global here and configure closure to see
+// this as and extern so it won't get minified.
+
+moduleRtn = readyPromise;
+
+// Assertion for attempting to access module properties on the incoming
+// moduleArg.  In the past we used this object as the prototype of the module
+// and assigned properties to it, but now we return a distinct object.  This
+// keeps the instance private until it is ready (i.e the promise has been
+// resolved).
+for (const prop of Object.keys(Module)) {
+  if (!(prop in moduleArg)) {
+    Object.defineProperty(moduleArg, prop, {
+      configurable: true,
+      get() {
+        abort(`Access to module property ('${prop}') is no longer possible via the module constructor argument; Instead, use the result of the module constructor.`)
+      }
+    });
+  }
+}
+// end include: postamble_modularize.js
 
 
-  return readyPromise
+
+  return moduleRtn;
 }
 );
 })();

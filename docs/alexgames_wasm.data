@@ -1187,8 +1187,6 @@ local MS_PER_FRAME = math.floor(1000/FPS)
 
 -- This function is called initially, and then many times repeatedly if `alexgames.set_timer_update_ms(time_ms)`
 -- is called, to update state.
--- TODO It really should be renamed from "update" to "update" or something.
--- 
 -- TODO I think it would also be cleaner to move away from global symbols like this, and instead register the important methods
 -- in something like `alexgames.init({update=update})`, and register the others (key, touch, mousemove) when I enable those events.
 function update()
