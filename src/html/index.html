@@ -772,10 +772,23 @@ for (let game_choice_row_info of game_choice_row_infos) {
 		set_status_msg(gfx, `Using matrix_user_id: ${URL_args.matrix_user_id}`);
 	}
 
+	const ALEXGAMES_MSG_PREFIX = "alexgames:";
+
+	function to_matrix_msg(msg) {
+		console.log("[alex-matrix] to_matrix_msg called with msg", msg);
+		if (typeof(msg) == 'string') {
+			return ALEXGAMES_MSG_PREFIX + msg;
+		} else if (Array.isArray(msg)) {
+			return ALEXGAMES_MSG_PREFIX + msg.map(x => String.fromCharCode(x)).join('');
+		} else {
+			console.error("Unhandled msg", msg);
+		}
+	}
+
 	function convert_matrix_msg_body_to_alexgames_msg(matrix_msg) {
 		console.log("[alex-matrix] converting msg ", matrix_msg);
 		if (typeof(matrix_msg) == 'string') {
-			matrix_msg = matrix_msg.split(',');
+			matrix_msg = matrix_msg.split('');
 		}
 
 		if (!Array.isArray(matrix_msg)) {
@@ -783,7 +796,9 @@ for (let game_choice_row_info of game_choice_row_infos) {
 			return;
 		}
 		//return matrix_msg.split(',').map((x) => String.fromCharCode(new Number(x).valueOf())).join('');
-		return matrix_msg.map((x) => String.fromCharCode(new Number(x).valueOf())).join('');
+		//return matrix_msg.map((x) => String.fromCharCode(new Number(x).valueOf())).join('');
+
+		return matrix_msg.join('');
 	}
 
 	function convert_alexgames_msg_to_matrix_msg(alexgames_msg) {
@@ -796,20 +811,28 @@ for (let game_choice_row_info of game_choice_row_infos) {
 		set_status_msg(gfx, "Matrix API ready! Requesting to read state events...")
 
 
-		send_message("all", convert_alexgames_msg_to_matrix_msg("player_joined:"));
+		//send_message("all", convert_alexgames_msg_to_matrix_msg("player_joined:"));
+		send_message("all", "player_joined:");
     });
 
 	widgetApi.on("action:send_event", (ev) => {
         ev.preventDefault();
 
 		const src = ev.detail.data.sender;
+		let data = ev.detail.data.content.body;
 		if (src == userId) {
-			console.debug("Ignoring message from self", src);
+			console.debug("[alex-matrix] Ignoring message from self", src, data);
         	widgetApi.transport.reply(ev.detail, {});
 			return;
 		}
-		const data = ev.detail.data.content.body;
-		console.log("[alex-matrix] Received msg", data);
+		console.log("[alex-matrix] Received msg from ", src, "msg: ", data);
+		if (!data.startsWith(ALEXGAMES_MSG_PREFIX)) {
+			console.debug("[alex-matrix] ignoring msg because no prefix", data);
+        	widgetApi.transport.reply(ev.detail, {});
+			return;
+		} else {
+			data = data.substring(ALEXGAMES_MSG_PREFIX.length);
+		}
 		const data2 = convert_matrix_msg_body_to_alexgames_msg(data);
 		console.log("[alex-matrix] converted recvd msg to ", data2);
         console.log(`Received action:send_event: sender: ${src}, body: ${data2} (raw: ${data})`);
@@ -832,6 +855,8 @@ for (let game_choice_row_info of game_choice_row_infos) {
 */
 
 	function matrix_send_msg(dst, msg_data) {
+		msg_data = to_matrix_msg(msg_data);
+		console.log("[alex-matrix] Sending message body: ", msg_data);
 		console.log(`[alex-matrix] Sending message body: ${msg_data}`);
 
         const evt_type = "m.room.message";
