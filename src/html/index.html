@@ -31,7 +31,8 @@
 	<script type="text/javascript" src="js/url_args.js"></script>
 
 	<!--<script src="https://unpkg.com/matrix-widget-api@0.1.0/dist/api.min.js"></script>-->
-	<script src="https://unpkg.com/matrix-widget-api@1.6.0/dist/api.min.js"></script>
+	<!--<script src="https://unpkg.com/matrix-widget-api@1.6.0/dist/api.min.js"></script>-->
+	<script src="https://unpkg.com/matrix-widget-api@1.6.0/dist/api"></script>
 
 	<link rel="manifest" href="manifest.json">
 	<link rel="stylesheet" type="text/css" href="css/style_very_dark.css">
@@ -746,32 +747,101 @@ for (let game_choice_row_info of game_choice_row_infos) {
 	// https://github.com/matrix-org/matrix-widget-api
 	//const widgetId = 'net.alexbarry.alexgames.matrix'; // if you know the widget ID, supply it.
 	const widgetId = URL_args.matrix_widget_id;
-	const mx = new mxwidgets();
-	const api = new mx.WidgetApi(widgetId);
+	const userId   = URL_args.matrix_user_id;
+	const widgetApi = new mxwidgets.WidgetApi(widgetId, '*');
+
+	widgetApi.requestCapabilityToReceiveEvent("m.room.message");
+	widgetApi.requestCapabilityToReceiveMessage("m.room.message");
+	widgetApi.requestCapabilityToSendEvent("m.room.message");
+
+	{
+		let gfx = {
+			"status_msg": status_msg,
+		};
+		set_status_msg(gfx, `Using matrix_widget_id: ${URL_args.matrix_widget_id}`);
+		set_status_msg(gfx, `Using matrix_user_id: ${URL_args.matrix_user_id}`);
+	}
+
+	function convert_matrix_msg_body_to_alexgames_msg(matrix_msg) {
+		console.log("[alex-matrix] converting msg ", matrix_msg);
+		if (typeof(matrix_msg) == 'string') {
+			matrix_msg = matrix_msg.split(',');
+		}
+
+		if (!Array.isArray(matrix_msg)) {
+			console.error("bad object received: ", matrix_msg);
+			return;
+		}
+		//return matrix_msg.split(',').map((x) => String.fromCharCode(new Number(x).valueOf())).join('');
+		return matrix_msg.map((x) => String.fromCharCode(new Number(x).valueOf())).join('');
+	}
+
+	function convert_alexgames_msg_to_matrix_msg(alexgames_msg) {
+		return alexgames_msg.split('').map(x => "" + x.charCodeAt()).join(",");
+	}
 
 
-	const ALEXGAMES_MSG = "net.alexbarry.alexgames.matrix.game_msg";
 
-    api.on("ready", function() {
-		set_status_msg(gfx, "Matrix API ready!")
-	
-		// TODO send "player_joined" message
+    widgetApi.on("ready", function() {
+		set_status_msg(gfx, "Matrix API ready! Requesting to read state events...")
+
+
+		send_message("all", convert_alexgames_msg_to_matrix_msg("player_joined:"));
     });
 
-	set_status_msg({ "status_msg": status_msg }, "Calling matrix api start");
-	api.start();
+	widgetApi.on("action:send_event", (ev) => {
+        ev.preventDefault();
 
-	api.sendContentLoaded();
+		const src = ev.detail.data.sender;
+		if (src == userId) {
+			console.debug("Ignoring message from self", src);
+        	widgetApi.transport.reply(ev.detail, {});
+			return;
+		}
+		const data = ev.detail.data.content.body;
+		console.log("[alex-matrix] Received msg", data);
+		const data2 = convert_matrix_msg_body_to_alexgames_msg(data);
+		console.log("[alex-matrix] converted recvd msg to ", data2);
+        console.log(`Received action:send_event: sender: ${src}, body: ${data2} (raw: ${data})`);
+        console.log("[alex-matrix] using gfx.ptr instead");
+		handle_msg_received(gfx.ptr, src, data2);
 
-	api.on(ALEXGAMES_MSG, (msg) => {
-		set_status_msg(gfx, `Received message from ${msg.dst}, body: ${msg.msg}`);
-		handle_msg_received(gfx, msg.dst, msg.msg);
+        widgetApi.transport.reply(ev.detail, {});
 	});
 
-	function matrix_send_msg(dst, msg) {
-		set_status_msg(gfx, `Sending message to ${dst}, body: ${msg}`);
-		api.transport.send(ALEXGAMES_MSG, { dst: dst, msg: msg });
+
+
+	//widgetApi.sendContentLoaded();
+
+/*
+	widgetApi.on(ALEXGAMES_MSG_EVT, (msg) => {
+		set_status_msg(gfx, `Received message from ${msg.dst}, body: ${msg.msg}`);
+		console.log(`[alex-matrix] Received message from ${msg.dst}, body: ${msg.msg}`);
+		handle_msg_received(gfx, msg.dst, msg.msg);
+	});
+*/
+
+	function matrix_send_msg(dst, msg_data) {
+		console.log(`[alex-matrix] Sending message body: ${msg_data}`);
+
+        const evt_type = "m.room.message";
+        const msg = {
+                "msgtype":        "m.text",
+                "body":           msg_data,
+                "format":         "org.matrix.custom.html",
+                "formatted_body": "<p>" + msg_data + "</p>",
+        }
+        console.log(`Attempting to send text "${JSON.stringify(msg)}" as event type ${evt_type}...`);
+        widgetApi.sendRoomEvent(evt_type, msg).then((e) => {
+                console.log("Message sent");
+        }).catch((err) => {
+                console.error("Error sending message:", err);
+        });
+
 	}
+
+	set_status_msg({ "status_msg": status_msg }, "Calling matrix api start");
+	widgetApi.start();
 
 	//const send_message = ws_send_message;
 	const send_message = matrix_send_msg;

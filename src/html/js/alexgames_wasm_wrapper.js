@@ -182,6 +182,11 @@ function newByteArray(msg) {
 }
 
 function handle_msg_received(ptr, msg_src, msg) {
+	if (!Module || !ptr) {
+		console.error("Received message before wasm init!");
+		return;
+	}
+	console.log("handle_msg_received", ptr, msg_src, msg);
 	let msg_ptr = newByteArray(msg);
 	try {
 		let rc = Module.ccall("handle_msg_received", null,
