@@ -557,6 +557,15 @@ TODO add session ID to options, maybe show other players that are connected
 </div>
 </div>
 
+<div id="game_row_msg_test" class="game_row">
+<div class="game_wrapper"></div>
+<h2 class="game_title">Messaging test</h2>
+<p>A test to send ASCII and binary messages over the multiplayer messaging interface. Not a real game.</p>
+</div>
+</div>
+
+
+
 <div class="game_list_padding"></div>
 
 </div>
@@ -582,6 +591,7 @@ let game_choice_row_infos = [
 	{ row_id: "game_row_life",         game_id: "life" },
 	{ row_id: "game_row_spider_swing", game_id: "spider_swing" },
 	{ row_id: "game_row_hospital",     game_id: "hospital" },
+	{ row_id: "game_row_msg_test",     game_id: "msg_test" },
 ];
 for (let game_choice_row_info of game_choice_row_infos) {
 	document.getElementById(game_choice_row_info.row_id).addEventListener('click', function() {

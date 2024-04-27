@@ -401,6 +401,8 @@ const char *get_lua_game_path(const char *game_id, size_t game_id_len) {
 		return LUA_PRELOAD_DIR "games/endless_runner/endless_runner_main.lua";
 	} else if (str_eq_literal(game_id, "minesweeper_life", game_id_len)) {
 		return LUA_PRELOAD_DIR "games/minesweeper_life/minesweeper_life_main.lua";
+	} else if (str_eq_literal(game_id, "msg_test", game_id_len)) {
+		return LUA_PRELOAD_DIR "games/test/msg_test.lua";
 	} else {
 		return NULL;
 	}

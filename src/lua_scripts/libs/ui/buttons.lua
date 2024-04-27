@@ -26,17 +26,32 @@ function buttons.new_button(state, btn_params)
 	if btn_params.enabled ~= nil then
 		enabled = btn_params.enabled
 	end
+
+	local bg_colour      = btn_params.bg_colour
+	local fg_colour      = btn_params.fg_colour
+	local outline_colour = btn_params.outline_colour
+	local outline_width  = btn_params.outline_width
+	local text_size      = btn_params.text_size
+	local padding        = btn_params.padding
+
+	if bg_colour      == nil then bg_colour      = '#888' end
+	if fg_colour      == nil then fg_colour      = '#000' end
+	if outline_colour == nil then outline_colour = '#000' end
+	if outline_width  == nil then outline_width  =  3     end
+	if text_size      == nil then text_size      = 18     end
+	if padding        == nil then padding        =  5     end
+
 	local btn_info = {
 		id             = btn_params.id,
 		text           = btn_params.text,
-		bg_colour      = btn_params.bg_colour,
-		fg_colour      = btn_params.fg_colour,
-		outline_colour = btn_params.outline_colour,
-		outline_width  = btn_params.outline_width,
+		bg_colour      = bg_colour,
+		fg_colour      = fg_colour,
+		outline_colour = outline_colour,
+		outline_width  = outline_width,
 		btn_shape      = btn_params.btn_shape,
 		shape_param    = btn_params.shape_param,
-		text_size      = btn_params.text_size,
-		padding        = btn_params.padding,
+		text_size      = text_size,
+		padding        = padding,
 		y_start        = btn_params.y_start,
 		x_start        = btn_params.x_start,
 		--y_end     = btn_params.y_start + btn_params.y_size,
