@@ -62,7 +62,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmp_9rteze_.js
+// include: /tmp/tmp6v1k08pw.js
 
   if (!Module.expectedDataFileDownloads) {
     Module.expectedDataFileDownloads = 0;
@@ -280,21 +280,21 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
 
   })();
 
-// end include: /tmp/tmp_9rteze_.js
-// include: /tmp/tmpzefcvm51.js
+// end include: /tmp/tmp6v1k08pw.js
+// include: /tmp/tmpdssjtwk4.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpzefcvm51.js
-// include: /tmp/tmptcbb8i8n.js
+  // end include: /tmp/tmpdssjtwk4.js
+// include: /tmp/tmp8r_k1hmn.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach(function(task) {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmptcbb8i8n.js
+  // end include: /tmp/tmp8r_k1hmn.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -340,11 +340,7 @@ if (ENVIRONMENT_IS_NODE) {
   var fs = require('fs');
   var nodePath = require('path');
 
-  if (ENVIRONMENT_IS_WORKER) {
-    scriptDirectory = nodePath.dirname(scriptDirectory) + '/';
-  } else {
-    scriptDirectory = __dirname + '/';
-  }
+  scriptDirectory = __dirname + '/';
 
 // include: node_shell_read.js
 read_ = (filename, binary) => {
@@ -917,11 +913,15 @@ class CppException extends EmscriptenEH {
   }
 }
 // end include: runtime_exceptions.js
+function findWasmBinary() {
+    var f = 'alexgames_wasm.wasm';
+    if (!isDataURI(f)) {
+      return locateFile(f);
+    }
+    return f;
+}
+
 var wasmBinaryFile;
-  wasmBinaryFile = 'alexgames_wasm.wasm';
-  if (!isDataURI(wasmBinaryFile)) {
-    wasmBinaryFile = locateFile(wasmBinaryFile);
-  }
 
 function getBinarySync(file) {
   if (file == wasmBinaryFile && wasmBinary) {
@@ -1081,6 +1081,8 @@ function createWasm() {
         readyPromiseReject(e);
     }
   }
+
+  if (!wasmBinaryFile) wasmBinaryFile = findWasmBinary();
 
   // If instantiation fails, reject the module ready promise.
   instantiateAsync(wasmBinary, wasmBinaryFile, info, receiveInstantiationResult).catch(readyPromiseReject);
@@ -4761,6 +4763,10 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   }
   }
 
+  var __abort_js = () => {
+      abort('native code called abort()');
+    };
+
   var nowIsMonotonic = 1;
   var __emscripten_get_now_is_monotonic = () => nowIsMonotonic;
 
@@ -4962,10 +4968,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         stringToUTF8(winterName, dst_name, 17);
         stringToUTF8(summerName, std_name, 17);
       }
-    };
-
-  var _abort = () => {
-      abort('native code called abort()');
     };
 
   var readEmAsmArgsArray = [];
@@ -5614,6 +5616,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
 
   var wasmTableMirror = [];
   
+  /** @type {WebAssembly.Table} */
   var wasmTable;
   var getWasmTableEntry = (funcPtr) => {
       var func = wasmTableMirror[funcPtr];
@@ -5778,6 +5781,8 @@ var wasmImports = {
   /** @export */
   __syscall_unlinkat: ___syscall_unlinkat,
   /** @export */
+  _abort_js: __abort_js,
+  /** @export */
   _emscripten_get_now_is_monotonic: __emscripten_get_now_is_monotonic,
   /** @export */
   _emscripten_system: __emscripten_system,
@@ -5791,8 +5796,6 @@ var wasmImports = {
   _mktime_js: __mktime_js,
   /** @export */
   _tzset_js: __tzset_js,
-  /** @export */
-  abort: _abort,
   /** @export */
   em_js_dict_init,
   /** @export */
