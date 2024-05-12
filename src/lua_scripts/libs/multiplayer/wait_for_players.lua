@@ -60,7 +60,8 @@ function wait_for_players.players_tentative()
 end
 
 function wait_for_players.show_waiting_for_players_popup()
-	local body_txt = string.format("Players joined: %d", #players)
+	local body_txt = "Share the URL in your address bar with your friend, making sure to include the randomly generated \"ID\" parameter. This is how the server knows to connect you with your friend."
+	body_txt = body_txt .. "\n" .. string.format("Players joined: %d", #players)
 	print("Player is %q", player)
 	for player_id, player_ip in pairs(players) do
 		local more_info = ""

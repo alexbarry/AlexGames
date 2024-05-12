@@ -113,9 +113,11 @@ local function need_player_reselect(remote_player)
 end
 
 local function show_player_choice_popup()
+	local msg = "Share the URL in your address bar with your friend, making sure to include the randomly generated \"ID\" parameter. This is how the server knows to connect you with your friend."
+	msg = msg .. "\n" .. g_args.get_msg()
 	show_buttons_popup.show_popup(two_player.PLAYER_CHOICE_POPUP_ID,
 	                              g_args.title,
-	                              g_args.get_msg(),
+	                              msg,
 	                              g_args.player_choices)
 end
 
