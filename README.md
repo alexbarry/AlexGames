@@ -4,6 +4,10 @@ A collection of simple Lua games, and a web engine for playing them including an
 
 Try the web version here: https://alexbarry.github.io/AlexGames
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/net.alexbarry.alexgames/)
+
 ## How to build
 
 ### Using docker
