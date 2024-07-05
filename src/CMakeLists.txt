@@ -199,9 +199,8 @@ add_library(lua ${LUA_CORE_SRC_LIST})
 
 # Rust games
 if (ENABLE_RUST_GAMES)
-# TODO call `cargo build --release`, but need to decide if it's for wasm/native/android
-
-set(RUST_LIB ${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/release/libalexgames_rust.a)
+# TODO call `cargo build --target=wasm32-unknown-unknown --release`, but need to decide if it's for wasm/native/android
+set(RUST_LIB ${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/wasm32-unknown-unknown/debug/libalexgames_rust.a)
 
 if(EXISTS ${RUST_LIB})
 #good
@@ -209,10 +208,18 @@ else()
 message(FATAL_ERROR "could not find rust lib at ${RUST_LIB}")
 endif()
 
+file(GLOB RUST_LIBS "${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/wasm32-unknown-unknown/debug/deps/*.a")
+message(INFO, "Found libs ${RUST_LIBS}")
+
+list(APPEND libs ${RUST_LIBS})
+
 add_library(alexgames_rust STATIC IMPORTED)
+target_link_libraries(alexgames_rust INTERFACE "${RUST_LIBS}")
 set_target_properties(alexgames_rust PROPERTIES
 	IMPORTED_LOCATION ${RUST_LIB}
 )
+
+
 endif()
 
 add_library(alexgames_core STATIC
@@ -275,6 +282,7 @@ if( WIN32 )
 # TODO split into array and only call target_link_libraries once
 target_link_libraries(alexgames_core ${libs})
 else()
+message("Linking libraries: ${libs}")
 target_link_libraries(alexgames_core ${libs})
 endif()
 target_include_directories(alexgames_core PUBLIC lua_api)

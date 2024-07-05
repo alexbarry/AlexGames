@@ -1,2 +1,2 @@
-[target.wasm32-unknown-emscripten]
-linker = "emcc"
+#[target.wasm32-unknown-unknown]
+#linker = "emcc"

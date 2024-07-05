@@ -318,6 +318,13 @@ void alex_unzip_file(void *L, const char *fname, const char *dst_name) {
 
 #endif
 
+void alexgames_print(const char *str, size_t len) {
+	for (int i=0; i<len; i++) {
+		printf("str[%d] = 0x%02x (%c)\n", i, str[i], str[i]);
+	}
+	printf("alexgames_print: %.*s\n", (int)len, str);
+}
+
 void *alex_init_game(const struct game_api_callbacks *api_callbacks,
                      const char *game_str, int game_str_len) {
 	printf("[init] game_api.c: alex_init_game called\n");
@@ -353,10 +360,15 @@ void *alex_init_game(const struct game_api_callbacks *api_callbacks,
 	} else {
 		lua_game_path = get_lua_game_path(game_str, game_str_len);
 		printf("ROOT_DIR=\"%s\"\n", ROOT_DIR);
-		printf("Loading Lua game path \"%s\"\n", lua_game_path);
 	}
 
+	printf("Checking if this is a rust game... \"%.*s\"\n", game_str_len, game_str);
+	rust_game_supported();
+	printf("done calling rust_game_supported\n");
+	//printf("is_rust = %d\n", is_rust);
+
 	if (lua_game_path != NULL) {
+		printf("Loading Lua game path \"%s\"\n", lua_game_path);
 		return start_lua_game(api_callbacks, lua_game_path);
 #if 0
 	} else if (str_eq_literal(game_str, "stick", game_str_len)) {
@@ -364,8 +376,12 @@ void *alex_init_game(const struct game_api_callbacks *api_callbacks,
 		set_game_api(game_api);
 		return game_api->init_lua_api(api_callbacks, game_str, game_str_len);
 #endif
+
+#if 0
 	} else if (rust_game_supported(game_str, game_str_len)) {
+		printf("Looks like this is a rust game!\n");
 		return start_rust_game(game_str, game_str_len, api_callbacks);
+#endif
 	} else if (str_eq_literal(game_str, "history_browse", game_str_len)) {
 		const struct game_api *game_api = get_history_browse_api();
 		set_game_api(game_api);
