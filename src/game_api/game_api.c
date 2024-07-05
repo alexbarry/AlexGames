@@ -362,11 +362,6 @@ void *alex_init_game(const struct game_api_callbacks *api_callbacks,
 		printf("ROOT_DIR=\"%s\"\n", ROOT_DIR);
 	}
 
-	printf("Checking if this is a rust game... \"%.*s\"\n", game_str_len, game_str);
-	rust_game_supported();
-	printf("done calling rust_game_supported\n");
-	//printf("is_rust = %d\n", is_rust);
-
 	if (lua_game_path != NULL) {
 		printf("Loading Lua game path \"%s\"\n", lua_game_path);
 		return start_lua_game(api_callbacks, lua_game_path);
@@ -377,11 +372,9 @@ void *alex_init_game(const struct game_api_callbacks *api_callbacks,
 		return game_api->init_lua_api(api_callbacks, game_str, game_str_len);
 #endif
 
-#if 0
 	} else if (rust_game_supported(game_str, game_str_len)) {
 		printf("Looks like this is a rust game!\n");
 		return start_rust_game(game_str, game_str_len, api_callbacks);
-#endif
 	} else if (str_eq_literal(game_str, "history_browse", game_str_len)) {
 		const struct game_api *game_api = get_history_browse_api();
 		set_game_api(game_api);

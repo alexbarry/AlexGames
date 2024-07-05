@@ -199,8 +199,8 @@ add_library(lua ${LUA_CORE_SRC_LIST})
 
 # Rust games
 if (ENABLE_RUST_GAMES)
-# TODO call `cargo build --target=wasm32-unknown-unknown --release`, but need to decide if it's for wasm/native/android
-set(RUST_LIB ${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/wasm32-unknown-unknown/debug/libalexgames_rust.a)
+# TODO call `cargo build --target=wasm32-unknown-emscripten --release`, but need to decide if it's for wasm/native/android
+set(RUST_LIB ${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/wasm32-unknown-emscripten/debug/libalexgames_rust.a)
 
 if(EXISTS ${RUST_LIB})
 #good
@@ -213,8 +213,10 @@ message(INFO, "Found libs ${RUST_LIBS}")
 
 list(APPEND libs ${RUST_LIBS})
 
+add_library(alexgames_rust_api STATIC "${CMAKE_CURRENT_SOURCE_DIR}/rust_games/rust_game_api.c")
 add_library(alexgames_rust STATIC IMPORTED)
-target_link_libraries(alexgames_rust INTERFACE "${RUST_LIBS}")
+target_include_directories(alexgames_rust_api PRIVATE game_api/)
+target_link_libraries(alexgames_rust INTERFACE "${RUST_LIBS};alexgames_rust_api")
 set_target_properties(alexgames_rust PROPERTIES
 	IMPORTED_LOCATION ${RUST_LIB}
 )
