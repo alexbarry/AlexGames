@@ -22,6 +22,7 @@
 
 #include "game_api.h"
 #include "game_api_utils.h"
+#include "rust_game_api.h"
 
 #include "lua_api.h"
 
@@ -363,6 +364,8 @@ void *alex_init_game(const struct game_api_callbacks *api_callbacks,
 		set_game_api(game_api);
 		return game_api->init_lua_api(api_callbacks, game_str, game_str_len);
 #endif
+	} else if (rust_game_supported(game_str, game_str_len)) {
+		return start_rust_game(game_str, game_str_len, api_callbacks);
 	} else if (str_eq_literal(game_str, "history_browse", game_str_len)) {
 		const struct game_api *game_api = get_history_browse_api();
 		set_game_api(game_api);

@@ -1,0 +1,12 @@
+[package]
+name = "rust_games"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+
+[lib]
+name = "alexgames_rust"
+path = "rust_game_handler.rs"
+crate-type = ["staticlib"]

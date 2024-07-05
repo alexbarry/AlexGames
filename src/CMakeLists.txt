@@ -37,6 +37,8 @@ option(ENABLE_WORD_DICT  "Enable the word dictionary. Allows for word puzzle gam
 
 option(ENABLE_SQLITE3_SAVED_STATE "Instead of requiring the platform to implement their own store_data and read_store_data APIs, use SQLite3 and filesystem APIs." OFF)
 
+option (ENABLE_RUST_GAMES "Build rust games" ON)
+
 message("ENABLE_ZIP_UPLOAD is ${ENABLE_ZIP_UPLOAD}")
 message("ENABLE_SQLITE3_SAVED_STATE is ${ENABLE_SQLITE3_SAVED_STATE}")
 IF (ENABLE_ZIP_UPLOAD)
@@ -194,6 +196,25 @@ target_include_directories(alexgames_c_dict PRIVATE game_api/)
 
 add_library(lua ${LUA_CORE_SRC_LIST})
 
+
+# Rust games
+if (ENABLE_RUST_GAMES)
+# TODO call `cargo build --release`, but need to decide if it's for wasm/native/android
+
+set(RUST_LIB ${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/release/libalexgames_rust.a)
+
+if(EXISTS ${RUST_LIB})
+#good
+else()
+message(FATAL_ERROR "could not find rust lib at ${RUST_LIB}")
+endif()
+
+add_library(alexgames_rust STATIC IMPORTED)
+set_target_properties(alexgames_rust PROPERTIES
+	IMPORTED_LOCATION ${RUST_LIB}
+)
+endif()
+
 add_library(alexgames_core STATIC
 	lua_api/lua_api.c
 	lua_api/lua_api_dict.c
@@ -242,6 +263,11 @@ endif()
 
 if (ENABLE_WORD_DICT)
 target_compile_definitions(alexgames_core PRIVATE ENABLE_WORD_DICT)
+endif()
+
+if (ENABLE_RUST_GAMES)
+list(APPEND libs "alexgames_rust")
+target_include_directories(alexgames_core PUBLIC rust_games/)
 endif()
 
 message("Including libs: ${libs}")
