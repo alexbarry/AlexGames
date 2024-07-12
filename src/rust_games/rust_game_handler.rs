@@ -1,12 +1,21 @@
-fn init_reversi(_callbacks: *const u8) -> *const u8 {
-	// TODO
-	println!("Hello from the init_reversi function!");
-	return std::ptr::null();
-}
+mod rust_game_api;
+mod reversi;
 
-fn get_rust_game_init_func(game_id: &str) -> Option<fn(*const u8) -> *const u8> {
+//use libc;
+//use std::ffi::CString;
+//use std::mem::transmute;
+
+//use std::sync::Arc;
+
+//use libc::{c_int, c_char, size_t};
+
+
+use reversi::reversi_main;
+use rust_game_api::{GameApi, RustGameState, CCallbacksPtr};
+
+fn get_rust_game_init_func(game_id: &str) -> Option<fn(*const CCallbacksPtr) -> GameApi> {
 	return match game_id {
-		"reversi" => Some(init_reversi),
+		"reversi" => Some(reversi_main::init_reversi),
 		_         => None,
 	}
 }
@@ -20,6 +29,30 @@ fn c_str_to_str(str_ptr: *const u8, str_len: usize) -> String {
 }
 
 #[no_mangle]
+pub extern "C" fn rust_game_api_handle_user_clicked(handle: &mut RustGameState, pos_y: i32, pos_x: i32) {
+	println!("rust_handle_user_clicked: {} {}", pos_y, pos_x);
+	(handle.api.handle_user_clicked)(handle, pos_y, pos_x);
+}
+
+#[no_mangle]
+pub extern "C" fn rust_game_api_update(handle: &mut RustGameState, dt_ms: i32) {
+	println!("rust_update: {}", dt_ms);
+	(handle.api.update)(handle, dt_ms);
+}
+
+#[no_mangle]
+pub extern "C" fn rust_game_api_start_game(handle: &mut RustGameState, _session_id: i32, _state: *const u8, _state_len: usize) {
+	println!("rust_game_api_start_game");
+	(handle.api.start_game)(handle);
+}
+
+
+fn c_ptr_to_callbacks(callbacks: *const u8) -> *const CCallbacksPtr {
+	let callbacks = callbacks as *const CCallbacksPtr;
+	return callbacks;
+}
+
+#[no_mangle]
 pub extern "C" fn rust_game_supported(game_str_ptr: *const u8, game_str_len: usize) -> bool {
 	let game_id = c_str_to_str(game_str_ptr, game_str_len);
 
@@ -29,12 +62,22 @@ pub extern "C" fn rust_game_supported(game_str_ptr: *const u8, game_str_len: usi
 }
 
 #[no_mangle]
-pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: usize, callbacks: *const u8) -> *const u8 {
+pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: usize, callbacks: *const CCallbacksPtr) -> *mut RustGameState {
 	let game_id = c_str_to_str(game_str_ptr, game_str_len);
 
 	println!("Game ID is {}, hello from rust!", game_id);
 
-	let game_init_fn = get_rust_game_init_func(&game_id).expect("game id not handled");
+	let game_init_fn = get_rust_game_init_func(&game_id).expect("game id not handled by rust");
 
-	return game_init_fn(callbacks);
+	//let callbacks = c_ptr_to_callbacks(callbacks);
+
+	let api = game_init_fn(callbacks);
+
+	let game_state = (api.init)(callbacks);
+
+	&mut RustGameState {
+		api:        api,
+		callbacks:  callbacks,
+		game_state: game_state,
+	}
 }

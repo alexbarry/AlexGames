@@ -11,6 +11,8 @@ bool rust_game_supported(const char *game_str, size_t game_str_len);
 
 void *start_rust_game(const char *game_str, size_t game_str_len, const struct game_api_callbacks *callbacks);
 
+const struct game_api * get_rust_api(void);
+
 #ifdef __cplusplus
 }
 #endif

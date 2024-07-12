@@ -1,8 +1,6 @@
-mod reversi_core;
+//use std::io;
 
-use std::io;
-
-const BOARD_SIZE: usize = 8;
+pub const BOARD_SIZE: usize = 8;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum CellState {
@@ -27,7 +25,7 @@ pub struct State {
 }
 
 impl State {
-	fn new() -> State {
+	pub fn new() -> State {
 		let mut state = State {
 			board: [[CellState::EMPTY; BOARD_SIZE]; BOARD_SIZE],
 			player_turn: CellState::PLAYER1,
@@ -41,7 +39,7 @@ impl State {
 		state
 	}
 
-	fn cell(&self, pt: Pt) -> CellState {
+	pub fn cell(&self, pt: Pt) -> CellState {
 		self.board[pt.y as usize][pt.x as usize]
 	}
 
