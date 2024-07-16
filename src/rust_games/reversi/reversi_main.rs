@@ -6,8 +6,10 @@ use crate::rust_game_api::{RustGameState, CANVAS_HEIGHT, CANVAS_WIDTH};
 use crate::reversi::reversi_core;
 use crate::reversi::reversi_core::{Pt};
 
+/*
 impl rust_game_api::GameState for reversi_core::State {
 }
+*/
 
 fn update(handle: &mut RustGameState, _dt_ms: i32) {
 	println!("rust: update called");
@@ -33,6 +35,17 @@ fn draw_state(handle: &mut RustGameState) {
 	let height = CANVAS_HEIGHT as f64;
 	let width  = CANVAS_WIDTH as f64;
 
+
+	/*
+	let reversi_state: &reversi_core::State;
+	if let rust_game_api::GameState::ReversiGameState(state) = &handle.game_state {
+		reversi_state = state;
+	} else {
+		panic!("invalid game state passed to reversi draw_state");
+	}
+	*/
+	let rust_game_api::GameState::ReversiGameState(reversi_state) = &handle.game_state;
+
 	//let reversi_state = handle.game_state.downcast_ref::<reversi_core::State>();
 	//let reversi_state = &handle.game_state as reversi_core::State;
 	//let reversi_state = handle.game_state;
@@ -55,10 +68,7 @@ fn draw_state(handle: &mut RustGameState) {
 			let y2 = ((y+1.0)/board_size_flt*height) as i32;
 			let x2 = ((x+1.0)/board_size_flt*width) as i32;
 			handle.draw_rect(colour, y1, x1, y2, x2);
-			// TODO I'm not sure how to convert the generic game state to
-			// the game specific game state.
-			/*
-			let player_colour = match handle.game_state.cell(Pt{y:y as i32, x:x as i32}) {
+			let player_colour = match reversi_state.cell(Pt{y:y as i32, x:x as i32}) {
 				reversi_core::CellState::PLAYER1 => Some("#dddddd"),
 				reversi_core::CellState::PLAYER2 => Some("#333333"),
 				_ => None,
@@ -66,14 +76,15 @@ fn draw_state(handle: &mut RustGameState) {
 			if let Some(colour) = player_colour {
 				handle.draw_circle(colour, "#000000", (y1 as f64 +cell_height/2.0) as i32, (x1 as f64 +cell_height/2.0) as i32, (cell_height/2.0 - 3.0) as i32, 2);
 			};
-			*/
 		}
 	}
 }
 
 //fn init(_callbacks: &rust_game_api::Callbacks) -> Box <dyn rust_game_api::GameState> {
-fn init(_callbacks: *const rust_game_api::CCallbacksPtr) -> Box <dyn rust_game_api::GameState> {
-	return Box::from(reversi_core::State::new());
+fn init(_callbacks: *const rust_game_api::CCallbacksPtr) -> Box <rust_game_api::GameState> {
+	let state = reversi_core::State::new();
+	let state = rust_game_api::GameState::ReversiGameState(state);
+	return Box::from(state);
 }
 
 pub fn init_reversi(_: *const rust_game_api::CCallbacksPtr) -> rust_game_api::GameApi {

@@ -74,6 +74,7 @@ pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: us
 	let api = game_init_fn(callbacks);
 
 	let game_state = (api.init)(callbacks);
+	let game_state = *game_state;
 
 	&mut RustGameState {
 		api:        api,

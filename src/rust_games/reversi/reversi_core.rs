@@ -16,7 +16,7 @@ pub enum ReversiErr {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct Pt{y: i32, x: i32}
+pub struct Pt{pub y: i32, pub x: i32}
 
 
 pub struct State {
