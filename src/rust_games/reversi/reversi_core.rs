@@ -21,7 +21,7 @@ pub struct Pt{pub y: i32, pub x: i32}
 
 pub struct State {
 	board: [[CellState; BOARD_SIZE]; BOARD_SIZE],
-	player_turn: CellState,
+	pub player_turn: CellState,
 }
 
 impl State {

@@ -31,12 +31,13 @@ fn c_str_to_str(str_ptr: *const u8, str_len: usize) -> String {
 #[no_mangle]
 pub extern "C" fn rust_game_api_handle_user_clicked(handle: &mut RustGameState, pos_y: i32, pos_x: i32) {
 	println!("rust_handle_user_clicked: {} {}", pos_y, pos_x);
+	println!("rust_handle_user_clicked: {:#?}", handle.api.handle_user_clicked);
 	(handle.api.handle_user_clicked)(handle, pos_y, pos_x);
 }
 
 #[no_mangle]
 pub extern "C" fn rust_game_api_update(handle: &mut RustGameState, dt_ms: i32) {
-	println!("rust_update: {}", dt_ms);
+	println!("rust_update: {} (dbg: {:#?}, {:#?}", dt_ms, handle.api, handle.api.update);
 	(handle.api.update)(handle, dt_ms);
 }
 
@@ -73,12 +74,19 @@ pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: us
 
 	let api = game_init_fn(callbacks);
 
+	println!("from start_rust_game_rust: rust_handle_user_clicked: {:#?}", api.handle_user_clicked);
+
 	let game_state = (api.init)(callbacks);
 	let game_state = *game_state;
 
-	&mut RustGameState {
+	//let handle = &mut RustGameState {
+	let handle = RustGameState {
 		api:        api,
 		callbacks:  callbacks,
 		game_state: game_state,
-	}
+	};
+
+	let handle = Box::new(handle);
+	// TODO need to add a free function on destroy game
+	return Box::into_raw(handle);
 }
