@@ -160,6 +160,7 @@ const char *alex_get_game_name(int idx) {
 const struct game_api *game_api = NULL;
 
 void set_game_api(const struct game_api *game_api_arg) {
+	printf("[init] set_game_api(%p)\n", game_api_arg);
 	game_api = game_api_arg;
 }
 

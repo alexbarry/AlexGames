@@ -101,7 +101,7 @@
 			set_status_msg(gfx, "Loading state from URL parameter");
 			start_game_b64(gfx.ptr, state_b64);
 		} else {
-			console.log("[init] Calling start_game with no saved state param");
+			console.log("[init] Calling start_game with no saved state param", game);
 			start_game(gfx.ptr);
 		}
 
