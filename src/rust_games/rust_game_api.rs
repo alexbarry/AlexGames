@@ -1,4 +1,5 @@
 use libc;
+use core::slice;
 use std::ffi::CString;
 //use std::mem::transmute;
 
@@ -82,7 +83,8 @@ pub struct CCallbacksPtr {
 	set_active_canvas: Option<unsafe extern "C" fn(*const c_char)>,
 	delete_extra_canvases: Option<unsafe extern "C" fn()>,
 
-	get_user_colour_pref: Option<unsafe extern "C" fn(*mut c_char, size_t) -> size_t>,
+	//get_user_colour_pref: Option<unsafe extern "C" fn(*mut c_char, size_t) -> size_t>, // TODO
+	get_user_colour_pref: Option<unsafe extern "C" fn(*mut u8, size_t) -> size_t>,
 
 	is_feature_supported: Option<unsafe extern "C" fn(*const c_char, size_t) -> c_bool>,
 
@@ -252,6 +254,29 @@ impl CCallbacksPtr {
 		return None;
 	}
 
+	pub fn get_user_colour_pref(&self) -> String {
+		//return "dark"; // TODO
+		if let Some(get_user_colour_pref) = self.get_user_colour_pref {
+			let buff_size = 512;
+			//let mut buffer: Vec<c_char> = Vec::with_capacity(buff_size); // TODO
+			let mut buffer: Vec<u8> = Vec::with_capacity(buff_size);
+			unsafe {
+				let colour_pref_len = (get_user_colour_pref)(buffer.as_mut_ptr(), buff_size);
+				if colour_pref_len > 0 {
+					let slice = slice::from_raw_parts(buffer.as_ptr(), colour_pref_len);
+					if let Ok(user_colour_pref) = std::str::from_utf8(slice) {
+						println!("user_colour_pref is {}", user_colour_pref);
+						return String::from(user_colour_pref);
+					} else {
+						println!("Error decoding user colour preference string");
+					}
+				}
+			}
+		} else {
+			println!("get_user_colour_pref is null");
+		}
+		return String::from("light");
+	}
 }
 
 #[derive(Debug)]
@@ -261,6 +286,7 @@ pub struct GameApi {
 	pub start_game: fn(handle: &mut RustGameState, state: Option<(i32, Vec<u8>)>) -> (),
 	pub update: fn(handle: &mut RustGameState, dt_ms: i32) -> (),
 	pub handle_user_clicked: fn(handle: &mut RustGameState, pos_y: i32, pos_x: i32) -> (),
+	pub handle_btn_clicked: fn(handle: &mut RustGameState, btn_id: &str) -> (),
 	pub get_state: fn(handle: &mut RustGameState) -> Option<Vec<u8>>,
 }
 

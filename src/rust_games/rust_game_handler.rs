@@ -5,13 +5,13 @@ use std::ptr;
 use std::slice;
 
 //use libc;
-//use std::ffi::CString;
+use std::ffi::CString;
 //use std::mem::transmute;
 
 //use std::sync::Arc;
 
 //use libc::{c_int, c_char, size_t};
-use libc::{size_t};
+use libc::{size_t, c_char};
 
 
 use reversi::reversi_main;
@@ -38,6 +38,38 @@ pub extern "C" fn rust_game_api_handle_user_clicked(handle: &mut RustGameState, 
 	println!("rust_handle_user_clicked: {} {}", pos_y, pos_x);
 	println!("rust_handle_user_clicked: {:#?}", handle.api.handle_user_clicked);
 	(handle.api.handle_user_clicked)(handle, pos_y, pos_x);
+}
+
+#[no_mangle]
+pub extern "C" fn rust_game_api_handle_btn_clicked(handle: &mut RustGameState, btn_id_cstr: *const u8) {
+	// TODO there must be a built in way to do this, but I don't have internet right now
+	let byte_count = 1024;
+	let mut str_end_pos: usize = 0;
+	for i in 0..=byte_count {
+		//if btn_id_cstr.wrapping_add(i) == std::ptr::null() {
+		let val = unsafe { *btn_id_cstr.add(i) };
+		println!("Checking i={}, val is {:#?}", i, val);
+		if val == 0 {
+			str_end_pos = i;
+			println!("breaking");
+			break;
+		}
+		if i == byte_count {
+			println!("Could not find terminating null in first {} bytes of string passed to handle_btn_clicked", byte_count);
+			return;
+		}
+	}
+	let mut btn_id: &str;
+	unsafe {
+		let slice = slice::from_raw_parts(btn_id_cstr, str_end_pos);
+		if let Ok(btn_id_val) = std::str::from_utf8(slice) {
+			btn_id = btn_id_val;
+		} else {
+			println!("Error decoding btn_id string");
+			return;
+		}
+	}
+	(handle.api.handle_btn_clicked)(handle, btn_id);
 }
 
 #[no_mangle]

@@ -51,6 +51,33 @@ fn handle_user_clicked(handle: &mut RustGameState, pos_y: i32, pos_x: i32) {
 	draw_state(handle);
 }
 
+fn handle_btn_clicked(handle: &mut RustGameState, btn_id: &str) {
+	println!("reversi handle_btn_clicked, btn_id=\"{}\"", btn_id);
+	/*
+	match btn_id {
+		// TODO??
+		//BTN_ID_UNDO => { load_state_offset(handle, -1); }
+		//BTN_ID_REDO => { load_state_offset(handle,  1); }
+		"btn_undo" => { load_state_offset(handle, -1); }
+		"btn_redo" => { load_state_offset(handle,  1); }
+		_ => {
+			handle.set_status_err(&format!("Unhandled btn_id {}", btn_id));
+		}
+	}
+	*/
+
+	if btn_id == BTN_ID_UNDO {
+		load_state_offset(handle, -1);
+	} else if btn_id == BTN_ID_REDO {
+		load_state_offset(handle,  1);
+	} else {
+		let err_msg = format!("Unhandled btn_id {}", btn_id);
+		println!("{}", err_msg);
+		handle.set_status_err(&err_msg);
+	}
+	draw_state(handle);
+}
+
 fn save_state(handle: &mut RustGameState) {
 	let rust_game_api::GameState::ReversiGameState(reversi_state) = &handle.game_state;
 	let session_id = reversi_state.session_id;
@@ -62,15 +89,24 @@ fn save_state(handle: &mut RustGameState) {
 	}
 }
 
+fn load_state_offset(handle: &mut RustGameState, offset: i32) {
+	println!("load_state_offset({})", offset);
+	let rust_game_api::GameState::ReversiGameState(reversi_state) = &handle.game_state;
+	let session_id = reversi_state.session_id;
+	let saved_state = unsafe { handle.callbacks.as_ref().expect("callbacks null?").adjust_saved_state_offset(session_id, offset) };
+	set_state(handle, &saved_state.expect("saved state is none from adjust_saved_state_offset?"));
+}
+
 fn set_state(handle: &mut RustGameState, serialized_state: &Vec<u8>) {
-		let reversi_state = bincode::deserialize::<reversi_core::State>(&serialized_state);
-		if let Ok(reversi_state) = reversi_state {
-			println!("Received game state: {:#?}", reversi_state);
-			handle.game_state = rust_game_api::GameState::ReversiGameState(reversi_state);
-		} else {
-			handle.set_status_err(&format!("Error decoding state: {:?}", reversi_state));
-		}
+	println!("set_state");
+	let reversi_state = bincode::deserialize::<reversi_core::State>(&serialized_state);
+	if let Ok(reversi_state) = reversi_state {
+		println!("Received game state: {:#?}", reversi_state);
+		handle.game_state = rust_game_api::GameState::ReversiGameState(reversi_state);
+	} else {
+		handle.set_status_err(&format!("Error decoding state: {:?}", reversi_state));
 	}
+}
 
 //fn start_game(_handle: &mut RustGameState) {
 fn start_game(handle: &mut RustGameState, session_id_and_state: Option<(i32, Vec<u8>)>) {
@@ -90,9 +126,10 @@ fn start_game(handle: &mut RustGameState, session_id_and_state: Option<(i32, Vec
 		}
 		*/
 	} else if let Some(session_id) = unsafe { handle.callbacks.as_ref().expect("callbacks null?").get_last_session_id("reversi") } {
+		load_state_offset(handle, 0);
 		//let saved_state = handle.callbacks.adjust_saved_state_offset(session_id, 0);
-		let saved_state = unsafe { handle.callbacks.as_ref().expect("callbacks null?").adjust_saved_state_offset(session_id, 0) };
-		set_state(handle, &saved_state.expect("saved state is none from adjust_saved_state_offset?"));
+		//let saved_state = unsafe { handle.callbacks.as_ref().expect("callbacks null?").adjust_saved_state_offset(session_id, 0) };
+		//set_state(handle, &saved_state.expect("saved state is none from adjust_saved_state_offset?"));
 	} else {
 		let rust_game_api::GameState::ReversiGameState(reversi_state) = &mut handle.game_state;
 		reversi_state.session_id = unsafe { handle.callbacks.as_ref().expect("callbacks null?").get_new_session_id() };
@@ -161,6 +198,10 @@ fn draw_state(handle: &mut RustGameState) {
 			};
 		}
 	}
+
+	let session_id = reversi_state.session_id;
+	handle.set_btn_enabled(BTN_ID_UNDO, unsafe { handle.callbacks.as_ref().expect("callbacks null?").has_saved_state_offset(session_id, -1) } );
+	handle.set_btn_enabled(BTN_ID_REDO, unsafe { handle.callbacks.as_ref().expect("callbacks null?").has_saved_state_offset(session_id,  1) } );
 }
 
 fn get_state(handle: &mut RustGameState) -> Option<Vec<u8>> {
@@ -209,6 +250,7 @@ pub fn init_reversi(callbacks: *const rust_game_api::CCallbacksPtr) -> rust_game
 		start_game: start_game,
 		update: update,
 		handle_user_clicked: handle_user_clicked,
+		handle_btn_clicked: handle_btn_clicked,
 		get_state: get_state,
 	};
 	//println!("init_reversi returning {:#?}", api);
