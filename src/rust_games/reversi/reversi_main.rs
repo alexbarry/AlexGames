@@ -142,6 +142,33 @@ fn draw_state(handle: &mut RustGameState) {
 	let height = CANVAS_HEIGHT as f64;
 	let width  = CANVAS_WIDTH as f64;
 
+	let mut bg_colour;
+	let mut bg_line_colour;
+	let mut piece_white_colour;
+	let mut piece_black_colour;
+	let mut piece_outline_colour;
+
+	let user_colour_pref = unsafe { handle.callbacks.as_ref().expect("callbacks null?").get_user_colour_pref() };
+	let user_colour_pref = &user_colour_pref as &str; // TODO why do I need to do this?
+	println!("reversi user_colour_pref is '{}'", user_colour_pref);
+	match user_colour_pref {
+		"dark" => {
+			bg_colour            = "#003300";
+			bg_line_colour       = "#000000";
+			piece_white_colour   = "#444444";
+			piece_black_colour   = "#000000";
+			piece_outline_colour = "#333333";
+
+		}
+		_ => {
+			bg_colour            = "#008800";
+			bg_line_colour       = "#000000";
+			piece_white_colour   = "#dddddd";
+			piece_black_colour   = "#333333";
+			piece_outline_colour = "#000000";
+		}
+	}
+
 
 	/*
 	let reversi_state: &reversi_core::State;
@@ -160,18 +187,18 @@ fn draw_state(handle: &mut RustGameState) {
 	let cell_height = height/board_size_flt;
 	let cell_width  = width/board_size_flt;
 
-	handle.draw_rect("#008800", 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+	handle.draw_rect(bg_colour, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
 	let line_size = 1;
 	for y in 1..reversi_core::BOARD_SIZE {
 		let y = y as i32;
 		let cell_height = cell_height as i32;
-		handle.draw_line("#000000", line_size, y*cell_height, 0, y*cell_height, CANVAS_WIDTH);
+		handle.draw_line(bg_line_colour, line_size, y*cell_height, 0, y*cell_height, CANVAS_WIDTH);
 	}
 	for x in 1..reversi_core::BOARD_SIZE {
 		let x = x as i32;
 		let cell_width = cell_width as i32;
-		handle.draw_line("#000000", 0, line_size, x*cell_width, CANVAS_HEIGHT, x*cell_width);
+		handle.draw_line(bg_line_colour, 0, line_size, x*cell_width, CANVAS_HEIGHT, x*cell_width);
 	}
 
 	for y in 0..reversi_core::BOARD_SIZE {
@@ -185,8 +212,8 @@ fn draw_state(handle: &mut RustGameState) {
 			let x2 = ((x+1.0)/board_size_flt*width) as i32;
 			//handle.draw_rect(colour, y1, x1, y2, x2);
 			let player_colour = match reversi_state.cell(Pt{y:y as i32, x:x as i32}) {
-				reversi_core::CellState::PLAYER1 => Some("#dddddd"),
-				reversi_core::CellState::PLAYER2 => Some("#333333"),
+				reversi_core::CellState::PLAYER1 => Some(piece_white_colour),
+				reversi_core::CellState::PLAYER2 => Some(piece_black_colour),
 				_ => None,
 			};
 			if let Some(colour) = player_colour {
@@ -194,7 +221,7 @@ fn draw_state(handle: &mut RustGameState) {
 				let circ_x = (x1 as f64 +cell_height/2.0) as i32;
 				let radius = (cell_height/2.0 - 3.0) as i32;
 
-				handle.draw_circle(colour, "#000000", circ_y, circ_x, radius, 2);
+				handle.draw_circle(colour, piece_outline_colour, circ_y, circ_x, radius, 2);
 			};
 		}
 	}
