@@ -7,7 +7,12 @@ use std::ffi::CString;
 // TODO remove, this file shouldn't have to reference each game
 use crate::reversi::reversi_core;
 
-use libc::{c_int, c_char, size_t, c_void};
+use libc::{c_int, c_char, size_t, c_void, c_long};
+
+// TODO maybe change game_api.h to use int instead...
+// apparently the official type in Rust libc for stdbool.h bool is TBD
+// https://stackoverflow.com/a/47705543/9596600
+type c_bool = bool;
 
 pub const CANVAS_WIDTH:  i32 = 480;
 pub const CANVAS_HEIGHT: i32 = 480;
@@ -29,18 +34,59 @@ pub struct CCallbacksPtr {
 	draw_circle: Option<unsafe extern "C" fn(*const c_char, size_t,
 	                                         *const c_char, size_t,
 	                                         c_int, c_int, c_int, c_int)>,
-	// TODO
 	draw_clear: Option<unsafe extern "C" fn()>,
 	draw_refresh: Option<unsafe extern "C" fn()>,
-	send_message: Option<unsafe extern "C" fn()>,
-	create_btn: Option<unsafe extern "C" fn()>,
-	set_btn_enabled: Option<unsafe extern "C" fn()>,
-	set_btn_visible: Option<unsafe extern "C" fn()>,
+
+	send_message: Option<unsafe extern "C" fn(*const c_char, size_t, *const c_char, size_t)>,
+
+	create_btn: Option<unsafe extern "C" fn(*const c_char, *const c_char, c_int)>,
+	set_btn_enabled: Option<unsafe extern "C" fn(*const c_char, c_bool)>,
+	set_btn_visible: Option<unsafe extern "C" fn(*const c_char, c_bool)>,
 	hide_popup: Option<unsafe extern "C" fn()>,
+
+	// TODO add params
 	add_game_option: Option<unsafe extern "C" fn()>,
 
 	set_status_msg: Option<unsafe extern "C" fn(*const c_char, size_t)>,
 	set_status_err: Option<unsafe extern "C" fn(*const c_char, size_t)>,
+
+	// TODO
+	show_popup: Option<unsafe extern "C" fn()>,
+
+	prompt_string: Option<unsafe extern "C" fn(*const c_char, size_t,
+	                                           *const c_char, size_t)>,
+
+	update_timer_ms: Option<unsafe extern "C" fn(c_int)>,
+	delete_timer: Option<unsafe extern "C" fn(c_int)>,
+
+	enable_evt: Option<unsafe extern "C" fn(*const c_char, size_t)>,
+	disable_evt: Option<unsafe extern "C" fn(*const c_char, size_t)>,
+
+	get_time_ms: Option<unsafe extern "C" fn() -> c_long>,
+	get_time_of_day: Option<unsafe extern "C" fn(*mut c_char, size_t)>,
+
+	store_data: Option<unsafe extern "C" fn(*mut c_void,
+	                                        *const c_char,
+	                                        *const u8, size_t)>,
+	read_stored_data: Option<unsafe extern "C" fn(*mut c_void,
+	                                              *const c_char, *mut u8, size_t) -> size_t>,
+	get_new_session_id: Option<unsafe extern "C" fn() -> c_int>,
+	get_last_session_id: Option<unsafe extern "C" fn(*const c_char) -> c_int>,
+
+	save_state: Option<unsafe extern "C" fn(c_int, *const u8, size_t)>,
+	has_saved_state_offset: Option<unsafe extern "C" fn(c_int, c_int) -> c_bool>,
+	adjust_saved_state_offset: Option<unsafe extern "C" fn(c_int, c_int, *mut u8, size_t) -> size_t>,
+
+	draw_extra_canvas: Option<unsafe extern "C" fn(*const c_char, c_int, c_int, c_int, c_int)>,
+	new_extra_canvas: Option<unsafe extern "C" fn(*const c_char)>,
+	set_active_canvas: Option<unsafe extern "C" fn(*const c_char)>,
+	delete_extra_canvases: Option<unsafe extern "C" fn()>,
+
+	get_user_colour_pref: Option<unsafe extern "C" fn(*mut c_char, size_t) -> size_t>,
+
+	is_feature_supported: Option<unsafe extern "C" fn(*const c_char, size_t) -> c_bool>,
+
+	destroy_all: Option<unsafe extern "C" fn()>,
 }
 
 impl CCallbacksPtr {
@@ -93,6 +139,32 @@ impl CCallbacksPtr {
 		//println!("done calling draw_line!");
 	}
 
+	pub fn create_btn(&self, btn_id: &str, btn_text: &str, weight: i32) {
+		let btn_id_cstr   = CString::new(btn_id).expect("CString::new failed");
+		let btn_text_cstr = CString::new(btn_text).expect("CString::new failed");
+
+		if let Some(create_btn) = self.create_btn {
+			unsafe {
+				(create_btn)(btn_id_cstr.as_ptr(), btn_text_cstr.as_ptr(), weight);
+			}
+		} else {
+			println!("create_btn is null");
+		}
+	}
+
+	pub fn set_btn_enabled(&self, btn_id: &str, is_enabled: bool) {
+		let btn_id_cstr   = CString::new(btn_id).expect("CString::new failed");
+
+		if let Some(set_btn_enabled) = self.set_btn_enabled {
+			unsafe {
+				(set_btn_enabled)(btn_id_cstr.as_ptr(), is_enabled);
+			}
+		} else {
+			println!("set_btn_enabled is null");
+		}
+	}
+
+
 	pub fn set_status_err(&self, msg: &str) {
 		let msg_cstr = CString::new(msg).expect("CString::new failed");
 		if let Some(set_status_err) = self.set_status_err {
@@ -114,14 +186,82 @@ impl CCallbacksPtr {
 		}
 	}
 
+	pub fn get_new_session_id(&self) -> i32 {
+		if let Some(get_new_session_id) = self.get_new_session_id {
+			unsafe {
+				return (get_new_session_id)();
+			}
+		} else {
+			println!("get_new_session_id is null");
+			return 0;
+		}
+	}
+
+	pub fn get_last_session_id(&self, game_id: &str) -> Option<i32> {
+		let game_id_cstr = CString::new(game_id).expect("CString::new failed");
+		if let Some(get_last_session_id) = self.get_last_session_id {
+			unsafe {
+				let session_id = (get_last_session_id)(game_id_cstr.as_ptr());
+				if session_id != -1 {
+					return Some(session_id);
+				}
+			}
+		} else {
+			println!("get_last_session_id is null");
+		}
+		return None;
+	}
+
+	pub fn save_state(&self, session_id: i32, state: Vec<u8>) {
+		if let Some(save_state) = self.save_state {
+			unsafe {
+				(save_state)(session_id, state.as_ptr(), state.len());
+			}
+		} else {
+			println!("save_state is null");
+		}
+	}
+
+	pub fn has_saved_state_offset(&self, session_id: i32, move_id_offset: i32) -> bool {
+		if let Some(has_saved_state_offset) = self.has_saved_state_offset {
+			unsafe {
+				return (has_saved_state_offset)(session_id, move_id_offset);
+			}
+		} else {
+			println!("has_saved_state_offset is null");
+			return false;
+		}
+	}
+
+	pub fn adjust_saved_state_offset(&self, session_id: i32, move_id_offset: i32) -> Option<Vec<u8>> {
+		if let Some(adjust_saved_state_offset) = self.adjust_saved_state_offset {
+			
+			let buff_size = 16*1024; // TODO define a common constant in C for this max size
+			let mut buffer: Vec<u8> = Vec::with_capacity(buff_size);
+			let buff_ptr = buffer.as_mut_ptr();
+			unsafe {
+				let state_len = (adjust_saved_state_offset)(session_id, move_id_offset, buff_ptr, buff_size);
+				if state_len > 0 {
+					let state_vec = Vec::from_raw_parts(buff_ptr, state_len, state_len);
+					return Some(state_vec);
+				}
+			}
+		} else {
+			println!("has_saved_state_offset is null");
+		}
+		return None;
+	}
+
 }
 
 #[derive(Debug)]
 pub struct GameApi {
 	pub init: fn(*const CCallbacksPtr) -> Box <GameState>,
-	pub start_game: fn(handle: &mut RustGameState) -> (),
+	//pub start_game: fn(handle: &mut RustGameState, state: *const u8, state_len: size_t) -> (),
+	pub start_game: fn(handle: &mut RustGameState, state: Option<(i32, Vec<u8>)>) -> (),
 	pub update: fn(handle: &mut RustGameState, dt_ms: i32) -> (),
 	pub handle_user_clicked: fn(handle: &mut RustGameState, pos_y: i32, pos_x: i32) -> (),
+	pub get_state: fn(handle: &mut RustGameState) -> Option<Vec<u8>>,
 }
 
 /*
@@ -167,6 +307,22 @@ impl RustGameState {
 			let callbacks = self.callbacks.as_ref();
 			if let Some(callbacks) = callbacks {
 				callbacks.call_draw_line(line_colour, line_size, y1, x1, y2, x2);
+			}
+		}
+	}
+
+	pub fn create_btn(&self, btn_id: &str, btn_text: &str, weight: i32) {
+		unsafe {
+			if let Some(callbacks) = self.callbacks.as_ref() {
+				callbacks.create_btn(btn_id, btn_text, weight);
+			}
+		}
+	}
+
+	pub fn set_btn_enabled(&self, btn_id: &str, is_enabled: bool) {
+		unsafe {
+			if let Some(callbacks) = self.callbacks.as_ref() {
+				callbacks.set_btn_enabled(btn_id, is_enabled);
 			}
 		}
 	}

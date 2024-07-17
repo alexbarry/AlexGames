@@ -1,6 +1,9 @@
 mod rust_game_api;
 mod reversi;
 
+use std::ptr;
+use std::slice;
+
 //use libc;
 //use std::ffi::CString;
 //use std::mem::transmute;
@@ -8,6 +11,7 @@ mod reversi;
 //use std::sync::Arc;
 
 //use libc::{c_int, c_char, size_t};
+use libc::{size_t};
 
 
 use reversi::reversi_main;
@@ -28,6 +32,7 @@ fn c_str_to_str(str_ptr: *const u8, str_len: usize) -> String {
 	return String::from(str_slice);
 }
 
+// TODO these should use libc types (c_int, etc)
 #[no_mangle]
 pub extern "C" fn rust_game_api_handle_user_clicked(handle: &mut RustGameState, pos_y: i32, pos_x: i32) {
 	println!("rust_handle_user_clicked: {} {}", pos_y, pos_x);
@@ -42,10 +47,42 @@ pub extern "C" fn rust_game_api_update(handle: &mut RustGameState, dt_ms: i32) {
 }
 
 #[no_mangle]
-pub extern "C" fn rust_game_api_start_game(handle: &mut RustGameState, _session_id: i32, _state: *const u8, _state_len: usize) {
+pub extern "C" fn rust_game_api_start_game(handle: &mut RustGameState, session_id: i32, state_ptr: *const u8, state_len: usize) {
 	println!("rust_game_api_start_game");
-	(handle.api.start_game)(handle);
+	let mut session_id_and_state: Option<(i32, Vec<u8>)> = None;
+	if state_len > 0 {
+		unsafe {
+			let slice = slice::from_raw_parts(state_ptr, state_len);
+			session_id_and_state = Some( (session_id, Vec::from(slice)) );
+		}
+	}
+	(handle.api.start_game)(handle, session_id_and_state);
 }
+
+#[no_mangle]
+pub extern "C" fn rust_game_api_get_state(handle: &mut RustGameState, state_out: *mut u8, state_out_max_len: size_t) -> size_t {
+	println!("rust_game_api_get_state");
+	let state = (handle.api.get_state)(handle);
+
+	if !state.is_some() {
+		return 0;
+	}
+	let state = state.expect("state should be some at this point");
+
+	if state.len() > state_out_max_len {
+		handle.set_status_err(&format!("get_state: state is {} bytes long but buffer is only {}", state_out_max_len, state.len()));
+		// TODO can I return -1 here? I don't know if I even checked for this case
+		// before.
+		return 0;
+	}
+
+	unsafe {
+		ptr::copy_nonoverlapping(state.as_ptr(), state_out, state.len()); 
+	}
+
+	return state.len();
+}
+
 
 
 fn c_ptr_to_callbacks(callbacks: *const u8) -> *const CCallbacksPtr {
@@ -89,4 +126,11 @@ pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: us
 	let handle = Box::new(handle);
 	// TODO need to add a free function on destroy game
 	return Box::into_raw(handle);
+}
+
+
+#[no_mangle]
+pub extern "C" fn rust_game_api_destroy_game(handle: *mut RustGameState) {
+	// TODO call game specific destroy
+	unsafe { Box::from_raw(handle); }
 }

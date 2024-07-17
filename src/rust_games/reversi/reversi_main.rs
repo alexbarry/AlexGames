@@ -1,3 +1,5 @@
+use bincode;
+
 use crate::rust_game_api;
 
 use crate::rust_game_api::{RustGameState, CANVAS_HEIGHT, CANVAS_WIDTH};
@@ -10,6 +12,9 @@ use crate::reversi::reversi_core::{Pt, ReversiErr};
 impl rust_game_api::GameState for reversi_core::State {
 }
 */
+
+static BTN_ID_UNDO: &str = "btn_undo";
+static BTN_ID_REDO: &str = "btn_redo";
 
 fn rc_to_err_msg(err: ReversiErr) -> &'static str {
 	match err {
@@ -40,13 +45,58 @@ fn handle_user_clicked(handle: &mut RustGameState, pos_y: i32, pos_x: i32) {
 	if let Err(err) = rc {
 		let msg = rc_to_err_msg(err);
 		handle.set_status_err(msg);
+	} else {
+		save_state(handle);
 	}
 	draw_state(handle);
 }
 
-fn start_game(_handle: &mut RustGameState) {
+fn save_state(handle: &mut RustGameState) {
+	let rust_game_api::GameState::ReversiGameState(reversi_state) = &handle.game_state;
+	let session_id = reversi_state.session_id;
+	let serialized_state = get_state(handle).expect("state is none?");
+	unsafe {
+		// TODO don't put session_id in the game state, make a separate struct for "state to be shared"
+		// and other state that shouldn't be shared
+		handle.callbacks.as_ref().expect("callbacks null?").save_state(session_id, serialized_state);
+	}
+}
+
+fn set_state(handle: &mut RustGameState, serialized_state: &Vec<u8>) {
+		let reversi_state = bincode::deserialize::<reversi_core::State>(&serialized_state);
+		if let Ok(reversi_state) = reversi_state {
+			println!("Received game state: {:#?}", reversi_state);
+			handle.game_state = rust_game_api::GameState::ReversiGameState(reversi_state);
+		} else {
+			handle.set_status_err(&format!("Error decoding state: {:?}", reversi_state));
+		}
+	}
+
+//fn start_game(_handle: &mut RustGameState) {
+fn start_game(handle: &mut RustGameState, session_id_and_state: Option<(i32, Vec<u8>)>) {
 	// TODO
 	println!("rust: start called");
+
+	if let Some(session_id_and_state) = session_id_and_state {
+		let (session_id, state_serialized) = session_id_and_state;
+		set_state(handle, &state_serialized);
+		/*
+		let reversi_state = bincode::deserialize::<reversi_core::State>(&state_serialized);
+		if let Ok(reversi_state) = reversi_state {
+			println!("Received game state: {:#?}", reversi_state);
+			handle.game_state = rust_game_api::GameState::ReversiGameState(reversi_state);
+		} else {
+			handle.set_status_err(&format!("Error decoding state: {:?}", reversi_state));
+		}
+		*/
+	} else if let Some(session_id) = unsafe { handle.callbacks.as_ref().expect("callbacks null?").get_last_session_id("reversi") } {
+		//let saved_state = handle.callbacks.adjust_saved_state_offset(session_id, 0);
+		let saved_state = unsafe { handle.callbacks.as_ref().expect("callbacks null?").adjust_saved_state_offset(session_id, 0) };
+		set_state(handle, &saved_state.expect("saved state is none from adjust_saved_state_offset?"));
+	} else {
+		let rust_game_api::GameState::ReversiGameState(reversi_state) = &mut handle.game_state;
+		reversi_state.session_id = unsafe { handle.callbacks.as_ref().expect("callbacks null?").get_new_session_id() };
+	}
 }
 
 fn draw_state(handle: &mut RustGameState) {
@@ -113,21 +163,55 @@ fn draw_state(handle: &mut RustGameState) {
 	}
 }
 
+fn get_state(handle: &mut RustGameState) -> Option<Vec<u8>> {
+	let rust_game_api::GameState::ReversiGameState(reversi_state) = &mut handle.game_state;
+
+	// TODO this is huge, I bet the enum is encoded as 4 bytes
+	// see if I can override it to make them only 2 bits each? Or
+	// at least just 1 byte.
+	// TODO also add a version number and abstract it into a function
+
+	// TODO check what endianness I used in Lua games
+	match bincode::serialize(reversi_state) {
+		Ok(state_encoded) => { return Some(state_encoded); }
+		Err(e) => {
+			// TODO use format macro and pass this more useful string to the API
+			println!("Error encoding state: {}", e);
+			handle.set_status_err("Error encoding state");
+			return None;
+		}
+	}
+}
+
 //fn init(_callbacks: &rust_game_api::Callbacks) -> Box <dyn rust_game_api::GameState> {
-fn init(_callbacks: *const rust_game_api::CCallbacksPtr) -> Box <rust_game_api::GameState> {
+fn init(callbacks: *const rust_game_api::CCallbacksPtr) -> Box <rust_game_api::GameState> {
 	let state = reversi_core::State::new();
 	let state = rust_game_api::GameState::ReversiGameState(state);
+
+	unsafe {
+		// TODO make wrappers for all of these on the callbacks, I guess?
+		// maybe change everything to call handle.callbacks.create_btn instead of
+		// defining the wrappers being defined on the game state, which is made
+		// at the common level, I guess.
+		let callbacks = callbacks.as_ref().expect("callbacks null?");
+		callbacks.create_btn(BTN_ID_UNDO, "Undo", 1);
+		callbacks.create_btn(BTN_ID_REDO, "Redo", 1);
+		callbacks.set_btn_enabled(BTN_ID_UNDO, false);
+		callbacks.set_btn_enabled(BTN_ID_REDO, false);
+	}
+
 	return Box::from(state);
 }
 
-pub fn init_reversi(_: *const rust_game_api::CCallbacksPtr) -> rust_game_api::GameApi {
+pub fn init_reversi(callbacks: *const rust_game_api::CCallbacksPtr) -> rust_game_api::GameApi {
 	let api = rust_game_api::GameApi {
 		init: init,
 		start_game: start_game,
 		update: update,
 		handle_user_clicked: handle_user_clicked,
+		get_state: get_state,
 	};
-	println!("init_reversi returning {:#?}", api);
+	//println!("init_reversi returning {:#?}", api);
 
 	api
 }

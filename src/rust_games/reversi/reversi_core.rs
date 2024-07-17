@@ -1,8 +1,12 @@
 //use std::io;
+use serde::{Serialize, Deserialize};
 
 pub const BOARD_SIZE: usize = 8;
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+// TODO make htis serialize into something smaller, I think it might be 4 bytes now.
+// Ideally just 2 bits if the serialization library can support that.
+// If not, maybe port the code I wrote for minesweeper
+#[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum CellState {
 	EMPTY,
 	PLAYER1,
@@ -19,9 +23,13 @@ pub enum ReversiErr {
 pub struct Pt{pub y: i32, pub x: i32}
 
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct State {
 	board: [[CellState; BOARD_SIZE]; BOARD_SIZE],
 	pub player_turn: CellState,
+
+	// TODO don't include in this state, make another state struct to include game metadata like this
+	pub session_id: i32,
 }
 
 impl State {
@@ -29,6 +37,9 @@ impl State {
 		let mut state = State {
 			board: [[CellState::EMPTY; BOARD_SIZE]; BOARD_SIZE],
 			player_turn: CellState::PLAYER1,
+
+			// TODO remove
+			session_id: 0,
 		};
 
 		state.board[3][3] = CellState::PLAYER1;

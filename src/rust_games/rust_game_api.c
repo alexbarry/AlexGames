@@ -6,6 +6,8 @@
 extern void rust_game_api_handle_user_clicked(void *L, int pos_y, int pos_x);
 extern void rust_game_api_start_game(void *L, int session_id, const uint8_t *state, size_t state_len);
 extern void rust_game_api_update(void *L, int dt_ms);
+extern size_t rust_game_api_get_state(void *L, uint8_t *state_out, size_t state_out_max_len);
+extern void rust_game_api_destroy_game(void *L);
 
 
 // This one is defined in rust
@@ -29,5 +31,7 @@ const struct game_api * get_rust_api(void) {
 	rust_api.handle_user_clicked = rust_game_api_handle_user_clicked;
 	rust_api.start_game          = rust_game_api_start_game;
 	rust_api.update              = rust_game_api_update;
+	rust_api.get_state           = rust_game_api_get_state;
+	rust_api.destroy_game        = rust_game_api_destroy_game;
 	return &rust_api;
 }
