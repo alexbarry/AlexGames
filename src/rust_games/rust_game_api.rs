@@ -21,89 +21,91 @@ pub const CANVAS_HEIGHT: i32 = 480;
 
 #[repr(C)]
 pub struct CCallbacksPtr {
-	set_game_handle: Option<unsafe extern "C" fn(*mut c_void, *const c_char)>,
-	get_game_id: Option<unsafe extern "C" fn(*mut c_void, *mut c_char, size_t)>,
-	draw_graphic: Option<unsafe extern "C" fn(*const c_char, c_int, c_int, c_int, c_int, *mut c_void)>,
-	draw_line: Option<unsafe extern "C" fn(*const c_char, c_int, c_int, c_int, c_int, c_int)>,
-	draw_text: Option<unsafe extern "C" fn(*const c_char, size_t, *const c_char, size_t,
+	pub set_game_handle: Option<unsafe extern "C" fn(*mut c_void, *const c_char)>,
+	pub get_game_id: Option<unsafe extern "C" fn(*mut c_void, *mut c_char, size_t)>,
+	pub draw_graphic: Option<unsafe extern "C" fn(*const c_char, c_int, c_int, c_int, c_int, *mut c_void)>,
+	pub draw_line: Option<unsafe extern "C" fn(*const c_char, c_int, c_int, c_int, c_int, c_int)>,
+	pub draw_text: Option<unsafe extern "C" fn(*const c_char, size_t, *const c_char, size_t,
 	                                       c_int, c_int, c_int, c_int)>,
-	draw_rect: Option<unsafe extern "C" fn(*const c_char, size_t,
+	pub draw_rect: Option<unsafe extern "C" fn(*const c_char, size_t,
 	                                       c_int, c_int, c_int, c_int)>,
 
-	draw_triangle: Option<unsafe extern "C" fn(*const c_char, size_t,
+	pub draw_triangle: Option<unsafe extern "C" fn(*const c_char, size_t,
 	                                           c_int, c_int, c_int, c_int, c_int, c_int)>,
-	draw_circle: Option<unsafe extern "C" fn(*const c_char, size_t,
+	pub draw_circle: Option<unsafe extern "C" fn(*const c_char, size_t,
 	                                         *const c_char, size_t,
 	                                         c_int, c_int, c_int, c_int)>,
-	draw_clear: Option<unsafe extern "C" fn()>,
-	draw_refresh: Option<unsafe extern "C" fn()>,
+	pub draw_clear: Option<unsafe extern "C" fn()>,
+	pub draw_refresh: Option<unsafe extern "C" fn()>,
 
-	send_message: Option<unsafe extern "C" fn(*const c_char, size_t, *const c_char, size_t)>,
+	pub send_message: Option<unsafe extern "C" fn(*const c_char, size_t, *const c_char, size_t)>,
 
-	create_btn: Option<unsafe extern "C" fn(*const c_char, *const c_char, c_int)>,
-	set_btn_enabled: Option<unsafe extern "C" fn(*const c_char, c_bool)>,
-	set_btn_visible: Option<unsafe extern "C" fn(*const c_char, c_bool)>,
-	hide_popup: Option<unsafe extern "C" fn()>,
+	pub create_btn: Option<unsafe extern "C" fn(*const c_char, *const c_char, c_int)>,
+	pub set_btn_enabled: Option<unsafe extern "C" fn(*const c_char, c_bool)>,
+	pub set_btn_visible: Option<unsafe extern "C" fn(*const c_char, c_bool)>,
+	pub hide_popup: Option<unsafe extern "C" fn()>,
 
 	// TODO add params
-	add_game_option: Option<unsafe extern "C" fn()>,
+	pub add_game_option: Option<unsafe extern "C" fn()>,
 
-	set_status_msg: Option<unsafe extern "C" fn(*const c_char, size_t)>,
-	set_status_err: Option<unsafe extern "C" fn(*const c_char, size_t)>,
+	pub set_status_msg: Option<unsafe extern "C" fn(*const c_char, size_t)>,
+	pub set_status_err: Option<unsafe extern "C" fn(*const c_char, size_t)>,
 
 	// TODO
-	show_popup: Option<unsafe extern "C" fn()>,
+	pub show_popup: Option<unsafe extern "C" fn()>,
 
-	prompt_string: Option<unsafe extern "C" fn(*const c_char, size_t,
+	pub prompt_string: Option<unsafe extern "C" fn(*const c_char, size_t,
 	                                           *const c_char, size_t)>,
 
-	update_timer_ms: Option<unsafe extern "C" fn(c_int)>,
-	delete_timer: Option<unsafe extern "C" fn(c_int)>,
+	pub update_timer_ms: Option<unsafe extern "C" fn(c_int)>,
+	pub delete_timer: Option<unsafe extern "C" fn(c_int)>,
 
-	enable_evt: Option<unsafe extern "C" fn(*const c_char, size_t)>,
-	disable_evt: Option<unsafe extern "C" fn(*const c_char, size_t)>,
+	pub enable_evt: Option<unsafe extern "C" fn(*const c_char, size_t)>,
+	pub disable_evt: Option<unsafe extern "C" fn(*const c_char, size_t)>,
 
-	get_time_ms: Option<unsafe extern "C" fn() -> c_long>,
-	get_time_of_day: Option<unsafe extern "C" fn(*mut c_char, size_t)>,
+	pub get_time_ms: Option<unsafe extern "C" fn() -> c_long>,
+	pub get_time_of_day: Option<unsafe extern "C" fn(*mut c_char, size_t)>,
 
-	store_data: Option<unsafe extern "C" fn(*mut c_void,
+	pub store_data: Option<unsafe extern "C" fn(*mut c_void,
 	                                        *const c_char,
 	                                        *const u8, size_t)>,
-	read_stored_data: Option<unsafe extern "C" fn(*mut c_void,
+	pub read_stored_data: Option<unsafe extern "C" fn(*mut c_void,
 	                                              *const c_char, *mut u8, size_t) -> size_t>,
-	get_new_session_id: Option<unsafe extern "C" fn() -> c_int>,
-	get_last_session_id: Option<unsafe extern "C" fn(*const c_char) -> c_int>,
+	pub get_new_session_id: Option<unsafe extern "C" fn() -> c_int>,
+	pub get_last_session_id: Option<unsafe extern "C" fn(*const c_char) -> c_int>,
 
-	save_state: Option<unsafe extern "C" fn(c_int, *const u8, size_t)>,
-	has_saved_state_offset: Option<unsafe extern "C" fn(c_int, c_int) -> c_bool>,
-	adjust_saved_state_offset: Option<unsafe extern "C" fn(c_int, c_int, *mut u8, size_t) -> size_t>,
+	pub save_state: Option<unsafe extern "C" fn(c_int, *const u8, size_t)>,
+	pub has_saved_state_offset: Option<unsafe extern "C" fn(c_int, c_int) -> c_bool>,
+	pub adjust_saved_state_offset: Option<unsafe extern "C" fn(c_int, c_int, *mut u8, size_t) -> size_t>,
 
-	draw_extra_canvas: Option<unsafe extern "C" fn(*const c_char, c_int, c_int, c_int, c_int)>,
-	new_extra_canvas: Option<unsafe extern "C" fn(*const c_char)>,
-	set_active_canvas: Option<unsafe extern "C" fn(*const c_char)>,
-	delete_extra_canvases: Option<unsafe extern "C" fn()>,
+	pub draw_extra_canvas: Option<unsafe extern "C" fn(*const c_char, c_int, c_int, c_int, c_int)>,
+	pub new_extra_canvas: Option<unsafe extern "C" fn(*const c_char)>,
+	pub set_active_canvas: Option<unsafe extern "C" fn(*const c_char)>,
+	pub delete_extra_canvases: Option<unsafe extern "C" fn()>,
 
 	//get_user_colour_pref: Option<unsafe extern "C" fn(*mut c_char, size_t) -> size_t>, // TODO
-	get_user_colour_pref: Option<unsafe extern "C" fn(*mut u8, size_t) -> size_t>,
+	pub get_user_colour_pref: Option<unsafe extern "C" fn(*mut u8, size_t) -> size_t>,
 
-	is_feature_supported: Option<unsafe extern "C" fn(*const c_char, size_t) -> c_bool>,
+	pub is_feature_supported: Option<unsafe extern "C" fn(*const c_char, size_t) -> c_bool>,
 
-	destroy_all: Option<unsafe extern "C" fn()>,
+	pub destroy_all: Option<unsafe extern "C" fn()>,
 }
 
 impl CCallbacksPtr {
-	unsafe fn call_draw_rect(&self, fill: &str, y1: i32, x1: i32, y2: i32, x2: i32) {
+	pub fn draw_rect(&self, fill: &str, y1: i32, x1: i32, y2: i32, x2: i32) {
 		let fill_len = fill.len();
 		let fill = CString::new(fill).expect("CString::new failed");
 		if let Some(draw_rect) = self.draw_rect {
-			draw_rect(fill.as_ptr() as *const c_char, fill_len,
-			          y1, x1, y2, x2);
+			unsafe {
+				draw_rect(fill.as_ptr() as *const c_char, fill_len,
+				          y1, x1, y2, x2);
+			}
 		} else {
 			println!("draw_rect is null");
 		}
 	}
 
-	unsafe fn call_draw_circle(&self, fill: &str, outline: &str, y: i32, x: i32, radius: i32, outline_width: i32) {
+	pub fn draw_circle(&self, fill: &str, outline: &str, y: i32, x: i32, radius: i32, outline_width: i32) {
 		let fill_len = fill.len();
 		let fill = CString::new(fill).expect("CString::new failed");
 
@@ -112,15 +114,17 @@ impl CCallbacksPtr {
 		if let Some(draw_circle) = self.draw_circle {
 			//draw_circle(fill.as_ptr()    as *const c_char, fill.len(),
 			//            outline.as_ptr() as *const c_char, outline.len(),
-			draw_circle(fill.as_ptr()   , fill_len,
-			            outline.as_ptr(), outline_len,
-			            y, x, radius, outline_width);
+			unsafe {
+				draw_circle(fill.as_ptr()   , fill_len,
+				            outline.as_ptr(), outline_len,
+				            y, x, radius, outline_width);
+			}
 		} else {
 			println!("draw_circle is null");
 		}
 	}
 
-	unsafe fn call_draw_line(&self, line_colour: &str, line_size: i32, y1: i32, x1: i32, y2: i32, x2: i32) {
+	pub fn draw_line(&self, line_colour: &str, line_size: i32, y1: i32, x1: i32, y2: i32, x2: i32) {
 		let line_colour_cstr = CString::new(line_colour).expect("CString::new failed");
 		//let line_colour_cstr: *const c_char = [ '#', '0', '0', '8', '8', '0', '0', 0 as c_char ];
 		//let line_colour_cstr = b"#008800\0";
@@ -279,92 +283,14 @@ impl CCallbacksPtr {
 	}
 }
 
-#[derive(Debug)]
-pub struct GameApi {
-	pub init: fn(*const CCallbacksPtr) -> Box <GameState>,
-	//pub start_game: fn(handle: &mut RustGameState, state: *const u8, state_len: size_t) -> (),
-	pub start_game: fn(handle: &mut RustGameState, state: Option<(i32, Vec<u8>)>) -> (),
-	pub update: fn(handle: &mut RustGameState, dt_ms: i32) -> (),
-	pub handle_user_clicked: fn(handle: &mut RustGameState, pos_y: i32, pos_x: i32) -> (),
-	pub handle_btn_clicked: fn(handle: &mut RustGameState, btn_id: &str) -> (),
-	pub get_state: fn(handle: &mut RustGameState) -> Option<Vec<u8>>,
+pub trait AlexGamesApi {
+	// TODO maybe this function can return a reference instead?
+	fn callbacks(&self) -> *const CCallbacksPtr;
+
+	fn init(&mut self, callbacks: *const CCallbacksPtr);
+	fn start_game(&mut self, state: Option<(i32, Vec<u8>)>) -> ();
+	fn update(&mut self, dt_ms: i32) -> ();
+	fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32) -> ();
+	fn handle_btn_clicked(&mut self, btn_id: &str) -> ();
+	fn get_state(&self) -> Option<Vec<u8>>;
 }
-
-/*
-pub trait GameState {
-}
-*/
-
-// TODO this file shouldn't have to reference each game individually,
-// figure out how to properly generalize this in rust like a void pointer
-pub enum GameState {
-	ReversiGameState(reversi_core::State),
-}
-
-pub struct RustGameState {
-	pub api:       GameApi,
-	pub callbacks: *const CCallbacksPtr,
-	//pub game_state: Box<GameState>,
-	pub game_state: GameState,
-}
-
-impl RustGameState {
-/*
-	pub fn draw_rect(&mut self, fill_colour: &str, y_start: i32, x_start: i32, y_end: i32, x_end: i32) {
-		(self.callbacks.draw_rect)(fill_colour, y_start, x_start, y_end, x_end);
-	}
-*/
-	//pub fn draw_rect(&mut self, fill_colour: &str, y_start: i32, x_start: i32, y_end: i32, x_end: i32) {
-	pub fn draw_rect(&self, fill_colour: &str, y_start: i32, x_start: i32, y_end: i32, x_end: i32) {
-		unsafe {
-			self.callbacks.as_ref().expect("null ptr?").call_draw_rect(fill_colour, y_start, x_start, y_end, x_end);
-		}
-	}
-
-	pub fn draw_circle(&self, fill_colour: &str, outline_colour: &str, y: i32, x: i32, radius: i32, outline_width: i32) {
-		unsafe {
-			self.callbacks.as_ref().expect("null ptr?").call_draw_circle(fill_colour, outline_colour, y, x, radius, outline_width);
-		}
-	}
-
-	pub fn draw_line(&self, line_colour: &str, line_size: i32, y1: i32, x1: i32, y2: i32, x2: i32) {
-		unsafe {
-			//self.callbacks.as_ref().expect("null ptr?").call_draw_line(line_colour, line_size, y1, x1, y2, x2);
-			let callbacks = self.callbacks.as_ref();
-			if let Some(callbacks) = callbacks {
-				callbacks.call_draw_line(line_colour, line_size, y1, x1, y2, x2);
-			}
-		}
-	}
-
-	pub fn create_btn(&self, btn_id: &str, btn_text: &str, weight: i32) {
-		unsafe {
-			if let Some(callbacks) = self.callbacks.as_ref() {
-				callbacks.create_btn(btn_id, btn_text, weight);
-			}
-		}
-	}
-
-	pub fn set_btn_enabled(&self, btn_id: &str, is_enabled: bool) {
-		unsafe {
-			if let Some(callbacks) = self.callbacks.as_ref() {
-				callbacks.set_btn_enabled(btn_id, is_enabled);
-			}
-		}
-	}
-	pub fn set_status_msg(&self, msg: &str) {
-		unsafe {
-			if let Some(callbacks) = self.callbacks.as_ref() {
-				callbacks.set_status_msg(msg);
-			}
-		}
-	}
-
-	pub fn set_status_err(&self, msg: &str) {
-		unsafe {
-			if let Some(callbacks) = self.callbacks.as_ref() {
-				callbacks.set_status_err(msg);
-			}
-		}
-	}
-} 

@@ -17,7 +17,9 @@ extern void *start_rust_game_rust(const char *game_str, size_t game_str_len, con
 // TODO return a C structure that points to C wrapper functions that
 // call all the Rust bindings
 void *start_rust_game(const char *game_str, size_t game_str_len, const struct game_api_callbacks *callbacks) {
-	return start_rust_game_rust(game_str, game_str_len, callbacks);
+	void *handle = start_rust_game_rust(game_str, game_str_len, callbacks);
+	printf("%s returned %p\n", __func__, handle);
+	return handle;
 }
 
 #if 0
