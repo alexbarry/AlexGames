@@ -1,8 +1,11 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
+pub use crate::libs::point::Pt;
+
 pub const BOARD_WIDTH: usize  = 8;
 pub const BOARD_HEIGHT: usize = 8;
+
 
 #[derive(Copy, Clone, Debug)]
 pub enum GemType {

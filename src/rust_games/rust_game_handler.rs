@@ -2,6 +2,7 @@ mod rust_game_api;
 
 mod reversi;
 mod gem_match;
+mod libs;
 
 use std::ptr;
 use std::slice;
