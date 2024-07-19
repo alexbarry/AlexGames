@@ -14,6 +14,17 @@ type CBool = bool;
 pub const CANVAS_WIDTH:  i32 = 480;
 pub const CANVAS_HEIGHT: i32 = 480;
 
+#[derive(Copy, Clone, Debug)]
+pub enum MouseEvt {
+	Up,
+	Down,
+	Leave,
+	AltDown,
+	AltUp,
+	Alt2Down,
+	Alt2Up,
+}
+
 
 #[repr(C)]
 pub struct CCallbacksPtr {
@@ -277,6 +288,17 @@ impl CCallbacksPtr {
 		}
 		return String::from("light");
 	}
+
+	pub fn enable_evt(&self, evt_id: &str) {
+		if let Some(enable_evt) = self.enable_evt {
+			let evt_id_cstr = CString::new(evt_id).expect("CString::new failed");
+			unsafe {
+				(enable_evt)(evt_id_cstr.as_ptr(), evt_id.len());
+			}
+		} else {
+			println!("enable_evt is null");
+		}
+	}
 }
 
 pub trait AlexGamesApi {
@@ -289,4 +311,10 @@ pub trait AlexGamesApi {
 	fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32) -> ();
 	fn handle_btn_clicked(&mut self, btn_id: &str) -> ();
 	fn get_state(&self) -> Option<Vec<u8>>;
+	fn handle_mousemove(&mut self, pos_y: i32, pos_x: i32, buttons: i32) {
+		println!("handle_mousemove unimplemented, y={}, x={} buttons={:x}", pos_y, pos_x, buttons);
+	}
+	fn handle_mouse_evt(&mut self, evt_id: MouseEvt, pos_y: i32, pos_x: i32, buttons: i32) {
+		println!("handle_mouse_evt unimplemented, evt_id={:#?}, y={}, x={}, buttons={:x}", evt_id, pos_y, pos_x, buttons);
+	}
 }

@@ -11,7 +11,7 @@ use libc::{size_t, c_void};
 
 use reversi::reversi_main;
 use gem_match::gem_match_main;
-use rust_game_api::{AlexGamesApi, CCallbacksPtr};
+use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt};
 
 // A pointer to this struct is returned to C, and then passed back
 // to the rust APIs. A pointer to AlexGamesApi is needed, and also
@@ -33,7 +33,28 @@ fn get_rust_game_init_func(game_id: &str) -> Option<fn(*const CCallbacksPtr) -> 
 	}
 }
 
-fn c_str_to_str(str_ptr: *const u8, str_len: usize) -> String {
+fn find_null_terminator(str_ptr: *const u8, max_bytes: usize) -> Option<usize> {
+	let mut str_end_pos: usize = 0;
+	for i in 0..=max_bytes {
+		let val = unsafe { *str_ptr.add(i) };
+		println!("Checking i={}, val is {:#?}", i, val);
+		if val == 0 {
+			str_end_pos = i;
+			println!("breaking");
+			break;
+		}
+		if i == max_bytes {
+			println!("Could not find terminating null in first {} bytes of string passed to handle_btn_clicked", max_bytes);
+			return None;
+		}
+	}
+	return Some(str_end_pos);
+}
+
+fn c_str_to_str(str_ptr: *const u8, str_len: Option<usize>) -> String {
+	// TODO does this call `find_null_terminator` whether it is needed or not?
+	let str_len = str_len.unwrap_or(find_null_terminator(str_ptr, 1024).expect("could not find null terminator"));
+
 	let bytes_slice = unsafe { std::slice::from_raw_parts(str_ptr, str_len) };
 
 	let str_slice = std::str::from_utf8(bytes_slice).expect("could not convert C string to string");
@@ -68,34 +89,32 @@ pub extern "C" fn rust_game_api_handle_user_clicked(handle: *mut c_void, pos_y: 
 #[no_mangle]
 pub extern "C" fn rust_game_api_handle_btn_clicked(handle: *mut c_void, btn_id_cstr: *const u8) {
 	let handle = handle_void_ptr_to_trait_ref(handle);
-	// TODO there must be a built in way to do this, but I don't have internet right now
-	let byte_count = 1024;
-	let mut str_end_pos: usize = 0;
-	for i in 0..=byte_count {
-		//if btn_id_cstr.wrapping_add(i) == std::ptr::null() {
-		let val = unsafe { *btn_id_cstr.add(i) };
-		println!("Checking i={}, val is {:#?}", i, val);
-		if val == 0 {
-			str_end_pos = i;
-			println!("breaking");
-			break;
+	let btn_id = c_str_to_str(btn_id_cstr, None);
+	handle.handle_btn_clicked(&btn_id);
+}
+
+#[no_mangle]
+pub extern "C" fn rust_game_api_handle_mousemove(handle: *mut c_void, pos_y: i32, pos_x: i32, buttons: i32) {
+	let handle = handle_void_ptr_to_trait_ref(handle);
+	handle.handle_mousemove(pos_y, pos_x, buttons);
+}
+
+#[no_mangle]
+pub extern "C" fn rust_game_api_handle_mouse_evt(handle: *mut c_void, mouse_evt_id: i32, pos_y: i32, pos_x: i32, buttons: i32) {
+	let handle = handle_void_ptr_to_trait_ref(handle);
+	let mouse_evt_id = match mouse_evt_id {
+		1 => MouseEvt::Up,
+		2 => MouseEvt::Down,
+		3 => MouseEvt::Leave,
+		4 => MouseEvt::AltDown,
+		5 => MouseEvt::AltUp,
+		6 => MouseEvt::Alt2Down,
+		7 => MouseEvt::Alt2Up,
+		_ => {
+			panic!("unhandled mouse_evt_id {}", mouse_evt_id);
 		}
-		if i == byte_count {
-			println!("Could not find terminating null in first {} bytes of string passed to handle_btn_clicked", byte_count);
-			return;
-		}
-	}
-	let btn_id: &str;
-	unsafe {
-		let slice = slice::from_raw_parts(btn_id_cstr, str_end_pos);
-		if let Ok(btn_id_val) = std::str::from_utf8(slice) {
-			btn_id = btn_id_val;
-		} else {
-			println!("Error decoding btn_id string");
-			return;
-		}
-	}
-	handle.handle_btn_clicked(btn_id);
+	};
+	handle.handle_mouse_evt(mouse_evt_id, pos_y, pos_x, buttons);
 }
 
 #[no_mangle]
@@ -151,7 +170,7 @@ pub extern "C" fn rust_game_api_get_state(handle: *mut c_void, state_out: *mut u
 
 #[no_mangle]
 pub extern "C" fn rust_game_supported(game_str_ptr: *const u8, game_str_len: usize) -> bool {
-	let game_id = c_str_to_str(game_str_ptr, game_str_len);
+	let game_id = c_str_to_str(game_str_ptr, Some(game_str_len));
 
 	println!("Game ID is {}, hello from rust!", game_id);
 
@@ -160,7 +179,7 @@ pub extern "C" fn rust_game_supported(game_str_ptr: *const u8, game_str_len: usi
 
 #[no_mangle]
 pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: size_t, callbacks: *const CCallbacksPtr) -> *mut c_void {
-	let game_id = c_str_to_str(game_str_ptr, game_str_len);
+	let game_id = c_str_to_str(game_str_ptr, Some(game_str_len));
 
 	println!("Game ID is {}, hello from rust!", game_id);
 

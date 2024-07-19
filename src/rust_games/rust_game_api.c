@@ -9,6 +9,8 @@ extern void rust_game_api_update(void *L, int dt_ms);
 extern size_t rust_game_api_get_state(void *L, uint8_t *state_out, size_t state_out_max_len);
 extern void rust_game_api_handle_btn_clicked(void *L, const char *btn_id);
 extern void rust_game_api_destroy_game(void *L);
+extern void rust_game_api_handle_mousemove(void *L, int pos_y, int pos_x, int buttons);
+extern void rust_game_api_handle_mouse_evt(void *L, int evt_id, int pos_y, int pos_x, int buttons);
 
 
 // This one is defined in rust
@@ -37,5 +39,7 @@ const struct game_api * get_rust_api(void) {
 	rust_api.handle_btn_clicked  = rust_game_api_handle_btn_clicked;
 	rust_api.get_state           = rust_game_api_get_state;
 	rust_api.destroy_game        = rust_game_api_destroy_game;
+	rust_api.handle_mousemove    = rust_game_api_handle_mousemove;
+	rust_api.handle_mouse_evt    = rust_game_api_handle_mouse_evt;
 	return &rust_api;
 }
