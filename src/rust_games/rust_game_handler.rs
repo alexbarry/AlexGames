@@ -20,6 +20,18 @@ use reversi::reversi_main;
 use gem_match::gem_match_main;
 use rust_game_api::{AlexGamesApi, CCallbacksPtr};
 
+// A pointer to this struct is returned to C, and then passed back
+// to the rust APIs. A pointer to AlexGamesApi is needed, and also
+// an identifier to know which struct to convert it to.
+// NOTE: even though the core game logic only needs to call the `AlexGamesApi`
+// trait functions, Rust still needs to know which structure to convert it to
+// under the hood.
+struct AlexGamesHandle {
+	//api: Box<dyn AlexGamesApi>,
+	api: *mut dyn AlexGamesApi,
+	game_id: String,
+}
+
 fn get_rust_game_init_func(game_id: &str) -> Option<fn(*const CCallbacksPtr) -> Box<dyn AlexGamesApi>> {
 	return match game_id {
 		"reversi"   => Some(reversi_main::init_reversi),
@@ -38,14 +50,16 @@ fn c_str_to_str(str_ptr: *const u8, str_len: usize) -> String {
 
 // TODO is static okay here? It isn't truly static, but ownership is not managed by rust
 fn handle_void_ptr_to_trait_ref(handle: *mut c_void) -> &'static mut dyn AlexGamesApi {
-	// TODO I don't know how to convert this to `dyn AlexGamesApi`
-	// I get:
-	//         the trait `AlexGamesApi` is not implemented for `c_void`
-	//
-	//let handle = handle as *mut reversi_main::AlexGamesReversi;
-	let handle = handle as *mut gem_match_main::AlexGamesGemMatch;
+	let handle = handle as *mut AlexGamesHandle; 
 	let handle = unsafe { handle.as_mut().expect("handle null?") };
-	return handle;
+
+	let api: *mut dyn AlexGamesApi = match handle.game_id.as_str() {
+		"reversi"   => handle.api as *mut reversi_main::AlexGamesReversi,
+		"gem_match" => handle.api as *mut gem_match_main::AlexGamesGemMatch,
+		_ => panic!("unhandled game_id passed to handle_void_ptr_to_trait_ref"),
+	};
+
+	return unsafe { api.as_mut().expect("handle.api null?") }
 }
 
 
@@ -176,16 +190,23 @@ pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: si
 	// and passing a raw pointer to C
 	let api =  Box::into_raw(api);
 	println!("api = {:#?}", api);
-	let api = api as *mut c_void;
+	//let api = api as *mut c_void;
 	println!("api = {:#?}", api);
 
-	api
+	Box::into_raw(Box::from(AlexGamesHandle {
+		api: api,
+		game_id: game_id,
+	})) as *mut c_void
 }
 
 
 #[no_mangle]
 pub extern "C" fn rust_game_api_destroy_game(handle: *mut c_void) {
-	let handle = handle_void_ptr_to_trait_ref(handle);
-	// free the pointer
-	unsafe { let _ = Box::from_raw(handle); }
+	let api = handle_void_ptr_to_trait_ref(handle);
+
+	// free the pointers
+	unsafe {
+		let _ = Box::from_raw(handle);
+		let _ = Box::from_raw(api);
+	}
 }
