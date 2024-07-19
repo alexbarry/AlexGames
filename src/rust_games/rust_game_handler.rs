@@ -6,15 +6,8 @@ mod gem_match;
 use std::ptr;
 use std::slice;
 
-//use libc;
-use std::ffi::CString;
-//use std::mem::transmute;
-
-//use std::sync::Arc;
-
-//use libc::{c_int, c_char, size_t};
-use libc::{size_t, c_char, c_void};
-
+//use libc::{size_t, c_char, c_void};
+use libc::{size_t, c_void};
 
 use reversi::reversi_main;
 use gem_match::gem_match_main;
@@ -92,7 +85,7 @@ pub extern "C" fn rust_game_api_handle_btn_clicked(handle: *mut c_void, btn_id_c
 			return;
 		}
 	}
-	let mut btn_id: &str;
+	let btn_id: &str;
 	unsafe {
 		let slice = slice::from_raw_parts(btn_id_cstr, str_end_pos);
 		if let Ok(btn_id_val) = std::str::from_utf8(slice) {
@@ -126,12 +119,7 @@ pub extern "C" fn rust_game_api_start_game(handle: *mut c_void, session_id: i32,
 			session_id_and_state = Some( (session_id, Vec::from(slice)) );
 		}
 	}
-	println!("calling handle.start_game");
-	unsafe {
-	//handle.as_mut().expect("handle null?").start_game(session_id_and_state);
-	}
 	handle.start_game(session_id_and_state);
-	println!("done calling handle.start_game");
 }
 
 #[no_mangle]
@@ -161,11 +149,6 @@ pub extern "C" fn rust_game_api_get_state(handle: *mut c_void, state_out: *mut u
 
 
 
-fn c_ptr_to_callbacks(callbacks: *const u8) -> *const CCallbacksPtr {
-	let callbacks = callbacks as *const CCallbacksPtr;
-	return callbacks;
-}
-
 #[no_mangle]
 pub extern "C" fn rust_game_supported(game_str_ptr: *const u8, game_str_len: usize) -> bool {
 	let game_id = c_str_to_str(game_str_ptr, game_str_len);
@@ -176,7 +159,6 @@ pub extern "C" fn rust_game_supported(game_str_ptr: *const u8, game_str_len: usi
 }
 
 #[no_mangle]
-//pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: size_t, callbacks: *const CCallbacksPtr) -> *mut dyn AlexGamesApi {
 pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: size_t, callbacks: *const CCallbacksPtr) -> *mut c_void {
 	let game_id = c_str_to_str(game_str_ptr, game_str_len);
 
@@ -189,8 +171,6 @@ pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: si
 	// tell rust that we are giving up ownership of this struct
 	// and passing a raw pointer to C
 	let api =  Box::into_raw(api);
-	println!("api = {:#?}", api);
-	//let api = api as *mut c_void;
 	println!("api = {:#?}", api);
 
 	Box::into_raw(Box::from(AlexGamesHandle {

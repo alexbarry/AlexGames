@@ -24,8 +24,8 @@ impl rust_game_api::GameState for reversi_core::State {
 }
 */
 
-static BTN_ID_UNDO: &str = "btn_undo";
-static BTN_ID_REDO: &str = "btn_redo";
+const BTN_ID_UNDO: &str = "btn_undo";
+const BTN_ID_REDO: &str = "btn_redo";
 
 pub struct AlexGamesReversi {
 	game_state: reversi_core::State,
@@ -47,11 +47,6 @@ fn save_state(&self) {
 	//let rust_game_api::GameState::ReversiGameState(reversi_state) = &handle.game_state;
 	let session_id = self.game_state.session_id;
 	let serialized_state = self.get_state().expect("state is none?");
-	unsafe {
-		// TODO don't put session_id in the game state, make a separate struct for "state to be shared"
-		// and other state that shouldn't be shared
-		//self.callbacks.as_ref().expect("callbacks null?").save_state(session_id, serialized_state);
-	}
 	self.callbacks.save_state(session_id, serialized_state);
 }
 
@@ -60,15 +55,17 @@ fn load_state_offset(&mut self, offset: i32) {
 	let session_id = self.game_state.session_id;
 	//let saved_state = unsafe { self.callbacks.as_ref().expect("callbacks null?").adjust_saved_state_offset(session_id, offset) };
 	let saved_state = self.callbacks.adjust_saved_state_offset(session_id, offset);
-	self.set_state(&saved_state.expect("saved state is none from adjust_saved_state_offset?"));
+	let saved_state = saved_state.expect("saved state is none from adjust_saved_state_offset?");
+	self.set_state(&saved_state, session_id);
 }
 
-fn set_state(&mut self, serialized_state: &Vec<u8>) {
+fn set_state(&mut self, serialized_state: &Vec<u8>, session_id: i32) {
 	println!("set_state");
 	let game_state = bincode::deserialize::<reversi_core::State>(&serialized_state);
 	if let Ok(game_state) = game_state {
 		println!("Received game state: {:#?}", game_state);
 		self.game_state = game_state;
+		self.game_state.session_id = session_id;
 	} else {
 		self.callbacks.set_status_err(&format!("Error decoding state: {:?}", game_state));
 	}
@@ -80,11 +77,11 @@ fn draw_state(&self) {
 	let height = CANVAS_HEIGHT as f64;
 	let width  = CANVAS_WIDTH as f64;
 
-	let mut bg_colour;
-	let mut bg_line_colour;
-	let mut piece_white_colour;
-	let mut piece_black_colour;
-	let mut piece_outline_colour;
+	let bg_colour;
+	let bg_line_colour;
+	let piece_white_colour;
+	let piece_black_colour;
+	let piece_outline_colour;
 
 	let user_colour_pref = self.callbacks.get_user_colour_pref();
 	let user_colour_pref = &user_colour_pref as &str; // TODO why do I need to do this?
@@ -145,9 +142,6 @@ fn draw_state(&self) {
 			
 			let y1 = (y/board_size_flt*height) as i32;
 			let x1 = (x/board_size_flt*width) as i32;
-			let y2 = ((y+1.0)/board_size_flt*height) as i32;
-			let x2 = ((x+1.0)/board_size_flt*width) as i32;
-			//handle.draw_rect(colour, y1, x1, y2, x2);
 			let player_colour = match self.game_state.cell(Pt{y:y as i32, x:x as i32}) {
 				reversi_core::CellState::PLAYER1 => Some(piece_white_colour),
 				reversi_core::CellState::PLAYER2 => Some(piece_black_colour),
@@ -215,28 +209,17 @@ fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32) {
 
 fn handle_btn_clicked(&mut self, btn_id: &str) {
 	println!("reversi handle_btn_clicked, btn_id=\"{}\"", btn_id);
-	/*
 	match btn_id {
-		// TODO??
-		//BTN_ID_UNDO => { load_state_offset(handle, -1); }
-		//BTN_ID_REDO => { load_state_offset(handle,  1); }
-		"btn_undo" => { load_state_offset(handle, -1); }
-		"btn_redo" => { load_state_offset(handle,  1); }
+		BTN_ID_UNDO => { self.load_state_offset(-1); }
+		BTN_ID_REDO => { self.load_state_offset( 1); }
 		_ => {
-			handle.set_status_err(&format!("Unhandled btn_id {}", btn_id));
+			let err_msg = format!("Unhandled btn_id {}", btn_id);
+			println!("{}", err_msg);
+			self.callbacks.set_status_err(&err_msg);
+			return;
 		}
 	}
-	*/
 
-	if btn_id == BTN_ID_UNDO {
-		self.load_state_offset(-1);
-	} else if btn_id == BTN_ID_REDO {
-		self.load_state_offset( 1);
-	} else {
-		let err_msg = format!("Unhandled btn_id {}", btn_id);
-		println!("{}", err_msg);
-		self.callbacks.set_status_err(&err_msg);
-	}
 	self.draw_state();
 }
 
@@ -249,21 +232,9 @@ fn start_game(&mut self, session_id_and_state: Option<(i32, Vec<u8>)>) {
 
 	if let Some(session_id_and_state) = session_id_and_state {
 		let (session_id, state_serialized) = session_id_and_state;
-		self.set_state(&state_serialized);
-		/*
-		let reversi_state = bincode::deserialize::<reversi_core::State>(&state_serialized);
-		if let Ok(reversi_state) = reversi_state {
-			println!("Received game state: {:#?}", reversi_state);
-			handle.game_state = rust_game_api::GameState::ReversiGameState(reversi_state);
-		} else {
-			handle.set_status_err(&format!("Error decoding state: {:?}", reversi_state));
-		}
-		*/
-	} else if let Some(session_id) = self.callbacks.get_last_session_id("reversi") {
+		self.set_state(&state_serialized, session_id);
+	} else if let Some(_session_id) = self.callbacks.get_last_session_id("reversi") {
 		self.load_state_offset(0);
-		//let saved_state = handle.callbacks.adjust_saved_state_offset(session_id, 0);
-		//let saved_state = unsafe { handle.callbacks.as_ref().expect("callbacks null?").adjust_saved_state_offset(session_id, 0) };
-		//set_state(handle, &saved_state.expect("saved state is none from adjust_saved_state_offset?"));
 	} else {
 		self.game_state.session_id = self.callbacks.get_new_session_id();
 	}

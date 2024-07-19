@@ -11,20 +11,22 @@ pub struct AlexGamesGemMatch {
 impl AlexGamesGemMatch {
 
 fn draw_state(&self) {
-	let padding = 2;
+	let padding = 1.0;
 	let cell_width  = (CANVAS_WIDTH as f64) / (BOARD_WIDTH as f64);
-	let cell_height = (CANVAS_WIDTH as f64) / (BOARD_WIDTH as f64);
-	let outline_colour = "#000000";
+	let cell_height = (CANVAS_HEIGHT as f64) / (BOARD_HEIGHT as f64);
+	let piece_radius = (f64::min(cell_width,cell_height)/2.0 - padding) as i32;
+	let piece_outline_width = 2;
 	for (y, row) in self.state.board.iter().enumerate() {
 		for (x, cell) in row.iter().enumerate() {
 			if let Some(cell) = cell {
-				let colour = match cell.gem_type {
-					GemType::SAPPHIRE => ("#000088", "#0000ff"),
-					GemType::EMERALD  => ("#00ff00", "#0000ff"),
-					GemType::RUBY     => ("#ff0000", "#0000ff"),
-					GemType::AMETHYST => ("#ff00ff", "#0000ff"),
-					GemType::TOPAZ    => ("#ffff00", "#0000ff"),
-					GemType::AMBER    => ("#ff8800", "#0000ff"),
+				let (colour, outline_colour) = match cell.gem_type {
+					GemType::SAPPHIRE => ("#0f52ba", "#000088" ),
+					//GemType::EMERALD  => ("#50c878", "#008800" ),
+					GemType::EMERALD  => ("#30c858", "#008800" ),
+					GemType::RUBY     => ("#9b111e", "#440000" ),
+					GemType::AMETHYST => ("#9966cc", "#440044" ),
+					GemType::TOPAZ    => ("#ffd700", "#888866" ),
+					GemType::AMBER    => ("#ff8800", "#442200" ),
 				};
 				let y = y as f64;
 				let x = x as f64;
@@ -32,7 +34,9 @@ fn draw_state(&self) {
 				let circ_y = (y+0.5)*cell_height;
 				let circ_x = (x+0.5)*cell_width;
 
-				self.callbacks.draw_circle(colour, outline_colour, circ_y as i32, circ_x as i32, (cell_width/2.0) as i32, 2);
+				self.callbacks.draw_circle(colour, outline_colour,
+				                           circ_y as i32, circ_x as i32,
+				                           piece_radius, piece_outline_width);
 			}
 		}
 	}
@@ -47,17 +51,17 @@ impl AlexGamesApi for AlexGamesGemMatch {
 		self.callbacks
 	}
 
-	fn update(&mut self, dt_ms: i32) {
+	fn update(&mut self, _dt_ms: i32) {
 		self.draw_state();
 	}
 
-	fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32) {
+	fn handle_user_clicked(&mut self, _pos_y: i32, _pos_x: i32) {
 	}
 	
-	fn handle_btn_clicked(&mut self, btn_id: &str) {
+	fn handle_btn_clicked(&mut self, _btn_id: &str) {
 	}
 	
-	fn start_game(&mut self, session_id_and_state: Option<(i32, Vec<u8>)>) {
+	fn start_game(&mut self, _session_id_and_state: Option<(i32, Vec<u8>)>) {
 	}
 	
 	fn get_state(&self) -> Option<Vec<u8>> {
@@ -66,13 +70,9 @@ impl AlexGamesApi for AlexGamesGemMatch {
 
 
 
-	fn init(&mut self, callbacks: *const rust_game_api::CCallbacksPtr) {
+	fn init(&mut self, _callbacks: *const rust_game_api::CCallbacksPtr) {
 		self.state = State::new(); 
 	}
-}
-
-pub fn test() {
-	let state = State::new();
 }
 
 pub fn init_gem_match(callbacks: *const rust_game_api::CCallbacksPtr) -> Box<dyn AlexGamesApi> {

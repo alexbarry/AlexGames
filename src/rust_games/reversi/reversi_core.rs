@@ -72,7 +72,7 @@ const DIRS: [(i32, i32); 8] = [
 ];
 
 
-pub fn print_board(state: &State) {
+pub fn _print_board(state: &State) {
 	print!("  ");
 	for x in 0..BOARD_SIZE {
 		print!("{} ", x)

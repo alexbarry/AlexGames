@@ -1,19 +1,15 @@
 use libc;
 use core::slice;
 use std::ffi::CString;
-//use std::mem::transmute;
-
-//use std::sync::Arc;
-
-// TODO remove, this file shouldn't have to reference each game
-use crate::reversi::reversi_core;
 
 use libc::{c_int, c_char, size_t, c_void, c_long};
 
 // TODO maybe change game_api.h to use int instead...
 // apparently the official type in Rust libc for stdbool.h bool is TBD
 // https://stackoverflow.com/a/47705543/9596600
-type c_bool = bool;
+// #[allow(non_camel_case_types)]
+//type c_bool = bool;
+type CBool = bool;
 
 pub const CANVAS_WIDTH:  i32 = 480;
 pub const CANVAS_HEIGHT: i32 = 480;
@@ -41,8 +37,8 @@ pub struct CCallbacksPtr {
 	pub send_message: Option<unsafe extern "C" fn(*const c_char, size_t, *const c_char, size_t)>,
 
 	pub create_btn: Option<unsafe extern "C" fn(*const c_char, *const c_char, c_int)>,
-	pub set_btn_enabled: Option<unsafe extern "C" fn(*const c_char, c_bool)>,
-	pub set_btn_visible: Option<unsafe extern "C" fn(*const c_char, c_bool)>,
+	pub set_btn_enabled: Option<unsafe extern "C" fn(*const c_char, CBool)>,
+	pub set_btn_visible: Option<unsafe extern "C" fn(*const c_char, CBool)>,
 	pub hide_popup: Option<unsafe extern "C" fn()>,
 
 	// TODO add params
@@ -75,7 +71,7 @@ pub struct CCallbacksPtr {
 	pub get_last_session_id: Option<unsafe extern "C" fn(*const c_char) -> c_int>,
 
 	pub save_state: Option<unsafe extern "C" fn(c_int, *const u8, size_t)>,
-	pub has_saved_state_offset: Option<unsafe extern "C" fn(c_int, c_int) -> c_bool>,
+	pub has_saved_state_offset: Option<unsafe extern "C" fn(c_int, c_int) -> CBool>,
 	pub adjust_saved_state_offset: Option<unsafe extern "C" fn(c_int, c_int, *mut u8, size_t) -> size_t>,
 
 	pub draw_extra_canvas: Option<unsafe extern "C" fn(*const c_char, c_int, c_int, c_int, c_int)>,
@@ -86,7 +82,7 @@ pub struct CCallbacksPtr {
 	//get_user_colour_pref: Option<unsafe extern "C" fn(*mut c_char, size_t) -> size_t>, // TODO
 	pub get_user_colour_pref: Option<unsafe extern "C" fn(*mut u8, size_t) -> size_t>,
 
-	pub is_feature_supported: Option<unsafe extern "C" fn(*const c_char, size_t) -> c_bool>,
+	pub is_feature_supported: Option<unsafe extern "C" fn(*const c_char, size_t) -> CBool>,
 
 	pub destroy_all: Option<unsafe extern "C" fn()>,
 }
