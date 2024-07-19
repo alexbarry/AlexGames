@@ -306,15 +306,18 @@ pub trait AlexGamesApi {
 	fn callbacks(&self) -> *const CCallbacksPtr;
 
 	fn init(&mut self, callbacks: *const CCallbacksPtr);
-	fn start_game(&mut self, state: Option<(i32, Vec<u8>)>) -> ();
-	fn update(&mut self, dt_ms: i32) -> ();
-	fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32) -> ();
-	fn handle_btn_clicked(&mut self, btn_id: &str) -> ();
-	fn get_state(&self) -> Option<Vec<u8>>;
+	fn start_game(&mut self, state: Option<(i32, Vec<u8>)>);
+	fn update(&mut self, dt_ms: i32);
+	fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32);
+	fn handle_btn_clicked(&mut self, btn_id: &str);
 	fn handle_mousemove(&mut self, pos_y: i32, pos_x: i32, buttons: i32) {
 		println!("handle_mousemove unimplemented, y={}, x={} buttons={:x}", pos_y, pos_x, buttons);
 	}
 	fn handle_mouse_evt(&mut self, evt_id: MouseEvt, pos_y: i32, pos_x: i32, buttons: i32) {
 		println!("handle_mouse_evt unimplemented, evt_id={:#?}, y={}, x={}, buttons={:x}", evt_id, pos_y, pos_x, buttons);
+	}
+	fn get_state(&self) -> Option<Vec<u8>> {
+		println!("get_state not implemented");
+		None
 	}
 }
