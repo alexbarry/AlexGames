@@ -27,7 +27,7 @@ impl rust_game_api::GameState for reversi_core::State {
 static BTN_ID_UNDO: &str = "btn_undo";
 static BTN_ID_REDO: &str = "btn_redo";
 
-struct AlexGamesReversi {
+pub struct AlexGamesReversi {
 	game_state: reversi_core::State,
 	//callbacks: *mut rust_game_api::CCallbacksPtr,
 	//callbacks: &'a rust_game_api::CCallbacksPtr,

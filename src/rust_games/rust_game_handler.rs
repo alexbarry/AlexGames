@@ -1,5 +1,7 @@
 mod rust_game_api;
+
 mod reversi;
+mod gem_match;
 
 use std::ptr;
 use std::slice;
@@ -15,12 +17,14 @@ use libc::{size_t, c_char, c_void};
 
 
 use reversi::reversi_main;
+use gem_match::gem_match_main;
 use rust_game_api::{AlexGamesApi, CCallbacksPtr};
 
 fn get_rust_game_init_func(game_id: &str) -> Option<fn(*const CCallbacksPtr) -> Box<dyn AlexGamesApi>> {
 	return match game_id {
-		"reversi" => Some(reversi_main::init_reversi),
-		_         => None,
+		"reversi"   => Some(reversi_main::init_reversi),
+		"gem_match" => Some(gem_match_main::init_gem_match),
+		_           => None,
 	}
 }
 
@@ -38,7 +42,8 @@ fn handle_void_ptr_to_trait_ref(handle: *mut c_void) -> &'static mut dyn AlexGam
 	// I get:
 	//         the trait `AlexGamesApi` is not implemented for `c_void`
 	//
-	let handle = handle as *mut reversi_main::AlexGamesReversi;
+	//let handle = handle as *mut reversi_main::AlexGamesReversi;
+	let handle = handle as *mut gem_match_main::AlexGamesGemMatch;
 	let handle = unsafe { handle.as_mut().expect("handle null?") };
 	return handle;
 }
