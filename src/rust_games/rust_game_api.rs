@@ -64,7 +64,7 @@ pub struct CCallbacksPtr {
 	pub prompt_string: Option<unsafe extern "C" fn(*const c_char, size_t,
 	                                           *const c_char, size_t)>,
 
-	pub update_timer_ms: Option<unsafe extern "C" fn(c_int)>,
+	pub update_timer_ms: Option<unsafe extern "C" fn(c_int) -> c_int>,
 	pub delete_timer: Option<unsafe extern "C" fn(c_int)>,
 
 	pub enable_evt: Option<unsafe extern "C" fn(*const c_char, size_t)>,
@@ -150,6 +150,26 @@ impl CCallbacksPtr {
 			}
 		}
 		//println!("done calling draw_line!");
+	}
+
+	pub fn draw_clear(&self) {
+		if let Some(draw_clear) = self.draw_clear {
+			unsafe {
+				(draw_clear)();
+			}
+		} else {
+			println!("draw_clear not set");
+		}
+	}
+
+	pub fn draw_refresh(&self) {
+		if let Some(draw_refresh) = self.draw_refresh {
+			unsafe {
+				(draw_refresh)();
+			}
+		} else {
+			println!("draw_refresh not set");
+		}
 	}
 
 	pub fn create_btn(&self, btn_id: &str, btn_text: &str, weight: i32) {
@@ -287,6 +307,17 @@ impl CCallbacksPtr {
 			println!("get_user_colour_pref is null");
 		}
 		return String::from("light");
+	}
+
+	pub fn update_timer_ms(&self, dt_ms: c_int) -> c_int{
+		if let Some(update_timer_ms) = self.update_timer_ms {
+			unsafe {
+				return (update_timer_ms)(dt_ms);
+			}
+		} else {
+			println!("update_timer_ms not set");
+			return -1;
+		}
 	}
 
 	pub fn enable_evt(&self, evt_id: &str) {
