@@ -11,4 +11,15 @@ impl Pt {
 			x: self.x + arg.x,
 		}
 	}
+
+	pub fn mult(&self, arg: i32) -> Pt {
+		Pt{
+			y: self.y * arg,
+			x: self.x * arg,
+		}
+	}
+
+	pub fn swap(&self) -> Pt {
+		Pt{ y: self.x, x: self.y }
+	}
 }
