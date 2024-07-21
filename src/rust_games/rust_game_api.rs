@@ -2,7 +2,7 @@ use libc;
 use core::slice;
 use std::ffi::CString;
 
-use libc::{c_int, c_char, size_t, c_void, c_long};
+use libc::{c_int, c_char, size_t, c_void, c_ulong, c_ulonglong};
 
 // TODO maybe change game_api.h to use int instead...
 // apparently the official type in Rust libc for stdbool.h bool is TBD
@@ -10,6 +10,8 @@ use libc::{c_int, c_char, size_t, c_void, c_long};
 // #[allow(non_camel_case_types)]
 //type c_bool = bool;
 type CBool = bool;
+
+pub type TimeMs = u32;
 
 pub const CANVAS_WIDTH:  i32 = 480;
 pub const CANVAS_HEIGHT: i32 = 480;
@@ -70,7 +72,8 @@ pub struct CCallbacksPtr {
 	pub enable_evt: Option<unsafe extern "C" fn(*const c_char, size_t)>,
 	pub disable_evt: Option<unsafe extern "C" fn(*const c_char, size_t)>,
 
-	pub get_time_ms: Option<unsafe extern "C" fn() -> c_long>,
+	//pub get_time_ms: Option<unsafe extern "C" fn() -> c_ulonglong>,
+	pub get_time_ms: Option<unsafe extern "C" fn() -> c_ulong>,
 	pub get_time_of_day: Option<unsafe extern "C" fn(*mut c_char, size_t)>,
 
 	pub store_data: Option<unsafe extern "C" fn(*mut c_void,
@@ -217,6 +220,17 @@ impl CCallbacksPtr {
 		} else {
 			println!("set_status_msg is null");
 		}
+	}
+
+	pub fn get_time_ms(&self) -> TimeMs {
+		if let Some(get_time_ms) = self.get_time_ms {
+			unsafe {
+				return (get_time_ms)();
+			}
+		} else {
+			println!("get_time_ms is null");
+			return 0;
+		}	
 	}
 
 	pub fn get_new_session_id(&self) -> i32 {
