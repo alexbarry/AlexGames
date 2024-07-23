@@ -1,10 +1,10 @@
-use crate::rust_game_api::{AlexGamesApi, CANVAS_HEIGHT, CANVAS_WIDTH, CCallbacksPtr, MouseEvt};
+use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt};
 use crate::rust_game_api;
 
 use crate::libs::swipe_tracker;
 use crate::libs::swipe_tracker::{CursorEvt, SwipeEvt, CursorEvtType};
 
-use crate::gem_match::gem_match_core::{State, GemType, BOARD_WIDTH, BOARD_HEIGHT, Pt, GemsInARow};
+use crate::gem_match::gem_match_core::{State, Pt};
 use crate::gem_match::gem_match_draw::{GemMatchDraw, cell_size, FPS};
 
 pub struct AlexGamesGemMatch {
@@ -18,16 +18,17 @@ pub struct AlexGamesGemMatch {
 
 impl AlexGamesGemMatch {
 	fn handle_swipe(&mut self, evt: SwipeEvt) {
+		println!("handle_swipe");
+		let prev_state = self.state;
 		let cell_pos = self.draw.screen_pos_to_cell_pos(evt.pos);
 		let move_result = self.state.move_gems(cell_pos, evt.dir);
+		prev_state._print_board();
 		println!("handle_swipe, result={:#?}", move_result);
-		if let Ok(_) = move_result {
-			println!("[move] swap");
-			self.draw.handle_swipe_swap_animation(evt.pos, evt.dir);
+		if let Ok(move_result) = move_result {
+			self.draw.handle_move_updates(&move_result, &prev_state, &self.state);
 			//self.draw.handle_swipe_bad_move(evt.pos, evt.dir);
 		} else {
-			println!("[move] bad_move");
-			self.draw.handle_swipe_bad_move(evt.pos, evt.dir);
+			self.draw.handle_swipe_bad_move(evt.pos, evt.dir, &self.state);
 		}
 
 		let matches = self.state.find_all_three_or_more_in_a_row();

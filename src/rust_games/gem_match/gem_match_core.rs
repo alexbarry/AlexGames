@@ -6,12 +6,15 @@ pub use crate::libs::point::Pt;
 pub const BOARD_WIDTH: usize  = 8;
 pub const BOARD_HEIGHT: usize = 8;
 
+type Board<T> = [[T; BOARD_WIDTH]; BOARD_HEIGHT];
+
 
 const DIRS: [Pt; 2] = [
 	Pt{y:  1, x: 0},
 	Pt{y:  0, x: 1},
 ];
 
+// Indicates a group of three or more gems in a row.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct GemsInARow {
 	pub pt: Pt,
@@ -19,6 +22,36 @@ pub struct GemsInARow {
 	pub len: i32,
 }
 
+impl GemsInARow {
+	pub fn end_pt(&self) -> Pt {
+		self.pt.add(self.dir.mult(self.len - 1))
+	}
+}
+
+// Indicates all the changes after a player moves, so that
+// they can be animated by gem_match_draw.rs
+#[derive(Debug, PartialEq, Eq)]
+pub struct GemChanges {
+	pub swipe_cell: Pt,
+	pub dst_cell: Pt,
+
+	// these are the gem positions that are removed from the previous state (when a move is made)
+	pub to_remove: Vec<GemsInARow>,
+
+	// these are the offsets that new gems would have fallen from, from the new state.
+	pub fallen_distance: Board<Option<usize>>,
+}
+
+impl GemChanges {
+	fn new(swipe_cell: Pt, dst_cell: Pt) -> GemChanges {
+		GemChanges {
+			swipe_cell: swipe_cell,
+			dst_cell: dst_cell,
+			to_remove: Vec::new(),
+			fallen_distance: [[None; BOARD_WIDTH]; BOARD_HEIGHT],
+		}
+	}
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum GemType {
@@ -27,7 +60,7 @@ pub enum GemType {
 	RUBY,      // red
 	AMETHYST,  // purple
 	TOPAZ,     // yellow
-	AMBER,     // orange
+	//AMBER,     // orange
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -43,13 +76,13 @@ pub struct GemInfo {
 
 #[derive(Copy, Clone, Debug)]
 pub struct State {
-	pub board: [[GemInfo; BOARD_WIDTH]; BOARD_HEIGHT],
+	pub board: Board<Option<GemInfo>>,
 }
 
 impl State {
 	pub fn new() -> State {
 		let mut state = State {
-			board: [[GemInfo{gem_type: GemType::SAPPHIRE}; BOARD_WIDTH]; BOARD_HEIGHT],
+			board: [[Some(GemInfo{gem_type: GemType::SAPPHIRE}); BOARD_WIDTH]; BOARD_HEIGHT],
 		};
 
 		let init_gems = [GemType::SAPPHIRE, GemType::EMERALD, GemType::RUBY, GemType::AMETHYST, GemType::TOPAZ];
@@ -59,8 +92,8 @@ impl State {
 			    let gem_info = GemInfo {
 					gem_type: *init_gems.choose(&mut rng).expect("Subset cannot be empty"),
 				};
-				*cell = gem_info;
-				println!("gem_info: {:#?}", gem_info);
+				*cell = Some(gem_info);
+				//println!("gem_info: {:#?}", gem_info);
 			}
 		}
 
@@ -70,30 +103,33 @@ impl State {
 	fn get_gem(&self, pt: Pt) -> Result<GemInfo, ()> {
 		let x = pt.x as usize;
 		let y = pt.y as usize;
-		if 0 <= y && y < self.board.len() &&
-		   0 <= x && x < self.board[0].len() {
-			return Ok(self.board[y][x]);
+		if y < self.board.len() &&
+		   x < self.board[0].len() {
+			let gem_info = self.board[y][x].unwrap();
+			return Ok(gem_info);
 		} else {
 			return Err(());
 		}
 	}
 
-	fn set_gem(&mut self, pt: Pt, gem_info: GemInfo) -> Result<(),()> {
+	fn set_gem(&mut self, pt: Pt, gem_info: Option<GemInfo>) {
 		println!("move_gems: set_gem pt({:?}), gem_info={:?}", pt, gem_info);
 		let x = pt.x as usize;
 		let y = pt.y as usize;
 
-		if 0 <= y && y < self.board.len() &&
-		   0 <= x && x < self.board[0].len() {
+		if y < self.board.len() &&
+		   x < self.board[0].len() {
 			self.board[y][x] = gem_info;
-			Ok(())
 		} else {
-			Err(())
+			panic!("invalid dimensions {:?}", pt);
 		}
 		
 	}
 
-	fn swap_gems(&mut self, pt1: Pt, pt2: Pt) -> Result<(),()> {
+	// Should only be called externally in the draw code, on a copy,
+	// for animations.
+	// The main game logic should only ever call move_gems
+	pub fn swap_gems(&mut self, pt1: Pt, pt2: Pt) -> Result<(),()> {
 		let gem1;
 		if let Ok(gem1_val) = self.get_gem(pt1) {
 			gem1 = gem1_val;
@@ -110,15 +146,15 @@ impl State {
 			return Err(());
 		}
 
-		self.set_gem(pt1, gem2).expect("error setting pt1?");
-		self.set_gem(pt2, gem1).expect("error setting pt2?");
+		self.set_gem(pt1, Some(gem2));
+		self.set_gem(pt2, Some(gem1));
 
 		Ok(())
 	}
 
 	pub fn has_three_or_more_in_a_row_at_pt(&self, pt: Pt) -> bool {
 		let gem = self.get_gem(pt);
-		'dir_loop: for dir in DIRS.iter() {
+		for dir in DIRS.iter() {
 			let mut gems_in_a_row = 0;
 			for i in -2..=2 {
 				let pt2 = pt.add(dir.mult(i));
@@ -139,10 +175,11 @@ impl State {
 
 	pub fn find_all_three_or_more_in_a_row(&self) -> Vec<GemsInARow> {
 		let mut matches: Vec<GemsInARow> = Vec::new();
-		'dir_loop: for dir in DIRS.iter() {
-			let (limit1, limit2, other_dir) = match dir {
-				Pt{y: 1, x: 0} => (BOARD_WIDTH,  BOARD_HEIGHT, Pt{y: 0, x: 1}, ),
-				Pt{y: 0, x: 1} => (BOARD_HEIGHT, BOARD_WIDTH,  Pt{y: 1, x: 0}, ),
+		for dir in DIRS.iter() {
+			let other_dir = dir.swap();
+			let (limit1, limit2) = match dir {
+				Pt{y: 1, x: 0} => (BOARD_WIDTH,  BOARD_HEIGHT),
+				Pt{y: 0, x: 1} => (BOARD_HEIGHT, BOARD_WIDTH ),
 				_ => { panic!("unhandled direction"); }
 			};
 			for i1 in 0..limit1 {
@@ -188,42 +225,143 @@ impl State {
 		matches
 	}
 
-	pub fn move_gems(&mut self, pt: Pt, dir: Pt) -> Result<(), GemMatchErr> {
-		println!("move_gems called with pt={:?}, dir={:?}", pt, dir);
+	fn remove_matches(&mut self, changes_out: &mut Vec<GemsInARow>) {
+		println!("remove_matches");
+		let matches = self.find_all_three_or_more_in_a_row();
+		for match_val in matches {
+			changes_out.push(match_val);
+			let start = match_val.pt;
+			let dir = match_val.dir;
+			for i in 0..match_val.len {
+				let pt = start.add(dir.mult(i));
+				//self.set_gem(pt, None);
+				//self.set_gem(pt, Some(GemInfo{gem_type: GemType::SAPPHIRE}));
+				self.set_gem(pt, None);
+			}
+		}
+		println!("done remove_matches");
+	}
+
+	fn calc_fallen_distance(&mut self, fallen_distance: &mut Board<Option<usize>>) {
+		for x in 0..BOARD_WIDTH {
+			let mut fall_count = 0;
+			for y in 0..BOARD_HEIGHT {
+				if let Some(_) = self.board[y][x] {
+					println!("found something");
+					// do nothing
+				} else {
+					println!("found empty!");
+					fall_count += 1;
+				}
+				if fall_count > 0 {
+					println!("setting fall_count to {} for {} {}", fall_count, y, x);
+					fallen_distance[y][x] = Some(fall_count);
+				}
+			}
+		}
+	}
+
+
+	fn fall_and_add_new_gems(&mut self, fall_distance: &mut Board<Option<usize>>) {
+	    let mut rng = thread_rng();
+		let init_gems = [GemType::SAPPHIRE, GemType::EMERALD, GemType::RUBY, GemType::AMETHYST, GemType::TOPAZ];
+
+		for x in 0..BOARD_WIDTH {
+			for y in (0..BOARD_HEIGHT).rev() {
+				if let None = self.board[y][x] {
+					let mut y2: Option<usize> = None;
+					for y in (0..y).rev() {
+						if let Some(_) = self.board[y][x] {
+							y2 = Some(y);
+							break;
+						}
+					}
+					if let Some(y2) = y2 {
+						self.board[y][x] = self.board[y2][x];
+						self.board[y2][x] = None;
+						fall_distance[y][x] = Some(y - y2);
+					}
+				}
+			}
+
+			for y in (0..BOARD_HEIGHT).rev() {
+				if let None = self.board[y][x] {
+					let gem = *init_gems.choose(&mut rng).expect("Subset cannot be empty");
+
+					self.board[y][x] = Some(GemInfo{gem_type:gem});
+					//fall_distance[y][x] = Some(2*(y));
+					fall_distance[y][x] = Some(2*y+1);
+				}
+			}
+
+		}
+	}
+
+	// Returns a list of changes, to be animated by gem_match_draw.rs
+	pub fn move_gems(&mut self, pt: Pt, dir: Pt) -> Result<GemChanges, GemMatchErr> {
 		let pt2 = pt.add(dir);
 		let mut copy = self.clone();
 
-		println!("move_gems: swap_gems");
 		if let Err(_) = copy.swap_gems(pt, pt2) {
-			println!("move_gems: error calling swap_gems");
 			return Err(GemMatchErr::InvalidMove);
 		}
 
-		for (y, row) in copy.board.iter().enumerate() {
+		if !copy.has_three_or_more_in_a_row_at_pt(pt) && !copy.has_three_or_more_in_a_row_at_pt(pt2) {
+			println!("move_gems: no three in a row!");
+			return Err(GemMatchErr::InvalidMove);
+		}
+
+		*self = copy;
+
+		let mut changes = GemChanges::new(pt, pt2);
+		self.remove_matches(&mut changes.to_remove);
+
+		// should populate a 2D array of "how many columns down did this gem move"
+		// this is pretty simple, it's just a matter of counting the number of empty cells below each
+		// cell.
+
+		// Then use that on the *final* state to reverse their motion, and animate them to the destination (their real position).
+		// And actually, the new gems will be treated the exact same way.
+		/*
+		self.calc_fallen_distance(&mut changes.fallen_distance);
+
+		for (y, row) in changes.fallen_distance.iter().enumerate() {
 			print!("{} ", y);
 			for (_x, cell) in row.iter().enumerate() {
-				let val = match cell.gem_type {
-					GemType::SAPPHIRE => "s",
-					GemType::EMERALD  => "e",
-					GemType::RUBY     => "r",
-					GemType::AMETHYST => "a",
-					GemType::TOPAZ    => "t",
-					GemType::AMBER    => "m",
+				print!("{} ", cell.unwrap_or(0));
+			}
+			println!("");
+		}
+		*/
+
+
+		self.fall_and_add_new_gems(&mut changes.fallen_distance);
+
+		self._print_board();
+
+		return Ok(changes);
+	}
+
+	pub fn _print_board(&self) {
+		for (y, row) in self.board.iter().enumerate() {
+			print!("{} ", y);
+			for (_x, cell) in row.iter().enumerate() {
+				let val = match cell {
+					Some(cell) => match cell.gem_type {
+						GemType::SAPPHIRE => "b",
+						GemType::EMERALD  => "g",
+						GemType::RUBY     => "r",
+						GemType::AMETHYST => "p",
+						GemType::TOPAZ    => "y",
+						//GemType::AMBER    => "o",
+					},
+					None => " ",
 				};
 				print!("{} ", val);
 			}
 			println!("");
 		}
 
-		println!("move_gems: checking for three in a row");
-		if !copy.has_three_or_more_in_a_row_at_pt(pt) && !copy.has_three_or_more_in_a_row_at_pt(pt2) {
-			println!("move_gems: no three in a row!");
-			return Err(GemMatchErr::InvalidMove);
-		}
-		println!("move_gems: found three in a row");
-
-		*self = copy;
-		Ok(())
 	}
 }
 
