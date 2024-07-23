@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::gem_match::gem_match_core::{State, GemType, GemInfo, BOARD_WIDTH, BOARD_HEIGHT, Pt, GemChanges};
+use crate::gem_match::gem_match_core::{State, GemType, BOARD_WIDTH, BOARD_HEIGHT, Pt, GemChanges};
 use crate::rust_game_api::{CANVAS_HEIGHT, CANVAS_WIDTH, TimeMs};
 use crate::rust_game_api;
 
@@ -67,9 +67,6 @@ impl StateAnimation {
 	}
 
 	fn add_animation(&mut self, anim: GemAnimation) {
-		//let anim = Rc::new(anim);
-		//self.gem_pos_adjustments.push(Rc::clone(&anim));
-		println!("adding animation with start_time_ms {}, total_time {}", anim.start_time_ms, anim.total_time_ms);
 		self.gem_pos_adjustments_by_pos.get_mut(&anim.src_cell).expect("empty?").push(anim);
 	}
 
@@ -362,7 +359,6 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 	self.animation_queue.push(anim_state1);
 
 	let swapped_state = {
-		let dir = changes.dst_cell.add(changes.swipe_cell.mult(-1));
 		let mut state = *prev_state;
 		state.swap_gems(changes.swipe_cell, changes.dst_cell).unwrap();
 		state
@@ -398,8 +394,6 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 */
 		}
 	}
-
-	// TODO add animations for the new gems falling in
 
 	self.animation_queue.push(anim_state2);
 	//let time_ms = time_ms + fade_duration_ms + time_stay_blank_ms;

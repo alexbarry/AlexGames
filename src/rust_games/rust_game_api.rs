@@ -2,7 +2,8 @@ use libc;
 use core::slice;
 use std::ffi::CString;
 
-use libc::{c_int, c_char, size_t, c_void, c_ulong, c_ulonglong};
+//use libc::{c_int, c_char, size_t, c_void, c_ulong, c_ulonglong};
+use libc::{c_int, c_char, size_t, c_void, c_ulong};
 
 // TODO maybe change game_api.h to use int instead...
 // apparently the official type in Rust libc for stdbool.h bool is TBD

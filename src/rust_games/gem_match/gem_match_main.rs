@@ -18,7 +18,6 @@ pub struct AlexGamesGemMatch {
 
 impl AlexGamesGemMatch {
 	fn handle_swipe(&mut self, evt: SwipeEvt) {
-		println!("handle_swipe");
 		let prev_state = self.state;
 		let cell_pos = self.draw.screen_pos_to_cell_pos(evt.pos);
 		let move_result = self.state.move_gems(cell_pos, evt.dir);
@@ -46,7 +45,6 @@ impl AlexGamesApi for AlexGamesGemMatch {
 	}
 
 	fn update(&mut self, dt_ms: i32) {
-		//println!("update called");
 		self.draw.update_animations(dt_ms);
 		self.draw.draw_state(&self.state);
 	}
@@ -88,7 +86,7 @@ impl AlexGamesApi for AlexGamesGemMatch {
 			}
 		}
 	}
-	
+
 	fn handle_btn_clicked(&mut self, _btn_id: &str) {
 	}
 	

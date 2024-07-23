@@ -93,7 +93,6 @@ impl State {
 					gem_type: *init_gems.choose(&mut rng).expect("Subset cannot be empty"),
 				};
 				*cell = Some(gem_info);
-				//println!("gem_info: {:#?}", gem_info);
 			}
 		}
 
@@ -113,7 +112,6 @@ impl State {
 	}
 
 	fn set_gem(&mut self, pt: Pt, gem_info: Option<GemInfo>) {
-		println!("move_gems: set_gem pt({:?}), gem_info={:?}", pt, gem_info);
 		let x = pt.x as usize;
 		let y = pt.y as usize;
 
@@ -134,7 +132,6 @@ impl State {
 		if let Ok(gem1_val) = self.get_gem(pt1) {
 			gem1 = gem1_val;
 		} else {
-			println!("move_gems: err getting gem1");
 			return Err(());
 		}
 
@@ -142,7 +139,6 @@ impl State {
 		if let Ok(gem2_val) = self.get_gem(pt2) {
 			gem2 = gem2_val;
 		} else {
-			println!("move_gems: err getting gem2");
 			return Err(());
 		}
 
@@ -164,7 +160,6 @@ impl State {
 				} else {
 					gems_in_a_row = 0;
 				}
-				println!("move_gems: src={:?}, pt={:?} now 'in a row' count is {}", pt, pt2, gems_in_a_row);
 				if gems_in_a_row >= 3 {
 					return true;
 				}
@@ -226,7 +221,6 @@ impl State {
 	}
 
 	fn remove_matches(&mut self, changes_out: &mut Vec<GemsInARow>) {
-		println!("remove_matches");
 		let matches = self.find_all_three_or_more_in_a_row();
 		for match_val in matches {
 			changes_out.push(match_val);
@@ -234,33 +228,10 @@ impl State {
 			let dir = match_val.dir;
 			for i in 0..match_val.len {
 				let pt = start.add(dir.mult(i));
-				//self.set_gem(pt, None);
-				//self.set_gem(pt, Some(GemInfo{gem_type: GemType::SAPPHIRE}));
 				self.set_gem(pt, None);
 			}
 		}
-		println!("done remove_matches");
 	}
-
-	fn calc_fallen_distance(&mut self, fallen_distance: &mut Board<Option<usize>>) {
-		for x in 0..BOARD_WIDTH {
-			let mut fall_count = 0;
-			for y in 0..BOARD_HEIGHT {
-				if let Some(_) = self.board[y][x] {
-					println!("found something");
-					// do nothing
-				} else {
-					println!("found empty!");
-					fall_count += 1;
-				}
-				if fall_count > 0 {
-					println!("setting fall_count to {} for {} {}", fall_count, y, x);
-					fallen_distance[y][x] = Some(fall_count);
-				}
-			}
-		}
-	}
-
 
 	fn fall_and_add_new_gems(&mut self, fall_distance: &mut Board<Option<usize>>) {
 	    let mut rng = thread_rng();
@@ -307,7 +278,6 @@ impl State {
 		}
 
 		if !copy.has_three_or_more_in_a_row_at_pt(pt) && !copy.has_three_or_more_in_a_row_at_pt(pt2) {
-			println!("move_gems: no three in a row!");
 			return Err(GemMatchErr::InvalidMove);
 		}
 
@@ -315,25 +285,6 @@ impl State {
 
 		let mut changes = GemChanges::new(pt, pt2);
 		self.remove_matches(&mut changes.to_remove);
-
-		// should populate a 2D array of "how many columns down did this gem move"
-		// this is pretty simple, it's just a matter of counting the number of empty cells below each
-		// cell.
-
-		// Then use that on the *final* state to reverse their motion, and animate them to the destination (their real position).
-		// And actually, the new gems will be treated the exact same way.
-		/*
-		self.calc_fallen_distance(&mut changes.fallen_distance);
-
-		for (y, row) in changes.fallen_distance.iter().enumerate() {
-			print!("{} ", y);
-			for (_x, cell) in row.iter().enumerate() {
-				print!("{} ", cell.unwrap_or(0));
-			}
-			println!("");
-		}
-		*/
-
 
 		self.fall_and_add_new_gems(&mut changes.fallen_distance);
 
