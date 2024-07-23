@@ -14,6 +14,8 @@ pub struct AlexGamesGemMatch {
 	callbacks: &'static rust_game_api::CCallbacksPtr,
 
 	swipe_tracker: swipe_tracker::SwipeTracker,
+
+	current_touch_id: Option<i64>,
 }
 
 impl AlexGamesGemMatch {
@@ -87,6 +89,48 @@ impl AlexGamesApi for AlexGamesGemMatch {
 		}
 	}
 
+	fn handle_touch_evt(&mut self, evt_id: &str, touches: Vec<rust_game_api::TouchInfo>) {
+		let cursor_evt_type = match evt_id {
+			"touchstart"   => CursorEvtType::Down,
+			"touchend"     => CursorEvtType::Up,
+			"touchmove"    => CursorEvtType::Move,
+			"touchcancel"  => CursorEvtType::Cancel,
+			_ => { panic!("unhandled touch evt {}", evt_id); },
+		};
+
+		let cursor_evt = (|| {
+			for touch in touches.iter() {
+				if let Some(current_touch_id) = self.current_touch_id {
+					if touch.id == current_touch_id {
+						return Some(CursorEvt{
+							evt_type: cursor_evt_type,
+							pos: Pt{y: touch.y as i32, x: touch.x as i32},
+						});
+					}
+				} else if evt_id == "touchstart" {
+					self.current_touch_id = Some(touch.id);
+					return Some(CursorEvt{
+						evt_type: cursor_evt_type,
+						pos: Pt{y: touch.y as i32, x: touch.x as i32},
+					});
+				}
+			}
+			return None;
+		})();
+
+		if let Some(cursor_evt) = cursor_evt {
+			println!("cursor: {:?}", cursor_evt);
+			let swipe_evt = self.swipe_tracker.handle_cursor_evt(cursor_evt);
+			if let Some(swipe_evt) = swipe_evt {
+				self.handle_swipe(swipe_evt);
+			}
+		}
+
+
+
+
+	}
+
 	fn handle_btn_clicked(&mut self, _btn_id: &str) {
 	}
 	
@@ -104,6 +148,7 @@ impl AlexGamesApi for AlexGamesGemMatch {
 		let callbacks = unsafe { callbacks.as_ref().expect("callbacks null?") };
 		callbacks.enable_evt("mouse_move");
 		callbacks.enable_evt("mouse_updown");
+		callbacks.enable_evt("touch");
 		callbacks.update_timer_ms(1000/FPS);
 	}
 }
@@ -117,6 +162,8 @@ pub fn init_gem_match(callbacks: *const rust_game_api::CCallbacksPtr) -> Box<dyn
 		draw: GemMatchDraw::new(callbacks),
 	
 		swipe_tracker: swipe_tracker::SwipeTracker::new(cell_size() as i32 / 3),
+
+		current_touch_id: None,
 	};
 
 	api.init(callbacks);
