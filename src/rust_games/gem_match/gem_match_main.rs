@@ -102,6 +102,9 @@ impl AlexGamesApi for AlexGamesGemMatch {
 			for touch in touches.iter() {
 				if let Some(current_touch_id) = self.current_touch_id {
 					if touch.id == current_touch_id {
+						if evt_id == "touchend" {
+							self.current_touch_id = None;
+						}
 						return Some(CursorEvt{
 							evt_type: cursor_evt_type,
 							pos: Pt{y: touch.y as i32, x: touch.x as i32},
