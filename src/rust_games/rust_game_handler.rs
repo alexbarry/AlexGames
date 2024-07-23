@@ -8,11 +8,11 @@ use std::ptr;
 use std::slice;
 
 //use libc::{size_t, c_char, c_void};
-use libc::{size_t, c_void};
+use libc::{size_t, c_void, c_int};
 
 use reversi::reversi_main;
 use gem_match::gem_match_main;
-use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt};
+use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, TouchInfo};
 
 // A pointer to this struct is returned to C, and then passed back
 // to the rust APIs. A pointer to AlexGamesApi is needed, and also
@@ -25,6 +25,14 @@ struct AlexGamesHandle {
 	api: *mut dyn AlexGamesApi,
 	game_id: String,
 }
+
+#[repr(C)]
+pub struct TouchInfoCStruct {
+	pub id: i64,
+	pub y: f64,
+	pub x: f64,
+}
+
 
 fn get_rust_game_init_func(game_id: &str) -> Option<fn(*const CCallbacksPtr) -> Box<dyn AlexGamesApi>> {
 	return match game_id {
@@ -117,6 +125,26 @@ pub extern "C" fn rust_game_api_handle_mouse_evt(handle: *mut c_void, mouse_evt_
 	};
 	handle.handle_mouse_evt(mouse_evt_id, pos_y, pos_x, buttons);
 }
+
+#[no_mangle]
+pub extern "C" fn rust_game_api_handle_touch_evt(handle: *mut c_void,
+                                                 evt_id_cstr: *const u8, evt_id_str_len: c_int,
+                                                 changed_touches: *const TouchInfoCStruct, changed_touches_len: c_int) {
+	let handle = handle_void_ptr_to_trait_ref(handle);
+	let evt_id = c_str_to_str(evt_id_cstr, Some(evt_id_str_len as usize));
+	let mut touches = Vec::<TouchInfo>::new();
+	for i in 0..changed_touches_len {
+		let c_touch = changed_touches.wrapping_add(i as usize);
+		let c_touch = unsafe { &(*c_touch) };
+		touches.push(TouchInfo {
+			id: c_touch.id,
+			y:  c_touch.y,
+			x:  c_touch.x,
+		});
+	}
+	handle.handle_touch_evt(&evt_id, touches);
+}
+
 
 #[no_mangle]
 pub extern "C" fn rust_game_api_update(handle: *mut c_void, dt_ms: i32) {

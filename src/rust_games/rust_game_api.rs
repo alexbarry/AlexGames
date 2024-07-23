@@ -28,6 +28,12 @@ pub enum MouseEvt {
 	Alt2Up,
 }
 
+#[derive(Copy, Clone, Debug)]
+pub struct TouchInfo {
+	pub id: i64,
+	pub y: f64,
+	pub x: f64,
+}
 
 #[repr(C)]
 pub struct CCallbacksPtr {
@@ -361,6 +367,9 @@ pub trait AlexGamesApi {
 	}
 	fn handle_mouse_evt(&mut self, evt_id: MouseEvt, pos_y: i32, pos_x: i32, buttons: i32) {
 		println!("handle_mouse_evt unimplemented, evt_id={:#?}, y={}, x={}, buttons={:x}", evt_id, pos_y, pos_x, buttons);
+	}
+	fn handle_touch_evt(&mut self, evt_id: &str, touches: Vec<TouchInfo>) {
+		println!("handle_touch_evt unimplemented, evt_id={:#?}, touches={:#?}", evt_id, touches);
 	}
 	fn get_state(&self) -> Option<Vec<u8>> {
 		println!("get_state not implemented");

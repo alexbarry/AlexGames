@@ -11,6 +11,9 @@ extern void rust_game_api_handle_btn_clicked(void *L, const char *btn_id);
 extern void rust_game_api_destroy_game(void *L);
 extern void rust_game_api_handle_mousemove(void *L, int pos_y, int pos_x, int buttons);
 extern void rust_game_api_handle_mouse_evt(void *L, int evt_id, int pos_y, int pos_x, int buttons);
+extern void rust_game_api_handle_touch_evt(void *L, 
+                                           const char *evt_id_str, int evt_id_str_len, 
+                                           void *changed_touches, int changed_touches_len);
 
 
 // This one is defined in rust
@@ -41,5 +44,6 @@ const struct game_api * get_rust_api(void) {
 	rust_api.destroy_game        = rust_game_api_destroy_game;
 	rust_api.handle_mousemove    = rust_game_api_handle_mousemove;
 	rust_api.handle_mouse_evt    = rust_game_api_handle_mouse_evt;
+	rust_api.handle_touch_evt    = rust_game_api_handle_touch_evt;
 	return &rust_api;
 }
