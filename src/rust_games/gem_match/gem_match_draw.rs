@@ -110,11 +110,41 @@ pub fn is_animating(&self) -> bool {
 	self.animation_queue.len() > 0
 }
 
+fn draw_gem(&self, gem_type: GemType, circ_y: i32, circ_x: i32, alpha: f64, piece_radius: i32) {
+	let piece_outline_width = 2;
+	let user_colour_pref: &str = &self.callbacks.get_user_colour_pref();
+
+	let is_dark_mode = match user_colour_pref {
+		"light"            => false,
+		"dark"|"very_dark" => true,
+		_ => false,
+	};
+	let (colour, outline_colour) = match gem_type {
+		GemType::SAPPHIRE => match is_dark_mode { false => ("#0f52ba", "#000088" ), true => ("#0f228a", "#000058" ), },
+		//GemType::EMERALD  => ("#50c878", "#008800" ),
+		GemType::EMERALD  => match is_dark_mode { false => ("#30c858", "#008800" ), true => ("#009828", "#005800" ), },
+		GemType::RUBY     => match is_dark_mode { false => ("#9b111e", "#440000" ), true => ("#6b010e", "#140000" ), },
+		GemType::AMETHYST => match is_dark_mode { false => ("#9966cc", "#440044" ), true => ("#69369c", "#140014" ), },
+		GemType::TOPAZ    => match is_dark_mode { false => ("#ffd700", "#888866" ), true => ("#af7700", "#585866" ), },
+		//GemType::AMBER    => ("#ff8800", "#442200" ),
+	};
+
+	let mut colour = colour.to_owned();
+	colour.push_str(&format!("{:02x}", (alpha*0xff as f64) as i32));
+
+	let mut outline_colour = outline_colour.to_owned();
+	outline_colour.push_str(&format!("{:02x}", (alpha*0xff as f64) as i32));
+
+	self.callbacks.draw_circle(&colour, &outline_colour,
+	                           circ_y as i32, circ_x as i32,
+	                           piece_radius, piece_outline_width);
+
+}
+
 pub fn draw_state(&self, latest_state: &State) {
 	self.callbacks.draw_clear();
 	let padding = 1.0;
 	let piece_radius = (cell_size()/2.0 - padding) as i32;
-	let piece_outline_width = 2;
 	let state;
 	let gem_pos_adjustments_by_pos;
 	if let Some(anim_state) = self.animation_queue.first() {
@@ -135,21 +165,6 @@ pub fn draw_state(&self, latest_state: &State) {
 				},
 			};
 			let pt = Pt{y: y as i32, x: x as i32};
-			let user_colour_pref: &str = &self.callbacks.get_user_colour_pref();
-			let is_dark_mode = match user_colour_pref {
-				"light"            => false,
-				"dark"|"very_dark" => true,
-				_ => false,
-			};
-			let (colour, outline_colour) = match cell.gem_type {
-				GemType::SAPPHIRE => match is_dark_mode { false => ("#0f52ba", "#000088" ), true => ("#0f228a", "#000058" ), },
-				//GemType::EMERALD  => ("#50c878", "#008800" ),
-				GemType::EMERALD  => match is_dark_mode { false => ("#30c858", "#008800" ), true => ("#009828", "#005800" ), },
-				GemType::RUBY     => match is_dark_mode { false => ("#9b111e", "#440000" ), true => ("#6b010e", "#140000" ), },
-				GemType::AMETHYST => match is_dark_mode { false => ("#9966cc", "#440044" ), true => ("#69369c", "#140014" ), },
-				GemType::TOPAZ    => match is_dark_mode { false => ("#ffd700", "#888866" ), true => ("#af7700", "#585866" ), },
-				//GemType::AMBER    => ("#ff8800", "#442200" ),
-			};
 			let y = y as f64;
 			let x = x as f64;
 
@@ -197,15 +212,7 @@ pub fn draw_state(&self, latest_state: &State) {
 				circ_x += dx;
 			}
 
-			let mut colour = colour.to_owned();
-			colour.push_str(&format!("{:02x}", (alpha*0xff as f64) as i32));
-
-			let mut outline_colour = outline_colour.to_owned();
-			outline_colour.push_str(&format!("{:02x}", (alpha*0xff as f64) as i32));
-
-			self.callbacks.draw_circle(&colour, &outline_colour,
-			                           circ_y as i32, circ_x as i32,
-			                           piece_radius, piece_outline_width);
+			self.draw_gem(cell.gem_type, circ_y as i32, circ_x as i32, alpha, piece_radius);
 		}
 	}
 
