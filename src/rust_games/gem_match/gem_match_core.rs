@@ -1,5 +1,6 @@
 // Author: Alex Barry (github.com/alexbarry)
 // Game: "Gem Match"
+use serde::{Serialize, Deserialize};
 
 use rand::seq::SliceRandom;
 use rand::thread_rng;
@@ -74,7 +75,7 @@ impl GemChanges {
 	}
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GemType {
 	SAPPHIRE,  // blue
 	EMERALD,   // green
@@ -90,12 +91,12 @@ pub enum GemMatchErr {
 	
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GemInfo {
 	pub gem_type: GemType,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct State {
 	pub board: Board<Option<GemInfo>>,
 }

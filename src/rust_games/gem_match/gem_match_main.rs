@@ -2,7 +2,8 @@
 // Game: "Gem Match"
 //
 // TODO:
-// * make shapes look like gems, not circles
+// * saved state is huge, figure out how to make enums use fewer bits
+// * in history preview, some gems aren't filled in??
 //
 // * implement saved state /share/undo/redo
 //
@@ -32,9 +33,11 @@ use crate::libs::swipe_tracker::{CursorEvt, SwipeEvt, CursorEvtType};
 
 use crate::gem_match::gem_match_core::{State, Pt};
 use crate::gem_match::gem_match_draw::{GemMatchDraw, cell_size, FPS};
+use crate::gem_match::gem_match_serialize::{serialize, deserialize};
 
 pub struct AlexGamesGemMatch {
 	state: State,
+	session_id: Option<i32>,
 	draw: GemMatchDraw,
 
 	callbacks: &'static rust_game_api::CCallbacksPtr,
@@ -59,13 +62,15 @@ impl AlexGamesGemMatch {
 		if let Ok(move_result) = move_result {
 			self.draw.handle_move_updates(&move_result, &prev_state, &self.state);
 			//self.draw.handle_swipe_bad_move(evt.pos, evt.dir);
+			self.save_state();
 		} else {
 			self.draw.handle_swipe_bad_move(evt.pos, evt.dir, &self.state);
 		}
+	}
 
-		let matches = self.state.find_all_three_or_more_in_a_row();
-		for match_val in matches {
-			println!("match: {:?}", match_val);
+	fn save_state(&self) {
+		if let Ok(serialized_state) = serialize(self.state) {
+			self.callbacks.save_state(self.session_id.unwrap(), serialized_state);
 		}
 	}
 }
@@ -168,11 +173,36 @@ impl AlexGamesApi for AlexGamesGemMatch {
 	fn handle_btn_clicked(&mut self, _btn_id: &str) {
 	}
 	
-	fn start_game(&mut self, _session_id_and_state: Option<(i32, Vec<u8>)>) {
+	fn start_game(&mut self, session_id_and_state: Option<(i32, Vec<u8>)>) {
+		if let Some((session_id, serialized_state)) = session_id_and_state {
+			if let Ok(state) = deserialize(&serialized_state) {
+				self.state = state;
+				self.session_id = Some(session_id);
+			} else {
+				self.callbacks.set_status_err("Error decoding serialized state");
+			}
+		} else if let Some(prev_session_id) = self.callbacks.get_last_session_id("gem_match") {
+			let state_serialized = self.callbacks.adjust_saved_state_offset(prev_session_id, 0);
+			let state_serialized = state_serialized.expect("state_serialized is none from adjust_saved_state_offset?");
+			if let Ok(state) = deserialize(&state_serialized) {
+				self.state = state;
+				self.session_id = Some(prev_session_id);
+			}
+			
+		}
+
+		if let None = self.session_id {
+			self.session_id = Some(self.callbacks.get_new_session_id());
+			self.save_state();
+		}
 	}
 	
 	fn get_state(&self) -> Option<Vec<u8>> {
-		None
+		if let Ok(serialized_state) = serialize(self.state) {
+			return Some(serialized_state);
+		} else {
+			return None;
+		}
 	}
 
 
@@ -192,6 +222,7 @@ pub fn init_gem_match(callbacks: *const rust_game_api::CCallbacksPtr) -> Box<dyn
 	let mut api = AlexGamesGemMatch {
 		state: State::new(),
 		callbacks: callbacks,
+		session_id: None,
 
 		draw: GemMatchDraw::new(callbacks),
 	
