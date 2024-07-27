@@ -131,13 +131,19 @@ pub fn draw_state(&self, latest_state: &State) {
 				},
 			};
 			let pt = Pt{y: y as i32, x: x as i32};
+			let user_colour_pref: &str = &self.callbacks.get_user_colour_pref();
+			let is_dark_mode = match user_colour_pref {
+				"light"            => false,
+				"dark"|"very_dark" => true,
+				_ => false,
+			};
 			let (colour, outline_colour) = match cell.gem_type {
-				GemType::SAPPHIRE => ("#0f52ba", "#000088" ),
+				GemType::SAPPHIRE => match is_dark_mode { false => ("#0f52ba", "#000088" ), true => ("#0f228a", "#000058" ), },
 				//GemType::EMERALD  => ("#50c878", "#008800" ),
-				GemType::EMERALD  => ("#30c858", "#008800" ),
-				GemType::RUBY     => ("#9b111e", "#440000" ),
-				GemType::AMETHYST => ("#9966cc", "#440044" ),
-				GemType::TOPAZ    => ("#ffd700", "#888866" ),
+				GemType::EMERALD  => match is_dark_mode { false => ("#30c858", "#008800" ), true => ("#009828", "#005800" ), },
+				GemType::RUBY     => match is_dark_mode { false => ("#9b111e", "#440000" ), true => ("#6b010e", "#140000" ), },
+				GemType::AMETHYST => match is_dark_mode { false => ("#9966cc", "#440044" ), true => ("#69369c", "#140014" ), },
+				GemType::TOPAZ    => match is_dark_mode { false => ("#ffd700", "#888866" ), true => ("#af7700", "#585866" ), },
 				//GemType::AMBER    => ("#ff8800", "#442200" ),
 			};
 			let y = y as f64;
