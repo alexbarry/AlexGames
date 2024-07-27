@@ -106,6 +106,10 @@ impl GemMatchDraw {
 		draw
 	}
 
+pub fn is_animating(&self) -> bool {
+	self.animation_queue.len() > 0
+}
+
 pub fn draw_state(&self, latest_state: &State) {
 	self.callbacks.draw_clear();
 	let padding = 1.0;

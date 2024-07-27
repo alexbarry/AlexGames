@@ -2,7 +2,6 @@
 // Game: "Gem Match"
 //
 // TODO:
-// * disable input while animating
 // * make shapes look like gems, not circles
 //
 // * implement saved state /share/undo/redo
@@ -18,6 +17,8 @@
 // * fix animations coming out of order, I think I need to make the end times
 //   equal, rather than the start times.
 //
+// * allow swapping gems while animations in progress, if swap is below below all state changes?
+//   Or perhaps if state changes don't change the position of these gems?
 // * maybe, in addition to fading out, make gems move from their original position to the new piece that was moved to make the match, or just have them go towards the centre
 //
 //
@@ -45,6 +46,11 @@ pub struct AlexGamesGemMatch {
 
 impl AlexGamesGemMatch {
 	fn handle_swipe(&mut self, evt: SwipeEvt) {
+		if self.draw.is_animating() {
+			// TODO this is actually doable if all the state changes are above this position?
+			println!("Ignoring swipe gesture because animations are in progress.");
+			return;
+		}
 		let prev_state = self.state;
 		let cell_pos = self.draw.screen_pos_to_cell_pos(evt.pos);
 		let move_result = self.state.move_gems(cell_pos, evt.dir);
