@@ -135,9 +135,119 @@ fn draw_gem(&self, gem_type: GemType, circ_y: i32, circ_x: i32, alpha: f64, piec
 	let mut outline_colour = outline_colour.to_owned();
 	outline_colour.push_str(&format!("{:02x}", (alpha*0xff as f64) as i32));
 
-	self.callbacks.draw_circle(&colour, &outline_colour,
-	                           circ_y as i32, circ_x as i32,
-	                           piece_radius, piece_outline_width);
+	let circ_y = circ_y as i32;
+	let circ_x = circ_x as i32;
+
+	let y1 = circ_y - piece_radius;
+	let y2 = circ_y + piece_radius;
+	let x1 = circ_x - piece_radius;
+	let x2 = circ_x + piece_radius;
+
+	match gem_type {
+		GemType::SAPPHIRE => 
+			self.callbacks.draw_circle(&colour, &outline_colour,
+	   		                        circ_y as i32, circ_x as i32,
+	       		                    piece_radius, piece_outline_width),
+		GemType::EMERALD => {
+			let tri_y1 = y1;
+			let tri_x1 = x1;
+			let tri_y2 = y1;
+			let tri_x2 = x2;
+			let tri_y3 = y2;
+			let tri_x3 = circ_x;
+			self.callbacks.draw_triangle(&colour,
+			                             tri_y1, tri_x1,
+			                             tri_y2, tri_x2,
+			                             tri_y3, tri_x3);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, tri_y1, tri_x1, tri_y2, tri_x2);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, tri_y1, tri_x1, tri_y3, tri_x3);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, tri_y2, tri_x2, tri_y3, tri_x3);
+		},
+		GemType::RUBY =>  {
+			self.callbacks.draw_rect(&colour, y1, x1, y2, x2);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, y1, x1, y1, x2);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, y1, x1, y2, x1);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, y2, x2, y1, x2);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, y2, x2, y2, x1);
+		},
+
+		GemType::AMETHYST => {
+			let yy1 = y1;
+			let xx1 = circ_x;
+
+			let yy2 = circ_y;
+			let xx2 = x1;
+
+			let yy3 = y2;
+			let xx3 = circ_x;
+
+			let yy4 = circ_y;
+			let xx4 = x2;
+
+			let xx2 = xx2 + 10;
+			let xx4 = xx4 - 10;
+
+			self.callbacks.draw_triangle(&colour,
+			                             yy1, xx1,
+			                             yy2, xx2,
+			                             circ_y, circ_x);
+			self.callbacks.draw_triangle(&colour,
+			                             yy2, xx2,
+			                             yy3, xx3,
+			                             circ_y, circ_x);
+			self.callbacks.draw_triangle(&colour,
+			                             yy3, xx3,
+			                             yy4, xx4,
+			                             circ_y, circ_x);
+			self.callbacks.draw_triangle(&colour,
+			                             yy4, xx4,
+			                             yy1, xx1,
+			                             circ_y, circ_x);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, yy1, xx1, yy2, xx2);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, yy2, xx2, yy3, xx3);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, yy3, xx3, yy4, xx4);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, yy4, xx4, yy1, xx1);
+
+		},
+		GemType::TOPAZ => {
+			let yy1 = y1;
+			let xx1 = circ_x;
+
+			let yy2 = circ_y;
+			let xx2 = x1;
+
+			let yy3 = y2;
+			let xx3 = circ_x;
+
+			let yy4 = circ_y;
+			let xx4 = x2;
+
+			self.callbacks.draw_triangle(&colour,
+			                             yy1, xx1,
+			                             yy2, xx2,
+			                             circ_y, circ_x);
+			self.callbacks.draw_triangle(&colour,
+			                             yy2, xx2,
+			                             yy3, xx3,
+			                             circ_y, circ_x);
+			self.callbacks.draw_triangle(&colour,
+			                             yy3, xx3,
+			                             yy4, xx4,
+			                             circ_y, circ_x);
+			self.callbacks.draw_triangle(&colour,
+			                             yy4, xx4,
+			                             yy1, xx1,
+			                             circ_y, circ_x);
+
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, yy1, xx1, yy2, xx2);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, yy2, xx2, yy3, xx3);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, yy3, xx3, yy4, xx4);
+			self.callbacks.draw_line(&outline_colour, piece_outline_width, yy4, xx4, yy1, xx1);
+
+
+		}
+	};
+	       		                    
 
 }
 
