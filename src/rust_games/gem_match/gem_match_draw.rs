@@ -144,16 +144,18 @@ fn draw_gem(&self, gem_type: GemType, circ_y: i32, circ_x: i32, alpha: f64, piec
 	let x2 = circ_x + piece_radius;
 
 	match gem_type {
-		GemType::SAPPHIRE => 
+		GemType::SAPPHIRE => {
+			let piece_radius = piece_radius - 5;
 			self.callbacks.draw_circle(&colour, &outline_colour,
-	   		                        circ_y as i32, circ_x as i32,
-	       		                    piece_radius, piece_outline_width),
+			                        circ_y as i32, circ_x as i32,
+			                        piece_radius, piece_outline_width);
+		},
 		GemType::EMERALD => {
-			let tri_y1 = y1;
-			let tri_x1 = x1;
-			let tri_y2 = y1;
-			let tri_x2 = x2;
-			let tri_y3 = y2;
+			let tri_y1 = y1 + 5;
+			let tri_x1 = x1 + 5;
+			let tri_y2 = y1 + 5;
+			let tri_x2 = x2 - 5;
+			let tri_y3 = y2 - 5;
 			let tri_x3 = circ_x;
 			self.callbacks.draw_triangle(&colour,
 			                             tri_y1, tri_x1,
@@ -164,6 +166,10 @@ fn draw_gem(&self, gem_type: GemType, circ_y: i32, circ_x: i32, alpha: f64, piec
 			self.callbacks.draw_line(&outline_colour, piece_outline_width, tri_y2, tri_x2, tri_y3, tri_x3);
 		},
 		GemType::RUBY =>  {
+			let y1 = y1 + 5;
+			let y2 = y2 - 5;
+			let x1 = x1 + 5;
+			let x2 = x2 - 5;
 			self.callbacks.draw_rect(&colour, y1, x1, y2, x2);
 			self.callbacks.draw_line(&outline_colour, piece_outline_width, y1, x1, y1, x2);
 			self.callbacks.draw_line(&outline_colour, piece_outline_width, y1, x1, y2, x1);
