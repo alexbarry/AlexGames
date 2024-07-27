@@ -1,3 +1,28 @@
+// Author: Alex Barry (github.com/alexbarry)
+// Game: "Gem Match"
+//
+// TODO:
+// * disable input while animating
+// * make shapes look like gems, not circles
+//
+// * implement saved state /share/undo/redo
+//
+// * refactor the touch to cursor event thing into a common library,
+// * maybe make the "touch to cursor event" thing default behaviour, so
+//   games that support mouse events will also get free touch handling.
+// * change touch event IDs from strings to an enum
+// * remove unsafe in all games, pass reference to callbacks instead of pointer
+// * maybe use macro to generate callback wrappers
+// * add default implementation to all callbacks
+//
+// * fix animations coming out of order, I think I need to make the end times
+//   equal, rather than the start times.
+//
+// * maybe, in addition to fading out, make gems move from their original position to the new piece that was moved to make the match, or just have them go towards the centre
+//
+//
+// 
+
 use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt};
 use crate::rust_game_api;
 

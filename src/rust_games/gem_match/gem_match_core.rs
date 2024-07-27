@@ -1,3 +1,6 @@
+// Author: Alex Barry (github.com/alexbarry)
+// Game: "Gem Match"
+
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
@@ -28,12 +31,10 @@ impl GemsInARow {
 	}
 }
 
-// Indicates all the changes after a player moves, so that
-// they can be animated by gem_match_draw.rs
-#[derive(Debug, PartialEq, Eq)]
-pub struct GemChanges {
-	pub swipe_cell: Pt,
-	pub dst_cell: Pt,
+#[derive(Debug)]
+pub struct ChangesIter {
+	pub prev_state: State,
+	pub new_state: State,
 
 	// these are the gem positions that are removed from the previous state (when a move is made)
 	pub to_remove: Vec<GemsInARow>,
@@ -42,13 +43,33 @@ pub struct GemChanges {
 	pub fallen_distance: Board<Option<usize>>,
 }
 
+// Indicates all the changes after a player moves, so that
+// they can be animated by gem_match_draw.rs
+#[derive(Debug)]
+pub struct GemChanges {
+	pub swipe_cell: Pt,
+	pub dst_cell: Pt,
+
+	pub changes: Vec<ChangesIter>,
+}
+
+impl ChangesIter {
+	fn new(prev_state: &State, new_state: &State) -> ChangesIter {
+		ChangesIter {
+			prev_state: *prev_state,
+			new_state:  *new_state,
+			to_remove: Vec::new(),
+			fallen_distance: [[None; BOARD_WIDTH]; BOARD_HEIGHT],
+		}
+	}
+}
+
 impl GemChanges {
 	fn new(swipe_cell: Pt, dst_cell: Pt) -> GemChanges {
 		GemChanges {
 			swipe_cell: swipe_cell,
 			dst_cell: dst_cell,
-			to_remove: Vec::new(),
-			fallen_distance: [[None; BOARD_WIDTH]; BOARD_HEIGHT],
+			changes: Vec::new(),
 		}
 	}
 }
@@ -284,9 +305,24 @@ impl State {
 		*self = copy;
 
 		let mut changes = GemChanges::new(pt, pt2);
-		self.remove_matches(&mut changes.to_remove);
+		loop {
+			let prev_state = self.clone();
+			let mut to_remove: Vec<GemsInARow> = Vec::new();
+			let mut fallen_distance = [[None; BOARD_WIDTH]; BOARD_HEIGHT];
 
-		self.fall_and_add_new_gems(&mut changes.fallen_distance);
+			self.remove_matches(&mut to_remove);
+			let remove_count = to_remove.len();
+
+			self.fall_and_add_new_gems(&mut fallen_distance);
+			let mut change_iter = ChangesIter::new(&prev_state, &self);
+			change_iter.to_remove = to_remove;
+			change_iter.fallen_distance = fallen_distance;
+			changes.changes.push(change_iter);
+
+			if remove_count == 0 {
+				break;
+			}
+		}
 
 		self._print_board();
 

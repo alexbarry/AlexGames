@@ -120,7 +120,7 @@ pub fn draw_state(&self, latest_state: &State) {
 	} else {
 		state = latest_state;
 		gem_pos_adjustments_by_pos = None;
-		println!("drawing no anim");
+		//println!("drawing no anim");
 	}
 	for (y, row) in state.board.iter().enumerate() {
 		for (x, cell) in row.iter().enumerate() {
@@ -328,8 +328,18 @@ pub fn handle_swipe_bad_move(&mut self, pos: Pt, dir: Pt, state: &State) {
 pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, new_state: &State) {
 	println!("handle_move_updates");
 	let time_ms = self.callbacks.get_time_ms();
+
+	let start_time_ms = time_ms;
+
 	let move_duration_ms = 200;
-	let fade_duration_ms = 500;
+	//let move_duration_ms = 750;
+	let fade_duration_ms = 200;
+	//let fade_duration_ms = 1000;
+	let fall_time_ms = 100;
+	//let fall_time_ms = 500;
+	//let pause_time_ms = 1000;
+	let pause_time_ms = 200;
+
 	let time_stay_blank_ms = 5000 + fade_duration_ms; // TODO REMOVE
 
 
@@ -357,75 +367,112 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 	});
 
 	self.animation_queue.push(anim_state1);
+	println!("added swipe anim starting at {}, ending {} later", time_ms - start_time_ms, move_duration_ms);
+	let time_ms = time_ms + move_duration_ms;
 
+	/*
 	let swapped_state = {
 		let mut state = *prev_state;
 		state.swap_gems(changes.swipe_cell, changes.dst_cell).unwrap();
 		state
 	};
-	let mut anim_state2 = StateAnimation::new("anim2", swapped_state);
+	*/
 
-	let time_ms = time_ms + move_duration_ms;
-	for match_val in changes.to_remove.iter() {
-		let dir = match_val.dir;
-		let start = match_val.pt; // TODO rename this field to "pos", I keep calling it that
-		for i in 0..match_val.len {
-			let pt = start.add(dir.mult(i));
-			anim_state2.add_animation(GemAnimation{
-				src_cell: pt,
-				dst_cell: None,
-				init_offset: None,
-				progress: 0.0,
-				progress_fn: progress_fn_smoothstep,
-				start_time_ms: time_ms,
-				total_time_ms: fade_duration_ms,
-			});
-/*
-			let time_ms = time_ms + fade_duration_ms;
-			anim_state2.add_animation(GemAnimation{
-				src_cell: pt,
-				dst_cell: None,
+	let mut time_ms = time_ms;
+
+	for (change_idx, changes_iter) in changes.changes.iter().enumerate() {
+
+		if change_idx > 0 {
+			let mut anim_state = StateAnimation::new(&format!("anim_pause{}", change_idx), changes_iter.prev_state);
+			anim_state.add_animation(GemAnimation{
+				src_cell: Pt{y: 1, x: 1},
+				dst_cell: Some(Pt{y: 1, x: 1}),
 				init_offset: None,
 				progress: 1.0,
 				progress_fn: progress_fn_smoothstep,
 				start_time_ms: time_ms,
-				total_time_ms: time_stay_blank_ms,
+				total_time_ms: pause_time_ms,
 			});
-*/
+			self.animation_queue.push(anim_state);
+			println!("added pause anim starting at {}, ending {} later", time_ms - start_time_ms, pause_time_ms);
+
+			time_ms += pause_time_ms;
 		}
-	}
 
-	self.animation_queue.push(anim_state2);
-	//let time_ms = time_ms + fade_duration_ms + time_stay_blank_ms;
-	let time_ms = time_ms + fade_duration_ms;
+		// TODO get state from `changes`
 
-	let fall_time_ms = 100;
-	let mut anim_state3 = StateAnimation::new("anim3", *new_state);
-	let end_time_ms = time_ms + 750;
-	for y in 0..BOARD_HEIGHT {
-		for x in 0..BOARD_WIDTH {
-			let pt = Pt{y: y as i32, x: x as i32};
-			let fall_distance = changes.fallen_distance[y][x];
-			if let Some(fall_distance) = fall_distance {
-				//let total_time_ms = (fall_time_ms as i32*(fall_distance as i32)) as u32;
-				let total_time_ms = 250 * (fall_distance as i32);
-				println!("fall dist: {}", fall_distance);
-				anim_state3.add_animation(GemAnimation{
+		let mut anim_state2 = StateAnimation::new(&format!("anim{}-2", change_idx), changes_iter.prev_state);
+	
+		for match_val in changes_iter.to_remove.iter() {
+			let dir = match_val.dir;
+			let start = match_val.pt; // TODO rename this field to "pos", I keep calling it that
+			for i in 0..match_val.len {
+				let pt = start.add(dir.mult(i));
+				anim_state2.add_animation(GemAnimation{
 					src_cell: pt,
-					dst_cell: Some(pt),
-					init_offset: Some(Pt{y: -(fall_distance as i32), x: 0}),
+					dst_cell: None,
+					init_offset: None,
 					progress: 0.0,
 					progress_fn: progress_fn_smoothstep,
 					start_time_ms: time_ms,
-					total_time_ms: fall_time_ms*(fall_distance as u32),
-					//start_time_ms: ((end_time_ms as i32) - total_time_ms) as u32,
-					//total_time_ms: total_time_ms as u32,
+					total_time_ms: fade_duration_ms,
 				});
+	/*
+				let time_ms = time_ms + fade_duration_ms;
+				anim_state2.add_animation(GemAnimation{
+					src_cell: pt,
+					dst_cell: None,
+					init_offset: None,
+					progress: 1.0,
+					progress_fn: progress_fn_smoothstep,
+					start_time_ms: time_ms,
+					total_time_ms: time_stay_blank_ms,
+				});
+	*/
 			}
 		}
-	}
+	
+		self.animation_queue.push(anim_state2);
+		println!("added fade anim starting at {}, ending {} later", time_ms - start_time_ms, fade_duration_ms);
 
-	self.animation_queue.push(anim_state3);
+		//let time_ms = time_ms + fade_duration_ms + time_stay_blank_ms;
+		time_ms = time_ms + fade_duration_ms;
+
+
+		let mut anim_state3 = StateAnimation::new(&format!("anim{}-3", change_idx), changes_iter.new_state);
+		let end_time_ms = time_ms + 750;
+		let mut max_fall_time_ms = 0;
+		for y in 0..BOARD_HEIGHT {
+			for x in 0..BOARD_WIDTH {
+				let pt = Pt{y: y as i32, x: x as i32};
+				let fall_distance = changes_iter.fallen_distance[y][x];
+				if let Some(fall_distance) = fall_distance {
+					//let total_time_ms = (fall_time_ms as i32*(fall_distance as i32)) as u32;
+					let total_time_ms = 250 * (fall_distance as i32);
+					//println!("fall dist: {}", fall_distance);
+					let this_fall_time_ms = fall_time_ms * (fall_distance as u32);
+					anim_state3.add_animation(GemAnimation{
+						src_cell: pt,
+						dst_cell: Some(pt),
+						init_offset: Some(Pt{y: -(fall_distance as i32), x: 0}),
+						progress: 0.0,
+						progress_fn: progress_fn_smoothstep,
+						start_time_ms: time_ms,
+						total_time_ms: this_fall_time_ms,
+						//start_time_ms: ((end_time_ms as i32) - total_time_ms) as u32,
+						//total_time_ms: total_time_ms as u32,
+					});
+					if this_fall_time_ms > max_fall_time_ms {
+						max_fall_time_ms = this_fall_time_ms;
+					}
+				}
+			}
+		}
+
+		self.animation_queue.push(anim_state3);
+		println!("added fall anim starting at {}, ending {} later", time_ms - start_time_ms, max_fall_time_ms);
+		time_ms += max_fall_time_ms;
+	}
 	println!("done handle_move_updates, len {}", self.animation_queue.len());
 }
 
