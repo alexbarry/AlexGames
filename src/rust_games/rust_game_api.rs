@@ -122,6 +122,25 @@ impl CCallbacksPtr {
 		}
 	}
 
+	pub fn draw_text(&self, text: &str, colour: &str, y: i32, x: i32, size: i32, align: i32) {
+		let text_len = text.len();
+		let text_cstr = CString::new(text).expect("CString::new failed");
+
+		let colour_len = colour.len();
+		let colour_cstr = CString::new(colour).expect("CString::new failed");
+
+		if let Some(draw_text) = self.draw_text {
+			unsafe {
+				(draw_text)(text_cstr.as_ptr() as *const c_char,   text_len,
+				            colour_cstr.as_ptr() as *const c_char, colour_len,
+				            y, x, size, align);
+			}
+		} else {
+			println!("draw_text is null");
+		}
+
+	}
+
 	pub fn draw_circle(&self, fill: &str, outline: &str, y: i32, x: i32, radius: i32, outline_width: i32) {
 		let fill_len = fill.len();
 		let fill = CString::new(fill).expect("CString::new failed");
@@ -160,6 +179,18 @@ impl CCallbacksPtr {
 			}
 		}
 		//println!("done calling draw_line!");
+	}
+
+	pub fn draw_triangle(&self, fill_colour: &str, y1: i32, x1: i32, y2: i32, x2: i32, y3: i32, x3: i32) {
+		let fill_colour_len = fill_colour.len();
+		let fill_colour_cstr = CString::new(fill_colour).expect("CString::new failed");
+		unsafe {
+			if let Some(draw_triangle) = self.draw_triangle {
+				(draw_triangle)(fill_colour_cstr.as_ptr(), fill_colour_len, y1, x1, y2, x2, y3, x3);
+			} else {
+				println!("draw_triangle is null");
+			}
+		}
 	}
 
 	pub fn draw_clear(&self) {
