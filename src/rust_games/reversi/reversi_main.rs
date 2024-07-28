@@ -83,16 +83,22 @@ fn draw_state(&self) {
 	let piece_black_colour;
 	let piece_outline_colour;
 
+	let highlight_fill;
+	let highlight_outline;
+
 	let user_colour_pref = self.callbacks.get_user_colour_pref();
 	let user_colour_pref = &user_colour_pref as &str; // TODO why do I need to do this?
 	println!("reversi user_colour_pref is '{}'", user_colour_pref);
 	match user_colour_pref {
-		"dark" => {
+		"dark"|"very_dark" => {
 			bg_colour            = "#003300";
 			bg_line_colour       = "#000000";
 			piece_white_colour   = "#444444";
 			piece_black_colour   = "#000000";
 			piece_outline_colour = "#333333";
+
+			highlight_fill       = "#88880088";
+			highlight_outline    = "#888800";
 
 		}
 		_ => {
@@ -101,6 +107,9 @@ fn draw_state(&self) {
 			piece_white_colour   = "#dddddd";
 			piece_black_colour   = "#333333";
 			piece_outline_colour = "#000000";
+
+			highlight_fill       = "#ffff0088";
+			highlight_outline    = "#ffff00";
 		}
 	}
 
@@ -137,6 +146,7 @@ fn draw_state(&self) {
 
 	for y in 0..reversi_core::BOARD_SIZE {
 		for x in 0..reversi_core::BOARD_SIZE {
+			let pt = Pt{y: y as i32, x: x as i32};
 			let y = y as f64;
 			let x = x as f64;
 			
@@ -147,13 +157,17 @@ fn draw_state(&self) {
 				reversi_core::CellState::PLAYER2 => Some(piece_black_colour),
 				_ => None,
 			};
+			let circ_y = (y1 as f64 +cell_height/2.0) as i32;
+			let circ_x = (x1 as f64 +cell_height/2.0) as i32;
 			if let Some(colour) = player_colour {
-				let circ_y = (y1 as f64 +cell_height/2.0) as i32;
-				let circ_x = (x1 as f64 +cell_height/2.0) as i32;
 				let radius = (cell_height/2.0 - 3.0) as i32;
 
 				self.callbacks.draw_circle(colour, piece_outline_colour, circ_y, circ_x, radius, 2);
-			};
+			} else if self.game_state.is_valid_move(self.game_state.player_turn, pt) {
+				let highlight_radius  = 15;
+				let highlight_outline_width  = 3;
+				self.callbacks.draw_circle(highlight_fill, highlight_outline, circ_y, circ_x, highlight_radius, highlight_outline_width);
+			}
 		}
 	}
 

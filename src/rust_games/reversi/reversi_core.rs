@@ -57,6 +57,16 @@ impl State {
 	fn set_cell(&mut self, pt: Pt, cell: CellState) {
 		self.board[pt.y as usize][pt.x as usize] = cell;
 	}
+
+	pub fn is_valid_move(&self, player: CellState, pt: Pt) -> bool {
+		for dir in DIRS {
+			let jumpable_piece_count = get_jumpable_pieces(self, player, pt, dir);
+			if jumpable_piece_count > 0 {
+				return true;
+			}
+		}
+		return false;
+	}
 }
 
 const DIRS: [(i32, i32); 8] = [
