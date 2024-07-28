@@ -866,6 +866,7 @@ static void wx_draw_circle_internal(const char *fill_colour_str,    size_t fill_
 	path.AddCircle(x, y, radius);
 
 	gc->StrokePath(path);
+	gc->FillPath(path);
 
 	delete gc;
 }
