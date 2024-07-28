@@ -327,8 +327,10 @@ impl CCallbacksPtr {
 			unsafe {
 				let state_len = (adjust_saved_state_offset)(session_id, move_id_offset, buff_ptr, buff_size);
 				if state_len > 0 {
-					let state_vec = Vec::from_raw_parts(buff_ptr, state_len, state_len);
-					return Some(state_vec);
+					//let state_vec = Vec::from_raw_parts(buff_ptr, state_len, state_len);
+					//return Some(state_vec);
+					buffer.set_len(state_len as usize);
+					return Some(buffer);
 				}
 			}
 		} else {
