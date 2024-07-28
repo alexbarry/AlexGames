@@ -123,7 +123,7 @@ int get_value(void *handle, const char *key,
 	} else if (rc != SQLITE_ROW) {
 		// TODO error
 		fprintf(stderr, "%s: expected first step call to return row or done, instead %d %s\n",
-		        rc, sqlite3_errmsg(db));
+		        __func__, rc, sqlite3_errmsg(db));
 		return -1;
 	}
 
@@ -147,7 +147,7 @@ int get_value(void *handle, const char *key,
 	rc = sqlite3_step(stmt);
 	if (rc != SQLITE_DONE) {
 		fprintf(stderr, "%s: expected second step call to return SQLITE_DONE, instead %d %s\n",
-		        __func__, rc, sqlite3_errmsg(rc));
+		        __func__, rc, sqlite3_errmsg(db));
 		return -1;
 	}
 
