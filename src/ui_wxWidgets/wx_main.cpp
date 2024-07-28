@@ -77,7 +77,7 @@ static int wx_update_timer_ms(int update_period_ms);
 static void wx_delete_timer(int timer_handle);
 static void wx_enable_evt(const char *evt_id_str, size_t evt_id_len);
 static void wx_disable_evt(const char *evt_id_str, size_t evt_id_len);
-static long wx_get_time_ms(void);
+static time_ms_t wx_get_time_ms(void);
 static size_t wx_get_time_of_day(char *time_str, size_t max_time_str_len);
 static void wx_store_data(void *L, const char *key, const uint8_t *value, size_t value_len);
 static size_t wx_read_stored_data(void *L, const char *key, uint8_t *value_out, size_t max_val_len);
@@ -1036,7 +1036,7 @@ static void wx_disable_evt(const char *evt_id_str, size_t evt_id_len) {
 // specific way.
 // e.g. the database stuff should default to an sqlite3 implementation on most
 // platforms besides emscripten/wasm
-static long wx_get_time_ms(void) {
+static time_ms_t wx_get_time_ms(void) {
 	namespace sc = std::chrono;
 	auto time = sc::system_clock::now();
 	auto since_epoch = time.time_since_epoch();

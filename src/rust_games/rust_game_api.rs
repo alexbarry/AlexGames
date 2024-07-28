@@ -12,7 +12,8 @@ use libc::{c_int, c_char, size_t, c_void, c_ulong};
 //type c_bool = bool;
 type CBool = bool;
 
-pub type TimeMs = u32;
+//pub type TimeMs = u32;
+pub type TimeMs = c_ulong;
 
 pub const CANVAS_WIDTH:  i32 = 480;
 pub const CANVAS_HEIGHT: i32 = 480;

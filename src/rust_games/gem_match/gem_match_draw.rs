@@ -583,7 +583,7 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 					//let total_time_ms = (fall_time_ms as i32*(fall_distance as i32)) as u32;
 					let total_time_ms = 250 * (fall_distance as i32);
 					//println!("fall dist: {}", fall_distance);
-					let this_fall_time_ms = fall_time_ms * (fall_distance as u32);
+					let this_fall_time_ms = fall_time_ms * (fall_distance as TimeMs);
 					anim_state3.add_animation(GemAnimation{
 						src_cell: pt,
 						dst_cell: Some(pt),
