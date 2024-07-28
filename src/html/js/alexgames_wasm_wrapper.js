@@ -10,7 +10,7 @@ function init_game_api(game_name) {
 }
 
 function start_game(ptr) {
-	console.log("[init] start_game");
+	console.log("[init] start_game, ptr=", ptr.toString(16));
 	let rc = Module.ccall("start_game", null,
 		["number"],
 		[ptr]);
@@ -194,6 +194,7 @@ function handle_msg_received(ptr, msg_src, msg) {
 }
 
 function handle_btn_clicked(ptr, btn_id) {
+	console.log("js: handle_btn_clicked", btn_id);
 	return Module.ccall("handle_btn_clicked", null,
 		["number", "string"],
 		[ptr, btn_id]);

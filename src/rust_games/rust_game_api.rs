@@ -351,7 +351,6 @@ impl CCallbacksPtr {
 				if colour_pref_len > 0 {
 					let slice = slice::from_raw_parts(buffer.as_ptr(), colour_pref_len);
 					if let Ok(user_colour_pref) = std::str::from_utf8(slice) {
-						println!("user_colour_pref is {}", user_colour_pref);
 						return String::from(user_colour_pref);
 					} else {
 						println!("Error decoding user colour preference string");

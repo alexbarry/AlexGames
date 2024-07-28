@@ -207,7 +207,6 @@ function draw_rect(gfx, fill_colour, y_start, x_start, y_end, x_end) {
 }
 
 function draw_triangle(gfx, fill_colour, y1, x1, y2, x2, y3, x3) {
-	console.log(`draw_triangle(fill=${fill_colour}, {${y1}, ${x1}}, {${y2}, ${x2}}, {${y3}, ${x3}})`);
 	let ctx = gfx.active_canvas.getContext("2d");
 	ctx.beginPath();
 	ctx.fillStyle   = fill_colour;
@@ -689,6 +688,8 @@ function get_time_of_day() {
 
 function alexgames_get_time_ms() {
 	let d = new Date();
-	return d.getTime();
+	let time_ms = d.getTime();
+	//console.log("js alexgames_get_time_ms", time_ms);
+	return time_ms;
 }
 

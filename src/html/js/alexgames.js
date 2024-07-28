@@ -96,6 +96,7 @@
 			console.error("Error initializing game");
 			return;
 		}
+		console.debug("[init] gfx.ptr is ", gfx.ptr.toString(16));
 		if (state_b64) {
 			console.log("[init] Calling start_game with state from URL arg, base64: ", state_b64);
 			set_status_msg(gfx, "Loading state from URL parameter");
