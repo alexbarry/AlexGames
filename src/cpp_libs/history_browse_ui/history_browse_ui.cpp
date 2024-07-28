@@ -280,6 +280,14 @@ static void preview_draw_rect(const char *fill_colour_str, size_t fill_colour_le
                   int y_end  , int x_end) {
 	g_callbacks->draw_rect(fill_colour_str, fill_colour_len, y_start, x_start, y_end, x_end);
 }
+
+static void preview_draw_triangle(const char *fill_colour_str, size_t fill_colour_len,
+                                  int y1, int x1,
+                                  int y2, int x2,
+                                  int y3, int x3) {
+	g_callbacks->draw_triangle(fill_colour_str, fill_colour_len, y1, x1, y2, x2, y3, x3);
+}
+
 static void preview_draw_circle(const char *fill_colour_str,    size_t fill_colour_len,
                     const char *outline_colour_str, size_t outline_colour_len,
                     int y, int x, int radius, int outline_width) {
@@ -336,6 +344,7 @@ static const struct game_api_callbacks create_preview_draw_callbacks(void) {
 	callbacks.draw_line    = preview_draw_line;
 	callbacks.draw_text    = preview_draw_text;
 	callbacks.draw_rect    = preview_draw_rect;
+	callbacks.draw_triangle = preview_draw_triangle;
 	callbacks.draw_circle  = preview_draw_circle;
 	callbacks.draw_clear   = preview_draw_clear;
 	callbacks.draw_refresh = preview_draw_refresh;
