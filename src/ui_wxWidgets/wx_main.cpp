@@ -108,6 +108,10 @@ static void wx_draw_text_internal(const char *text_str, size_t text_str_len,
 static void wx_draw_circle_internal(const char *fill_colour_str,    size_t fill_colour_len,
                     const char *outline_colour_str, size_t outline_colour_len,
                     int y, int x, int radius);
+static void wx_draw_triangle_internal(const char *fill_colour_str, size_t fill_colour_len,
+                                      int y1, int x1,
+                                      int y2, int x2,
+                                      int y3, int x3);
 static void wx_draw_line_internal(const char *colour_str, int line_width,
                          int y1, int x1,
                          int y2, int x2);
@@ -521,6 +525,32 @@ class DrawLineDrawable : public Drawable {
 	int y1, x1, y2, x2;
 };
 
+class DrawTriangleDrawable : public Drawable {
+	public:
+	DrawTriangleDrawable(const char *fill_str, size_t fill_str_len,
+	                     int y1, int x1,
+	                     int y2, int x2,
+	                     int y3, int x3) {
+		this->fill = fill_str;
+		this->y1 = y1;
+		this->x1 = x1;
+		this->y2 = y2;
+		this->x2 = x2;
+		this->y3 = y3;
+		this->x3 = x3;
+	}
+
+	virtual void draw(void *L) {
+		wx_draw_triangle_internal(fill.c_str(), fill.size(), y1, x1, y2, x2, y3, x3);
+	}
+
+	private:
+	std::string fill;
+	int y1, x1;
+	int y2, x2;
+	int y3, x3;
+};
+
 // TODO how do you allow the queue to automatically handle freeing these?
 std::deque<Drawable*> drawable_queue;
 
@@ -786,13 +816,39 @@ static void wx_draw_circle(const char *fill_colour_str,    size_t fill_colour_le
 	drawable_queue.push_back(drawable);
 }
 
-static void wx_draw_triangle(const char *fill_colour_str,    size_t fill_colour_len,
+static void wx_draw_triangle_internal(const char *fill_colour_str,    size_t fill_colour_len,
+                                      int y1, int x1,
+                                      int y2, int x2,
+                                      int y3, int x3) {
+	wxMemoryDC dc;
+	dc.SelectObject(g_canvas->bmp);
+	wxGraphicsContext *gc = wxGraphicsContext::Create(dc);
+	if (gc == nullptr) {
+		fprintf(stderr, "could not create graphics context?\n");
+		return;
+	}
+
+	wxGraphicsPath path = gc->CreatePath();
+	path.MoveToPoint(x1, y1);
+	path.AddLineToPoint(x2, y2);
+	path.AddLineToPoint(x3, y3);
+	path.AddLineToPoint(x1, y1);
+	path.CloseSubpath();
+
+	gc->SetBrush(colour_str_to_wxColour(fill_colour_str));
+	gc->FillPath(path);
+
+	delete gc;
+}
+
+static void wx_draw_triangle(const char *fill_colour_str, size_t fill_colour_str_len,
                              int y1, int x1,
                              int y2, int x2,
                              int y3, int x3) {
-	// TODO
-	NOT_IMPL();
+	Drawable *drawable = new DrawTriangleDrawable(fill_colour_str, fill_colour_str_len, y1, x1, y2, x2, y3, x3);
+	drawable_queue.push_back(drawable);
 }
+
 static void wx_draw_circle_internal(const char *fill_colour_str,    size_t fill_colour_len,
                     const char *outline_colour_str, size_t outline_colour_len,
                     int y, int x, int radius) {
