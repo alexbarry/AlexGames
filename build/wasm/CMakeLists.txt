@@ -12,6 +12,10 @@ set(HTML_OUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/out/")
 
 set(ENABLE_MEM_SANITIZER 0)
 
+
+set(ENABLE_RUST_GAMES "ON")
+set(RUST_TARGET  "wasm32-unknown-emscripten")
+
 #set(WASM_USE_C_DICT_API OFF) # uncomment this line to try the JS dictionary instead of the C dictionary
 option(WASM_USE_C_DICT_API "Use the C implementation of the dictionary API. The alternative is something in javascript that seems to use a lot of memory" ON)
 
