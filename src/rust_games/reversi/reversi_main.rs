@@ -72,6 +72,7 @@ fn set_state(&mut self, serialized_state: &Vec<u8>, session_id: i32) {
 }
 
 fn draw_state(&self) {
+	self.callbacks.draw_clear();
 	//println!("rust: draw_state called");
 	let board_size_flt = reversi_core::BOARD_SIZE as f64;
 	let height = CANVAS_HEIGHT as f64;
@@ -174,6 +175,8 @@ fn draw_state(&self) {
 	let session_id = self.game_state.session_id;
 	self.callbacks.set_btn_enabled(BTN_ID_UNDO, self.callbacks.has_saved_state_offset(session_id, -1));
 	self.callbacks.set_btn_enabled(BTN_ID_REDO, self.callbacks.has_saved_state_offset(session_id,  1));
+
+	self.callbacks.draw_refresh();
 }
 
 }
