@@ -27,7 +27,7 @@ Now install python dependencies
 	pip3 install wordfreq
 
 	# for hosting the websocket server
-	pip3 install websocket
+	pip3 install websockets
 
 Now you are ready to build the web version and host the websocket server in
 the next steps.
