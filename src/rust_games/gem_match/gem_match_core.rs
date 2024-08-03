@@ -283,7 +283,7 @@ impl State {
 
 					self.board[y][x] = Some(GemInfo{gem_type:gem});
 					//fall_distance[y][x] = Some(2*(y));
-					fall_distance[y][x] = Some(2*y+1);
+					fall_distance[y][x] = Some(y+1);
 				}
 			}
 

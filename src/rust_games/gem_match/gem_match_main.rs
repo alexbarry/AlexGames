@@ -2,6 +2,7 @@
 // Game: "Gem Match"
 //
 // TODO:
+// * add option button to start a new game
 // * saved state is huge, figure out how to make enums use fewer bits
 // * in history preview, some gems aren't filled in??
 //

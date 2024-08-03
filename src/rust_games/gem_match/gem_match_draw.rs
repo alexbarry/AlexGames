@@ -468,7 +468,7 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 	//let move_duration_ms = 750;
 	let fade_duration_ms = 200;
 	//let fade_duration_ms = 1000;
-	let fall_time_ms = 100;
+	let fall_time_ms: TimeMs = 175;
 	//let fall_time_ms = 500;
 	//let pause_time_ms = 1000;
 	let pause_time_ms = 200;
@@ -573,38 +573,74 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 
 
 		let mut anim_state3 = StateAnimation::new(&format!("anim{}-3", change_idx), changes_iter.new_state);
-		let end_time_ms = time_ms + 750;
-		let mut max_fall_time_ms = 0;
-		for y in 0..BOARD_HEIGHT {
-			for x in 0..BOARD_WIDTH {
+		//let end_time_ms = time_ms + 750;
+		let max_fall_dist = {
+			let mut max_fall_dist = 0;
+			for y in 0..BOARD_HEIGHT {
+				for x in 0..BOARD_WIDTH {
+					let pt = Pt{y: y as i32, x: x as i32};
+					let fall_distance = changes_iter.fallen_distance[y][x];
+					if let Some(fall_distance) = fall_distance {
+						if fall_distance > max_fall_dist {
+							max_fall_dist = fall_distance;
+						}
+					}
+				}
+			}
+			max_fall_dist as u32
+		};
+		//let max_fall_dist = 1;
+		let mut max_board_fall_time_ms = 0;
+		for x in 0..BOARD_WIDTH {
+			let max_fall_dist = {
+				let mut max_fall_dist = 0;
+				for y in 0..BOARD_HEIGHT {
+					if let Some(fall_distance) = changes_iter.fallen_distance[y][x] {
+						if fall_distance > max_fall_dist {
+							max_fall_dist = fall_distance;
+						}
+					}
+				}
+				max_fall_dist as TimeMs
+			};
+			for y in 0..BOARD_HEIGHT {
 				let pt = Pt{y: y as i32, x: x as i32};
 				let fall_distance = changes_iter.fallen_distance[y][x];
 				if let Some(fall_distance) = fall_distance {
-					//let total_time_ms = (fall_time_ms as i32*(fall_distance as i32)) as u32;
-					let total_time_ms = 250 * (fall_distance as i32);
-					//println!("fall dist: {}", fall_distance);
+					let mut delay_dist = max_fall_dist - fall_distance as TimeMs;
+					let delay_time_ms = (fall_time_ms * delay_dist) as TimeMs;
 					let this_fall_time_ms = fall_time_ms * (fall_distance as TimeMs);
+					if delay_time_ms > 0 {
+						anim_state3.add_animation(GemAnimation{
+							src_cell: pt,
+							dst_cell: Some(Pt{y: pt.y-(fall_distance as i32), x: pt.x}),
+							init_offset: None,
+							progress: 1.0,
+							progress_fn: progress_fn_smoothstep,
+							start_time_ms: time_ms,
+							total_time_ms: delay_time_ms,
+						});
+					}
+
 					anim_state3.add_animation(GemAnimation{
 						src_cell: pt,
 						dst_cell: Some(pt),
 						init_offset: Some(Pt{y: -(fall_distance as i32), x: 0}),
 						progress: 0.0,
 						progress_fn: progress_fn_smoothstep,
-						start_time_ms: time_ms,
+						//start_time_ms: time_ms,
+						start_time_ms: time_ms + delay_time_ms,
 						total_time_ms: this_fall_time_ms,
-						//start_time_ms: ((end_time_ms as i32) - total_time_ms) as u32,
-						//total_time_ms: total_time_ms as u32,
 					});
-					if this_fall_time_ms > max_fall_time_ms {
-						max_fall_time_ms = this_fall_time_ms;
+					if this_fall_time_ms > max_board_fall_time_ms {
+						max_board_fall_time_ms = this_fall_time_ms;
 					}
 				}
 			}
 		}
 
 		self.animation_queue.push(anim_state3);
-		println!("added fall anim starting at {}, ending {} later", time_ms - start_time_ms, max_fall_time_ms);
-		time_ms += max_fall_time_ms;
+		time_ms += max_board_fall_time_ms;
 	}
 	println!("done handle_move_updates, len {}", self.animation_queue.len());
 }
