@@ -26,7 +26,7 @@ fn progress_fn_smoothstep(x: f64) -> f64 {
 }
 
 struct StateAnimation {
-	label: String,
+	_label: String,
 	state: State,
 	gem_pos_adjustments_by_pos: HashMap<Pt, Vec<GemAnimation>>,
 }
@@ -34,7 +34,7 @@ struct StateAnimation {
 impl StateAnimation {
 	fn new(label: &str, state: State) -> StateAnimation {
 		let mut state_animation = StateAnimation {
-			label: label.to_string(),
+			_label: label.to_string(),
 			state: state,
 			gem_pos_adjustments_by_pos: HashMap::new(),
 		};
@@ -266,7 +266,7 @@ pub fn draw_state(&self, latest_state: &State) {
 	if let Some(anim_state) = self.animation_queue.first() {
 		state = &anim_state.state;
 		gem_pos_adjustments_by_pos = Some(&anim_state.gem_pos_adjustments_by_pos);
-		println!("drawing anim {}", anim_state.label);
+		//println!("drawing anim {}", anim_state.label);
 	} else {
 		state = latest_state;
 		gem_pos_adjustments_by_pos = None;
@@ -362,8 +362,6 @@ pub fn update_animations(&mut self, dt_ms: i32) {
 	let time_ms = self.callbacks.get_time_ms();
 	while let Some(anim_state) = self.animation_queue.first() {
 		if !anim_state.is_current(time_ms) {
-			let len = self.animation_queue.len();
-			println!("removing non current anim state {} from queue, remaining len is {}", anim_state.label, len-1);
 			self.animation_queue.remove(0);
 		} else {
 			break;
@@ -458,23 +456,14 @@ pub fn handle_swipe_bad_move(&mut self, pos: Pt, dir: Pt, state: &State) {
 
 }
 
-pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, new_state: &State) {
+pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State) {
 	println!("handle_move_updates");
 	let time_ms = self.callbacks.get_time_ms();
 
-	let start_time_ms = time_ms;
-
 	let move_duration_ms = 200;
-	//let move_duration_ms = 750;
 	let fade_duration_ms = 200;
-	//let fade_duration_ms = 1000;
 	let fall_time_ms: TimeMs = 175;
-	//let fall_time_ms = 500;
-	//let pause_time_ms = 1000;
 	let pause_time_ms = 200;
-
-	let time_stay_blank_ms = 5000 + fade_duration_ms; // TODO REMOVE
-
 
 	let mut anim_state1 = StateAnimation::new("anim1", *prev_state);
 
@@ -500,7 +489,7 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 	});
 
 	self.animation_queue.push(anim_state1);
-	println!("added swipe anim starting at {}, ending {} later", time_ms - start_time_ms, move_duration_ms);
+	//println!("added swipe anim starting at {}, ending {} later", time_ms - start_time_ms, move_duration_ms);
 	let time_ms = time_ms + move_duration_ms;
 
 	/*
@@ -527,7 +516,7 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 				total_time_ms: pause_time_ms,
 			});
 			self.animation_queue.push(anim_state);
-			println!("added pause anim starting at {}, ending {} later", time_ms - start_time_ms, pause_time_ms);
+			//println!("added pause anim starting at {}, ending {} later", time_ms - start_time_ms, pause_time_ms);
 
 			time_ms += pause_time_ms;
 		}
@@ -566,30 +555,13 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 		}
 	
 		self.animation_queue.push(anim_state2);
-		println!("added fade anim starting at {}, ending {} later", time_ms - start_time_ms, fade_duration_ms);
+		//println!("added fade anim starting at {}, ending {} later", time_ms - start_time_ms, fade_duration_ms);
 
 		//let time_ms = time_ms + fade_duration_ms + time_stay_blank_ms;
 		time_ms = time_ms + fade_duration_ms;
 
 
 		let mut anim_state3 = StateAnimation::new(&format!("anim{}-3", change_idx), changes_iter.new_state);
-		//let end_time_ms = time_ms + 750;
-		let max_fall_dist = {
-			let mut max_fall_dist = 0;
-			for y in 0..BOARD_HEIGHT {
-				for x in 0..BOARD_WIDTH {
-					let pt = Pt{y: y as i32, x: x as i32};
-					let fall_distance = changes_iter.fallen_distance[y][x];
-					if let Some(fall_distance) = fall_distance {
-						if fall_distance > max_fall_dist {
-							max_fall_dist = fall_distance;
-						}
-					}
-				}
-			}
-			max_fall_dist as u32
-		};
-		//let max_fall_dist = 1;
 		let mut max_board_fall_time_ms = 0;
 		for x in 0..BOARD_WIDTH {
 			let max_fall_dist = {
@@ -607,7 +579,7 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 				let pt = Pt{y: y as i32, x: x as i32};
 				let fall_distance = changes_iter.fallen_distance[y][x];
 				if let Some(fall_distance) = fall_distance {
-					let mut delay_dist = max_fall_dist - fall_distance as TimeMs;
+					let delay_dist = max_fall_dist - fall_distance as TimeMs;
 					let delay_time_ms = (fall_time_ms * delay_dist) as TimeMs;
 					let this_fall_time_ms = fall_time_ms * (fall_distance as TimeMs);
 					if delay_time_ms > 0 {
@@ -642,7 +614,7 @@ pub fn handle_move_updates(&mut self, changes: &GemChanges, prev_state: &State, 
 		self.animation_queue.push(anim_state3);
 		time_ms += max_board_fall_time_ms;
 	}
-	println!("done handle_move_updates, len {}", self.animation_queue.len());
+	//println!("done handle_move_updates, len {}", self.animation_queue.len());
 }
 
 

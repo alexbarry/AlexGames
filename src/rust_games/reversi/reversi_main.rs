@@ -91,7 +91,7 @@ fn draw_state(&self) {
 
 	let user_colour_pref = self.callbacks.get_user_colour_pref();
 	let user_colour_pref = &user_colour_pref as &str; // TODO why do I need to do this?
-	println!("reversi user_colour_pref is '{}'", user_colour_pref);
+	//println!("reversi user_colour_pref is '{}'", user_colour_pref);
 	match user_colour_pref {
 		"dark"|"very_dark" => {
 			bg_colour            = "#003300";
@@ -197,7 +197,7 @@ impl AlexGamesApi for AlexGamesReversi {
 	*/
 
 fn update(&mut self, _dt_ms: i32) {
-	println!("rust: update called");
+	//println!("rust: update called");
 	//draw_state(&handle.game_state as reversi_core::State);
 	self.draw_state();
 }

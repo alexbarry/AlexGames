@@ -58,11 +58,8 @@ impl AlexGamesGemMatch {
 		let prev_state = self.state;
 		let cell_pos = self.draw.screen_pos_to_cell_pos(evt.pos);
 		let move_result = self.state.move_gems(cell_pos, evt.dir);
-		prev_state._print_board();
-		println!("handle_swipe, result={:#?}", move_result);
 		if let Ok(move_result) = move_result {
-			self.draw.handle_move_updates(&move_result, &prev_state, &self.state);
-			//self.draw.handle_swipe_bad_move(evt.pos, evt.dir);
+			self.draw.handle_move_updates(&move_result, &prev_state);
 			self.save_state();
 		} else {
 			self.draw.handle_swipe_bad_move(evt.pos, evt.dir, &self.state);
@@ -89,11 +86,6 @@ impl AlexGamesApi for AlexGamesGemMatch {
 	}
 
 	fn handle_user_clicked(&mut self, _pos_y: i32, _pos_x: i32) {
-		// TODO REMOVE
-		let matches = self.state.find_all_three_or_more_in_a_row();
-		for match_val in matches {
-			println!("match: {:?}", match_val);
-		}
 	}
 
 	fn handle_mousemove(&mut self, pos_y: i32, pos_x: i32, _buttons: i32) {

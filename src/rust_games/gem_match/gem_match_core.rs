@@ -27,7 +27,7 @@ pub struct GemsInARow {
 }
 
 impl GemsInARow {
-	pub fn end_pt(&self) -> Pt {
+	pub fn _end_pt(&self) -> Pt {
 		self.pt.add(self.dir.mult(self.len - 1))
 	}
 }
@@ -325,7 +325,7 @@ impl State {
 			}
 		}
 
-		self._print_board();
+		//self._print_board();
 
 		return Ok(changes);
 	}
