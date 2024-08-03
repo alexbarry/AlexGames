@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 
 include(../../local_env.cmake)
 
+get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
+
 # TODO this is causing syntax errors when I try to cmake build
 # add_definitions(-D"api_check(L,o)=assert(o)")
 
@@ -16,6 +18,45 @@ set(ENABLE_SQLITE3_SAVED_STATE ON)
 set(SRC_DIR "../../src")
 #set(PROJECT_ROOT "${SRC_DIR}/../")
 set(LUA_SCRIPT_SRC "../${SRC_DIR}/lua_scripts")
+
+
+# TODO maybe move this to a separate file? It's distracting
+# And ideally it could be shared with emscripten
+if(ENABLE_ZIP_UPLOAD)
+set(ALEXGAMES_ZLIB_SRC "${PROJECT_ROOT}/third_party/zlib")
+set(ALEXGAMES_ZLIB_LIB_DIR  "${ALEXGAMES_ZLIB_SRC}/build/native")
+execute_process(COMMAND mkdir -p ${ALEXGAMES_ZLIB_LIB_DIR})
+set(ALEXGAMES_ZLIB_LIB_PATH "${ALEXGAMES_ZLIB_LIB_DIR}/libz.a")
+if(EXISTS ${ALEXGAMES_ZLIB_LIB_PATH})
+message("Found libz.a for native build at ${ALEXGAMES_ZLIB_LIB_PATH}")
+else()
+message("Building zlib (libz.a) for native...")
+
+execute_process(
+	COMMAND "${ALEXGAMES_ZLIB_SRC}/configure"
+	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
+)
+
+execute_process(
+	COMMAND make
+	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
+)
+execute_process(
+	COMMAND cp ${ALEXGAMES_ZLIB_SRC}/zconf.h ${ALEXGAMES_ZLIB_LIB_DIR}
+)
+execute_process(
+	COMMAND cp ${ALEXGAMES_ZLIB_SRC}/zlib.h ${ALEXGAMES_ZLIB_LIB_DIR}
+)
+
+execute_process(COMMAND ls ${ALEXGAMES_ZLIB_LIB_PATH})
+if (EXISTS ${ALEXGAMES_ZLIB_LIB_PATH})
+message("Succssfully built ${ALEXGAMES_ZLIB_LIB_PATH}")
+else()
+message(FATAL_ERROR "Unable to build zlib for native (could not find output libz.a at ${ALEXGAMES_ZLIB_LIB_PATH}")
+endif()
+endif()
+endif()
+
 
 #set(WXWIDGETS_DL_DIR ${PROJECT_ROOT}/third_party/wxwidgets)
 #execute_process(COMMAND git clone https://github.com/wxWidgets/wxWidgets.git ${WXWIDGETS_DL_DIR})

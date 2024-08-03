@@ -19,8 +19,11 @@ set(SQLITE_DIR "${PROJECT_ROOT}/third_party/sqlite/")
 set(LUA_DL_DIR "${PROJECT_ROOT}/third_party/lua/")
 set(WORDLIST_DL_DIR "${PROJECT_ROOT}/third_party/wordlist/")
 
-get_filename_component(ZLIB_LIBRARY "${PROJECT_ROOT}/third_party/zlib/libz.a" ABSOLUTE)
-get_filename_component(ZLIB_INCLUDE_DIR "${PROJECT_ROOT}/third_party/zlib" ABSOLUTE)
+# NOTE: this variable should be set in the build specific cmake files, e.g.
+# build/wasm/CMakeLists.txt . It should point to the target architecture's
+# build of zlib.
+get_filename_component(ZLIB_LIBRARY "${ALEXGAMES_ZLIB_LIB_PATH}" ABSOLUTE)
+get_filename_component(ZLIB_INCLUDE_DIR "${ALEXGAMES_ZLIB_LIB_DIR}" ABSOLUTE)
 
 # Originally I had made this different for wxWidgets in visual studio, but I think a symlink 
 # called "preload" in the build directory, pointing to `src`, has mitigated this.
@@ -40,6 +43,8 @@ option(ENABLE_SQLITE3_SAVED_STATE "Instead of requiring the platform to implemen
 option (ENABLE_RUST_GAMES "Build rust games" ON)
 option (RUST_TARGET  "Rust target (leave blank for native, wasm32-unknown-emscripten for wasm)" "")
 
+option(ALEXGAMES_DEBUG_BUILD "Set to true/on to create a debug build, false for release" OFF)
+
 message("ENABLE_ZIP_UPLOAD is ${ENABLE_ZIP_UPLOAD}")
 message("ENABLE_SQLITE3_SAVED_STATE is ${ENABLE_SQLITE3_SAVED_STATE}")
 IF (ENABLE_ZIP_UPLOAD)
@@ -50,6 +55,7 @@ else()
 	message("Downloading zlib into ${ZLIB_DIR}")
 	execute_process(COMMAND git clone https://github.com/madler/zlib.git ${ZLIB_DIR})
 endif()
+
 execute_process(COMMAND ls "${ZLIB_LIBRARY}")
 #execute_process(COMMAND ls "${ZLIB_LIBRARY}/asdflkjasdflkjasdflkj.a")
 #message(FATAL_ERROR "test")
@@ -202,11 +208,12 @@ add_library(lua ${LUA_CORE_SRC_LIST})
 if (ENABLE_RUST_GAMES)
 
 
+message("Rust target is ${RUST_TARGET}")
 if (NOT RUST_TARGET)
-	set(RUST_TARGET_TARGET_PATH  "")
+	set(RUST_TARGET_PATH  "")
 	set(RUST_TARGET_CMD  "")
 else()
-	set(RUST_TARGET_TARGET_PATH  "${RUST_TARGET}")
+	set(RUST_TARGET_PATH  "${RUST_TARGET}")
 	set(RUST_TARGET_CMD  "--target=${RUST_TARGET}")
 endif()
 
@@ -220,7 +227,7 @@ file(GLOB_RECURSE RUST_SOURCE_FILES
 
 message("Rust sources: ${RUST_SOURCE_FILES}")
 
-# TODO add --release if some future debug variable is not set, also update path and add -G to wasm build
+# TODO add --release if ALEXGAMES_DEBUG_BUILD is not set
 add_custom_command(
 	OUTPUT "${RUST_LIB}"
 	COMMAND cargo build "${RUST_TARGET_CMD}"
@@ -233,12 +240,6 @@ add_custom_target(
 	alexgames_rust_lib ALL
 	DEPENDS "${RUST_LIB}"
 )
-
-if(EXISTS ${RUST_LIB})
-#good
-else()
-message(FATAL_ERROR "could not find rust build output lib at ${RUST_LIB}")
-endif()
 
 file(GLOB RUST_LIBS "${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/wasm32-unknown-unknown/debug/deps/*.a")
 message(INFO, "Found libs ${RUST_LIBS}")
@@ -253,6 +254,15 @@ target_link_libraries(alexgames_rust INTERFACE "${RUST_LIBS};alexgames_rust_api"
 set_target_properties(alexgames_rust PROPERTIES
 	IMPORTED_LOCATION ${RUST_LIB}
 )
+
+
+# TODO I'd like to add a sanity check here, but I'm not sure how
+#if(EXISTS ${RUST_LIB})
+##good
+#else()
+#message(FATAL_ERROR "could not find rust build output lib at ${RUST_LIB}")
+#endif()
+
 
 
 endif()
