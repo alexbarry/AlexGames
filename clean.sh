@@ -62,6 +62,15 @@ if ls cscope.out >/dev/null 2>&1; then
 	rm cscope.out
 fi
 
+if ls out >/dev/null 2>&1; then
+	rm -r out
+fi
+
+(
+	cd src/rust_games;
+	cargo clean;
+)
+
 (
 	cd src/android;
 	./gradlew clean;
