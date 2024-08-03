@@ -1050,14 +1050,21 @@ document.getElementById("btn_close_game_choice_popup").addEventListener('click',
 	set_game_choice_popup_visible(false);
 });
 
+function update_colour_pref(colour_pref) {
+	set_html_colour_theme(colour_pref);
+	update(gfx.ptr);
+}
+
 const select_user_colour_pref = document.getElementById("select_user_colour_pref");
 select_user_colour_pref.addEventListener("change", function () {
+	console.log("[colour_pref] User changed colour preference dropdown");
 	let idx = select_user_colour_pref.selectedIndex;
 	let value = select_user_colour_pref.options[idx].value;
 	set_user_colour_pref(value);
-	set_html_colour_theme(value);
-	update(gfx.ptr);
+	update_colour_pref(value);
 });
+
+set_on_colour_theme_change_handler(update_colour_pref);
 
 document.getElementById("btn_force_refresh").addEventListener('click', function () {
 	window.location.reload();

@@ -606,6 +606,19 @@
 			// But when doing that, I'll need to add the URL params too
 			document.getElementById("url_share_multiplayer").href = window.location.href;
 			document.getElementById("url_share_multiplayer").innerText = window.location.href;
+
+			const stored_colour_pref = get_user_stored_colour_pref();
+			if (stored_colour_pref) {
+				const select_user_colour_pref = document.getElementById("select_user_colour_pref");
+				const options = select_user_colour_pref.children;
+				for (let i=0; i<options.length; i++) {
+					if (stored_colour_pref == options[i].value) {
+						console.log("[options][colour_pref] Setting options popup colour preference dropdown to stored preference", stored_colour_pref, "index ", i); 
+						select_user_colour_pref.selectedIndex = i;
+						break;
+					}
+				}
+			}
 		} else {
 			options_display_type = "none";
 			g_options_visible = false;
