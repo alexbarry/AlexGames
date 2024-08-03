@@ -13,6 +13,7 @@
 import re
 import math
 import os
+import sys
 import collections
 import dict_utils
 
@@ -48,22 +49,6 @@ word_counts_by_length = {}
 
 skip_words            = dict_utils.read_word_list(skip_words_fname)
 vulgar_or_weird_words = dict_utils.read_word_list(bad_word_list_fname2)
-
-
-words_map = {}
-
-for line in open(wordlist_fname, 'r'):
-	m = re.match(r'"([a-zA-Z-]+)"', line)
-	if not m: raise Exception('line %s did not match' % line)
-	word, = m.groups()
-	if word in skip_words: continue
-	freq = wordfreq.word_frequency(word, LANGUAGE)
-	is_vulgar_or_weird = (word in vulgar_or_weird_words)
-	word_info_list.append( word_info_entry(word, freq, is_vulgar_or_weird=is_vulgar_or_weird) )
-	if len(word) not in word_counts_by_length:
-		word_counts_by_length[len(word)] = 0
-	word_counts_by_length[len(word)] += 1
-	words_map[word] = freq
 
 #word_info_list = sorted(word_info_list, key = lambda x: x.freq, reverse=True)
 # NOTE: the word dictionary must be sorted alphabetically, now that I'm using bisection search
@@ -124,7 +109,37 @@ def small_float_sci(f):
 		return s
 		
 
+input_files = [
+	wordlist_fname,
+	skip_words_fname,
+	bad_word_list_fname2,
+]
+
 if output_ascii_list:
+	if (os.path.isfile(ascii_list_output_fname) and
+	    os.path.getmtime(ascii_list_output_fname) >= max(map(lambda fname: os.path.getmtime(fname), input_files))):
+		print('Skipping generating wordlist because output exists and is newer than input')
+		print(f'inputs: %s' % input_files)
+		print(f'output: {ascii_list_output_fname}')
+		sys.exit(0)
+	
+	words_map = {}
+	
+	
+	for line in open(wordlist_fname, 'r'):
+		m = re.match(r'"([a-zA-Z-]+)"', line)
+		if not m: raise Exception('line %s did not match' % line)
+		word, = m.groups()
+		if word in skip_words: continue
+		freq = wordfreq.word_frequency(word, LANGUAGE)
+		is_vulgar_or_weird = (word in vulgar_or_weird_words)
+		word_info_list.append( word_info_entry(word, freq, is_vulgar_or_weird=is_vulgar_or_weird) )
+		if len(word) not in word_counts_by_length:
+			word_counts_by_length[len(word)] = 0
+		word_counts_by_length[len(word)] += 1
+		words_map[word] = freq
+
+
 	os.makedirs(os.path.dirname(ascii_list_output_fname), exist_ok=True)
 	with open(ascii_list_output_fname, 'w') as f:
 		for info in word_info_list:
