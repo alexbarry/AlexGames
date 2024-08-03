@@ -41,7 +41,7 @@ option(ENABLE_WORD_DICT  "Enable the word dictionary. Allows for word puzzle gam
 option(ENABLE_SQLITE3_SAVED_STATE "Instead of requiring the platform to implement their own store_data and read_store_data APIs, use SQLite3 and filesystem APIs." OFF)
 
 option (ENABLE_RUST_GAMES "Build rust games" ON)
-option (RUST_TARGET  "Rust target (leave blank for native, wasm32-unknown-emscripten for wasm)" "")
+set(RUST_TARGET  "OFF" CACHE STRING "Rust build target")
 
 option(ALEXGAMES_DEBUG_BUILD "Set to true/on to create a debug build, false for release" OFF)
 
@@ -232,7 +232,7 @@ add_custom_command(
 	OUTPUT "${RUST_LIB}"
 	COMMAND cargo build "${RUST_TARGET_CMD}"
 	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/rust_games"
-	COMMENT "Building alexgames rust_games library with cargo"
+	COMMENT "Building alexgames rust_games library with cargo for target=${RUST_TARGET}"
 	DEPENDS ${RUST_SOURCE_FILES}
 )
 
