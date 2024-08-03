@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD 17) # This was needed on MacOS for me
 
 add_definitions(-DROOT_DIR="\"${ALEXGAMES_LUA_SCRIPT_ROOT_DIR}\"")
 
-set(ENABLE_SQLITE3_SAVED_STATE ON)
+set(ENABLE_SQLITE3_SAVED_STATE ON CACHE BOOL "Enable SQLIte3 saved state" FORCE)
 
 set(SRC_DIR "../../src")
 #set(PROJECT_ROOT "${SRC_DIR}/../")

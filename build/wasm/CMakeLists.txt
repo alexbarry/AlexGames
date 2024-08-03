@@ -20,14 +20,22 @@ set(RUST_TARGET  "wasm32-unknown-emscripten" CACHE STRING "Rust build target for
 option(WASM_USE_C_DICT_API "Use the C implementation of the dictionary API. The alternative is something in javascript that seems to use a lot of memory" ON)
 
 
+get_filename_component(ZLIB_DIR   "${PROJECT_ROOT}/third_party/zlib/" ABSOLUTE)
 set(ALEXGAMES_ZLIB_SRC "${PROJECT_ROOT}/third_party/zlib")
 set(ALEXGAMES_ZLIB_LIB_DIR  "${ALEXGAMES_ZLIB_SRC}/build/wasm")
-execute_process(COMMAND mkdir -p ${ALEXGAMES_ZLIB_LIB_DIR})
 set(ALEXGAMES_ZLIB_LIB_PATH "${ALEXGAMES_ZLIB_LIB_DIR}/libz.a")
 if(EXISTS ${ALEXGAMES_ZLIB_LIB_PATH})
 message("Found libz.a for wasm build at ${ALEXGAMES_ZLIB_LIB_PATH}")
 else()
 message("Building zlib (libz.a) for wasm...")
+
+IF (EXISTS ${ZLIB_DIR})
+	message("Found zlib in ${ZLIB_DIR}")
+else()
+	message("Downloading zlib into ${ZLIB_DIR}")
+	execute_process(COMMAND git clone https://github.com/madler/zlib.git ${ZLIB_DIR})
+endif()
+execute_process(COMMAND mkdir -p ${ALEXGAMES_ZLIB_LIB_DIR})
 
 execute_process(
 	COMMAND "${ALEXGAMES_ZLIB_SRC}/configure"
