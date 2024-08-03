@@ -82,6 +82,7 @@ const DIRS: [(i32, i32); 8] = [
 ];
 
 
+// TODO move to struct impl
 pub fn _print_board(state: &State) {
 	print!("  ");
 	for x in 0..BOARD_SIZE {
@@ -139,6 +140,7 @@ fn other_player(player: CellState) -> CellState {
 	}
 }
 
+// TODO move to struct impl
 fn get_jumpable_pieces(state: &State, player: CellState, start_pt: Pt, dir: (i32, i32) ) -> i32 {
 	let start_pt_copy = start_pt.clone();
 	for i in 1..BOARD_SIZE {
@@ -153,6 +155,7 @@ fn get_jumpable_pieces(state: &State, player: CellState, start_pt: Pt, dir: (i32
 	return 0;
 }
 
+// TODO move to struct impl
 fn reverse_cells(state: &mut State, player: CellState, pt: Pt, dir: (i32, i32)) {
 	for i in 1..BOARD_SIZE {
 		let pt = add_pt(&pt, (dir.0 * i as i32, dir.1 * i as i32));
@@ -167,6 +170,7 @@ fn reverse_cells(state: &mut State, player: CellState, pt: Pt, dir: (i32, i32)) 
 	}
 }
 
+// TODO move to struct impl
 pub fn player_move(mut state: &mut State, player: CellState, pt: Pt) -> Result<(), ReversiErr> {
 	if state.player_turn != player {
 		return Err(ReversiErr::NotYourTurn);

@@ -2,6 +2,8 @@
 // Author: Alex Barry (github.com/alexbarry)
 //
 // TODO:
+//  * fix deserialization errors in reversi in wasm? I'm not sure I see it anymore. Check the wxWidgets build, I saw it there too
+//  * add option button to start a new game
 //  * network multiplayer
 //  * make saved state smaller
 //  * add version to saved state
