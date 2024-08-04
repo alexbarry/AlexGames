@@ -44,6 +44,10 @@ function set_user_colour_pref(pref) {
 function set_html_colour_theme(theme) {
 	document.body.classList.remove("dark");
 	document.body.classList.remove("very_dark");
+
+	if (!theme || theme == "auto") {
+		theme = get_user_colour_pref();
+	}
 	document.body.classList.add(theme);
 }
 
