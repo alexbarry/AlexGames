@@ -30,6 +30,13 @@ pub enum MouseEvt {
 }
 
 #[derive(Copy, Clone, Debug)]
+pub enum TextAlign {
+	Left,
+	Middle,
+	Right,
+}
+
+#[derive(Copy, Clone, Debug)]
 pub struct TouchInfo {
 	pub id: i64,
 	pub y: f64,
@@ -123,12 +130,19 @@ impl CCallbacksPtr {
 		}
 	}
 
-	pub fn draw_text(&self, text: &str, colour: &str, y: i32, x: i32, size: i32, align: i32) {
+	pub fn draw_text(&self, text: &str, colour: &str, y: i32, x: i32, size: i32, align: TextAlign) {
 		let text_len = text.len();
 		let text_cstr = CString::new(text).expect("CString::new failed");
 
 		let colour_len = colour.len();
 		let colour_cstr = CString::new(colour).expect("CString::new failed");
+
+		// TODO auto generate this from the definition in game_api.h
+		let align = match align {
+			TextAlign::Left   =>  1,
+			TextAlign::Middle =>  0,
+			TextAlign::Right  => -1,
+		};
 
 		if let Some(draw_text) = self.draw_text {
 			unsafe {
