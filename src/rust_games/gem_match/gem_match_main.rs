@@ -4,9 +4,14 @@
 // TODO:
 // * add option button to start a new game
 // * saved state is huge, figure out how to make enums use fewer bits
-// * in history preview, some gems aren't filled in??
+// * sometimes gems flicker, I think the animation timing may be off
 //
-// * implement saved state /share/undo/redo
+// * add score tracking
+// * introduce 6th type of gem after so many points
+// * when matching 4 or 5 in a row, an L, or a T, should create a new upgraded gem in place.
+//   Upgraded gem will remove many surrounding gems when matched. 5 in a row can be swiped with
+//   any nearby gem to remove all of that type of gem.
+//
 //
 // * refactor the touch to cursor event thing into a common library,
 // * maybe make the "touch to cursor event" thing default behaviour, so
