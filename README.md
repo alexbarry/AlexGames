@@ -8,6 +8,24 @@ Try the web version here: https://alexbarry.github.io/AlexGames
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/net.alexbarry.alexgames/)
 
+## Brief technical overview
+
+High level:
+* Simple API for handling input/output defined in [`game_api.h`](src/game_api/game_api.h). e.g. "draw rectangle", "handle touch", "send/receive multiplayer message".
+* Wrappers to this API for [Lua](src/lua_api/lua_api.c), [Rust](src/rust_games/rust_game_api.rs). (C/C++ can call the API directly).
+* Games are written for this API in [Lua](src/lua_scripts/games) and [Rust](src/rust_games). (See the "history browser" (described below) for an example of implementing the game API in C++).
+* The API is implemented by the following platforms:
+    * web (HTML/JS/WASM): ([C wrapper](src/emscripten/emscripten_api.c), [JS callbacks](src/html/js/alexgames_wasm_api.js), [JS Game APIs](src/html/js/alexgames_wasm_wrapper.js)),
+    * [wxWidgets](src/ui_wxWidgets/wx_main.cpp), and
+    * Android bundles the web version for offline play, and _(experimental)_ Android supports the native AlexGames API, no browser or WebView required: ([C wrapper](src/android/app/src/main/cpp/alex_games_android_jni.cpp), [Java JNI Interface](src/android/app/src/main/java/net/alexbarry/alexgames/AlexGamesJni.java), [Android canvas writes](src/android/app/src/main/java/net/alexbarry/alexgames/graphics/AlexGamesCanvas.java)).
+
+The web version is polished and fairly robust. The wxWidgets and Android native versions serve more as proof of concepts for now, demonstrating how relatively easy it is to bring up a new platform that supports all the games. But they are lacking some functionality.
+
+Some other cool features:
+* [History Browser](src/cpp_libs/history_browse_ui/history_browse_ui.cpp) allows you to view previously saved game states, including a preview. The history browser code itself implements the same API as the games, so it should be easy to support it on a new platform. The history browser code also uses the games' code to render previews, meaning it runs them as games within itself, which is also implementing the game interface.
+* [Saved State database](src/cpp_libs/saved_state_db) to keep the API simple, the only persistent state is writing to key value pairs (based on HTML local storage). The "saved state database" is a C++ wrapper to allow games to simply call `save_state` with a `uint8_t` array  every time there is a state change, and the saved state database keeps track of the move ID. It also handles distinguishing between game sessions, and supports undo/redo and loading initial state on game start (e.g. browser refresh).
+* _(Experimental)_ [Android web games server](src/android/app/src/main/java/net/alexbarry/alexgames/server): this isn't often a useful feature, but if you had a WiFi network with no public internet access, and IP isolation isn't enforced, you could use a phone with the AlexGames Android app to host the simple static HTTP and websocket server. This would allow you to play games with your friends on your local network, without relying on the public internet.
+
 ## How to build
 
 ### Using docker
