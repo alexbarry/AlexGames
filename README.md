@@ -1,6 +1,6 @@
 # AlexGames
 
-A collection of simple Lua games, and a web engine for playing them including an English dictionary (for word puzzles), websocket multiplayer, state sharing via URL, and auto saving with undo/redo. You can also upload your own games and play in the public web version.
+A collection of simple Lua and Rust games, and an API for playing them including an English dictionary (for word puzzles), websocket multiplayer, state sharing via URL, and auto saving with undo/redo. You can also upload your own Lua games and play in the public web version.
 
 Try the web version here: https://alexbarry.github.io/AlexGames
 
