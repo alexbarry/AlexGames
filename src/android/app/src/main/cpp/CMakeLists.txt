@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.4.1)
 # still support this, though.
 set(ENABLE_ZIP_UPLOAD OFF CACHE BOOL "Enable the ability to upload custom games in zip files. Includes libzip and zlib." FORCE)
 
+# TODO Figure out how to support Rust for Android NDK
+set(ENABLE_RUST_GAMES OFF CACHE BOOL "" FORCE)
+
 set(SRC_DIR "../../../../..")
 # add_definitions(-DROOT_DIR="res/assets/")
 # TODO I think this works now for testing...
