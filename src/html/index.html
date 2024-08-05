@@ -244,38 +244,20 @@ Your browser doesn't support canvases.
 
 
 <div id="game_button_row" class="button_row">
-<!-- TODO these buttons should be instantiated from Lua, they are game dependent.
-     I am just putting them here for now to see how it looks in pure JS before
-     making it more complicated -->
-<!--
-<button style="flex:1">Undo</button>
-<button style="flex:1">Redo</button>
-<button style="flex:2">Pass</button>
--->
+<!-- Buttons are added here from the game API -->
 </div>
 
-<!-- TODO this popup should also be instantiated from Lua, or at least hidden by default
-     but Lua decides when to show it and what content to populate it with.
-     Maybe for now it is okay to define a "choice popup" that shows a message
-     like this with a header, some text, and some number of buttons. -->
 <div id="popup" class="popup game_popup" style="display:none">
-<!--
-<h2>Choose piece colour</h2>
-<p>Black moves first.</p>
-<p>The other player has not yet chosen.</p>
-<p>The other player has chosen <em>white</em>.</p>
-<button>Black</button>
-<button>White</button>
--->
+<!-- This popup is populated and set visible by the game API -->
 </div>
 
 <div class="overlay" style="display:none"></div>
-
 </div>
 
 </div>
 
 
+<!-- This is made visible when the user presses the "Options" button -->
 <div id="options_popup" class="popup meta_popup options_popup" style="display:none">
 <button id="btn_close_options" class="close_button">X</button>
 <div class="popup_content_wrapper">
@@ -301,6 +283,7 @@ Your browser doesn't support canvases.
 </div>
 
 <h3>Game options</h3>
+<!-- These options are populated by the game API -->
 <div id="game_options">
 <div id="game_options_none_placeholder">
 <p>This game has not defined any options. <span class="dev_note not_supported">(For developers: call the <code>add_game_option</code> API to add options here. This is useful for less commonly used options like starting a new game.)</span></p>
