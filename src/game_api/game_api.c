@@ -22,7 +22,10 @@
 
 #include "game_api.h"
 #include "game_api_utils.h"
+
+#ifdef ALEXGAMES_RUST_ENABLED
 #include "rust_game_api.h"
+#endif
 
 #include "lua_api.h"
 
@@ -375,10 +378,12 @@ void *alex_init_game(const struct game_api_callbacks *api_callbacks,
 		return game_api->init_lua_api(api_callbacks, game_str, game_str_len);
 #endif
 
+#ifdef ALEXGAMES_RUST_ENABLED
 	} else if (rust_game_supported(game_str, game_str_len)) {
 		printf("Looks like this is a rust game!\n");
 		set_game_api(get_rust_api());
 		return start_rust_game(game_str, game_str_len, api_callbacks);
+#endif
 	} else if (str_eq_literal(game_str, "history_browse", game_str_len)) {
 		const struct game_api *game_api = get_history_browse_api();
 		set_game_api(game_api);

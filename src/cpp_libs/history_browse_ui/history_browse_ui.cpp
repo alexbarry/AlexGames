@@ -8,7 +8,12 @@
 #include "saved_state_db.h"
 #include "game_api_helper.h"
 #include "button_helper.h"
+
+// TODO put this in a common module
+#ifdef ALEXGAMES_RUST_ENABLED
 #include "rust_game_api.h"
+#endif
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -374,10 +379,12 @@ static const struct init_game_info init_game(const char *game_id, const struct g
 	if (lua_fpath != NULL) {
 		game_api = &lua_game_api;
 		L = init_lua_game(callbacks, lua_fpath);
+#ifdef ALEXGAMES_RUST_ENABLED
 	} else if (rust_game_supported(game_id, strlen(game_id))) {
 		//printf("Looks like this is a rust game!\n");
 		game_api = get_rust_api();
 		L = start_rust_game(game_id, strlen(game_id), callbacks);
+#endif
 	} else {
 		char msg[64];
 		int msg_len = snprintf(msg, sizeof(msg), "Unhandled state preview game_id=\"%s\"\n", game_id);

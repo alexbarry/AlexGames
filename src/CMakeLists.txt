@@ -207,6 +207,7 @@ add_library(lua ${LUA_CORE_SRC_LIST})
 # Rust games
 if (ENABLE_RUST_GAMES)
 
+add_compile_definitions(ALEXGAMES_RUST_ENABLED)
 
 message("Rust target is ${RUST_TARGET}")
 if (NOT RUST_TARGET)
@@ -263,7 +264,8 @@ set_target_properties(alexgames_rust PROPERTIES
 #message(FATAL_ERROR "could not find rust build output lib at ${RUST_LIB}")
 #endif()
 
-
+else()
+message("Skipping rust games because ENABLE_RUST_GAMES is OFF")
 
 endif()
 
