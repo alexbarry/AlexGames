@@ -1,4 +1,22 @@
-A collection of simple Lua games, and a web engine for playing them including an English dictionary (for word puzzles), websocket multiplayer, state sharing via URL, and auto saving with undo/redo. You can also upload your own games and play them.
+A collection of simple Lua and Rust games, and a web engine for playing them including an English dictionary (for word puzzles), websocket multiplayer, state sharing via URL, and auto saving with undo/redo. You can also upload your own games and play them.
+
+Some games incude:
+* Solitaire
+* "Word Mastermind": Guess 5 letter words, finding out if you guessed the right letter, or the right letter in the right position.
+* chess
+* "Crossword Letters": Try to make as many words as you can with the letters provided, with a crossword as a hint.
+* "Gem Match": Swap gems to make lines of three or more of the same kind.
+* Go/Weiqi/Baduk
+* Reversi
+* Checkers/Draughts
+* "Endless Runner": Tap the screen or press space bar to propel yourself upwards, dodging the endless oncoming obstacles.
+* Minesweeper
+* Fluid Mix: Rearrange the stacks where you can only move stacks onto empty stacks or stacks of the same colour, until each stack has only a single colour.
+* Backgammon
+* Cribbage
+* "Spider Swing": swing from point to point, being careful not to lose too much height or speed.
+* "Thrust": Race your space ship around the track, trying to control your momentum.
+* Gomoku/Wuziqi/Omok: Place stones on a Go board, trying to be the first to create a line of 5.
 
 The android app bundles the web version for offline play. (For network multiplayer, try the web version at https://alexbarry.github.io/AlexGames).
 
