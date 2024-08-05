@@ -24,13 +24,17 @@ jobs:
     - name: Setup docker buildx
       uses: docker/setup-buildx-action@v1
 
+    - name: Build AlexGames docker image (get build dependencies)
+      run: |
+        docker build -t alexgames_build_wasm \
+            -f docker/http_server/Dockerfile.build_wasm \
+            .
+
     - name: Build AlexGames static HTML via docker
       run: |
-        docker build -t alexgames_http_server \
-        -f docker/http_server/Dockerfile \
-        --target=export_output  \
-        --output=./public \
-        .
+        docker run --rm \
+            -v $(pwd):/app \
+            alexgames_build_wasm
 
     - name: Deploy built HTML to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
