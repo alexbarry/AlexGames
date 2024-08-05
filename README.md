@@ -8,23 +8,19 @@ Try the web version here: https://alexbarry.github.io/AlexGames
 
 ### Using docker
 
-**TL;DR:** you can simply run `sudo docker-compose up`, then navigate to http://localhost:1234 . This hosts an HTML server on port 1234, and a websocket server on port 55433. But if you want to host it on a public server, you should build the static HTML separately, copy that to your HTML server content path, and run the websocket server separately (see below).
+**TL;DR:** you can simply run `sudo docker-compose up --build`, then navigate to http://localhost:1234 . This hosts an HTML server on port 1234, and a websocket server on port 55433. But if you want to host it on a public server, you should build the static HTML separately, copy that to your HTML server content path, and run the websocket server separately (see below).
 
 #### Build and host static HTML/JS/WASM
 
-This commands build a docker image containing an HTTP server and the AlexGames static HTML, and it also outputs it to `build/wasm/out/http_out`:
+Run this script to build and run the docker image to build the HTML/WASM implementation. This mounts the project as a volume, so that incremental builds are supported. (NOTE: you will need to remove `build/wasm/out` if you have previously built from outside the docker image.)
+
 ```
-sudo docker build -t alexgames_http_server \
-	-f docker/http_server/Dockerfile \
-	--target=export_output  \
-	--output=build/wasm/out/http_out  \
-	.
-sudo chown -R "${USER}" build/wasm/out
+docker/http_server/build.sh
 ```
 
 For development purposes, you can host a simple HTTP server like this, on port 1234:
 ```
-sudo docker run -p 1234:80 alexgames_http_server
+docker/http_server/start_http_server.sh
 ```
 
 Alternatively, copy `build/wasm/out/http_out/*` to your HTTP server path.

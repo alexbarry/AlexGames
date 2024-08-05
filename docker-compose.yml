@@ -1,11 +1,19 @@
 version: '3.8'
 services:
-    http_server:
+    http_build_wasm:
         build:
             context: .
-            dockerfile: docker/http_server/Dockerfile
+            dockerfile: docker/http_server/Dockerfile.build_wasm
+        volumes:
+            - ./:/app
+    http_serve:
+        image: nginx:latest
+        volumes:
+            - ./build/wasm/out/http_out:/usr/share/nginx/html
         ports:
             - "1234:80"
+        depends_on:
+            - http_build_wasm
     ws_server:
         build:
             context: .

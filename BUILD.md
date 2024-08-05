@@ -37,22 +37,6 @@ python environment, you can run this command:
 
 	deactivate
 
-## Building zlib to wasm
-
-I'm not sure why this is sometimes necessary, I thought emscripten was supposed
-to include zlib. On some computers that I have tried building this project on,
-I did not need to perform these steps. (Though on my docker image, I did,
-so I made the default behaviour to set `ZLIB_LIBRARY` and `ZLIB_INCLUDE_DIR`
-to point to these paths)
-
-```
-cd third_party/zlib
-emconfigure ./configure
-emcmake cmake .
-# omitting emcmake below seemed to be necessary
-cmake --build .
-```
-
 ## Building AlexGames web
 
 Simply run:
