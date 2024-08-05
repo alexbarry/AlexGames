@@ -1,1 +1,1 @@
-Play simple Lua games, host web games server
+Play simple Lua/Rust games, host web games server
