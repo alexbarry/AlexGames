@@ -8,6 +8,12 @@
 #include "saved_state_db.h"
 #include "game_api_helper.h"
 #include "button_helper.h"
+
+// TODO put this in a common module
+#ifdef ALEXGAMES_RUST_ENABLED
+#include "rust_game_api.h"
+#endif
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -279,6 +285,14 @@ static void preview_draw_rect(const char *fill_colour_str, size_t fill_colour_le
                   int y_end  , int x_end) {
 	g_callbacks->draw_rect(fill_colour_str, fill_colour_len, y_start, x_start, y_end, x_end);
 }
+
+static void preview_draw_triangle(const char *fill_colour_str, size_t fill_colour_len,
+                                  int y1, int x1,
+                                  int y2, int x2,
+                                  int y3, int x3) {
+	g_callbacks->draw_triangle(fill_colour_str, fill_colour_len, y1, x1, y2, x2, y3, x3);
+}
+
 static void preview_draw_circle(const char *fill_colour_str,    size_t fill_colour_len,
                     const char *outline_colour_str, size_t outline_colour_len,
                     int y, int x, int radius, int outline_width) {
@@ -335,6 +349,7 @@ static const struct game_api_callbacks create_preview_draw_callbacks(void) {
 	callbacks.draw_line    = preview_draw_line;
 	callbacks.draw_text    = preview_draw_text;
 	callbacks.draw_rect    = preview_draw_rect;
+	callbacks.draw_triangle = preview_draw_triangle;
 	callbacks.draw_circle  = preview_draw_circle;
 	callbacks.draw_clear   = preview_draw_clear;
 	callbacks.draw_refresh = preview_draw_refresh;
@@ -345,7 +360,51 @@ static const struct game_api_callbacks create_preview_draw_callbacks(void) {
 	return callbacks;
 }
 
-extern const struct game_api lua_game_api;
+//extern const struct game_api lua_game_api;
+//extern const struct game_api *game_api;
+
+struct init_game_info {
+	bool success;
+	const struct game_api *game_api;
+	void *L;
+};
+// TODO move to common code
+static const struct init_game_info init_game(const char *game_id, const struct game_api_callbacks *callbacks,
+                                             bool switch_to_game, int session_id,
+                                             const uint8_t *saved_game_state, size_t saved_game_state_len) {
+	printf("[init] history browser init_game, game_id=\"%s\", switch_to_game=%d\n", game_id, switch_to_game);
+	void *L = nullptr;
+	const char *lua_fpath = get_lua_game_path(game_id, strlen(game_id));
+	const struct game_api *game_api = nullptr;
+	if (lua_fpath != NULL) {
+		game_api = &lua_game_api;
+		L = init_lua_game(callbacks, lua_fpath);
+#ifdef ALEXGAMES_RUST_ENABLED
+	} else if (rust_game_supported(game_id, strlen(game_id))) {
+		//printf("Looks like this is a rust game!\n");
+		game_api = get_rust_api();
+		L = start_rust_game(game_id, strlen(game_id), callbacks);
+#endif
+	} else {
+		char msg[64];
+		int msg_len = snprintf(msg, sizeof(msg), "Unhandled state preview game_id=\"%s\"\n", game_id);
+		g_callbacks->set_status_err(msg, msg_len);
+		return { false, NULL, NULL };
+	}
+
+	if (switch_to_game) {
+		printf("[init] switching to game %s\n", game_id);
+		set_game_api(game_api);
+		//printf("[init] setting game handle to \"%s\"\n", game_id);
+		g_callbacks->set_game_handle(L, game_id);
+	}
+
+
+	game_api->start_game(L, session_id, saved_game_state, saved_game_state_len);
+	game_api->update(L, 0);
+
+	return { true, game_api, L };
+}
 
 static bool load_game(history_browse_state *state) {
 	{
@@ -376,27 +435,18 @@ static bool load_game(history_browse_state *state) {
 		                          game_id,  sizeof(game_id),
 		                          date_str, sizeof(date_str),
 		                          &move_count);
-	
-		const char *fpath = get_lua_game_path(game_id, strlen(game_id));
-		if (fpath == NULL) {
-			char msg[64];
-			int msg_len = snprintf(msg, sizeof(msg), "Unhandled state preview game_id=\"%s\"\n", game_id);
-			g_callbacks->set_status_err(msg, msg_len);
-			goto err;
-		}
 
 		g_callbacks->destroy_all();
 		set_game_api(NULL);
 
 		g_callbacks->set_game_handle(NULL, "unset"); // TODO
-		void *L = start_lua_game(g_callbacks, fpath);
-		printf("[init] setting game handle to \"%s\"\n", game_id);
-		g_callbacks->set_game_handle(L, game_id);
 
-		lua_game_api.start_game(L, session_id, saved_game_state, saved_game_state_len);
-		lua_game_api.update(L, 0);
+		const struct init_game_info init_game_info = init_game(game_id, g_callbacks, true, session_id, saved_game_state, saved_game_state_len);
+		if (!init_game_info.success) {
+			goto err;
+		}
+
 		rc = true;
-
 	}
 
 	err:
@@ -441,27 +491,13 @@ void SessionSelectState::generate_state_previews(history_browse_state *state) {
 			g_callbacks->set_status_err(msg, sizeof(msg));
 		}
 	
-		// TODO need to get game ID from DB, then figure out game path from that somehow
-		//void *L = init_lua_game(&preview_draw_callbacks, "games/solitaire/solitaire_main.lua");
-		const char *fpath = get_lua_game_path(game_id, strlen(game_id));
-		if (fpath == NULL) {
-			char msg[64];
-			int msg_len = snprintf(msg, sizeof(msg), "Unhandled state preview game_id=\"%s\"\n", game_id);
-			fprintf(stderr, "Unhandled state preview game_id=\"%s\", sess=%d, date=%s\n", game_id, session_id, date_str);
-			g_callbacks->set_status_err(msg, msg_len);
+		const struct init_game_info preview_game_info = init_game(game_id, &preview_draw_callbacks, false, session_id, saved_game_state, saved_game_state_len);
+		if (!preview_game_info.success) {
 			continue;
 		}
 
-		{
-		void *L = init_lua_game(&preview_draw_callbacks, fpath);
-		//uint8_t saved_game_state[MAX_GAME_STATE_SIZE];
-		lua_game_api.start_game(L, session_id, saved_game_state, saved_game_state_len);
-		lua_game_api.update(L, 0);
-
-		lua_game_api.destroy_game(L);
+		preview_game_info.game_api->destroy_game(preview_game_info.L);
 		g_preview_game_id = nullptr;
-		//destroy_lua_game(L);
-		}
 
 		HistoryPreviewEntry *preview = new HistoryPreviewEntry();
 		// TODO also need to store some info in db like date last played, move number
@@ -672,21 +708,14 @@ void MoveSelectState::update(void *L_arg, int dt_ms) {
 	                          date_str, sizeof(date_str),
 	                          &move_count);
 
-	const char *fpath = get_lua_game_path(game_id, strlen(game_id));
-	if (fpath == NULL) {
-		char msg[64];
-		int msg_len = snprintf(msg, sizeof(msg), "Unhandled state preview game_id=\"%s\"\n", game_id);
-		g_callbacks->set_status_err(msg, msg_len);
+	const struct init_game_info init_game_info = init_game(game_id, &preview_draw_callbacks, false, session_id, saved_game_state, saved_game_state_len);
+	if (!init_game_info.success) {
+		free(saved_game_state);
 		return;
 	}
 
-	void *L = init_lua_game(&preview_draw_callbacks, fpath);
-	//uint8_t saved_game_state[MAX_GAME_STATE_SIZE];
-	lua_game_api.start_game(L, session_id, saved_game_state, saved_game_state_len);
-	lua_game_api.update(L, 0);
-
 	free(saved_game_state);
-	destroy_lua_game(L);
+	init_game_info.game_api->destroy_game(init_game_info.L);
 	g_callbacks->set_active_canvas("");
 
 	g_callbacks->draw_clear();

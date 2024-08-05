@@ -12,9 +12,59 @@ set(HTML_OUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/out/")
 
 set(ENABLE_MEM_SANITIZER 0)
 
+
+set(ENABLE_RUST_GAMES "ON")
+set(RUST_TARGET  "wasm32-unknown-emscripten" CACHE STRING "Rust build target for wasm")
+
 #set(WASM_USE_C_DICT_API OFF) # uncomment this line to try the JS dictionary instead of the C dictionary
 option(WASM_USE_C_DICT_API "Use the C implementation of the dictionary API. The alternative is something in javascript that seems to use a lot of memory" ON)
 
+
+get_filename_component(ZLIB_DIR   "${PROJECT_ROOT}/third_party/zlib/" ABSOLUTE)
+set(ALEXGAMES_ZLIB_SRC "${PROJECT_ROOT}/third_party/zlib")
+set(ALEXGAMES_ZLIB_LIB_DIR  "${ALEXGAMES_ZLIB_SRC}/build/wasm")
+set(ALEXGAMES_ZLIB_LIB_PATH "${ALEXGAMES_ZLIB_LIB_DIR}/libz.a")
+if(EXISTS ${ALEXGAMES_ZLIB_LIB_PATH})
+message("Found libz.a for wasm build at ${ALEXGAMES_ZLIB_LIB_PATH}")
+else()
+message("Building zlib (libz.a) for wasm...")
+
+IF (EXISTS ${ZLIB_DIR})
+	message("Found zlib in ${ZLIB_DIR}")
+else()
+	message("Downloading zlib into ${ZLIB_DIR}")
+	execute_process(COMMAND git clone https://github.com/madler/zlib.git ${ZLIB_DIR})
+endif()
+execute_process(COMMAND mkdir -p ${ALEXGAMES_ZLIB_LIB_DIR})
+
+execute_process(
+	COMMAND "${ALEXGAMES_ZLIB_SRC}/configure"
+	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
+)
+
+execute_process(
+	COMMAND emcmake cmake ${ALEXGAMES_ZLIB_SRC}
+	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
+)
+
+execute_process(
+	COMMAND cmake --build .
+	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
+)
+execute_process(
+	COMMAND cp ${ALEXGAMES_ZLIB_SRC}/zconf.h ${ALEXGAMES_ZLIB_LIB_DIR}
+)
+execute_process(
+	COMMAND cp ${ALEXGAMES_ZLIB_SRC}/zlib.h ${ALEXGAMES_ZLIB_LIB_DIR}
+)
+
+execute_process(COMMAND ls ${ALEXGAMES_ZLIB_LIB_PATH})
+if (EXISTS ${ALEXGAMES_ZLIB_LIB_PATH})
+message("Succssfully built ${ALEXGAMES_ZLIB_LIB_PATH}")
+else()
+message(FATAL_ERROR "Unable to build zlib for wasm (could not find output libz.a at ${ALEXGAMES_ZLIB_LIB_PATH}")
+endif()
+endif()
 
 # TODO would like to make cmake rebuild if lua_scripts change, not sure how to do that
 
@@ -124,6 +174,11 @@ list(APPEND EMCC_COMPILE_OPTS
 	"-Wno-error=sign-compare"
 	"-Wno-unused-main"
     "-O3")
+
+if (ALEXGAMES_DEBUG_BUILD)
+list(APPEND EMCC_COMPILE_OPTS
+    "-g")
+endif()
 
 if (ENABLE_MEM_SANITIZER)
 list(APPEND EMCC_COMPILE_OPTS

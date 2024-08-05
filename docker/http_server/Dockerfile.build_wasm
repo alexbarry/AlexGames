@@ -1,6 +1,6 @@
 # TODO have the ws and http server inherit from a common image
 # to avoid duplicating so many dependencies
-FROM nginx:latest as base
+FROM nginx:latest AS base
 
 # Install OS dependencies
 # TODO double check that all of these are actually needed
@@ -29,55 +29,28 @@ ENV PATH="/alexgames_python_venv/bin:$PATH"
 RUN pip3 install wordfreq # needed to generate dictionary file
 
 # Install Emscripten
-WORKDIR /app
+WORKDIR /
 RUN if [ ! -f "emsdk" ]; then \
 	echo "Cloning emsdk repo..."; \
 	git clone https://github.com/emscripten-core/emsdk.git emsdk ; \
 else \
 	echo "emsdk repo already present"; \
 fi
-WORKDIR /app/emsdk
+WORKDIR /emsdk
 RUN ./emsdk install latest
 RUN ./emsdk activate latest
 RUN . ./emsdk_env.sh
-ENV PATH="${PATH}:/app/emsdk"
-#ENV EM_CONFIG="/root/.emscripten"
+ENV PATH="${PATH}:/emsdk"
 RUN /bin/bash -c "source ./emsdk_env.sh"
-ENV PATH="${PATH}:/app/emsdk/upstream/emscripten"
+ENV PATH="${PATH}:/emsdk/upstream/emscripten"
 RUN emcc --version
 
+# Install rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN rustup target add wasm32-unknown-emscripten
 
-# Install and build zlib for wasm (using emscripten)
-WORKDIR /app/third_party/
-RUN if [ ! -d "zlib" ]; then \
-	git clone https://github.com/madler/zlib.git ; \
-fi
-WORKDIR /app/third_party/zlib/
-RUN if [ ! -f "libz.a" ]; then \
-	emconfigure ./configure ; \
-	emcmake cmake . ; \
-	# omitting emcmake below seemed to be necessary \
-	cmake --build . ; \
-fi
-RUN ls libz.a
-
-
-
-
-
-# Build alexgames
+FROM base AS build_alexgames
 WORKDIR /app
-COPY . .
-#RUN mkdir -p build/wasm/out/
-#RUN mkdir -p build/wasm/out/http_out
-WORKDIR build/wasm/
-RUN bash ./build.sh
 
-# Copy build output to nginx serving path
-RUN cp -r out/http_out/* /usr/share/nginx/html/
-
-FROM scratch as export_output
-COPY --from=base /app/build/wasm/out/http_out/ /
-
-FROM base as server
-# Use base nginx entrypoint to host HTTP server
+CMD ["bash", "build/wasm/build.sh" ]

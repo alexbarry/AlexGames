@@ -42,6 +42,12 @@ extern "C" {
 
 typedef int64_t touch_id_t;
 
+//typedef uint64_t time_ms_t;
+//typedef uint64_t time_ms_t;
+// TODO when rust adds a wasm64-unknown-emscripten target,
+// I think I can change this to uint64_t
+typedef uint32_t time_ms_t;
+
 struct touch_info {
 	// TODO should make sure these aren't packed?
 	touch_id_t id;
@@ -251,7 +257,7 @@ struct game_api_callbacks {
 	void (*disable_evt)(const char *evt_id_str, size_t evt_id_len);
 	// TODO change the return type of `get_time_ms` to `unsigned long` or whatever
 	// time usually is.
-	long (*get_time_ms)(void);
+	time_ms_t (*get_time_ms)(void);
 	size_t (*get_time_of_day)(char *time_str, size_t max_time_str_len);
 	void (*store_data)(void *L, const char *key, const uint8_t *value, size_t value_len);
 

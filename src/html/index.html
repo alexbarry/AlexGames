@@ -435,6 +435,16 @@ TODO add session ID to options, maybe show other players that are connected
 </div>
 </div>
 
+<div id="game_row_gem_match" class="game_row">
+<h2 class="game_title">"Gem Match"</h2>
+<div class="game_wrapper"><img class="game_icon" src="img/game_icons/gem_match.png"/></div>
+<div class="description">
+<p>Single player.</p>
+<p>Swap gems to make lines of three or more.</p>
+</div>
+</div>
+
+
 <div id="game_row_go" class="game_row">
 <h2 class="game_title">Go/Weiqi/Baduk</h2>
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/go.png"/></div>
@@ -442,6 +452,15 @@ TODO add session ID to options, maybe show other players that are connected
 <p>Local or network multiplayer: 2 players.</p>
 <p>Win by controlling more territory than your opponent, and capture their groups of stones by surrounding them.</p>
 <p><strong>NOTE:</strong> this game does not yet support AI opponents, or even displaying territory or determining who wins.</p>
+</div>
+</div>
+
+<div id="game_row_reversi" class="game_row">
+<h2 class="game_title">Reversi</h2>
+<div class="game_wrapper"><img class="game_icon" src="img/game_icons/reversi.png"/></div>
+<div class="description">
+<p>Local multiplayer.</p>
+<p>You can only move when jumping one or more of your opponent's pieces, and then they all "reverse" to become yours.</p>
 </div>
 </div>
 
@@ -567,6 +586,8 @@ let game_choice_row_infos = [
 	{ row_id: "game_row_go",           game_id: "go" },
 	{ row_id: "game_row_checkers",     game_id: "checkers" },
 	{ row_id: "game_row_solitaire",    game_id: "solitaire" },
+	{ row_id: "game_row_gem_match",    game_id: "gem_match" },
+	{ row_id: "game_row_reversi",      game_id: "reversi" },
 	{ row_id: "game_row_minesweeper",  game_id: "minesweeper" },
 	{ row_id: "game_row_endless_runner",  game_id: "endless_runner" },
 	{ row_id: "game_row_fluid_mix",    game_id: "fluid_mix" },
@@ -1034,14 +1055,21 @@ document.getElementById("btn_close_game_choice_popup").addEventListener('click',
 	set_game_choice_popup_visible(false);
 });
 
+function update_colour_pref(colour_pref) {
+	set_html_colour_theme(colour_pref);
+	update(gfx.ptr);
+}
+
 const select_user_colour_pref = document.getElementById("select_user_colour_pref");
 select_user_colour_pref.addEventListener("change", function () {
+	console.log("[colour_pref] User changed colour preference dropdown");
 	let idx = select_user_colour_pref.selectedIndex;
 	let value = select_user_colour_pref.options[idx].value;
 	set_user_colour_pref(value);
-	set_html_colour_theme(value);
-	update(gfx.ptr);
+	update_colour_pref(value);
 });
+
+set_on_colour_theme_change_handler(update_colour_pref);
 
 document.getElementById("btn_force_refresh").addEventListener('click', function () {
 	window.location.reload();

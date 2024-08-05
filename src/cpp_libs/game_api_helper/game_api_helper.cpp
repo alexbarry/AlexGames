@@ -44,7 +44,7 @@ static int update_timer_ms(int update_period_ms) { return 0; }
 static void delete_timer(int handle) {}
 static void enable_evt(const char *evt_id_str, size_t evt_id_len) {}
 static void disable_evt(const char *evt_id_str, size_t evt_id_len) {}
-static long get_time_ms(void) { return 0; }
+static time_ms_t get_time_ms(void) { return 0; }
 static size_t get_time_of_day(char *time_str, size_t max_time_str_len) { return 0; }
 
 static void store_data(void *L, const char *key, const uint8_t *value, size_t value_len) {}

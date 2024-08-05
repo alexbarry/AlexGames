@@ -415,7 +415,7 @@ EM_JS(void, js_disable_evt, (const char *evt_id_ptr, size_t evt_id_len), {
 });
 
 // TODO this seems to only return the last 32 bits of the time.
-EM_JS(long, js_get_time_ms, (), {
+EM_JS(time_ms_t, js_get_time_ms, (), {
 	return alexgames_get_time_ms();
 });
 
