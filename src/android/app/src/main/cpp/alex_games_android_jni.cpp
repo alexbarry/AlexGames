@@ -383,7 +383,7 @@ static void jni_delete_timer(jint handle) {
 static void jni_enable_evt(const char *evt_id_str, size_t evt_id_len) {
 	// TODO
 }
-static long jni_get_time_ms(void) {
+static time_ms_t jni_get_time_ms(void) {
 	// TODO
 	return 0;
 }
