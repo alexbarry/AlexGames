@@ -36,6 +36,11 @@ jobs:
             -v $(pwd):/app \
             alexgames_build_wasm
 
+    - name: Copy AlexGames static HTML to hosting path
+      run: |
+        mkdir -p public && \
+        cp -r build/wasm/out/http_out/* ./public
+
     - name: Deploy built HTML to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
