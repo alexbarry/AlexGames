@@ -60,3 +60,6 @@ See BUILD.md. I find this much more convenient for incremental builds.
 
 * Email: `alexbarry.dev2 [ at ] gmail.com`.
 * Matrix: [`#alexgames:matrix.org`](https://matrix.to/#/#alexgames:matrix.org)
+* Github: https://github.com/alexbarry/AlexGames
+* Discord: https://discord.gg/rhy8SuHPYU
+* Lemmy: [`!alexgames@lemmy.ca`](https://lemmyverse.link/c/alexgames@lemmy.ca)
