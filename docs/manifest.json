@@ -1,0 +1,15 @@
+{
+	"name": "AlexGames",
+	"short_name": "AlexGames",
+	"start_url": ".",
+	"display": "standalone",
+	"description": "Play simple games in your browser, alone, with friends on the same device, or with friends over the internet by sharing a link with them.",
+	"background_color": "#000",
+	"icons": [
+		{
+			"src": "icon/logo.png",
+			"sizes": "any"
+		}
+	],
+	"splash_pages": null
+}
