@@ -2,7 +2,7 @@
 <html manifest="cache.manifest">
 <head>
 	<meta charset="utf-8"/>
-	<meta name="description" content="Collection of simple Lua games that can be played in your browser. Includes solitaire, word games, chess, go, checkers. Supports local or websocket multiplayer."/>
+	<meta name="description" content="Collection of simple Lua and Rust games that can be played in your browser. Includes solitaire, word games, chess, go, checkers. Supports local or websocket multiplayer."/>
 	<meta name="keywords" content="games, simple, board games, lua, multiplayer, solitaire, chess, go, checkers"/>
 	<meta name="author" content="Alex Barry"/>
 	<!-- setting maximum-scale=1 to prevent auto zooming in on input fields in safari mobile.
@@ -244,38 +244,20 @@ Your browser doesn't support canvases.
 
 
 <div id="game_button_row" class="button_row">
-<!-- TODO these buttons should be instantiated from Lua, they are game dependent.
-     I am just putting them here for now to see how it looks in pure JS before
-     making it more complicated -->
-<!--
-<button style="flex:1">Undo</button>
-<button style="flex:1">Redo</button>
-<button style="flex:2">Pass</button>
--->
+<!-- Buttons are added here from the game API -->
 </div>
 
-<!-- TODO this popup should also be instantiated from Lua, or at least hidden by default
-     but Lua decides when to show it and what content to populate it with.
-     Maybe for now it is okay to define a "choice popup" that shows a message
-     like this with a header, some text, and some number of buttons. -->
 <div id="popup" class="popup game_popup" style="display:none">
-<!--
-<h2>Choose piece colour</h2>
-<p>Black moves first.</p>
-<p>The other player has not yet chosen.</p>
-<p>The other player has chosen <em>white</em>.</p>
-<button>Black</button>
-<button>White</button>
--->
+<!-- This popup is populated and set visible by the game API -->
 </div>
 
 <div class="overlay" style="display:none"></div>
-
 </div>
 
 </div>
 
 
+<!-- This is made visible when the user presses the "Options" button -->
 <div id="options_popup" class="popup meta_popup options_popup" style="display:none">
 <button id="btn_close_options" class="close_button">X</button>
 <div class="popup_content_wrapper">
@@ -301,6 +283,7 @@ Your browser doesn't support canvases.
 </div>
 
 <h3>Game options</h3>
+<!-- These options are populated by the game API -->
 <div id="game_options">
 <div id="game_options_none_placeholder">
 <p>This game has not defined any options. <span class="dev_note not_supported">(For developers: call the <code>add_game_option</code> API to add options here. This is useful for less commonly used options like starting a new game.)</span></p>
@@ -617,13 +600,13 @@ for (let game_choice_row_info of game_choice_row_infos) {
 <div class="popup_content_wrapper">
 <h2 class="title">About AlexGames</h2>
 
-<p>AlexGames is a platform for simple games written in Lua or C/C++, currently supporting HTML (the page you are currently visiting), and experimental implementations in Android, and Windows/MacOS/Linux (using wxWidgets). The idea is that someone can throw together the "fun parts" of a game in a few hundred lines of Lua or C++, and then the boilerplate to get it running on their platform of choice should be already taken care of. Adding support for a new platform should be relatively easy.</p>
+<p>AlexGames is a platform for simple games written in Lua, Rust, or C/C++, currently supporting HTML (the page you are currently visiting), and experimental implementations in Android, and Windows/MacOS/Linux (using wxWidgets). The idea is that someone can throw together the "fun parts" of a game in a few hundred lines of Lua, Rust, or C++, and then the boilerplate to get it running on their platform of choice should be already taken care of. Adding support for a new platform should be relatively easy.</p>
 
-<p>For further convenience (both for game developers and game players), you can develop and/or play your own game just by uploading a bundle of Lua code to the browser client. If you want to put together a simple game, but don't want to bother building this project, you shouldn't need to: just download <a href="example_game_apidemo.zip">the example Lua game zip</a>, consult the <a href="game_api_doc.html" target="_blank">Lua API reference</a>, and then you can modify the existing example Lua code or write your own, and then zip your files. Then you can upload that zip file into the web client, or send it to a friend.</p>
+<p>For further convenience (both for game developers and game players), you can develop and/or play your own Lua game just by uploading a bundle of Lua code to the browser client. If you want to put together a simple game, but don't want to bother building this project, you shouldn't need to: just download <a href="example_game_apidemo.zip">the example Lua game zip</a>, consult the <a href="game_api_doc.html" target="_blank">Lua API reference</a>, and then you can modify the existing example Lua code or write your own, and then zip your files. Then you can upload that zip file into the web client, or send it to a friend.</p>
 
 <p>It also supports some helpful features like a built in English dictionary (for word puzzle games), sharing state via URL, and saving state and browsing previously saved states. Previews of saved states are generated using the same code the programmer wrote to  render the game itself. The logic for handling this is included as a library to the game platform itself: very little extra code should be needed for game developers or developers of new "clients" (more on what a "client" is below).</p>
 
-<p>One of the goals is for the API to be very convenient both for game developers, and for developers of new "clients". In this context a "client" is a platform that the game is built for: there is a client for browsers, developed in HTML/JS/WASM, a native Android client, and a wxWidgets client that allows for playing games natively on Windows, MacOS, and Linux.</p>
+<p>One of the goals is for the API to be very convenient both for game developers, and for developers of new "platforms". In this context a "platform" is a device that the game is built for: there is a platform for browsers, developed in HTML/JS/WASM, a native Android platform, and a wxWidgets platform that allows for playing games natively on Windows, MacOS, and Linux.</p>
 
 <p>Created by <a href="https://github.com/alexbarry">Alex Barry</a>. You are encouraged to submit comments, bug reports, feature requests, or say hi at:</p>
 
@@ -642,6 +625,7 @@ for (let game_choice_row_info of game_choice_row_infos) {
 <li><a href="https://lua.org"><img alt="Lua Logo" src="img/credits/Lua-Logo_128x128.png" width="48" height="48"/></a> A lightweight scripting language that integrates very nicely with C</li>
 <li><a href="https://cmake.org">CMake</a>: cross platform build system</li>
 <li><a href="https://emscripten.org">Emscripten</a>: compile C/C++ to WebAssembly</li>
+<li><a href="https://www.rust-lang.org/">Rust (Language)</a>: a much nicer alternative to C++ which still integrates nicely with C++ and has great support for WebAssembly.</li>
 </ul>
 <!-- The others don't explicitly say to include their logo, so I'm not sure if I should. -->
 <p>See more in the <a href="licenses.html" target="_blank">licenses page</a>.</p>
