@@ -1,2 +1,2 @@
-pub mod swipe_tracker;
 pub mod point;
+pub mod swipe_tracker;
