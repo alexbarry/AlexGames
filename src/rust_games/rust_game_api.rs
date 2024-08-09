@@ -401,10 +401,9 @@ impl CCallbacksPtr {
 }
 
 pub trait AlexGamesApi {
-	// TODO maybe this function can return a reference instead?
-	fn callbacks(&self) -> *const CCallbacksPtr;
+	fn callbacks(&self) -> &CCallbacksPtr;
 
-	fn init(&mut self, callbacks: *const CCallbacksPtr);
+	fn init(&mut self, callbacks: &'static CCallbacksPtr);
 	fn start_game(&mut self, state: Option<(i32, Vec<u8>)>);
 	fn update(&mut self, dt_ms: i32);
 	fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32);

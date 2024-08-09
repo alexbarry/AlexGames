@@ -34,7 +34,7 @@ pub struct TouchInfoCStruct {
 }
 
 
-fn get_rust_game_init_func(game_id: &str) -> Option<fn(*const CCallbacksPtr) -> Box<dyn AlexGamesApi>> {
+fn get_rust_game_init_func(game_id: &str) -> Option<fn(&'static CCallbacksPtr) -> Box<dyn AlexGamesApi + '_>> {
 	return match game_id {
 		"reversi"   => Some(reversi_main::init_reversi),
 		"gem_match" => Some(gem_match_main::init_gem_match),
@@ -182,7 +182,7 @@ pub extern "C" fn rust_game_api_get_state(handle: *mut c_void, state_out: *mut u
 	let state = state.expect("state should be some at this point");
 
 	if state.len() > state_out_max_len {
-		unsafe { handle.callbacks().as_ref().expect("callbacks null?") }.set_status_err(&format!("get_state: state is {} bytes long but buffer is only {}", state_out_max_len, state.len()));
+		handle.callbacks().set_status_err(&format!("get_state: state is {} bytes long but buffer is only {}", state_out_max_len, state.len()));
 		// TODO can I return -1 here? I don't know if I even checked for this case
 		// before.
 		return 0;
@@ -213,6 +213,8 @@ pub extern "C" fn start_rust_game_rust(game_str_ptr: *const u8, game_str_len: si
 	println!("Game ID is {}, hello from rust!", game_id);
 
 	let game_init_fn = get_rust_game_init_func(&game_id).expect("game id not handled by rust");
+
+	let callbacks = unsafe { callbacks.as_ref().expect("callbacks null?") };
 
 	let api = game_init_fn(callbacks);
 

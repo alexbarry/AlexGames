@@ -55,7 +55,6 @@ fn save_state(&self) {
 fn load_state_offset(&mut self, offset: i32) {
 	println!("load_state_offset({})", offset);
 	let session_id = self.game_state.session_id;
-	//let saved_state = unsafe { self.callbacks.as_ref().expect("callbacks null?").adjust_saved_state_offset(session_id, offset) };
 	let saved_state = self.callbacks.adjust_saved_state_offset(session_id, offset);
 	let saved_state = saved_state.expect("saved state is none from adjust_saved_state_offset?");
 	self.set_state(&saved_state, session_id);
@@ -186,15 +185,9 @@ fn draw_state(&self) {
 impl AlexGamesApi for AlexGamesReversi {
 
 
-	fn callbacks(&self) -> *const CCallbacksPtr {
+	fn callbacks(&self) -> &CCallbacksPtr {
 		self.callbacks
 	}
-
-	/*
-	fn callbacks_ref(&self) -> &CCallbacksPtr {
-		unsafe { self.callbacks.as_ref().expect("callbacks null?") }
-	}
-	*/
 
 fn update(&mut self, _dt_ms: i32) {
 	//println!("rust: update called");
@@ -278,29 +271,21 @@ fn get_state(&self) -> Option<Vec<u8>> {
 }
 
 //fn init(_callbacks: &rust_game_api::Callbacks) -> Box <dyn rust_game_api::GameState> {
-fn init(&mut self, callbacks: *const rust_game_api::CCallbacksPtr) {
-	self.game_state= reversi_core::State::new();
-
-	unsafe {
-		// TODO make wrappers for all of these on the callbacks, I guess?
-		// maybe change everything to call handle.callbacks.create_btn instead of
-		// defining the wrappers being defined on the game state, which is made
-		// at the common level, I guess.
-		let callbacks = callbacks.as_ref().expect("callbacks null?");
-		callbacks.create_btn(BTN_ID_UNDO, "Undo", 1);
-		callbacks.create_btn(BTN_ID_REDO, "Redo", 1);
-		callbacks.set_btn_enabled(BTN_ID_UNDO, false);
-		callbacks.set_btn_enabled(BTN_ID_REDO, false);
-	}
+fn init(&mut self, callbacks:  &rust_game_api::CCallbacksPtr) {
+	self.game_state = reversi_core::State::new();
+	callbacks.create_btn(BTN_ID_UNDO, "Undo", 1);
+	callbacks.create_btn(BTN_ID_REDO, "Redo", 1);
+	callbacks.set_btn_enabled(BTN_ID_UNDO, false);
+	callbacks.set_btn_enabled(BTN_ID_REDO, false);
 }
 
 
 }
 
-pub fn init_reversi(callbacks: *const rust_game_api::CCallbacksPtr) -> Box<dyn AlexGamesApi> {
+pub fn init_reversi(callbacks: &'static rust_game_api::CCallbacksPtr) -> Box<dyn AlexGamesApi + 'static> {
 	let mut reversi = AlexGamesReversi {
 		game_state: reversi_core::State::new(),
-		callbacks: unsafe { callbacks.as_ref().expect("callbacks null?") },
+		callbacks: callbacks,
 	};
 	reversi.init(callbacks);
 	Box::from(reversi)

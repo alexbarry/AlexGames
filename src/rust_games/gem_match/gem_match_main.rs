@@ -17,7 +17,6 @@
 // * maybe make the "touch to cursor event" thing default behaviour, so
 //   games that support mouse events will also get free touch handling.
 // * change touch event IDs from strings to an enum
-// * remove unsafe in all games, pass reference to callbacks instead of pointer
 // * maybe use macro to generate callback wrappers
 // * add default implementation to all callbacks
 //
@@ -81,7 +80,7 @@ impl AlexGamesGemMatch {
 
 
 impl AlexGamesApi for AlexGamesGemMatch {
-	fn callbacks(&self) -> *const CCallbacksPtr {
+	fn callbacks(&self) -> &CCallbacksPtr {
 		self.callbacks
 	}
 
@@ -205,9 +204,8 @@ impl AlexGamesApi for AlexGamesGemMatch {
 
 
 
-	fn init(&mut self, callbacks: *const rust_game_api::CCallbacksPtr) {
+	fn init(&mut self, callbacks:  &rust_game_api::CCallbacksPtr) {
 		self.state = State::new(); 
-		let callbacks = unsafe { callbacks.as_ref().expect("callbacks null?") };
 		callbacks.enable_evt("mouse_move");
 		callbacks.enable_evt("mouse_updown");
 		callbacks.enable_evt("touch");
@@ -215,8 +213,7 @@ impl AlexGamesApi for AlexGamesGemMatch {
 	}
 }
 
-pub fn init_gem_match(callbacks: *const rust_game_api::CCallbacksPtr) -> Box<dyn AlexGamesApi> {
-	let callbacks = unsafe { callbacks.as_ref().expect("callbacks null?") };
+pub fn init_gem_match(callbacks: &'static rust_game_api::CCallbacksPtr) -> Box<dyn AlexGamesApi + '_> {
 	let mut api = AlexGamesGemMatch {
 		state: State::new(),
 		callbacks: callbacks,
