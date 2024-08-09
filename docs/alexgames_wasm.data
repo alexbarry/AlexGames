@@ -1484,7 +1484,8 @@ function draw.draw(state)
 	local y_pos = text_size + padding
 	local x_pos = padding
 
-	-- Draw text on the screen
+	-- Draw text on the screen, with a background
+	alexgames.draw_rect("#88888888", 0, 0, y_pos + padding, g_board_width)
 	alexgames.draw_text(msg, text_color,
 	                     y_pos, x_pos,
 	                     text_size,
@@ -1563,6 +1564,8 @@ function draw.draw(state)
 
 	-- Show text indicating user input to help debug, also
 	-- explain to user how they can provide input to move the ball.
+	-- Draw a background first, so the text is visible in light or dark mode
+	alexgames.draw_rect("#88888888", g_board_height - 3*padding - 2*text_size, 0, g_board_height, g_board_width)
 	if state.mouse_down then
 		alexgames.draw_text(string.format('Mouse pos: {y=%3.0f, x=%3.0f}', state.user_input_pos_y, state.user_input_pos_x), text_color,
 		                     g_board_height - padding, padding,
