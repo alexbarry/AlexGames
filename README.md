@@ -8,6 +8,25 @@ Try the web version here: https://alexbarry.github.io/AlexGames
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/net.alexbarry.alexgames/)
 
+Some games incude:
+* [Solitaire](src/lua_scripts/games/solitaire) (Lua)
+* ["Word Mastermind"](src/lua_scripts/games/word_mastermind) (Lua): Guess 5 letter words, finding out if you guessed the right letter, or the right letter in the right position.
+* [Chess](src/lua_scripts/games/chess) (Lua)
+* ["Crossword Letters"](src/lua_scripts/games/crossword_letters) (Lua): Try to make as many words as you can with the letters provided, with a crossword as a hint.
+* ["Gem Match"](src/rust_games/gem_match) (Rust): Swap gems to make lines of three or more of the same kind.
+* [Go/Weiqi/Baduk](src/lua_scripts/games/go) (Lua)
+* [Reversi](src/rust_games/reversi) (Rust)
+* [Checkers/Draughts](src/lua_scripts/games/checkers) (Lua)
+* ["Endless Runner"](src/lua_scripts/games/endless_runner) (Lua): Tap the screen or press space bar to propel yourself upwards, dodging the endless oncoming obstacles.
+* [Minesweeper](src/lua_scripts/games/minesweeper) (Lua)
+* [Fluid Mix](src/lua_scripts/games/fluid_mix) (Lua): Rearrange the stacks where you can only move stacks onto empty stacks or stacks of the same colour, until each stack has only a single colour.
+* [Backgammon](src/lua_scripts/games/backgammon) (Lua)
+* [Cribbage](src/lua_scripts/games/crib) (Lua)
+* ["Spider Swing"](src/lua_scripts/games/spider_swing) (Lua): swing from point to point, being careful not to lose too much height or speed.
+* ["Thrust"](src/lua_scripts/games/thrust) (Lua): Race your space ship around the track, trying to control your momentum.
+* [Gomoku/Wuziqi/Omok](src/lua_scripts/games/go) (Lua): Place stones on a Go board, trying to be the first to create a line of 5.
+
+
 ## Brief technical overview
 
 High level:
@@ -22,6 +41,7 @@ High level:
 The web version is polished and fairly robust. The wxWidgets and Android native versions serve more as proof of concepts for now, demonstrating how relatively easy it is to bring up a new platform that supports all the games. But they are lacking some functionality.
 
 Some other cool features:
+* Handling arbitrary game uploads: You can write your own Lua game ([see this example Lua game for reference](src/lua_scripts/games/api_demo)), zip it, and upload it to the browser version in the "Options" menu. This doesn't actually send your game over the network, it simply writes it to the Emscripten virtual filesystem on the AlexGames page running in your browser. Then I use libzip to unzip it locally, and treat it similar to the preloaded games. See [`fileReader.onload` in `index.html`](src/html/index.html) for the Javascript web calls, and the C implementation of these APIs can be found in [`game_api.c`](https://github.com/alexbarry/AlexGames/blob/main/src/game_api/game_api.c). (NOTE: this is intended for easily sharing a game with your friends, without having to download and build this repo. But if you are interested in submitting a game then I'd be very happy, see the "Contributing" section in this README)
 * [History Browser](src/cpp_libs/history_browse_ui/history_browse_ui.cpp) allows you to view previously saved game states, including a preview. The history browser code itself implements the same API as the games, so it should be easy to support it on a new platform. The history browser code also uses the games' code to render previews, meaning it runs them as games within itself, which is also implementing the game interface.
 * [Saved State database](src/cpp_libs/saved_state_db) to keep the API simple, the only persistent state is writing to key value pairs (based on HTML local storage). The "saved state database" is a C++ wrapper to allow games to simply call `save_state` with a `uint8_t` array  every time there is a state change, and the saved state database keeps track of the move ID. It also handles distinguishing between game sessions, and supports undo/redo and loading initial state on game start (e.g. browser refresh).
 * _(Experimental)_ [Android web games server](src/android/app/src/main/java/net/alexbarry/alexgames/server): this isn't often a useful feature, but if you had a WiFi network with no public internet access, and IP isolation isn't enforced, you could use a phone with the AlexGames Android app to host the simple static HTTP and websocket server. This would allow you to play games with your friends on your local network, without relying on the public internet.
@@ -73,6 +93,14 @@ If you copied it to your existing HTTP server, then you should be able to open i
 ### How to build manually
 
 See BUILD.md. I find this much more convenient for incremental builds.
+
+## Contributing
+
+I would be very happy if anyone wants to add their own game, or implement the API on a new platform. Feel free to contact me if you are interested. I would be happy to guide you through the code or investigate any bugs you are running into.
+
+The goal is that both adding a new game or supporting a new platform should be fairly easy.
+
+If you would like to add a new API for your game, then consider briefly discussing it with me first. If it is something that could be handled by the other APIs without much difficulty, a library is preferred. Ideally each platform should have to implement as few APIs as possible.
 
 ## Contact
 
