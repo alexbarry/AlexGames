@@ -995,15 +995,14 @@ document.getElementById("input_upload_game_bundle").addEventListener("change", f
 });
 document.getElementById("btn_process_uploaded_game_bundle").addEventListener('click', function () {
 
-	let fileReader = new FileReader()
+	let fileReader = new FileReader();
 	fileReader.onload = function () {
 		console.debug("File onload");
 		// Write the file to the emscripten file system
-		let fname = "/derp.txt";
+		let fname = "/tmp_game_upload.zip";
 		let f = new_file(null, fname);
-		//write_to_file(null, f, [10, 20, 30, 40, 50, 60, 70, 80, 1, 2, 3, 4, 5, 6]);
-		console.log(fileReader.result);
-		console.log(new DataView(fileReader.result));
+		console.log('[game_upload] fileReader.result =', fileReader.result);
+		//console.log(new DataView(fileReader.result));
 		//dump_array_buffer(new DataView(fileReader.result));
 		write_array_buffer_to_file(null, f, fileReader.result);
 		close_file(null, f);
@@ -1011,14 +1010,14 @@ document.getElementById("btn_process_uploaded_game_bundle").addEventListener('cl
 		unzip_file(null, fname, "/upload/game1");
 		//dump_file(null, fname);
 
-		console.log("[init] read uploaded game file, calling game_chosen('upload')");
-		// TODO get this from lua_api.h ?
+		console.log("[init][game_upload] read uploaded game file, calling game_chosen('upload')");
+		// TODO get this "upload" ID from lua_api.h ?
 		game_chosen("upload");
-	}
+	};
 	fileReader.onerror = function (e) {
 		set_status_err(gfx, "Error reading uploaded game file");
 		console.error("Error reading uploaded game file", e);
-	}
+	};
 
 	let file = document.getElementById("input_upload_game_bundle").files[0];
 	console.debug("Reading ", file);
