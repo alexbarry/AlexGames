@@ -62,7 +62,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmp1xjvo3_b.js
+// include: /tmp/tmp6n2r2012.js
 
   if (!Module.expectedDataFileDownloads) {
     Module.expectedDataFileDownloads = 0;
@@ -280,21 +280,21 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
 
   })();
 
-// end include: /tmp/tmp1xjvo3_b.js
-// include: /tmp/tmp3xzujkeo.js
+// end include: /tmp/tmp6n2r2012.js
+// include: /tmp/tmpwkjdgki2.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmp3xzujkeo.js
-// include: /tmp/tmpgcmbqqjb.js
+  // end include: /tmp/tmpwkjdgki2.js
+// include: /tmp/tmptoeu8_5m.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpgcmbqqjb.js
+  // end include: /tmp/tmptoeu8_5m.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -1175,7 +1175,7 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  264179: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  264339: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
@@ -5794,6 +5794,18 @@ function invoke_iiiii(index,a1,a2,a3,a4) {
   }
 }
 
+function invoke_ji(index,a1) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+    return 0n;
+  }
+}
+
 function invoke_jiii(index,a1,a2,a3) {
   var sp = stackSave();
   try {
@@ -5803,6 +5815,28 @@ function invoke_jiii(index,a1,a2,a3) {
     if (!(e instanceof EmscriptenEH)) throw e;
     _setThrew(1, 0);
     return 0n;
+  }
+}
+
+function invoke_viiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_d(index) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)();
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
   }
 }
 
@@ -5862,29 +5896,6 @@ function invoke_iijii(index,a1,a2,a3,a4) {
   }
 }
 
-function invoke_ji(index,a1) {
-  var sp = stackSave();
-  try {
-    return getWasmTableEntry(index)(a1);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-    return 0n;
-  }
-}
-
-function invoke_viiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7,a8,a9);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
 function invoke_viiiidi(index,a1,a2,a3,a4,a5,a6) {
   var sp = stackSave();
   try {
@@ -5900,17 +5911,6 @@ function invoke_dd(index,a1) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
-function invoke_d(index) {
-  var sp = stackSave();
-  try {
-    return getWasmTableEntry(index)();
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
