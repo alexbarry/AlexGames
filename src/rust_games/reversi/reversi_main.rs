@@ -73,7 +73,9 @@ impl AlexGamesReversi {
     }
 
     fn draw_state(&self) {
-        self.callbacks.draw_clear();
+        let callbacks = self.callbacks;
+        let state = &self.game_state;
+        callbacks.draw_clear();
         //println!("rust: draw_state called");
         let board_size_flt = reversi_core::BOARD_SIZE as f64;
         let height = CANVAS_HEIGHT as f64;
@@ -88,9 +90,11 @@ impl AlexGamesReversi {
         let highlight_fill;
         let highlight_outline;
 
-        let user_colour_pref = self.callbacks.get_user_colour_pref();
+        let user_colour_pref = callbacks.get_user_colour_pref();
         let user_colour_pref = &user_colour_pref as &str; // TODO why do I need to do this?
-                                                          //println!("reversi user_colour_pref is '{}'", user_colour_pref);
+
+        //println!("reversi user_colour_pref is '{}'", user_colour_pref);
+
         match user_colour_pref {
             "dark" | "very_dark" => {
                 bg_colour = "#003300";
@@ -130,14 +134,13 @@ impl AlexGamesReversi {
         let cell_height = height / board_size_flt;
         let cell_width = width / board_size_flt;
 
-        self.callbacks
-            .draw_rect(bg_colour, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        callbacks.draw_rect(bg_colour, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         let line_size = 1;
         for y in 1..reversi_core::BOARD_SIZE {
             let y = y as i32;
             let cell_height = cell_height as i32;
-            self.callbacks.draw_line(
+            callbacks.draw_line(
                 bg_line_colour,
                 line_size,
                 y * cell_height,
@@ -149,7 +152,7 @@ impl AlexGamesReversi {
         for x in 1..reversi_core::BOARD_SIZE {
             let x = x as i32;
             let cell_width = cell_width as i32;
-            self.callbacks.draw_line(
+            callbacks.draw_line(
                 bg_line_colour,
                 0,
                 line_size,
@@ -170,7 +173,7 @@ impl AlexGamesReversi {
 
                 let y1 = (y / board_size_flt * height) as i32;
                 let x1 = (x / board_size_flt * width) as i32;
-                let player_colour = match self.game_state.cell(Pt {
+                let player_colour = match state.cell(Pt {
                     y: y as i32,
                     x: x as i32,
                 }) {
@@ -183,21 +186,11 @@ impl AlexGamesReversi {
                 if let Some(colour) = player_colour {
                     let radius = (cell_height / 2.0 - 3.0) as i32;
 
-                    self.callbacks.draw_circle(
-                        colour,
-                        piece_outline_colour,
-                        circ_y,
-                        circ_x,
-                        radius,
-                        2,
-                    );
-                } else if self
-                    .game_state
-                    .is_valid_move(self.game_state.player_turn, pt)
-                {
+                    callbacks.draw_circle(colour, piece_outline_colour, circ_y, circ_x, radius, 2);
+                } else if state.is_valid_move(self.game_state.player_turn, pt) {
                     let highlight_radius = 15;
                     let highlight_outline_width = 3;
-                    self.callbacks.draw_circle(
+                    callbacks.draw_circle(
                         highlight_fill,
                         highlight_outline,
                         circ_y,
@@ -209,17 +202,14 @@ impl AlexGamesReversi {
             }
         }
 
-        let session_id = self.game_state.session_id;
-        self.callbacks.set_btn_enabled(
+        let session_id = state.session_id;
+        callbacks.set_btn_enabled(
             BTN_ID_UNDO,
-            self.callbacks.has_saved_state_offset(session_id, -1),
+            callbacks.has_saved_state_offset(session_id, -1),
         );
-        self.callbacks.set_btn_enabled(
-            BTN_ID_REDO,
-            self.callbacks.has_saved_state_offset(session_id, 1),
-        );
+        callbacks.set_btn_enabled(BTN_ID_REDO, callbacks.has_saved_state_offset(session_id, 1));
 
-        self.callbacks.draw_refresh();
+        callbacks.draw_refresh();
     }
 }
 
