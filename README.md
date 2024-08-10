@@ -26,6 +26,19 @@ Some games incude:
 * ["Thrust"](src/lua_scripts/games/thrust) (Lua): Race your space ship around the track, trying to control your momentum.
 * [Gomoku/Wuziqi/Omok](src/lua_scripts/games/go) (Lua): Place stones on a Go board, trying to be the first to create a line of 5.
 
+Screenshots:
+
+<p float="left">
+<img src="metadata/en-US/images/phoneScreenshots/screenshot1-solitaire.png"
+    alt="Screenshot of Solitare on the mobile version of AlexGames"
+    width="32%"/>
+<img src="metadata/en-US/images/phoneScreenshots/screenshot2-crossword_letters.png"
+    alt="Screenshot of &quot;Crossword Letters&quot; on the mobile version of AlexGames"
+    width="32%"/>
+<img src="metadata/en-US/images/phoneScreenshots/screenshot3-chess.png"
+    alt="Screenshot of Chess on the mobile version of AlexGames"
+    width="32%"/>
+</p>
 
 ## Brief technical overview
 
