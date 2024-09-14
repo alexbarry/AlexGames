@@ -38,8 +38,91 @@ lazy_static! {
             correct_answer_index: 3,
         },
 
-        // TODO add more questions
-
+        TriviaQuestion {
+            question: "Klondike, popularized by its digital version, is a well-known type of which card game?",
+            answers: ["Solitaire", "Poker", "Bridge", "Rummy"],
+            correct_answer_index: 0,
+        },
+        TriviaQuestion {
+            question: "Pussy Galore, played by Honor Blackman, is a famous character from which James Bond movie?",
+            answers: ["Goldfinger", "Dr. No", "Thunderball", "You Only Live Twice"],
+            correct_answer_index: 0,
+        },
+        TriviaQuestion {
+            question: "The Tesla Roadster, the first electric sports car, is named after Nikola Tesla, who invented what?",
+            answers: ["Alternating current (AC)", "Direct current (DC)", "Electric motor", "Radio"],
+            correct_answer_index: 0,
+        },
+        TriviaQuestion {
+            question: "The Simpsons' fictional Springfield is a reference to the setting of which '50s TV sitcom?",
+            answers: ["Leave It to Beaver", "The Adventures of Ozzie and Harriet", "Father Knows Best", "The Flintstones"],
+            correct_answer_index: 2,
+        },
+        TriviaQuestion {
+            question: "Dr. Gregory House's apartment number '221B' is a nod to the address of which famous detective?",
+            answers: ["Hercule Poirot", "Philip Marlowe", "Sherlock Holmes", "Sam Spade"],
+            correct_answer_index: 2,
+        },
+        TriviaQuestion {
+            question: "In the 2010 Fortune Global 500 list, 3 of the top 4 companies belong to which sector?",
+            answers: ["Technology", "Automotive", "Energy", "Banking"],
+            correct_answer_index: 2,
+        },
+        TriviaQuestion {
+            question: "On the Fahrenheit scale, 98.6 degrees is generally accepted as what?",
+            answers: ["Room temperature", "Freezing point of water", "Normal body temperature", "Boiling point of water"],
+            correct_answer_index: 2,
+        },
+        TriviaQuestion {
+            question: "On food labels, the abbreviation 'DV' stands for 'daily' what?",
+            answers: ["Value", "Vitamin", "Volume", "Variety"],
+            correct_answer_index: 0,
+        },
+        TriviaQuestion {
+            question: "In the acronym 'SRS', commonly used for airbags, what does the letter 'R' stand for?",
+            answers: ["Response", "Restriction", "Restraint", "Reaction"],
+            correct_answer_index: 2,
+        },
+        TriviaQuestion {
+            question: "Discovery Day in the Bahamas commemorates the arrival of which European explorer?",
+            answers: ["Ferdinand Magellan", "Christopher Columbus", "Amerigo Vespucci", "John Cabot"],
+            correct_answer_index: 1,
+        },
+        TriviaQuestion {
+            question: "In the computer game 'The Oregon Trail,' players take on the role of which historical group?",
+            answers: ["Cowboys", "Explorers", "Pioneers", "Soldiers"],
+            correct_answer_index: 2,
+        },
+        TriviaQuestion {
+            question: "In the Latin phrase 'veni, vidi, vici,' what does 'vidi' translate to?",
+            answers: ["Came", "Conquered", "Fought", "Saw"],
+            correct_answer_index: 3,
+        },
+        TriviaQuestion {
+            question: "Which French leader is the namesake of Paris’s largest airport?",
+            answers: ["Napoleon Bonaparte", "Charles de Gaulle", "Louis XVI", "François Mitterrand"],
+            correct_answer_index: 1,
+        },
+        TriviaQuestion {
+            question: "People who prevent others from succeeding are often compared to which animal 'in a bucket'?",
+            answers: ["Frogs", "Crabs", "Snakes", "Mice"],
+            correct_answer_index: 1,
+        },
+        TriviaQuestion {
+            question: "What rock band, fronted by Jim Morrison, named one of their albums 'Morrison Hotel'?",
+            answers: ["The Rolling Stones", "Led Zeppelin", "The Doors", "The Who"],
+            correct_answer_index: 2,
+        },
+        TriviaQuestion {
+            question: "Patients undergoing malar augmentation surgery are seeking to enhance what part of their body?",
+            answers: ["Chin", "Nose", "Cheekbones", "Forehead"],
+            correct_answer_index: 2,
+        },
+        TriviaQuestion {
+            question: "In 1972, Jane Fonda earned an infamous nickname after being photographed on an anti-aircraft gun. What was it?",
+            answers: ["Hanoi Jane", "Agent Jane", "War Jane", "Combat Jane"],
+            correct_answer_index: 0,
+        },
     ];
 }
 
