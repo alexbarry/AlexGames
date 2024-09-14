@@ -12,7 +12,7 @@ use libc::{c_int, c_void, size_t};
 
 use gem_match::gem_match_main;
 use reversi::reversi_main;
-use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, TouchInfo};
+use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, TouchInfo, PopupState};
 
 // A pointer to this struct is returned to C, and then passed back
 // to the rust APIs. A pointer to AlexGamesApi is needed, and also
@@ -159,6 +159,15 @@ pub extern "C" fn rust_game_api_handle_touch_evt(
         });
     }
     handle.handle_touch_evt(&evt_id, touches);
+}
+
+
+#[no_mangle]
+pub fn rust_game_api_handle_popup_btn_clicked(handle: *mut c_void, popup_id: *const u8, btn_idx: i32, _popup_state: *const c_void) {
+    let handle = handle_void_ptr_to_trait_ref(handle);
+	let popup_id = c_str_to_str(popup_id, None);
+	let popup_state = PopupState {}; // TODO add real state here
+	handle.handle_popup_btn_clicked(&popup_id, btn_idx, &popup_state);
 }
 
 #[no_mangle]

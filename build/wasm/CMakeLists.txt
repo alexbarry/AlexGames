@@ -156,7 +156,9 @@ list(APPEND EMCC_LINK_OPTS
 	# linux and WSL before and never knowingly encountered that. 
 	# So my assumption is that this limit was 64 kB on mac OS, but something much higher on the others--
 	# or objects when building on macOS are much larger for some reason.
-	"-s TOTAL_STACK=128KB"
+	# TODO 2024-09-14: improve Rust popup API to use less stack space
+	#"-s TOTAL_STACK=128KB"
+	"-s TOTAL_STACK=1MB"
 
 	# "-s"
 	# "-ps"

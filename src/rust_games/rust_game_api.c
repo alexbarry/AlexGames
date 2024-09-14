@@ -14,6 +14,9 @@ extern void rust_game_api_handle_mouse_evt(void *L, int evt_id, int pos_y, int p
 extern void rust_game_api_handle_touch_evt(void *L, 
                                            const char *evt_id_str, int evt_id_str_len, 
                                            void *changed_touches, int changed_touches_len);
+extern void rust_game_api_handle_popup_btn_clicked(void *L,
+                                                   const char *popup_id, int btn_idx,
+                                                   const struct popup_state *popup_state);
 
 
 // This one is defined in rust
@@ -45,5 +48,6 @@ const struct game_api * get_rust_api(void) {
 	rust_api.handle_mousemove    = rust_game_api_handle_mousemove;
 	rust_api.handle_mouse_evt    = rust_game_api_handle_mouse_evt;
 	rust_api.handle_touch_evt    = rust_game_api_handle_touch_evt;
+	rust_api.handle_popup_btn_clicked = rust_game_api_handle_popup_btn_clicked;
 	return &rust_api;
 }
