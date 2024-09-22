@@ -1,5 +1,5 @@
 <!doctype html>
-<html manifest="cache.manifest">
+<html lang="{{ .Lang }}" manifest="cache.manifest">
 <head>
 	<meta charset="utf-8"/>
 	<meta name="description" content="Collection of simple Lua and Rust games that can be played in your browser. Includes solitaire, word games, chess, go, checkers. Supports local or websocket multiplayer."/>
@@ -19,7 +19,12 @@
 	<link rel="apple-touch-icon" href="img/logo.png" />
 	<link rel="apple-touch-startup-image" href="img/logo.png" />
 	<meta rel="apple-mobile-web-app-title" content="AlexGames" />
-	<title>AlexGames</title>
+	<title>{{ index .Site.Data.strings.default "title"  }}
+	{{ if ne .Lang "en" }}
+		({{ index .Site.Data.strings .Lang "translated_title"  }})
+	{{ end }}
+	</title>
+    {{ partial "translations.html" . }}
 	<script type="text/javascript" src="alexgames_wasm.js"></script>
 	<script type="text/javascript" src="js/alexgames.js"></script>
 	<script type="text/javascript" src="js/alexgames_colour_pref.js"></script>
@@ -205,10 +210,15 @@
 <div id="header" class="header" style="position:relative">
 <div style="display:block; margin:auto">
 <a href="index.html"><img class="logo" src="img/logo-transparent.png" alt="AlexGames logo"/></a>
-<h1 id="title" class="title" style=""><a class="no_underline" href="index.html">AlexGames</a></h1>
-<h2 id="subtitle" class="subtitle">Choose a game</h2>
+<h1 id="title" class="title" style=""><a class="no_underline" href="index.html">
+{{ index .Site.Data.strings.default "title"  }}
+{{ if ne .Lang "en" }}
+		({{ index .Site.Data.strings .Lang "translated_title"  }})
+{{ end }}
+</a></h1>
+<h2 id="subtitle" class="subtitle">{{ index .Site.Data.strings .Lang "choose_a_game" }}</h2>
 </div>
-<button id="btn_options" style="position:absolute; top:0; right:0">Options</button>
+<button id="btn_options" style="position:absolute; top:0; right:0">{{ index .Site.Data.strings .Lang "options" }}</button>
 </div>
 
 
@@ -220,7 +230,7 @@
 <div id="status" class="status" style="flex:1">Initializing...</div>
 <!--<span id="status_err" class="status status_error">&nbsp;</span>-->
 <!-- This button is only shown if the header is hidden -->
-<button id="btn_status_options" style="flex:0; display:none">Options</button>
+<button id="btn_status_options" style="flex:0; display:none">{{ index .Site.Data.strings .Lang "options" }}</button>
 </div>
 <div id="fullscreen_msg_wrapper" class="unset_game_instructions_cls overlay_transparent" style="display:none">
 <div id="fullscreen_err_msg" class="fullscreen_msg fullscreen_err_msg">
@@ -230,15 +240,15 @@
 <div class="fullscreen_msg">
 <!-- TODO show "loading, please wait" at first. Then change it to this once the game is loaded -->
 <p>
-Press here to select a game.
+{{ index .Site.Data.strings .Lang "press_here_to_select_a_game" }}
 </p>
 <p>
-Alternatively, go to the "options" button in the top right of the screen, and select "load autosaved game" to resume any previously played games.
+{{ index .Site.Data.strings .Lang "press_here_to_select_a_game_alternative" }}
 </p>
 </div>
 </div>
 <canvas id="game_canvas" width="480" height="480">
-Your browser doesn't support canvases.
+{{ index .Site.Data.strings .Lang "canvas_not_supported_err_msg" }}
 </canvas>
 
 
@@ -261,100 +271,98 @@ Your browser doesn't support canvases.
 <div id="options_popup" class="popup meta_popup options_popup" style="display:none">
 <button id="btn_close_options" class="close_button">X</button>
 <div class="popup_content_wrapper">
-<h2 class="title">Options</h2>
-<h3>Main</h3>
+<h2 class="title">{{ index .Site.Data.strings .Lang "options" }}</h2>
+<h3>{{ index .Site.Data.strings .Lang "main" }}</h3>
 
-<button id="btn_game_select" class="options_button">Select a different game</button>
-<button id="btn_history_browse" class="options_button">Load autosaved game</button>
+<button id="btn_game_select" class="options_button">{{ index .Site.Data.strings .Lang "select_different_game" }}</button>
+<button id="btn_history_browse" class="options_button">{{ index .Site.Data.strings .Lang "load_autosaved_game" }}</button>
 
 <div style="display:flex; flex-direction:row">
 <div style="flex:1; display:flex; align-items: center; margin-right:5px">
-<label for="select_user_colour_pref" style="flex:0">Colour scheme</label>
+<label for="select_user_colour_pref" style="flex:0">{{ index .Site.Data.strings .Lang "colour_scheme" }}</label>
 <select id="select_user_colour_pref" class="popup_dropdown" style="flex:1">
-<option value="auto">Auto</option>
-<option value="light">Light</option>
-<option value="dark">Dark</option>
-<option value="very_dark">Very Dark</option>
+<option value="auto">{{ index .Site.Data.strings .Lang "colour_scheme_auto" }}</option>
+<option value="light">{{ index .Site.Data.strings .Lang "colour_scheme_light" }}</option>
+<option value="dark">{{ index .Site.Data.strings .Lang "colour_scheme_dark" }}</option>
+<option value="very_dark">{{ index .Site.Data.strings .Lang "colour_scheme_very_dark" }}</option>
 </select>
 </div>
 <div style="flex:1">
-<p class="small">Note: some games may require a refresh for their colour scheme to update.<span class="small">(This could be easily fixed in a future update.)</span></p>
+<p class="small">{{ index .Site.Data.strings .Lang "colour_scheme_update_refresh_needed" }}<span class="small">{{ index .Site.Data.strings .Lang "could_be_fixed_in_future_update" }}</span></p>
 </div>
 </div>
 
-<h3>Game options</h3>
+<h3>{{ index .Site.Data.strings .Lang "game_options" }}</h3>
 <!-- These options are populated by the game API -->
 <div id="game_options">
 <div id="game_options_none_placeholder">
-<p>This game has not defined any options. <span class="dev_note not_supported">(For developers: call the <code>add_game_option</code> API to add options here. This is useful for less commonly used options like starting a new game.)</span></p>
+<p>{{ index .Site.Data.strings .Lang "game_options_not_defined" | safeHTML }}</p>
 </div>
 <!-- for example: -->
 <!--<button class="options_button">Start new game</button>-->
 </div>
 
-<h3>Share/export state</h3>
-<h4 class="options_subheading">Current state</h4>
+<h3>{{ index .Site.Data.strings .Lang "share_export_state" }}</h3>
+<h4 class="options_subheading">{{ index .Site.Data.strings .Lang "current_state" }}</h4>
 <div id="current_state_not_supported" style="display:none">
-<p class="not_supported">This game does not support sharing state via URL. <span class="dev_note not_supported">(For developers: define the <code>get_state</code> global function to return the state as a byte array. The game engine will base 64 encode it and it will show up here when the options menu is opened.)</span></p>
+<p class="not_supported">{{ index .Site.Data.strings .Lang "url_share_state_not_supported" | safeHTML }}</p>
 </div>
 
 <div id="current_state_supported">
-<p class="options_p">The below link contains the game's <strong>current state</strong>. You can send this link to another device to continue playing.</p>
+<p class="options_p">{{ index .Site.Data.strings .Lang "url_share_current_state_supported" | safeHTML }}</p>
 <div class="url_container">
 <a id="url_current_state" class="url_span" href="#"></a>
 </div>
 </div>
 
-<h4 class="options_subheading">Initial state</h4>
+<h4 class="options_subheading">{{ index .Site.Data.strings .Lang "initial_state" }}</h4>
 <div id="init_state_not_supported" style="display:none">
-<p class="not_supported">This game does not support sharing initial state via URL. <span class="dev_note not_supported">(For developers: define the <code>get_init_state</code> global function to return the state as a byte array. The game engine will base 64 encode it and it will show up here when the options menu is opened.)</span></p>
+<p class="not_supported">{{ index .Site.Data.strings .Lang "url_share_init_state_not_supported" | safeHTML }}</p>
 </div>
 
 <div id="init_state_eq_state" style="display:none">
-<p class="not_supported">This game's initial state is currently equal to its current state. Once you make some moves, this section should retain a link to the game's original state, so you can share it with a friend to play the same puzzle you did (if this game supports it). The above link will change to match the game's <strong>current state</strong>, so you can share a link to continue playing where you left off on another device.
+<p class="not_supported">{{ index .Site.Data.strings .Lang "init_state_eq_current_state" | safeHTML }}</p>
 </div>
 
 
 <div id="init_state_supported">
-<p class="options_p">The below link contains the game's <strong>initial state</strong>. You can send this link to a friend so they can try to solve the same puzzle that you did.</p>
+<p class="options_p">{{ index .Site.Data.strings .Lang "url_init_state_description" }}</p>
 <div class="url_container">
 <a id="url_init_state" class="url_span" href="#"></a>
 </div>
 </div>
 
 
-<h3>Upload Game Bundle</h3>
-<p>In addition to the preloaded games already available on this page, you can create your own game (or get one from another person) and upload it to play on this page.</p>
-<p>It should be a ZIP archive of Lua files, with a manifest file. Read more about the API and specifications here: <a href="game_api_doc.html" target="_blank">AlexGames Lua API reference</a></p>
-<p>Here is an example game zip, feel free to download it, optionally edit its contents, and reupload using the buttons below to try out your changes: <a href="example_game_apidemo.zip" style="font-family:monospace">example_game_apidemo.zip</a></p>
+<h3>{{ index .Site.Data.strings .Lang "upload_game_bundle" }}</h3>
+{{ index .Site.Data.strings .Lang "upload_game_bundle" | safeHTML }}
 <input type="file" id="input_upload_game_bundle" style="popup_input_row"/>
-<button id="btn_process_uploaded_game_bundle" disabled>Process game bundle</button>
+<button id="btn_process_uploaded_game_bundle" disabled>{{ index .Site.Data.strings .Lang "process_game_bundle" }}</button>
 
-<h3>Multiplayer settings</h3>
-<p>Generally, you should be able to just copy and paste the URL in your address bar (or below), and share it with a friend for multiplayer to work.</p>
+<h3>{{ index .Site.Data.strings .Lang "multiplayer_settings" }}</h3>
+<p>{{ index .Site.Data.strings .Lang "multiplayer_url_description" }}</p>
 <div class="url_container">
 <a id="url_share_multiplayer" class="url_span" href="#"></a>
 </div>
-<p>The session ID is how the server knows to connect you with your friend(s). You can change the session ID or server below.</p>
+<p>{{ index .Site.Data.strings .Lang "multiplayer_id_description" }}</p>
 <div class="popup_table">
 
 <div class="popup_row">
-<label for="session_id_input" class="label_col">Session ID</label>
+<label for="session_id_input" class="label_col">{{ index .Site.Data.strings .Lang "session_id_label" }}</label>
 <input id="session_id_input" class="input_col"></input>
 </div>
 
 
 <div class="popup_row">
-<label for="custom_ws_server_input" class="label_col">Websocket server</label>
-<input id="custom_ws_server_input" class="input_col" placeholder="example: wss://alexbarry.net:55433, or ws://192.168.1.100:5678"></input>
+<label for="custom_ws_server_input" class="label_col">{{ index .Site.Data.strings .Lang "websocket_server_label" }}</label>
+<input id="custom_ws_server_input" class="input_col" placeholder="{{ index .Site.Data.strings .Lang "example_label" }}: wss://alexbarry.net:55433, {{ index .Site.Data.strings .Lang "or" }} ws://192.168.1.100:5678"></input>
 </div>
 
 </div>
 
-<button id="btn_submit_multiplayer_settings" style="width: 100%">Submit multiplayer settings</button>
+<button id="btn_submit_multiplayer_settings" style="width: 100%">{{ index .Site.Data.strings .Lang "submit_multiplayer_settings" }}</button>
 
-<h3>Miscellaneous</h3>
-<button id="btn_force_refresh" class="options_button">Force Refresh</button>
+<h3>{{ index .Site.Data.strings .Lang "miscellaneous" }}</h3>
+<button id="btn_force_refresh" class="options_button">{{ index .Site.Data.strings .Lang "force_refresh" }}</button>
 <!--
 <label for="theme_select">Theme</label>
 <select id="theme_select">
@@ -370,7 +378,7 @@ TODO add session ID to options, maybe show other players that are connected
 -->
 
 <p></p>
-<a id="about_link_options" href="#">AlexGames was created by Alex Barry, click here for more info.</a>
+<a id="about_link_options" href="#">{{ index .Site.Data.strings .Lang "alexgames_created_by_click_for_about" }}</a>
 </div>
 </div>
 
@@ -378,153 +386,153 @@ TODO add session ID to options, maybe show other players that are connected
 <div id="game_choice_popup" class="popup game_choice_popup meta_popup" style="display:none">
 <button id="btn_close_game_choice_popup" class="close_button">X</button>
 <div class="game_choice_popup_wrapper">
-<h2 class="title">Select a game</h2>
+<h2 class="title">{{ index .Site.Data.strings .Lang "choose_a_game" }}</h2>
 
 <div id="game_row_solitaire" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/solitaire.png"/></div>
-<h2 class="game_title">Solitaire</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "solitaire" }}</h2>
 <div class="description">
-<p>Single player.</p>
-<p>Win by putting all of the cards in order from lowest to highest, and grouped by suit. Cards can be placed on the game board from highest to lowest, with alternating suit colours.</p>
+<p>{{ index .Site.Data.strings .Lang "single_player" }}</p>
+<p>{{ index .Site.Data.strings .Lang "solitaire_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_word_mastermind" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/word_mastermind.png"/></div>
-<h2 class="game_title">Word Mastermind</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "word_mastermind" }}</h2>
 <div class="description">
-<p>Single player.</p>
-<p>Guess words, finding out if the letter is in the word and in the right position. Guesses must be valid English words.</p>
-<p>Supports entering an arbitrary 5-letter word to generate your own custom puzzle, to share with your friends either by handing them your device, or sending them a link with the state embedded in the URL.</p>
+<p>{{ index .Site.Data.strings .Lang "single_player" }}</p>
+<p>{{ index .Site.Data.strings .Lang "word_mastermind_description1" }}</p>
+<p>{{ index .Site.Data.strings .Lang "word_mastermind_description2" }}</p>
 </div>
 </div>
 
 <div id="game_row_chess" class="game_row">
-<h2 class="game_title">Chess</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "chess" }}</h2>
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/chess.png"/></div>
 <div class="description">
-<p>Local or network multiplayer: 2 players.</p>
-<p>Win by putting the opponent's king in checkmate.</p>
+<p>{{ index .Site.Data.strings .Lang "network_or_local_multiplayer" }}{{ index .Site.Data.strings .Lang "colon" }} {{ index .Site.Data.strings .Lang "two_players" }}</p>
+<p>{{ index .Site.Data.strings .Lang "chess_description" }}</p>
 </div>
 </div>
 
 
 <div id="game_row_crossword_letters" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/crossword_letters.png"/></div>
-<h2 class="game_title">Crossword Letters</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "crossword_letters" }}</h2>
 <div class="description">
-<p>Single player.</p>
-<p>Try to figure out all the words that can be made from rearranging a few letters, using the crossword as a hint.
+<p>{{ index .Site.Data.strings .Lang "single_player" }}</p>
+<p>{{ index .Site.Data.strings .Lang "crossword_letters_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_gem_match" class="game_row">
-<h2 class="game_title">"Gem Match"</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "gem_match" }}</h2>
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/gem_match.png"/></div>
 <div class="description">
-<p>Single player.</p>
-<p>Swap gems to make lines of three or more.</p>
+<p>{{ index .Site.Data.strings .Lang "single_player" }}</p>
+<p>{{ index .Site.Data.strings .Lang "gem_match_description" }}</p>
 </div>
 </div>
 
 
 <div id="game_row_go" class="game_row">
-<h2 class="game_title">Go/Weiqi/Baduk</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "go_title" }}</h2>
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/go.png"/></div>
 <div class="description">
-<p>Local or network multiplayer: 2 players.</p>
-<p>Win by controlling more territory than your opponent, and capture their groups of stones by surrounding them.</p>
-<p><strong>NOTE:</strong> this game does not yet support AI opponents, or even displaying territory or determining who wins.</p>
+<p>{{ index .Site.Data.strings .Lang "network_or_local_multiplayer" }}{{ index .Site.Data.strings .Lang "colon" }} {{ index .Site.Data.strings .Lang "two_players" }}</p>
+<p>{{ index .Site.Data.strings .Lang "go_description" }}</p>
+<p><strong>{{ index .Site.Data.strings .Lang "note_prefix" }}</strong> {{ index .Site.Data.strings .Lang "go_no_ai_disclaimer" }}</p>
 </div>
 </div>
 
 <div id="game_row_reversi" class="game_row">
-<h2 class="game_title">Reversi</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "reversi" }}</h2>
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/reversi.png"/></div>
 <div class="description">
-<p>Local multiplayer.</p>
-<p>You can only move when jumping one or more of your opponent's pieces, and then they all "reverse" to become yours.</p>
+<p>{{ index .Site.Data.strings .Lang "local_multiplayer" }}</p>
+<p>{{ index .Site.Data.strings .Lang "reversi_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_checkers" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/checkers.png"/></div>
-<h2 class="game_title">Checkers/Draughts</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "checkers" }}</h2>
 <div class="description">
-<p>Local or network multiplayer: 2 players.</p>
-<p>Win by capturing all the opponent's pieces.</p>
+<p>{{ index .Site.Data.strings .Lang "network_or_local_multiplayer" }}{{ index .Site.Data.strings .Lang "colon" }} {{ index .Site.Data.strings .Lang "two_players" }}</p>
+<p>{{ index .Site.Data.strings .Lang "checkers_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_endless_runner" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/endless_runner.png"/></div>
-<h2 class="game_title">Endless Runner</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "endless_runner" }}</h2>
 <div class="description">
-<p>Single player.</p>
-<p>Tap to jump and use gravity to navigate through an endless set of obstacles.</p>
+<p>{{ index .Site.Data.strings .Lang "single_player" }}</p>
+<p>{{ index .Site.Data.strings .Lang "endless_runner_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_minesweeper" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/minesweeper.png"/></div>
-<h2 class="game_title">Minesweeper</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "minesweeper" }}</h2>
 <div class="description">
-<p>Single player, or network multiplayer up to 4 players.</p>
-<p>Flag mines by using logic to determine where they are, knowing how many mines are adjacent to revealed squares.</p>
+<p>{{ index .Site.Data.strings .Lang "single_or_network_multiplayer_up_to_4_players" }}</p>
+<p>{{ index .Site.Data.strings .Lang "minesweeper_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_fluid_mix" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/fluid_mix.png"/></div>
-<h2 class="game_title">Fluid Mix</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "fluid_mix" }}</h2>
 <div class="description">
-<p>Single player.</p>
-<p>Sort/rearrange layers of liquids in vials, with the goal of ending up with each vial containing only a single type of liquid.</p>
+<p>{{ index .Site.Data.strings .Lang "single_player" }}</p>
+<p>{{ index .Site.Data.strings .Lang "fluid_mix_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_backgammon" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/backgammon.png"/></div>
-<h2 class="game_title">Backgammon</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "backgammon" }}</h2>
 <div class="description">
-<p>Local or network multiplayer: 2 players.</p>
-<p>Win by bearing off all your pieces before your opponent. You can slow your opponent down by capturing their pieces, moving them to the middle, forcing them to start that piece from the beginning again.</p>
+<p>{{ index .Site.Data.strings .Lang "network_or_local_multiplayer" }}{{ index .Site.Data.strings .Lang "colon" }} {{ index .Site.Data.strings .Lang "two_players" }}</p>
+<p>{{ index .Site.Data.strings .Lang "backgammon_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_crib" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/crib.png"/></div>
-<h2 class="game_title">Cribbage</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "crib" }}</h2>
 <div class="description">
-<p>Network multiplayer: 2-4 players.</p>
-<p>Score points by getting cards worth 15, a run (cards in sequence), pairs, or a flush. First player to achieve 121 wins.</p>
+<p>{{ index .Site.Data.strings .Lang "network_multiplayer_two_to_four_players" }}</p>
+<p>{{ index .Site.Data.strings .Lang "crib_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_spider_swing" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/spider_swing.png"/></div>
-<h2 class="game_title">Spider swing</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "spider_swing" }}</h2>
 <div class="description">
-<p>Single player only.</p>
-<p>Swing from point to point, being careful not to lose too much height or speed.</p>
+<p>{{ index .Site.Data.strings .Lang "single_player" }}</p>
+<p>{{ index .Site.Data.strings .Lang "spider_swing_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_thrust" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/thrust.png"/></div>
-<h2 class="game_title">"Thrust"</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "thrust" }}</h2>
 <div class="description">
-<p>Single player only.</p>
-<p>Race your space ship around the track, trying to control your momentum.</p>
+<p>{{ index .Site.Data.strings .Lang "single_player" }}</p>
+<p>{{ index .Site.Data.strings .Lang "thrust_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_wu" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/wu.png"/></div>
-<h2 class="game_title">Gomoku/Wuziqi/Omok</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "wu" }}</h2>
 <div class="description">
-<p>Local or network multiplayer: 2 players.</p>
-<p>The winner is the first player to place 5 stones in a row.</p>
+<p>{{ index .Site.Data.strings .Lang "network_or_local_multiplayer" }}{{ index .Site.Data.strings .Lang "colon" }} {{ index .Site.Data.strings .Lang "two_players" }}</p>
+<p>{{ index .Site.Data.strings .Lang "wu_description" }}</p>
 </div>
 </div>
 
@@ -532,28 +540,28 @@ TODO add session ID to options, maybe show other players that are connected
 
 <div id="game_row_31s" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/31s.png"/></div>
-<h2 class="game_title">31's</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "game_31s" }}</h2>
 <div class="description">
-<p>Network multiplayer: 2-4 players.</p>
-<p>You can hold only 3 cards at a time. On your turn you can choose to draw a new card, or draw a discarded card. Try to get as close to 31 as possible (must be the same suit), or go for three of a kind. On any turn a player may knock, which will end the game after everyone else has played. The player with the highest cards after knocking wins. If a player achieves 31, the game immediately ends and that player is the winner.</p>
+<p>{{ index .Site.Data.strings .Lang "network_multiplayer_two_to_four_players" }}</p>
+<p>{{ index .Site.Data.strings .Lang "game_31s_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_hospital" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/hospital.png"/></div>
-<h2 class="game_title">Hospital</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "hospital" }}</h2>
 <div class="description">
-<p>Single player, or network multiplayer up to 4 players.</p>
-<p>Alone or with a friend, try to help patients by providing them with the right kind of help, racing against the clock.</p>
+<p>{{ index .Site.Data.strings .Lang "single_or_network_multiplayer_up_to_4_players" }}</p>
+<p>{{ index .Site.Data.strings .Lang "hospital_description" }}</p>
 </div>
 </div>
 
 <div id="game_row_life" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/life.png"/></div>
-<h2 class="game_title">Conway's Game of Life</h2>
+<h2 class="game_title">{{ index .Site.Data.strings .Lang "conway_life" }}</h2>
 <div class="description">
-<p>Single player only. (Arguably "zero player")</p>
-<p>A cellular automaton. <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life">See wikipedia for more information.</a> I threw this together and included it here more as a tech demo than an actual game.</p>
+<p>{{ index .Site.Data.strings .Lang "single_player_zero_player" }}</p>
+<p>{{ index .Site.Data.strings .Lang "conway_life_description" }}</p>
 </div>
 </div>
 
@@ -598,37 +606,42 @@ for (let game_choice_row_info of game_choice_row_infos) {
 <div id="about_popup" class="popup meta_popup options_popup" style="display:none">
 <button id="btn_close_about_popup" class="close_button">X</button>
 <div class="popup_content_wrapper">
-<h2 class="title">About AlexGames</h2>
+<h2 class="title">{{ index .Site.Data.strings .Lang "about_alexgames" }}</h2>
 
-<p>AlexGames is a platform for simple games written in Lua, Rust, or C/C++, currently supporting HTML (the page you are currently visiting), and experimental implementations in Android, and Windows/MacOS/Linux (using wxWidgets). The idea is that someone can throw together the "fun parts" of a game in a few hundred lines of Lua, Rust, or C++, and then the boilerplate to get it running on their platform of choice should be already taken care of. Adding support for a new platform should be relatively easy.</p>
+<p>{{ index .Site.Data.strings .Lang "about_alexgames_line1" }}</p>
+<p>
+{{ index .Site.Data.strings .Lang "about_alexgames_line2_pt1" }} 
+<a href="example_game_apidemo.zip">{{ index .Site.Data.strings .Lang "the_example_lua_game_zip" }}</a>
+{{ index .Site.Data.strings .Lang "consult_the" }} 
+<a href="game_api_doc.html" target="_blank">{{ index .Site.Data.strings .Lang "lua_api_reference" }}</a>
+{{ index .Site.Data.strings .Lang "about_alexgames_line2_pt2" }}
+</p>
 
-<p>For further convenience (both for game developers and game players), you can develop and/or play your own Lua game just by uploading a bundle of Lua code to the browser client. If you want to put together a simple game, but don't want to bother building this project, you shouldn't need to: just download <a href="example_game_apidemo.zip">the example Lua game zip</a>, consult the <a href="game_api_doc.html" target="_blank">Lua API reference</a>, and then you can modify the existing example Lua code or write your own, and then zip your files. Then you can upload that zip file into the web client, or send it to a friend.</p>
+<p>{{ index .Site.Data.strings .Lang "about_alexgames_line3" }}</p>
 
-<p>It also supports some helpful features like a built in English dictionary (for word puzzle games), sharing state via URL, and saving state and browsing previously saved states. Previews of saved states are generated using the same code the programmer wrote to  render the game itself. The logic for handling this is included as a library to the game platform itself: very little extra code should be needed for game developers or developers of new "clients" (more on what a "client" is below).</p>
+<p>{{ index .Site.Data.strings .Lang "about_alexgames_line4" }}</p>
 
-<p>One of the goals is for the API to be very convenient both for game developers, and for developers of new "platforms". In this context a "platform" is a device that the game is built for: there is a platform for browsers, developed in HTML/JS/WASM, a native Android platform, and a wxWidgets platform that allows for playing games natively on Windows, MacOS, and Linux.</p>
-
-<p>Created by <a href="https://github.com/alexbarry">Alex Barry</a>. You are encouraged to submit comments, bug reports, feature requests, or say hi at:</p>
+<p>{{ index .Site.Data.strings .Lang "created_by" }} <a href="https://github.com/alexbarry">Alex Barry</a>. {{ index .Site.Data.strings .Lang "encouraged_to_say_hi_at" }}</p>
 
 <ul>
 	<li>Github: <a class="url" href="https://github.com/alexbarry/AlexGames" target="_blank">github.com/alexbarry/AlexGames</a></li>
 	<li>Discord: <a class="url" href="https://discord.gg/rhy8SuHPYU" target="_blank">discord.gg/rhy8SuHPYU</a></li>
 	<li>Lemmy: <a class="url" href="https://lemmyverse.link/c/alexgames@lemmy.ca" target="_blank">!alexgames@lemmy.ca</a></li>
 	<li>Matrix: <a class="url" href="https://matrix.to/#/#alexgames:matrix.org" target="_blank">#alexgames:matrix.org</a></li>
-	<li>Email: <span class="url">alexbarry.dev2 [ at ] gmail.com</span></li>
+	<li>{{ index .Site.Data.strings .Lang "email" }}: <span class="url">alexbarry.dev2 [ at ] gmail.com</span></li>
 </ul>
 
-<p>Also available as an <a href="https://f-droid.org/packages/net.alexbarry.alexgames" target="_blank">Android app on F-Droid</a> for offline play.</p>
+<p>{{ index .Site.Data.strings .Lang "also_available_as_an" }} <a href="https://f-droid.org/packages/net.alexbarry.alexgames" target="_blank">{{ index .Site.Data.strings .Lang "android_app_on_fdroid" }}</a> {{ index .Site.Data.strings .Lang "for_offline_play" }}</p>
 
-<p>This project would not be possible if it were not for these amazing projects:</p>
+<p>{{ index .Site.Data.strings .Lang "project_would_not_be_possible_without_other_projects" }}</p>
 <ul>
-<li><a href="https://lua.org"><img alt="Lua Logo" src="img/credits/Lua-Logo_128x128.png" width="48" height="48"/></a> A lightweight scripting language that integrates very nicely with C</li>
-<li><a href="https://cmake.org">CMake</a>: cross platform build system</li>
-<li><a href="https://emscripten.org">Emscripten</a>: compile C/C++ to WebAssembly</li>
-<li><a href="https://www.rust-lang.org/">Rust (Language)</a>: a much nicer alternative to C++ which still integrates nicely with C++ and has great support for WebAssembly.</li>
+<li><a href="https://lua.org"><img alt="Lua Logo" src="img/credits/Lua-Logo_128x128.png" width="48" height="48"/></a> {{ index .Site.Data.strings .Lang "lua_lang_description" }}</li>
+<li><a href="https://cmake.org">CMake</a>: {{ index .Site.Data.strings .Lang "cmake_description" }}</li>
+<li><a href="https://emscripten.org">Emscripten</a>: {{ index .Site.Data.strings .Lang "emscripten_description" }}</li>
+<li><a href="https://www.rust-lang.org/">Rust (Language)</a>: {{ index .Site.Data.strings .Lang "rust_lang_description" }}</li>
 </ul>
 <!-- The others don't explicitly say to include their logo, so I'm not sure if I should. -->
-<p>See more in the <a href="licenses.html" target="_blank">licenses page</a>.</p>
+<p>{{ index .Site.Data.strings .Lang "see_more_in_the" }} <a href="licenses.html" target="_blank">{{ index .Site.Data.strings .Lang "licenses_page" }}</a>{{ index .Site.Data.strings .Lang "end_of_sentence" }}</p>
 
 </div>
 </div>
@@ -740,9 +753,9 @@ for (let game_choice_row_info of game_choice_row_infos) {
 
 <div class="footer_links">
 <ul class="footer_links_list">
-	<li><a id="about_link_footer" href="#">About</a></li>
-	<li><a href="licenses.html" target="_blank">Licenses</a></li>
-	<li><a href="https://github.com/alexbarry/AlexGames" target="_blank">Source</a></li>
+	<li><a id="about_link_footer" href="#">{{ index .Site.Data.strings .Lang "about" }}</a></li>
+	<li><a href="licenses.html" target="_blank">{{ index .Site.Data.strings .Lang "licenses" }}</a></li>
+	<li><a href="https://github.com/alexbarry/AlexGames" target="_blank">{{ index .Site.Data.strings .Lang "source" }}</a></li>
 </div>
 
 <script>
@@ -755,7 +768,7 @@ for (let game_choice_row_info of game_choice_row_infos) {
 	const status_msg = document.getElementById("status");
 
 	if (typeof WebAssembly === 'undefined') {
-		let msg = 'WebAssembly is disabled or not supported. One possible cause is having "Lockdown Mode" enabled on Apple devices.';
+		let msg = translations.wasm_disabled;
 		console.error(msg);
 		let gfx = {
 			"status_msg": status_msg,

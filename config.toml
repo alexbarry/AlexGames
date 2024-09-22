@@ -1,0 +1,29 @@
+defaultContentLanguage = "en"
+
+layoutDir = "src/html"
+
+enableMultilingual = true
+
+
+[languages]
+	[languages.en]
+		languageName="English"
+		contentDir = "content/en"
+		weight = 1
+	[languages.fr]
+		languageName="French"
+		contentDir = "content/fr"
+		weight = 2
+	[languages.it]
+		languageName="Italian"
+		contentDir = "content/it"
+		weight = 3
+	[languages.zh-hans]
+		languageName="Chinese (Simplified)"
+		contentDir = "content/zh-hans"
+		# TODO what is "weight" here??
+		weight = 4
+
+
+[params]
+	layout = "src/html/index.html"

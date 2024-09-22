@@ -1,0 +1,181 @@
+translated_title: "Jeux d'Alex"
+choose_a_game: "Choisissez un jeu"
+options: "Options"
+press_here_to_select_a_game: "Appuyez ici pour sélectionner un jeu"
+press_here_to_select_a_game_alternative: 'Alternativement, allez au bouton "options" en haut à droite de l’écran et sélectionnez "charger la partie sauvegardée automatiquement" pour reprendre une partie précédemment jouée.'
+
+canvas_not_supported_err_msg: "Votre navigateur ne prend pas en charge les toiles."
+
+main: "Principal"
+select_different_game: "Sélectionner un autre jeu"
+load_autosaved_game: "Charger la partie sauvegardée automatiquement"
+colour_scheme: "Schéma de couleurs"
+colour_scheme_auto: "Automatique"
+colour_scheme_light: "Clair"
+colour_scheme_dark: "Sombre"
+colour_scheme_very_dark: "Très sombre"
+
+colour_scheme_update_refresh_needed: "Remarque : certains jeux peuvent nécessiter un rafraîchissement pour que leur schéma de couleurs se mette à jour."
+could_be_fixed_in_future_update: "(Cela pourrait être facilement corrigé dans une future mise à jour.)"
+
+game_options: "Options de jeu"
+
+game_options_not_defined: 'Ce jeu n’a défini aucune option. <span class="dev_note not_supported">(Pour les développeurs : appelez l’API <code>add_game_option</code> pour ajouter des options ici. Cela est utile pour les options moins couramment utilisées, comme commencer une nouvelle partie.)</span>'
+
+share_export_state: "Partager/exporter l'état"
+current_state: "État actuel"
+
+url_share_state_not_supported: "Ce jeu ne prend pas en charge le partage de l'état via l'URL. <span class=\"dev_note not_supported\">(Pour les développeurs : définissez la fonction globale <code>get_state</code> pour renvoyer l'état sous forme de tableau d'octets. Le moteur de jeu l'encodera en base 64 et il apparaîtra ici lorsque le menu des options sera ouvert.)</span>"
+url_share_current_state_supported: "Le lien ci-dessous contient l'<strong>état actuel</strong> du jeu. Vous pouvez envoyer ce lien à un autre appareil pour continuer à jouer."
+
+initial_state: "État initial"
+url_share_init_state_not_supported: "Ce jeu ne prend pas en charge le partage de l'état initial via l'URL. <span class=\"dev_note not_supported\">(Pour les développeurs : définissez la fonction globale <code>get_init_state</code> pour renvoyer l'état sous forme de tableau d'octets. Le moteur de jeu l'encodera en base 64 et il apparaîtra ici lorsque le menu des options sera ouvert.)</span>"
+init_state_eq_current_state: "L'état initial de ce jeu est actuellement égal à son état actuel. Une fois que vous aurez effectué des mouvements, cette section conservera un lien vers l'état original du jeu, afin que vous puissiez le partager avec un ami pour jouer au même puzzle que vous (si ce jeu le prend en charge). Le lien ci-dessus changera pour correspondre à l'<strong>état actuel</strong> du jeu, afin que vous puissiez partager un lien pour continuer à jouer là où vous vous étiez arrêté sur un autre appareil."
+
+url_init_state_description: "Le lien ci-dessous contient l'<strong>état initial</strong> du jeu. Vous pouvez envoyer ce lien à un ami pour qu'il essaie de résoudre le même puzzle que vous."
+upload_game_bundle: "Télécharger un ensemble de jeu"
+upload_game_bundle_body: "<p>En plus des jeux préchargés déjà disponibles sur cette page, vous pouvez créer votre propre jeu (ou en obtenir un d'une autre personne) et le télécharger pour y jouer sur cette page.</p>
+<p>Il doit s'agir d'une archive ZIP de fichiers Lua, avec un fichier manifest. En savoir plus sur l'API et les spécifications ici : <a href=\"game_api_doc.html\" target=\"_blank\">Référence de l'API AlexGames Lua</a></p>
+<p>Voici un exemple de jeu zip, n'hésitez pas à le télécharger, à éditer son contenu si vous le souhaitez, et à le télécharger à nouveau en utilisant les boutons ci-dessous pour essayer vos modifications : <a href=\"example_game_apidemo.zip\" style=\"font-family:monospace\">example_game_apidemo.zip</a></p>"
+
+process_game_bundle: "Traiter l'ensemble de jeu"
+
+multiplayer_settings: "Paramètres multijoueurs"
+multiplayer_url_description: "En général, vous devriez pouvoir copier et coller l'URL dans votre barre d'adresse (ou ci-dessous), et la partager avec un ami pour que le multijoueur fonctionne."
+multiplayer_id_description: "L'ID de session est la façon dont le serveur sait vous connecter à votre/vos ami(s). Vous pouvez modifier l'ID de session ou le serveur ci-dessous."
+session_id_label: "ID de session"
+
+websocket_server_label: "Serveur Websocket"
+example_label: "exemple"
+or: "ou"
+submit_multiplayer_settings: "Soumettre les paramètres multijoueurs"
+miscellaneous: "Divers"
+force_refresh: "Forcer le rafraîchissement"
+alexgames_created_by_click_for_about: "AlexGames a été créé par Alex Barry, cliquez ici pour plus d'infos."
+
+
+single_player: "Joueur solo."
+network_or_local_multiplayer: "Multijoueur local ou en réseau"
+up_to: "jusqu'à"
+two_players: "2 joueurs."
+four_players: "4 jouers."
+local_multiplayer: "Multijouer local." 
+colon: ":" 
+
+solitaire: "Solitaire"
+solitaire_description: "Gagnez en mettant toutes les cartes dans l’ordre du plus bas au plus haut, et regroupées par couleur. Les cartes peuvent être placées sur le plateau de jeu du plus haut au plus bas, avec des couleurs de couleur alternées."
+
+word_mastermind: "Maître des mots"
+word_mastermind_description1: "Devinez des mots, en découvrant si la lettre est dans le mot et à la bonne position. Les suppositions doivent être des mots anglais valides."
+word_mastermind_description2: "Permet d'entrer un mot de 5 lettres arbitraire pour générer votre propre casse-tête personnalisé, à partager avec vos amis en leur donnant votre appareil ou en leur envoyant un lien avec l'état intégré dans l'URL."
+
+chess: "Échecs"
+chess_description: "Gagnez en mettant le roi de l’adversaire en échec et mat."
+
+crossword_letters: "Mots croisés"
+crossword_letters_description: "Essayez de deviner tous les mots qui peuvent être formés en réorganisant quelques lettres, en utilisant le mots croisés comme indice."
+
+gem_match: "Match de gemmes"
+gem_match_description: "Échangez des gemmes pour former des lignes de trois ou plus."
+
+go_title: "Go/Weiqi/Baduk"
+go_description: "Gagnez en contrôlant plus de territoire que votre adversaire et capturez ses groupes de pierres en les entourant."
+go_no_ai_disclaimer: "Ce jeu ne prend pas encore en charge les adversaires IA, ni l'affichage du territoire ou la détermination du gagnant."
+note_prefix: "REMARQUE :"
+
+reversi: "Reversi"
+reversi_description: "Vous ne pouvez bouger qu'en sautant un ou plusieurs pions de votre adversaire, puis ils se \"renversent\" pour devenir les vôtres."
+
+checkers: "Dames"
+checkers_description: "Gagnez en sautant/capturant tous les pions de votre adversaire."
+
+endless_runner: "Course infinie"
+endless_runner_description: "Touchez pour sauter et utilisez la gravité pour naviguer à travers un ensemble infini d'obstacles."
+
+minesweeper: "Démineur"
+minesweeper_description: "Placez des drapeaux sur les mines en utilisant la logique pour déterminer où elles se trouvent, sachant combien de mines sont adjacentes aux cases révélées."
+
+fluid_mix: "Mélange de liquides"
+fluid_mix_description: "Triez/réorganisez les couches de liquides dans des flacons, avec pour objectif de finir avec chaque flacon contenant seulement un type de liquide. Semblable à la \"Tour de Hanoï\"."
+
+backgammon: "Backgammon"
+backgammon_description: "Gagnez en sortant tous vos pions avant votre adversaire. Vous pouvez ralentir votre adversaire en capturant ses pions, les déplaçant au centre, les forçant à recommencer ce pion depuis le début."
+
+crib: "Cribbage"
+crib_description: "Marquez des points en obtenant des cartes valant 15, une suite (cartes en séquence), des paires ou une couleur. Le premier joueur à atteindre 121 gagne."
+
+network_multiplayer_two_to_four_players: "Multijoueur en réseau : 2-4 joueurs."
+
+spider_swing: "Balancement de l'araignée"
+spider_swing_description: "Balancez-vous d'un point à l'autre, en faisant attention à ne pas perdre trop de hauteur ou de vitesse."
+
+thrust: "Propulsion"
+thrust_description: "Faites courir votre vaisseau spatial autour de la piste, en essayant de contrôler votre vitesse."
+
+wu: "Gomoku/Wuziqi/Omok"
+wu_description: "Le gagnant est le premier joueur à aligner 5 pierres."
+
+game_31s: "31's"
+game_31s_description: "Vous ne pouvez tenir que 3 cartes à la fois. À votre tour, vous pouvez choisir de piocher une nouvelle carte ou de prendre une carte défaussée. Essayez de vous rapprocher le plus possible de 31 (doit être de la même couleur), ou visez un brelan. À chaque tour, un joueur peut frapper, ce qui met fin à la partie après que tout le monde ait joué. Le joueur avec les cartes les plus élevées après avoir frappé gagne. Si un joueur atteint 31, la partie se termine immédiatement et ce joueur est le gagnant."
+
+hospital: "Hôpital"
+hospital_description: "Seul ou avec un ami, essayez d'aider les patients en leur fournissant le bon type d'aide, en courant contre le temps."
+
+conway_life: "Le Jeu de la Vie de Conway"
+conway_life_description: "Un automate cellulaire. <a href=\"https://fr.wikipedia.org/wiki/Jeu_de_la_vie_de_Conway\">Voir Wikipédia pour plus d'informations.</a> J'ai assemblé cela et l'ai inclus ici plus comme une démonstration technique qu'un véritable jeu."
+single_player_zero_player: "Un seul joueur. (On peut dire \"zéro joueur\")"
+
+about_alexgames: "À propos d'AlexGames"
+about_alexgames_line1: "AlexGames est une plateforme pour des jeux simples écrits en Lua, Rust ou C/C++, supportant actuellement HTML (la page que vous visitez actuellement), et des implémentations expérimentales sur Android et Windows/MacOS/Linux (utilisant wxWidgets). L'idée est que quelqu'un puisse assembler les \"parties amusantes\" d'un jeu en quelques centaines de lignes de Lua, Rust ou C++, et que le code de base pour le faire fonctionner sur sa plateforme de choix soit déjà pris en charge. Ajouter le support d'une nouvelle plateforme devrait être relativement facile."
+about_alexgames_line2_pt1: "Pour plus de commodité (tant pour les développeurs de jeux que pour les joueurs), vous pouvez développer et/ou jouer votre propre jeu Lua simplement en téléchargeant un ensemble de code Lua dans le client de navigateur. Si vous voulez créer un jeu simple, mais que vous ne voulez pas vous embêter à construire ce projet, vous ne devriez pas avoir besoin de le faire : téléchargez simplement"
+the_example_lua_game_zip: "le zip de l'exemple de jeu Lua"
+consult_the: ", consultez le"
+lua_api_reference: "référence de l'API Lua"
+about_alexgames_line2_pt2: ", puis vous pouvez modifier le code Lua existant ou écrire le vôtre, puis compresser vos fichiers. Ensuite, vous pouvez télécharger ce fichier zip dans le client web, ou l'envoyer à un ami."
+about_alexgames_line3: "Cela prend également en charge des fonctionnalités utiles comme un dictionnaire anglais intégré (pour les jeux de mots), le partage d'état via URL, et la sauvegarde d'état et la navigation dans les états sauvegardés précédemment. Des aperçus des états sauvegardés sont générés en utilisant le même code que le programmeur a écrit pour rendre le jeu lui-même. La logique pour gérer cela est incluse comme une bibliothèque dans la plateforme de jeu elle-même : très peu de code supplémentaire devrait être nécessaire pour les développeurs de jeux ou les développeurs de nouveaux \"clients\" (plus d'informations sur ce qu'est un \"client\" ci-dessous)."
+about_alexgames_line4: "Un des objectifs est que l'API soit très pratique tant pour les développeurs de jeux que pour les développeurs de nouvelles \"plateformes\". Dans ce contexte, une \"plateforme\" est un appareil pour lequel le jeu est construit : il y a une plateforme pour les navigateurs, développée en HTML/JS/WASM, une plateforme Android native, et une plateforme wxWidgets qui permet de jouer à des jeux nativement sur Windows, MacOS et Linux."
+
+created_by: "Créé par"
+encouraged_to_say_hi_at: "Vous êtes encouragé à soumettre des commentaires, des rapports de bogues, des demandes de fonctionnalités, ou à dire bonjour à :"
+email: "Email"
+
+also_available_as_an: "Également disponible en tant que"
+android_app_on_fdroid: "application Android sur F-Droid"
+for_offline_play: "pour jouer hors ligne."
+
+project_would_not_be_possible_without_other_projects: "Ce projet ne serait pas possible sans ces projets incroyables :"
+lua_lang_description: "Un langage de script léger qui s'intègre très bien avec C"
+cmake_description: "système de construction multiplateforme"
+emscripten_description: "compiler C/C++ en WebAssembly"
+rust_lang_description: "une alternative bien meilleure à C++ qui s'intègre toujours bien avec C++ et a un excellent support pour WebAssembly."
+see_more_in_the: "Voir plus dans la"
+licenses_page: "page des licences"
+end_of_sentence: "."
+
+wasm_disabled: 'WebAssembly est désactivé ou non supporté. Une cause possible est que le \"Mode de verrouillage\" est activé sur les appareils Apple.'
+
+about: "À propos"
+
+licenses: "Licences"
+
+source: "Source"
+
+init_complete: "Initialisation terminée"
+websocket_failed: ", mais échec de la connexion au websocket. Le mode multijoueur ne sera pas disponible"
+websocket_failed2: "Initialisation terminée, mais la connexion websocket a échoué. Ne pas charger le jeu. Ajoutez \"no_ws=false\" aux arguments d'URL pour jouer sans websockets."
+waiting_for: "En attente de"
+wasm_init: "Initialisation WASM"
+websocket_connection: "connexion websocket"
+html_load: "chargement HTML"
+dictionary_init: "téléchargement/init du dictionnaire"
+loading_state_from_url_param: "Chargement de l'état à partir du paramètre d'URL"
+
+unsecure_websocket_server_warning: "Avertissement : tentative de connexion à un serveur websocket non sécurisé : "
+connecting_to: "Connexion à : "
+failed_to_connect_to_websocket: "Échec de la connexion au websocket : "
+ws_onerror: "Échec de la connexion au websocket, ws.onerror() appelé."
+skipping_ws: "Ignorer la connexion websocket car l'argument url no_ws=true"
+tried_to_send_ws_but_disconnected: "Tentative d'envoi de message réseau, mais le websocket est déconnecté"
+connected_to_ws: "Connecté au serveur websocket "
+
+starting_game: "Démarrage du jeu '%s'"

@@ -3,6 +3,7 @@ third_party/
 old/
 logs/
 out/
+public/
 .*.swp
 .*.swo
 .DS_Store

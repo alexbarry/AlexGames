@@ -1,0 +1,186 @@
+translated_title: "Alex's Games"
+choose_a_game: "Choose a game"
+options: "Options"
+press_here_to_select_a_game: "Press here to select a game"
+press_here_to_select_a_game_alternative: 'Alternatively, go to the "options" button in the top right of the screen, and select "load autosaved game" to resume any previously played games.'
+
+canvas_not_supported_err_msg: "Your browser doesn't support canvases."
+
+main: "Main"
+select_different_game: "Select a different game"
+load_autosaved_game: "Load autosaved game"
+colour_scheme: "Colour scheme"
+colour_scheme_auto: "Auto"
+colour_scheme_light: "Light"
+colour_scheme_dark: "Dark"
+colour_scheme_very_dark: "Very Dark"
+
+colour_scheme_update_refresh_needed: "Note: some games may require a refresh for their colour scheme to update."
+could_be_fixed_in_future_update: "(This could be easily fixed in a future update.)"
+
+game_options: "Game options"
+
+game_options_not_defined: 'This game has not defined any options. <span class="dev_note not_supported">(For developers: call the <code>add_game_option</code> API to add options here. This is useful for less commonly used options like starting a new game.)</span>'
+
+share_export_state: "Share/export state"
+current_state: "Current state"
+
+url_share_state_not_supported: "This game does not support sharing state via URL. <span class=\"dev_note not_supported\">(For developers: define the <code>get_state</code> global function to return the state as a byte array. The game engine will base 64 encode it and it will show up here when the options menu is opened.)</span>"
+url_share_current_state_supported: "The below link contains the game's <strong>current state</strong>. You can send this link to another device to continue playing."
+
+initial_state: "Initial state"
+url_share_init_state_not_supported: "This game does not support sharing initial state via URL. <span class=\"dev_note not_supported\">(For developers: define the <code>get_init_state</code> global function to return the state as a byte array. The game engine will base 64 encode it and it will show up here when the options menu is opened.)</span>"
+init_state_eq_current_state: "This game's initial state is currently equal to its current state. Once you make some moves, this section should retain a link to the game's original state, so you can share it with a friend to play the same puzzle you did (if this game supports it). The above link will change to match the game's <strong>current state</strong>, so you can share a link to continue playing where you left off on another device."
+
+url_init_state_description: "The below link contains the game's <strong>initial state</strong>. You can send this link to a friend so they can try to solve the same puzzle that you did."
+upload_game_bundle: "Upload Game Bundle"
+upload_game_bundle_body: "<p>In addition to the preloaded games already available on this page, you can create your own game (or get one from another person) and upload it to play on this page.</p>
+<p>It should be a ZIP archive of Lua files, with a manifest file. Read more about the API and specifications here: <a href=\"game_api_doc.html\" target=\"_blank\">AlexGames Lua API reference</a></p>
+<p>Here is an example game zip, feel free to download it, optionally edit its contents, and reupload using the buttons below to try out your changes: <a href=\"example_game_apidemo.zip\" style=\"font-family:monospace\">example_game_apidemo.zip</a></p>"
+
+process_game_bundle: "Process game bundle"
+
+multiplayer_settings: "Multiplayer settings"
+multiplayer_url_description: "Generally, you should be able to just copy and paste the URL in your address bar (or below), and share it with a friend for multiplayer to work."
+multiplayer_id_description: "The session ID is how the server knows to connect you with your friend(s). You can change the session ID or server below."
+session_id_label: "Session ID"
+
+websocket_server_label: "Websocket server"
+example_label: "example"
+or: "or"
+submit_multiplayer_settings: "Submit multiplayer settings"
+miscellaneous: "Miscellaneous"
+force_refresh: "Force Refresh"
+alexgames_created_by_click_for_about: "AlexGames was created by Alex Barry, click here for more info."
+
+
+single_player: "Single player."
+two_players: "2 players."
+local_multiplayer: "Local Multiplayer." 
+network_or_local_multiplayer: "Local or network multiplayer"
+colon: ":"
+single_or_network_multiplayer_up_to_4_players: "Single player, or network multiplayer up to 4 players."
+
+
+solitaire: "Solitaire"
+solitaire_description: "Win by putting all of the cards in order from lowest to highest, and grouped by suit. Cards can be placed on the game board from highest to lowest, with alternating suit colours."
+
+word_mastermind: "Word Mastermind"
+word_mastermind_description1: "Guess words, finding out if the letter is in the word and in the right position. Guesses must be valid English words."
+word_mastermind_description2: "Supports entering an arbitrary 5-letter word to generate your own custom puzzle, to share with your friends either by handing them your device, or sending them a link with the state embedded in the URL."
+
+chess: "Chess"
+chess_description: "Win by putting the opponent's king in checkmate."
+
+crossword_letters: "Crossword Letters"
+crossword_letters_description: "Try to figure out all the words that can be made from rearranging a few letters, using the crossword as a hint."
+
+gem_match: "Gem Match"
+gem_match_description: "Swap gems to make lines of three or more."
+
+
+# left off here
+go_title: "Go/Weiqi/Baduk"
+go_description: "Win by controlling more territory than your opponent, and capture their groups of stones by surrounding them."
+go_no_ai_disclaimer: "this game does not yet support AI opponents, or even displaying territory or determining who wins."
+note_prefix: "NOTE:"
+
+reversi: "Reversi"
+reversi_description: "You can only move when jumping one or more of your opponent's pieces, and then they all \"reverse\" to become yours."
+
+checkers: "Checkers"
+checkers_description: "Win by jumping over/capturing all your opponent's pieces."
+
+endless_runner: "Endless runner"
+endless_runner_description: "Tap to jump and use gravity to navigate through an endless set of obstacles."
+
+minesweeper: "Minesweeper"
+minesweeper_description: "Flag mines by using logic to determine where they are, knowing how many mines are adjacent to revealed squares."
+
+fluid_mix: "Fluid Mix"
+fluid_mix_description: "Sort/rearrange layers of liquids in vials, with the goal of ending up with each vial containing only a single type of liquid. Similar to the \"Tower of Hanoi\"."
+
+backgammon: "Backgammon"
+backgammon_description: "Win by bearing off all your pieces before your opponent. You can slow your opponent down by capturing their pieces, moving them to the middle, forcing them to start that piece from the beginning again."
+
+crib: "Cribbage"
+crib_description: "Score points by getting cards worth 15, a run (cards in sequence), pairs, or a flush. First player to achieve 121 wins."
+
+network_multiplayer_two_to_four_players: "Network multiplayer: 2-4 players."
+
+spider_swing: "Spider swing"
+spider_swing_description: "Swing from point to point, being careful not to lose too much height or speed."
+
+thrust: "Thrust"
+thrust_description: "Race your space ship around the track, trying to control your momentum."
+
+wu: "Gomoku/Wuziqi/Omok"
+wu_description: "The winner is the first player to place 5 stones in a row."
+
+game_31s: "31's"
+game_31s_description: "You can hold only 3 cards at a time. On your turn you can choose to draw a new card, or draw a discarded card. Try to get as close to 31 as possible (must be the same suit), or go for three of a kind. On any turn a player may knock, which will end the game after everyone else has played. The player with the highest cards after knocking wins. If a player achieves 31, the game immediately ends and that player is the winner."
+
+hospital: "Hospital"
+hospital_description: "Alone or with a friend, try to help patients by providing them with the right kind of help, racing against the clock."
+
+conway_life: "Conway's Game of Life"
+conway_life_description: "A cellular automaton. <a href=\"https://en.wikipedia.org/wiki/Conway's_Game_of_Life\">See wikipedia for more information.</a> I threw this together and included it here more as a tech demo than an actual game."
+single_player_zero_player: "Single player only. (Arguably \"zero player\")"
+
+about_alexgames: "About AlexGames"
+about_alexgames_line1: "AlexGames is a platform for simple games written in Lua, Rust, or C/C++, currently supporting HTML (the page you are currently visiting), and experimental implementations in Android, and Windows/MacOS/Linux (using wxWidgets). The idea is that someone can throw together the \"fun parts\" of a game in a few hundred lines of Lua, Rust, or C++, and then the boilerplate to get it running on their platform of choice should be already taken care of. Adding support for a new platform should be relatively easy."
+about_alexgames_line2_pt1: "For further convenience (both for game developers and game players), you can develop and/or play your own Lua game just by uploading a bundle of Lua code to the browser client. If you want to put together a simple game, but don't want to bother building this project, you shouldn't need to: just download"
+the_example_lua_game_zip: "the example Lua game zip"
+consult_the: ", consult the"
+lua_api_reference: "Lua API reference"
+about_alexgames_line2_pt2: ", and then you can modify the existing example Lua code or write your own, and then zip your files. Then you can upload that zip file into the web client, or send it to a friend."
+about_alexgames_line3: "It also supports some helpful features like a built in English dictionary (for word puzzle games), sharing state via URL, and saving state and browsing previously saved states. Previews of saved states are generated using the same code the programmer wrote to  render the game itself. The logic for handling this is included as a library to the game platform itself: very little extra code should be needed for game developers or developers of new \"clients\" (more on what a \"client\" is below)."
+about_alexgames_line4: "One of the goals is for the API to be very convenient both for game developers, and for developers of new \"platforms\". In this context a \"platform\" is a device that the game is built for: there is a platform for browsers, developed in HTML/JS/WASM, a native Android platform, and a wxWidgets platform that allows for playing games natively on Windows, MacOS, and Linux."
+
+created_by: "Created by"
+encouraged_to_say_hi_at: "You are encouraged to submit comments, bug reports, feature requests, or say hi at:"
+email: "Email"
+
+also_available_as_an: "Also available as an"
+android_app_on_fdroid: "Android app on F-Droid"
+for_offline_play: "for offline play."
+
+project_would_not_be_possible_without_other_projects: "This project would not be possible if it were not for these amazing projects:"
+lua_lang_description: "A lightweight scripting language that integrates very nicely with C"
+cmake_description: "cross platform build system"
+emscripten_description: "compile C/C++ to WebAssembly"
+rust_lang_description: "a much nicer alternative to C++ which still integrates nicely with C++ and has great support for WebAssembly."
+see_more_in_the: "See more in the"
+licenses_page: "licenses page"
+end_of_sentence: "."
+
+wasm_disabled: 'WebAssembly is disabled or not supported. One possible cause is having "Lockdown Mode" enabled on Apple devices.'
+
+# Brings up the popup to explain the motivation behind the project and a bit about how it works.
+about: "About"
+
+# Open source software licenses
+licenses: "Licenses"
+
+# This directs the user to see the games' source code.
+source: "Source"
+
+init_complete: "Initialization complete"
+websocket_failed: ", but failed to connect to websocket. Multiplayer will not be available"
+websocket_failed2: "Init completed, but websocket connection failed. Not loading game. Add \"no_ws=false\" to the URL arguments to play without websockets."
+waiting_for: "Waiting for"
+wasm_init: "WASM init"
+websocket_connection: "websocket connection"
+html_load: "HTML load"
+dictionary_init: "dictionary download/init"
+loading_state_from_url_param: "Loading state from URL parameter"
+
+unsecure_websocket_server_warning: "Warning: attempting to connect to unsecured websocket server: "
+connecting_to: "Connecting to: "
+failed_to_connect_to_websocket: "Failed to connect to websocket: "
+ws_onerror: "Failed to connect to websocket, ws.onerror() called."
+skipping_ws: "Skipping websocket connection because url arg no_ws=true"
+tried_to_send_ws_but_disconnected: "Tried to send network msg but websocket is disconnected"
+connected_to_ws: "Connected to websocket server "
+
+starting_game: "Starting game '%s'"
