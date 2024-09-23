@@ -561,7 +561,7 @@ TODO add session ID to options, maybe show other players that are connected
 <h2 class="game_title">{{ index .Site.Data.strings .Lang "conway_life" }}</h2>
 <div class="description">
 <p>{{ index .Site.Data.strings .Lang "single_player_zero_player" }}</p>
-<p>{{ index .Site.Data.strings .Lang "conway_life_description" }}</p>
+<p>{{ index .Site.Data.strings .Lang "conway_life_description" | safeHTML }}</p>
 </div>
 </div>
 

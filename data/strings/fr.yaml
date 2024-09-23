@@ -122,7 +122,7 @@ hospital: "Hôpital"
 hospital_description: "Seul ou avec un ami, essayez d'aider les patients en leur fournissant le bon type d'aide, en courant contre le temps."
 
 conway_life: "Le Jeu de la Vie de Conway"
-conway_life_description: "Un automate cellulaire. <a href=\"https://fr.wikipedia.org/wiki/Jeu_de_la_vie_de_Conway\">Voir Wikipédia pour plus d'informations.</a> J'ai assemblé cela et l'ai inclus ici plus comme une démonstration technique qu'un véritable jeu."
+conway_life_description: "Un automate cellulaire. <a href=\"https://fr.wikipedia.org/wiki/Jeu_de_la_vie\">Voir Wikipédia pour plus d'informations.</a> J'ai assemblé cela et l'ai inclus ici plus comme une démonstration technique qu'un véritable jeu."
 single_player_zero_player: "Un seul joueur. (On peut dire \"zéro joueur\")"
 
 about_alexgames: "À propos d'AlexGames"

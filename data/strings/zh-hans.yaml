@@ -120,7 +120,7 @@ hospital: "医院"
 hospital_description: "独自或与朋友一起，尝试通过提供正确的帮助来帮助患者，与时间赛跑。"
 
 conway_life: "康威的生命游戏"
-conway_life_description: "一种元胞自动机。<a href=\"https://en.wikipedia.org/wiki/Conway's_Game_of_Life\">有关更多信息，请参见维基百科。</a> 我将这个拼凑在一起，更多是作为技术演示而非实际游戏。"
+conway_life_description: "一种元胞自动机。<a href=\"https://zh.wikipedia.org/wiki/%E5%BA%B7%E5%A8%81%E7%94%9F%E5%91%BD%E6%B8%B8%E6%88%8F\">有关更多信息，请参见维基百科。</a> 我将这个拼凑在一起，更多是作为技术演示而非实际游戏。"
 single_player_zero_player: "仅限单人游戏。（可争议地称为“零人玩家”）"
 
 about_alexgames: "关于 AlexGames"
