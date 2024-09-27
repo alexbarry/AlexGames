@@ -49,23 +49,23 @@ local translations = {
 
     it = { 
         new_game = "Nuova Partita",
-        draw_dropdown_label = "Pesca",
+        draw_dropdown_label = "Numero di carte",
         draw_type_one = "Uno",
         draw_type_three = "Tre",
         start_game = "Inizia il gioco",
         cancel = "Annulla",
-        
+
 		move_fmt_str = 'Mosse: %d',
 
         undo = "Annulla",
         new_game = "Nuova Partita",
-        autocomplete = "Auto-Completa",
-        
-        loaded_state = "Stato precedente caricato",
-        loaded_state_str = "Impossibile caricare lo stato precedente, non trovato",
+        autocomplete = "Autocompleta",
+
+        loaded_state = "Stato caricato",
+        loaded_state_str = "Impossibile caricare lo stato precedente",
         started_new_game_w_seed = "Generata nuova partita con seed %x %x",
         loaded_saved_state_bytes = "Caricamento stato salvato: %d byte",
-        no_saved_state_found = "Nessuno stato salvato trovato, avvio di una nuova partita",
+        no_saved_state_found = "Nessun stato salvato trovato, avvio di una nuova partita",
 
 		game_option_show_elapsed_time_and_move_count = "Mostra il tempo trascorso e il conteggio delle mosse",
     }, 
