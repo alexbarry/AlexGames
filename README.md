@@ -107,6 +107,16 @@ If you copied it to your existing HTTP server, then you should be able to open i
 
 See BUILD.md. I find this much more convenient for incremental builds.
 
+## Matrix Widget
+
+In the branch [`matrix-widget`](https://github.com/alexbarry/AlexGames/tree/matrix-widget), the source has been modified to use the matrix.org widget API for multiplayer messages.
+
+See the "AlexGames" section of ["This Week in Matrix" 2024-09-27](https://matrix.org/blog/2024/09/27/this-week-in-matrix-2024-09-27/#alexgames-simple-lua-rust-webassembly-powered-board-games-running-in-a-matrix-widget) for more information. Here is a demo video:
+
+[![Video of AlexGames running as a matrix widget](http://img.youtube.com/vi/a_uR0tPeR18/0.jpg)](http://www.youtube.com/watch?v=a_uR0tPeR18 "AlexGames chess as a matrix widget")
+
+I'm happy to polish this and merge it into main if there is any interest.
+
 ## Contributing
 
 I would be very happy if anyone wants to add their own game, or implement the API on a new platform. Feel free to contact me if you are interested. I would be happy to guide you through the code or investigate any bugs you are running into.
