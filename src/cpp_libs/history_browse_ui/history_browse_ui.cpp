@@ -309,6 +309,10 @@ static void preview_set_status_err(const char *msg, size_t msg_len) {
 	g_callbacks->set_status_err(msg, msg_len);
 }
 
+static size_t preview_get_language_code(char *lang_code_out, size_t max_lang_code_out_len) {
+	return g_callbacks->get_language_code(lang_code_out, max_lang_code_out_len);
+}
+
 static size_t preview_get_user_colour_pref(char *colour_pref_out, size_t max_colour_pref_out_len) {
 	return g_callbacks->get_user_colour_pref(colour_pref_out, max_colour_pref_out_len);
 }
@@ -356,6 +360,7 @@ static const struct game_api_callbacks create_preview_draw_callbacks(void) {
 	callbacks.set_status_err = preview_set_status_err;
 	callbacks.get_user_colour_pref = preview_get_user_colour_pref;
 	callbacks.get_game_id  = preview_get_game_id;
+	callbacks.get_language_code = preview_get_language_code;
 
 	return callbacks;
 }
