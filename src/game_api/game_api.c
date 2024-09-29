@@ -39,6 +39,8 @@
 // TODO make a proper header for this
 extern const struct game_api *get_stick_api();
 
+const char * alexgames_get_translation(const char *translation_id);
+
 #include "history_browse_ui.h"
 
 #define ARY_LEN(x) (sizeof(x)/sizeof((x)[0]))
@@ -334,9 +336,11 @@ void alexgames_print(const char *str, size_t len) {
 void *alex_init_game(const struct game_api_callbacks *api_callbacks,
                      const char *game_str, int game_str_len) {
 	printf("[init] game_api.c: alex_init_game called\n");
+
+	printf("get_translation returned: %s\n", alexgames_get_translation("starting_game"));
 	{
 		char init_msg[256];
-		int init_msg_len = snprintf(init_msg, sizeof(init_msg), "Starting game \"%s\"", game_str);
+		int init_msg_len = snprintf(init_msg, sizeof(init_msg), alexgames_get_translation("starting_game"), game_str);
 		api_callbacks->set_status_msg(init_msg, init_msg_len);
 	}
 

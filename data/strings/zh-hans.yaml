@@ -1,0 +1,179 @@
+translated_title: "亚历克斯的游戏们"
+choose_a_game: "选择游戏"
+options: "选项"
+press_here_to_select_a_game: "按这里选择游戏"
+press_here_to_select_a_game_alternative: '或者，前往屏幕右上角的“选项”按钮，选择“加载自动保存的游戏”以恢复之前玩的游戏。'
+
+canvas_not_supported_err_msg: "您的浏览器不支持画布。"
+
+main: "主菜单"
+select_different_game: "选择其他游戏"
+load_autosaved_game: "加载自动保存的游戏"
+colour_scheme: "颜色方案"
+colour_scheme_auto: "自动"
+colour_scheme_light: "明亮"
+colour_scheme_dark: "黑暗"
+colour_scheme_very_dark: "非常黑暗"
+
+colour_scheme_update_refresh_needed: "注意：某些游戏可能需要刷新才能更新其颜色方案。"
+could_be_fixed_in_future_update: "(这可以在未来的更新中轻松修复。)"
+
+game_options: "游戏选项"
+
+game_options_not_defined: '此游戏尚未定义任何选项。<span class="dev_note not_supported">(对于开发者：调用 <code>add_game_option</code> API 在这里添加选项。这对于像开始新游戏这样不常用的选项非常有用。)</span>'
+
+share_export_state: "分享/导出状态"
+current_state: "当前状态"
+
+url_share_state_not_supported: "该游戏不支持通过URL分享状态。<span class=\"dev_note not_supported\">（对于开发者：定义全局函数<code>get_state</code>来返回状态作为字节数组。游戏引擎将对其进行Base64编码，当打开选项菜单时它会显示在这里。）</span>"
+url_share_current_state_supported: "以下链接包含游戏的<strong>当前状态</strong>。您可以将此链接发送到其他设备以继续游戏。"
+
+initial_state: "初始状态"
+url_share_init_state_not_supported: "该游戏不支持通过URL分享初始状态。<span class=\"dev_note not_supported\">（对于开发者：定义全局函数<code>get_init_state</code>来返回初始状态作为字节数组。游戏引擎将对其进行Base64编码，当打开选项菜单时它会显示在这里。）</span>"
+init_state_eq_current_state: "该游戏的初始状态当前等于其当前状态。一旦您进行一些操作后，此部分将保留一个链接到游戏的原始状态，以便您可以与朋友分享相同的谜题（如果此游戏支持）。以上的链接将更改为匹配游戏的<strong>当前状态</strong>，因此您可以分享链接以便在其他设备上继续游戏。"
+
+url_init_state_description: "以下链接包含游戏的<strong>初始状态</strong>。您可以将此链接发送给朋友，让他们尝试解决您玩的相同谜题。"
+upload_game_bundle: "上传游戏包"
+upload_game_bundle_body: "<p>除了此页面上已预载的游戏外，您还可以创建自己的游戏（或从他人处获取游戏）并上传到此页面进行游戏。</p>
+<p>它应是一个包含Lua文件的ZIP归档文件，带有清单文件。有关API和规范的更多信息，请阅读此处：<a href=\"game_api_doc.html\" target=\"_blank\">AlexGames Lua API 参考</a></p>
+<p>这是一个示例游戏ZIP，您可以下载它，选择性地编辑其内容，然后使用下面的按钮重新上传以尝试您的更改：<a href=\"example_game_apidemo.zip\" style=\"font-family:monospace\">example_game_apidemo.zip</a></p>"
+
+process_game_bundle: "处理游戏包"
+
+multiplayer_settings: "多人游戏设置"
+multiplayer_url_description: "通常，您可以复制并粘贴地址栏中的URL（或下面的URL），并与朋友分享以进行多人游戏。"
+multiplayer_id_description: "会话ID是服务器连接您和朋友的方式。您可以在下方更改会话ID或服务器。"
+session_id_label: "会话ID"
+
+websocket_server_label: "WebSocket服务器"
+example_label: "示例"
+or: "或"
+submit_multiplayer_settings: "提交多人游戏设置"
+miscellaneous: "其他"
+force_refresh: "强制刷新"
+alexgames_created_by_click_for_about: "AlexGames由Alex Barry创建，点击此处了解更多信息。"
+
+single_player: "单人游戏。"
+two_players: "2人游戏。"
+local_multiplayer: "本地多人游戏。"
+network_or_local_multiplayer: "本地或网络多人游戏"
+colon: "："
+single_or_network_multiplayer_up_to_4_players: "单人游戏或网络多人游戏（最多4人）。"
+
+solitaire: "纸牌接龙"
+solitaire_description: "通过将所有牌按从低到高的顺序排列，并按花色分组来获胜。牌可以从高到低放置在游戏板上，且交替花色。"
+
+word_mastermind: "单词推理"
+word_mastermind_description1: "猜测单词，判断字母是否在单词中及其位置是否正确。猜测必须是有效的英语单词。"
+word_mastermind_description2: "支持输入任意5个字母的单词以生成您自己的自定义谜题，可以通过将设备交给朋友或发送包含状态的链接与他们分享。"
+
+chess: "国际象棋"
+chess_description: "通过将对手的国王将死来获胜。"
+
+crossword_letters: "填字游戏字母"
+crossword_letters_description: "尝试通过重新排列几个字母来找出所有可能的单词，利用填字游戏作为提示。"
+
+gem_match: "宝石匹配"
+gem_match_description: "交换宝石，形成三颗或更多同类宝石的直线。"
+
+go_title: "围棋"
+go_description: "通过控制比对手更多的领土来获胜，并通过包围对手的棋子来捕获他们。"
+go_no_ai_disclaimer: "该游戏尚不支持AI对手，甚至不显示领土或判断谁赢。"
+note_prefix: "注意："
+
+reversi: "黑白棋"
+reversi_description: "只有在跳过一个或多个对手的棋子时才能移动，然后所有的棋子都“反转”成为你的棋子。"
+
+checkers: "跳棋"
+checkers_description: "通过跳过/捕获对手的所有棋子来获胜。"
+
+endless_runner: "无尽跑者"
+endless_runner_description: "点击跳跃，利用重力穿越无尽的障碍。"
+
+minesweeper: "扫雷"
+minesweeper_description: "使用逻辑判断地雷的位置，标记地雷，并知道有多少地雷与已揭示的方块相邻。"
+
+fluid_mix: "液体混合"
+fluid_mix_description: "在试管中分类/重新排列液体层，目标是使每个试管只含有一种类型的液体。类似于“汉诺塔”。"
+
+backgammon: "西洋双陆"
+backgammon_description: "通过在对手之前全部卸下自己的棋子来获胜。您可以通过捕获对手的棋子来减缓他们的速度，将他们移到中间，迫使他们从头开始该棋子。"
+
+crib: "布雷奇"
+crib_description: "通过获得总值为15的牌、顺子（按顺序排列的牌）、对子或同花来得分。第一个达到121分的玩家获胜。"
+
+network_multiplayer_two_to_four_players: "网络多人游戏：2-4人。"
+
+spider_swing: "蜘蛛摆荡"
+spider_swing_description: "从一个点摆荡到另一个点，注意不要失去太多高度或速度。"
+
+thrust: "推进"
+thrust_description: "驾驶您的宇宙飞船在赛道上竞速，努力控制您的动量。"
+
+wu: "五子棋"
+wu_description: "第一个连续放置5颗棋子的玩家获胜。"
+
+game_31s: "31点"
+game_31s_description: "您一次只能持有3张牌。在您的回合中，您可以选择抽一张新牌或抽一张丢弃的牌。尽量接近31（必须是同花色），或者争取三张同样的牌。在任何回合中，玩家可以敲打，敲打后游戏结束，其他玩家完成后，手中牌值最高的玩家获胜。如果某个玩家达到31，游戏立即结束，该玩家获胜。"
+
+hospital: "医院"
+hospital_description: "独自或与朋友一起，尝试通过提供正确的帮助来帮助患者，与时间赛跑。"
+
+conway_life: "康威的生命游戏"
+conway_life_description: "一种元胞自动机。<a href=\"https://zh.wikipedia.org/wiki/%E5%BA%B7%E5%A8%81%E7%94%9F%E5%91%BD%E6%B8%B8%E6%88%8F\">有关更多信息，请参见维基百科。</a> 我将这个拼凑在一起，更多是作为技术演示而非实际游戏。"
+single_player_zero_player: "仅限单人游戏。（可争议地称为“零人玩家”）"
+
+about_alexgames: "关于 AlexGames"
+about_alexgames_line1: "AlexGames 是一个基于 Lua、Rust 或 C/C++ 编写的简单游戏平台，目前支持 HTML（您正在访问的页面），以及在 Android 和 Windows/MacOS/Linux（使用 wxWidgets）的实验性实现。这个想法是让某人可以在几百行 Lua、Rust 或 C++ 中快速拼凑出游戏的“有趣部分”，然后让在其选择的平台上运行所需的模板代码已经完成。为新平台添加支持应该相对简单。"
+about_alexgames_line2_pt1: "为了更方便（对游戏开发者和玩家都如此），您可以通过将一包 Lua 代码上传到浏览器客户端来开发和/或玩自己的 Lua 游戏。如果您想拼凑一个简单的游戏，但不想费心构建此项目，您不需要这样做：只需下载"
+the_example_lua_game_zip: "示例 Lua 游戏 zip"
+consult_the: "，请查阅"
+lua_api_reference: "Lua API 参考"
+about_alexgames_line2_pt2: "，然后您可以修改现有的示例 Lua 代码或编写自己的代码，然后将文件打包为 zip。然后您可以将该 zip 文件上传到网页客户端，或发送给朋友。"
+about_alexgames_line3: "它还支持一些有用的功能，如内置英语词典（用于单词谜题游戏）、通过 URL 共享状态以及保存状态和浏览之前保存的状态。保存状态的预览是使用程序员编写的相同代码生成的，以渲染游戏本身。处理此逻辑的代码作为库包含在游戏平台中：游戏开发者或新“客户端”开发者几乎不需要额外的代码（关于“客户端”的更多信息在下方）。"
+about_alexgames_line4: "其中一个目标是使 API 对游戏开发者和新“平台”的开发者非常方便。在这个上下文中，“平台”是游戏所构建的设备：有一个针对浏览器的平台，使用 HTML/JS/WASM 开发，还有一个本地 Android 平台，以及一个允许在 Windows、MacOS 和 Linux 上本地玩游戏的 wxWidgets 平台。"
+
+created_by: "创建者"
+encouraged_to_say_hi_at: "欢迎提交评论、错误报告、功能请求或问候："
+email: "电子邮件"
+
+also_available_as_an: "也可作为"
+android_app_on_fdroid: "F-Droid 上的 Android 应用"
+for_offline_play: "用于离线游戏。"
+
+project_would_not_be_possible_without_other_projects: "如果没有这些惊人的项目，这个项目将无法实现："
+lua_lang_description: "一种轻量级脚本语言，与 C 非常良好地集成"
+cmake_description: "跨平台构建系统"
+emscripten_description: "将 C/C++ 编译为 WebAssembly"
+rust_lang_description: "一种比 C++ 更好的替代方案，仍然与 C++ 很好地集成，并且对 WebAssembly 有很好的支持。"
+see_more_in_the: "请查看"
+licenses_page: "许可证页面"
+end_of_sentence: "。"
+
+wasm_disabled: 'WebAssembly 被禁用或不受支持。一个可能的原因是在 Apple 设备上启用了“锁定模式”。'
+
+about: "关于"
+
+licenses: "许可证"
+
+source: "源代码"
+
+init_complete: "初始化完成"
+websocket_failed: "，但连接到 websocket 失败。多人游戏将不可用"
+websocket_failed2: "初始化完成，但 websocket 连接失败。游戏将不加载。请将 \"no_ws=false\" 添加到 URL 参数中以在没有 websockets 的情况下进行游戏。"
+waiting_for: "等待中"
+wasm_init: "WASM 初始化"
+websocket_connection: "websocket 连接"
+html_load: "HTML 加载"
+dictionary_init: "字典下载/初始化"
+loading_state_from_url_param: "从 URL 参数加载状态"
+
+unsecure_websocket_server_warning: "警告：尝试连接到不安全的 websocket 服务器："
+connecting_to: "连接到："
+failed_to_connect_to_websocket: "连接到 websocket 失败："
+ws_onerror: "连接到 websocket 失败，调用了 ws.onerror()。"
+skipping_ws: "跳过 websocket 连接，因为 URL 参数 no_ws=true"
+tried_to_send_ws_but_disconnected: "尝试发送网络消息，但 websocket 已断开连接"
+connected_to_ws: "已连接到 websocket 服务器 "
+
+starting_game: "启动游戏 '%s'"

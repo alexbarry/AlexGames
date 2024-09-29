@@ -30,7 +30,33 @@ mkdir -p ${HTTP_OUT}
 # words-en.txt is a list of English words, used for words puzzles
 cp -r ../../../out/words-*.txt ${HTTP_OUT}/
 
-cp -r ../../../src/html/* ${HTTP_OUT}/
+#cp -r ../../../src/html/* ${HTTP_OUT}/
+cp -r ../../../src/html/js/ ${HTTP_OUT}/
+cp -r ../../../src/html/css/ ${HTTP_OUT}/
+(cd ../../../ && hugo )
+cp -r ../../../public/index.html ${HTTP_OUT}/
+langs=(
+	en
+	fr
+	#es
+	#pt
+	it
+	#de
+	#hi
+	#tr
+	#vi
+	#ar
+	#th
+	#ru
+	#uk
+	zh-hans
+	#ja
+	#ko
+)
+for lang in "${langs[@]}"; do
+	cp -r ../../../public/${lang}/index.html ${HTTP_OUT}/${lang}.html
+done
+
 mkdir -p ${HTTP_OUT}/img
 cp -r ../../../img/* ${HTTP_OUT}/img/
 

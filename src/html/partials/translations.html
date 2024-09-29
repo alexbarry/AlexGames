@@ -1,0 +1,28 @@
+<script>
+
+//const language_code = "{{ .Lang | replace "zh-Hans" "zh-hans" }}";
+const language_code = "{{ .Lang }}";
+const translations = {
+	choose_a_game: '{{ index .Site.Data.strings .Lang "choose_a_game" }}',
+	wasm_disabled: '{{ index .Site.Data.strings .Lang "wasm_disabled" }}',
+	init_complete: '{{ index .Site.Data.strings .Lang "init_complete" }}',
+	websocket_failed: '{{ index .Site.Data.strings .Lang "websocket_failed" }}',
+	waiting_for: '{{ index .Site.Data.strings .Lang "waiting_for" }}',
+	wasm_init: '{{ index .Site.Data.strings .Lang "wasm_init" }}',
+	websocket_connection: '{{ index .Site.Data.strings .Lang "websocket_connection" }}',
+	html_load: '{{ index .Site.Data.strings .Lang "html_load" }}',
+	dictionary_init: '{{ index .Site.Data.strings .Lang "dictionary_init" }}',
+	loading_state_from_url_param: '{{ index .Site.Data.strings .Lang "loading_state_from_url_param" }}',
+
+	unsecure_websocket_server_warning: '{{ index .Site.Data.strings .Lang "unsecure_websocket_server_warning" }}',
+	connecting_to: '{{ index .Site.Data.strings .Lang "connecting_to" }}',
+	failed_to_connect_to_websocket: '{{ index .Site.Data.strings .Lang "failed_to_connect_to_websocket" }}',
+	ws_onerror: '{{ index .Site.Data.strings .Lang "ws_onerror" }}',
+	skipping_ws: '{{ index .Site.Data.strings .Lang "skipping_ws" }}',
+	tried_to_send_ws_but_disconnected: '{{ index .Site.Data.strings .Lang "tried_to_send_ws_but_disconnected" }}',
+	connected_to_ws: '{{ index .Site.Data.strings .Lang "connected_to_ws" }}',
+
+	starting_game: '{{ index .Site.Data.strings .Lang "starting_game" }}',
+
+};
+</script>

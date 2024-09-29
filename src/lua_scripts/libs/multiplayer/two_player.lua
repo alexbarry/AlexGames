@@ -33,9 +33,117 @@ two_player.MULTIPLAYER_TYPE_NETWORK = "network"
 two_player.PLAYER_CHOICE_POPUP_ID = "two_player_choice_popup"
 two_player.MULTIPLAYER_TYPE_POPUP_ID = "two_player_multiplayer_type_popup"
 
+local strings = {
+	en = {
+		local_multiplayer = "Local multiplayer (two players on this device)",
+		network_multiplayer = "Network multiplayer (players on different devices)",
+		url_id_explanation = "Share the URL in your address bar with your friend, making sure to include the randomly generated \"ID\" parameter. This is how the server knows to connect you with your friend.",
+		multiplayer_type_title = "Multiplayer type",
+		player_x_chose_to_be_y = "Player %s chose to be %s",
+		player_x_joined = "Player %s joined",
+		player_x_y_left = "Player %s (%s) left",
+	},
+    fr = {
+        local_multiplayer = "Multijoueur local (deux joueurs sur cet appareil)",
+        network_multiplayer = "Multijoueur en réseau (joueurs sur des appareils différents)",
+        url_id_explanation = "Partagez l'URL dans votre barre d'adresse avec votre ami, en veillant à inclure le paramètre \"ID\" généré aléatoirement. C'est ainsi que le serveur sait vous connecter à votre ami.",
+        multiplayer_type_title = "Type de multijoueur",
+        player_x_chose_to_be_y = "Le joueur %s a choisi d'être %s",
+        player_x_joined = "Le joueur %s a rejoint",
+        player_x_y_left = "Le joueur %s (%s) est parti",
+    },
+    es = {
+        local_multiplayer = "Multijugador local (dos jugadores en este dispositivo)",
+        network_multiplayer = "Multijugador en red (jugadores en dispositivos diferentes)",
+        url_id_explanation = "Comparte la URL en la barra de direcciones con tu amigo, asegurándote de incluir el parámetro \"ID\" generado aleatoriamente. Así es como el servidor sabe que debe conectarte con tu amigo.",
+        multiplayer_type_title = "Tipo de multijugador",
+        player_x_chose_to_be_y = "El jugador %s eligió ser %s",
+        player_x_joined = "El jugador %s se ha unido",
+        player_x_y_left = "El jugador %s (%s) se fue",
+    },
+    
+    pt = {
+        local_multiplayer = "Multijogador local (dois jogadores neste dispositivo)",
+        network_multiplayer = "Multijogador em rede (jogadores em dispositivos diferentes)",
+        url_id_explanation = "Compartilhe o URL na barra de endereços com seu amigo, certificando-se de incluir o parâmetro \"ID\" gerado aleatoriamente. É assim que o servidor sabe conectá-lo ao seu amigo.",
+        multiplayer_type_title = "Tipo de multijogador",
+        player_x_chose_to_be_y = "O jogador %s escolheu ser %s",
+        player_x_joined = "O jogador %s entrou",
+        player_x_y_left = "O jogador %s (%s) saiu",
+    },
+    
+    it = {
+        local_multiplayer = "Multigiocatore locale (due giocatori su questo dispositivo)",
+        network_multiplayer = "Multigiocatore in rete (giocatori su dispositivi diversi)",
+        url_id_explanation = "Condividi l'URL nella barra degli indirizzi con il tuo amico, assicurandoti di includere il parametro \"ID\" generato casualmente. È così che il server sa che deve connetterti con il tuo amico.",
+        multiplayer_type_title = "Tipo di multigiocatore",
+        player_x_chose_to_be_y = "Il giocatore %s ha scelto di essere %s",
+        player_x_joined = "Il giocatore %s si è unito",
+        player_x_y_left = "Il giocatore %s (%s) ha lasciato",
+    },
+    
+    de = {
+        local_multiplayer = "Lokaler Mehrspieler (zwei Spieler auf diesem Gerät)",
+        network_multiplayer = "Netzwerk-Mehrspieler (Spieler auf verschiedenen Geräten)",
+        url_id_explanation = "Teilen Sie die URL in Ihrer Adressleiste mit Ihrem Freund und stellen Sie sicher, dass der zufällig generierte \"ID\"-Parameter enthalten ist. So weiß der Server, dass er Sie mit Ihrem Freund verbinden soll.",
+        multiplayer_type_title = "Mehrspielertyp",
+        player_x_chose_to_be_y = "Spieler %s hat sich entschieden, %s zu sein",
+        player_x_joined = "Spieler %s ist beigetreten",
+        player_x_y_left = "Spieler %s (%s) hat das Spiel verlassen",
+    },
+    
+    ["zh-hans"] = {
+        local_multiplayer = "本地多人游戏（此设备上的两名玩家）",
+        network_multiplayer = "网络多人游戏（不同设备上的玩家）",
+        url_id_explanation = "与好友分享地址栏中的URL，确保包含随机生成的\"ID\"参数。这样服务器才知道将你和好友连接在一起。",
+        multiplayer_type_title = "多人游戏类型",
+        player_x_chose_to_be_y = "玩家 %s 选择成为 %s",
+        player_x_joined = "玩家 %s 加入了",
+        player_x_y_left = "玩家 %s (%s) 退出了",
+    },
+    
+    ja = {
+        local_multiplayer = "ローカルマルチプレイヤー（このデバイスで2人のプレイヤー）",
+        network_multiplayer = "ネットワークマルチプレイヤー（異なるデバイス上のプレイヤー）",
+        url_id_explanation = "アドレスバーに表示されているURLを友達と共有し、ランダムに生成された\"ID\"パラメータを含めることを確認してください。これがサーバーが友達と接続する方法です。",
+        multiplayer_type_title = "マルチプレイの種類",
+        player_x_chose_to_be_y = "プレイヤー%sが%sを選びました",
+        player_x_joined = "プレイヤー%sが参加しました",
+        player_x_y_left = "プレイヤー%s（%s）が退出しました",
+    },
+    
+    ko = {
+        local_multiplayer = "로컬 멀티플레이어 (이 기기의 두 명의 플레이어)",
+        network_multiplayer = "네트워크 멀티플레이어 (다른 기기의 플레이어)",
+        url_id_explanation = "주소 표시줄에 있는 URL을 친구에게 공유하고, 무작위로 생성된 \"ID\" 매개변수를 포함하는지 확인하세요. 서버가 친구와 연결하는 방법입니다.",
+        multiplayer_type_title = "멀티플레이 유형",
+        player_x_chose_to_be_y = "플레이어 %s이(가) %s을(를) 선택했습니다",
+        player_x_joined = "플레이어 %s이(가) 참가했습니다",
+        player_x_y_left = "플레이어 %s (%s)이(가) 나갔습니다",
+    },
+    
+    ru = {
+        local_multiplayer = "Локальная многопользовательская игра (два игрока на этом устройстве)",
+        network_multiplayer = "Сетевая многопользовательская игра (игроки на разных устройствах)",
+        url_id_explanation = "Поделитесь URL в адресной строке с вашим другом, убедившись, что включен случайно сгенерированный параметр \"ID\". Таким образом сервер узнает, как соединить вас с другом.",
+        multiplayer_type_title = "Тип многопользовательской игры",
+        player_x_chose_to_be_y = "Игрок %s выбрал быть %s",
+        player_x_joined = "Игрок %s присоединился",
+        player_x_y_left = "Игрок %s (%s) вышел",
+    },
+}
+
+local lang = alexgames.get_language_code()
+if strings[lang] == nil then
+	alexgames.set_status_err(string.format("Sorry, language '%s' not supported by library two_player.lua.", lang))
+	lang = 'en'
+end
+
+strings = strings[lang]
+
 local multiplayer_types_btns = {
-	"Local multiplayer (two players on this device)",
-	"Network multiplayer (players on different devices)",
+	strings.local_multiplayer,
+	strings.network_multiplayer,
 }
 local multiplayer_type_btn_local   = 0
 local multiplayer_type_btn_network = 1
@@ -113,7 +221,7 @@ local function need_player_reselect(remote_player)
 end
 
 local function show_player_choice_popup()
-	local msg = "Share the URL in your address bar with your friend, making sure to include the randomly generated \"ID\" parameter. This is how the server knows to connect you with your friend."
+	local msg = strings.url_id_explanation
 	msg = msg .. "\n" .. g_args.get_msg()
 	show_buttons_popup.show_popup(two_player.PLAYER_CHOICE_POPUP_ID,
 	                              g_args.title,
@@ -123,7 +231,7 @@ end
 
 local function show_multiplayer_type_popup()
 	show_buttons_popup.show_popup(two_player.MULTIPLAYER_TYPE_POPUP_ID,
-	                              "Multiplayer type",
+	                              strings.multiplayer_type_title,
 	                              "",
 	                              --"Choose to have two players on this device, or to play against someone over the network",
 	                              --"Choose either:\n" ..
@@ -238,7 +346,7 @@ function two_player.handle_msg_received(src, msg)
 		-- Make sure that `hide_popup` isn't called after calling this, since
 		-- the client may show their own popup that this library shouldn't hide.
 		g_args.handle_player_choice(src, other_player)
-		alexgames.set_status_msg(string.format("Player %s chose to be %s", src, g_args.player_id_to_nice_name(other_player)))
+		alexgames.set_status_msg(string.format(strings.player_x_chose_to_be_y, src, g_args.player_id_to_nice_name(other_player)))
 		return true
 	elseif header == MSG_HEADER_PLAYER_JOINED then
 		-- When new players join, if the local player has already chosen, then tell them.
@@ -247,13 +355,13 @@ function two_player.handle_msg_received(src, msg)
 		if this_player_choice ~= nil then
 			broadcast_this_player_choice(this_player_choice)
 		end
-		alexgames.set_status_msg(string.format("Player %s joined", src))
+		alexgames.set_status_msg(string.format(strings.player_x_joined, src))
 		return true
 	elseif header == "player_left" and src == "ctrl" then
 		print("player left")
 		local player_name = payload
 		local player_id = g_args.player_name_to_id[player_name]
-		alexgames.set_status_msg(string.format("Player %s (%s) left", player_name, g_args.player_id_to_nice_name(player_id)))
+		alexgames.set_status_msg(string.format(strings.player_x_y_left, player_name, g_args.player_id_to_nice_name(player_id)))
 		g_args.player_name_to_id[player_name] = nil
 		remove_player(g_state, player_name)
 		-- TODO I don't see how this was ever true,

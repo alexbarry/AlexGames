@@ -7,6 +7,7 @@ local cards_draw = require("libs/cards/cards_draw")
 local draw_celebration_anim = require("libs/draw/draw_celebration_anim")
 
 local core       = require("games/solitaire/solitaire_core")
+local strings    = require("games/solitaire/solitaire_strings")
 
 local BACKGROUND_COLOUR = '#008800'
 local CARD_SPACE_COLOUR = '#007000'
@@ -115,9 +116,9 @@ function draw.init(board_width_arg, board_height_arg)
 	card_padding = math.floor(card_width_max * card_padding_ratio)
 
 
-	alexgames.create_btn(draw.BTN_ID_UNDO,          "Undo",          1)
-	alexgames.create_btn(draw.BTN_ID_NEW_GAME,      "New Game",      1)
-	alexgames.create_btn(draw.BTN_ID_AUTO_COMPLETE, "Auto-Complete", 1)
+	alexgames.create_btn(draw.BTN_ID_UNDO,          strings.undo,         1)
+	alexgames.create_btn(draw.BTN_ID_NEW_GAME,      strings.new_game,     1)
+	alexgames.create_btn(draw.BTN_ID_AUTO_COMPLETE, strings.autocomplete, 1)
 end
 
 
@@ -356,7 +357,7 @@ function draw.draw_state(session_id, state)
 	end
 
 	if draw.show_move_count_and_elapsed_time and state.move_count ~= nil then
-		local moves_str = string.format('Moves: %d', state.move_count)
+		local moves_str = string.format(strings.move_fmt_str, state.move_count)
 		alexgames.draw_text(moves_str, get_text_colour(),
 		                     board_height - PADDING,
 		                     PADDING,

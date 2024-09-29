@@ -14,6 +14,7 @@ local alexgames = require("alexgames")
 local core = require("games/chess/chess_core")
 local draw = require("games/chess/chess_draw")
 local serialize = require("games/chess/chess_serialize")
+local strings = require("games/chess/chess_strings")
 
 local utils = require("libs/utils")
 local two_player = require("libs/multiplayer/two_player")
@@ -29,8 +30,8 @@ local session_id = alexgames.get_new_session_id()
 
 local SELECT_PLAYER_POPUP_ID = "select_player"
 local PLAYER_CHOICE_BTNS = {
-	"White",
-	"Black",
+	strings.white,
+	strings.black,
 }
 local BTN_MAP = {
     [0] = core.PLAYER_WHITE,
@@ -93,14 +94,14 @@ function handle_rc(rc, is_other_player)
 	elseif rc == core.RC_GAME_OVER then
 		local msg = core.get_status_msg(g_state)
 		alexgames.set_status_msg(msg)
-		alexgames.show_popup(POPUP_ID_NEW_GAME, { title = "Game Over", items = {
+		alexgames.show_popup(POPUP_ID_NEW_GAME, { title = strings.game_over_title, items = {
 			{ item_type = alexgames.POPUP_ITEM_TYPE_MSG, msg = msg },
-			{ id = POPUP_ITEM_ID_NEW_GAME_BTN, item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = "New Game" },
+			{ id = POPUP_ITEM_ID_NEW_GAME_BTN, item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = strings.new_game },
 		} })
 	else
 		local msg = core.get_err_msg(rc)
 		if is_other_player then
-			msg = "Other player invalid move: " .. msg
+			msg = strings.other_player_invalid_move .. ': ' .. msg
 		end
 		alexgames.set_status_err(msg)
 	end
@@ -165,9 +166,9 @@ function handle_msg_received(src, msg)
         handle_rc(rc, --[[is_other_player=]] true)
 
         if rc ~= core.SUCCESS then
-            alexgames.set_status_err("Other player made an invalid move")
+            alexgames.set_status_err(strings.other_player_invalid_move)
         else
-            alexgames.set_status_msg("Your move")
+            alexgames.set_status_msg(strings.your_move)
             draw_board_internal()
             save_state()
         end
@@ -191,7 +192,7 @@ end
 function two_player_init()
     local args = {
         supports_local_multiplayer = true,
-        title = "Choose piece colour",
+        title = strings.choose_piece_colour_title,
         player_choices = PLAYER_CHOICE_BTNS,
         handle_multiplayer_type_choice = function (multiplayer_type)
             if multiplayer_type == two_player.MULTIPLAYER_TYPE_LOCAL then
@@ -210,15 +211,15 @@ function two_player_init()
             return utils.make_first_char_uppercase(player_colour)
         end,
         get_msg = function ()
-            local msg = "White moves first."
+            local msg = strings.white_moves_first
             if utils.table_len(player_name_to_id) == 0 then
-                msg = msg .. "\nThe other player has not yet chosen."
+                msg = msg .. "\n" .. strings.other_player_not_yet_chosen 
             else
                 --msg = msg .. string.format("The other player has chosen %s",
                 --                           core.player_id_to_name(other_player))
                 for player_name, player_id in pairs(player_name_to_id) do
                     local player_colour = core.get_player_name(player_id)
-                    msg = msg .. string.format("\n%s is chosen by %s", utils.make_first_char_uppercase(player_colour), player_name)
+                    msg = msg .. string.format("\n" .. strings.x_chosen_by_y, utils.make_first_char_uppercase(player_colour), player_name)
                 end
             end
             return msg
@@ -300,7 +301,7 @@ function start_game(session_id_arg, state_serialized)
 	else
 		local saved_session_id = alexgames.get_last_session_id()
 		if saved_session_id ~= nil and alexgames.has_saved_state_offset(saved_session_id, 0) then
-			alexgames.set_status_msg(string.format("Loading saved state session %d", saved_session_id))
+			alexgames.set_status_msg(string.format(strings.loading_saved_state_session, saved_session_id))
 			load_state_offset(saved_session_id, 0)
 			state_loaded = true
 		end
@@ -310,10 +311,10 @@ function start_game(session_id_arg, state_serialized)
 
 	alexgames.send_message("all", "get_state:")
 
-	alexgames.add_game_option(OPTION_ID_NEW_GAME, { type = alexgames.OPTION_TYPE_BTN, label = "New Game" })
+	alexgames.add_game_option(OPTION_ID_NEW_GAME, { type = alexgames.OPTION_TYPE_BTN, label = strings.new_game })
 
-	alexgames.create_btn(BTN_ID_UNDO, "Undo", 1)
-	alexgames.create_btn(BTN_ID_REDO, "Redo", 1)
+	alexgames.create_btn(BTN_ID_UNDO, strings.undo, 1)
+	alexgames.create_btn(BTN_ID_REDO, strings.redo, 1)
 	--[[
 	g_session_id = alexgames.get_new_session_id()
 	g_state = core.new_game()

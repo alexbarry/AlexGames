@@ -124,6 +124,7 @@ pub struct CCallbacksPtr {
     //pub get_time_ms: Option<unsafe extern "C" fn() -> c_ulonglong>,
     pub get_time_ms: Option<unsafe extern "C" fn() -> c_ulong>,
     pub get_time_of_day: Option<unsafe extern "C" fn(*mut c_char, size_t)>,
+    pub get_language_code: Option<unsafe extern "C" fn(*mut c_char, size_t) -> size_t>,
 
     pub store_data: Option<unsafe extern "C" fn(*mut c_void, *const c_char, *const u8, size_t)>,
     pub read_stored_data:
@@ -426,6 +427,26 @@ impl CCallbacksPtr {
             return 0;
         }
     }
+
+	pub fn get_language_code(&self) -> String {
+		let buff_size = 256;
+		let mut buffer: Vec<u8> = Vec::with_capacity(buff_size);
+		if let Some(get_language_code) = self.get_language_code {
+			unsafe {
+				let byte_len = (get_language_code)(buffer.as_mut_ptr() as *mut i8, buff_size);
+				let slice = slice::from_raw_parts(buffer.as_ptr(), byte_len);
+				if let Ok(language_code) = std::str::from_utf8(slice) {
+					return String::from(language_code);
+				} else {
+					println!("Error decoding language code string");
+				}
+			}
+		} else {
+			println!("get_language_code is null");
+		}
+		println!("error calling get_language_code, returning 'en'");
+		return String::from("en");
+	}
 
     pub fn get_new_session_id(&self) -> i32 {
         if let Some(get_new_session_id) = self.get_new_session_id {

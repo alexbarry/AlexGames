@@ -1,6 +1,6 @@
 	const PUBLIC_URL = "https://alexbarry.github.io/AlexGames"
 
-	const UNSET_GAME_TITLE = "Choose a game";
+	const UNSET_GAME_TITLE = translations.choose_a_game;
 	const UNSET_GAME_ID = "unset";
 
 	const BITMASK_MOUSE_BTN_1 = 0x1; // primary mouse button (usually left)
@@ -22,7 +22,7 @@
 				// gfx.url_state_b64 = null;
 			}
 		} else if (game_ready_without_network() && ws_error) {
-			set_status_err(gfx, "Init completed, but websocket connection failed. Not loading game. Add \"no_ws=false\" to the URL arguments to play without websockets.");
+			set_status_err(gfx, translations.websocket_failed2);
 		}
 	}
 
@@ -30,34 +30,34 @@
 		let str = "";
 		let show_as_error = false;
 		if (allReady()) {
-			str = "Initialization complete";
+			str = translations.init_complete;
 			if (!gfx.no_ws && ws_error) {
-				str += ", but failed to connect to websocket. Multiplayer will not be available";
+				str += translations.websocket_failed;
 				show_as_error = true;
 			}
 		} else {
-			str = "Waiting for";
+			str = translations.waiting_for;
 			let waiting_count = 0;
 			if (!wasm_init) {
 				waiting_count += 1;
-				str += " WASM init";
+				str += " " + translations.wasm_init;
 			}
 			if (!gfx.no_ws && !ws_init) {
 				if (waiting_count > 0) { str += ","; }
 				waiting_count += 1;
-				str += " websocket connection";
+				str += " " + translations.websocket_connection;
 			}
 
 			if (!html_init) {
 				if (waiting_count > 0) { str += ","; }
 				waiting_count += 1;
-				str += " HTML load";
+				str += " " + translations.html_load;
 			}
 
 			if (!dict_is_init) {
 				if (waiting_count > 0) { str += ","; }
 				waiting_count += 1;
-				str += " dictionary download/init";
+				str += " " + translations.dictionary_init;
 			}
 		}
 
@@ -99,7 +99,7 @@
 		console.debug("[init] gfx.ptr is ", gfx.ptr.toString(16));
 		if (state_b64) {
 			console.log("[init] Calling start_game with state from URL arg, base64: ", state_b64);
-			set_status_msg(gfx, "Loading state from URL parameter");
+			set_status_msg(gfx, translations.loading_state_from_url_param);
 			start_game_b64(gfx.ptr, state_b64);
 		} else {
 			console.log("[init] Calling start_game with no saved state param", game);

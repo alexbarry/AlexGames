@@ -4,6 +4,7 @@ local alexgames = require("alexgames")
 local core = require("games/solitaire/solitaire_core")
 local draw = require("games/solitaire/solitaire_draw")
 local serialize = require("games/solitaire/solitaire_serialize")
+local strings = require("games/solitaire/solitaire_strings")
 local utils = require("libs/utils")
 local storage_helpers = require("libs/serialize/storage_helpers")
 
@@ -156,9 +157,9 @@ local function load_prev_state()
 		state = serialize.deserialize_state(prev_state_serialized)
 		state.time_elapsed = time_elapsed
 		update()
-		alexgames.set_status_msg("Loaded previous state")
+		alexgames.set_status_msg(strings.loaded_state)
 	else
-		alexgames.set_status_err("Can not load previous state, not found")
+		alexgames.set_status_err(strings.loaded_state_err)
 	end
 end
 
@@ -186,23 +187,23 @@ end
 
 local function new_game()
 	alexgames.show_popup(POPUP_ID_NEW_GAME, {
-	                          title = "New Game",
+	                          title = strings.new_game,
 	                          items  = {
 	                              {
 	                                  id        = POPUP_ITEM_ID_DRAW_TYPE,
 	                                  item_type = alexgames.POPUP_ITEM_TYPE_DROPDOWN,
-	                                  label     = "Draw",
-	                                  options   = { "One", "Three" },
+	                                  label     = strings.draw_dropdown_label,
+	                                  options   = { strings.draw_type_one, strings.draw_type_three },
 	                              },
 	                              {
 	                                  id        = POPUP_ITEM_ID_BTN_START_GAME,
 	                                  item_type = alexgames.POPUP_ITEM_TYPE_BTN,
-	                                  text      = "Start game",
+	                                  text      = strings.start_game,
 	                              },
 	                              {
 	                                  id        = POPUP_ITEM_ID_BTN_CANCEL,
 	                                  item_type = alexgames.POPUP_ITEM_TYPE_BTN,
-	                                  text      = "Cancel",
+	                                  text      = strings.cancel,
 	                              },
 	                          },
 	                      })
@@ -305,7 +306,7 @@ local function start_new_game(draw_type)
 	print(string.format("Starting new game (session=%d) (seed %016x %016x) with state: %s",
 	      session_id, state.seed_x, state.seed_y,
 	      utils.binstr_to_hr_str(serialize.serialize_board_state(state))))
-	alexgames.set_status_msg(string.format("Generated new grame with seed %x %x", state.seed_x, state.seed_y))
+	alexgames.set_status_msg(string.format(strings.started_new_game_w_seed, state.seed_x, state.seed_y))
 	draw.stop_move_animations()
 	save_state()
 	draw_board_internal()
@@ -368,7 +369,7 @@ function load_hr_binstr_state(version, hr_binstr_state)
 end
 
 function load_saved_state(session_id_arg, state_serialized)
-	alexgames.set_status_msg(string.format("Loading saved state: %d bytes", #state_serialized)) -- TODO show date of last played?
+	alexgames.set_status_msg(string.format(strings.loaded_saved_state_bytes, #state_serialized)) -- TODO show date of last played?
 	local hr_state_serialized = utils.binstr_to_hr_str(state_serialized)
 	print("Serialized state: " .. hr_state_serialized)
 	session_id = session_id_arg
@@ -448,14 +449,14 @@ function start_game(session_id_arg, state_serialized)
 		if state_serialized ~= nil then
 			load_saved_state(last_session_id, state_serialized)
 		else
-			alexgames.set_status_msg("No saved state found, starting new game")
+			alexgames.set_status_msg(strings.no_saved_state_found)
 			new_game()
 		end
 	end
 
 	alexgames.add_game_option(GAME_OPTION_SHOW_TIME_AND_MOVE_COUNT, {
 		type  = alexgames.OPTION_TYPE_TOGGLE,
-		label = "Show elapsed time and move count",
+		label = strings.game_option_show_elapsed_time_and_move_count,
 		value = draw.show_move_count_and_elapsed_time,
 	} )
 	

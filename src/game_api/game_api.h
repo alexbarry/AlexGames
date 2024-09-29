@@ -259,6 +259,7 @@ struct game_api_callbacks {
 	// time usually is.
 	time_ms_t (*get_time_ms)(void);
 	size_t (*get_time_of_day)(char *time_str, size_t max_time_str_len);
+	size_t (*get_language_code)(char *lang_code_str_out, size_t max_lang_code_str_len);
 	void (*store_data)(void *L, const char *key, const uint8_t *value, size_t value_len);
 
 	/**

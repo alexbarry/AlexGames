@@ -96,6 +96,7 @@ static int lua_delete_timer(lua_State *L);
 static int lua_enable_evt(lua_State *L);
 static int lua_get_time_ms(lua_State *L);
 static int lua_get_time_of_day(lua_State *L);
+static int lua_get_language_code(lua_State *L);
 static int lua_store_data(lua_State *L);
 static int lua_get_new_session_id(lua_State *L);
 static int lua_get_last_session_id(lua_State *L);
@@ -168,6 +169,7 @@ static const struct luaL_Reg lua_c_api[] = {
 	{"enable_evt",      lua_enable_evt      },
 	{"get_time_ms",     lua_get_time_ms     },
 	{"get_time_of_day", lua_get_time_of_day },
+	{"get_language_code", lua_get_language_code },
 	{"get_new_session_id", lua_get_new_session_id },
 	{"get_last_session_id", lua_get_last_session_id },
 	{"store_data",       lua_store_data       },
@@ -1646,6 +1648,13 @@ static int lua_get_time_of_day(lua_State *L) {
 
 	lua_pushlstring(L, time_of_day_str, time_of_day_str_len);
 
+	return 1;
+}
+
+static int lua_get_language_code(lua_State *L) {
+	char lang_code[128];
+	size_t lang_code_len = api->get_language_code(lang_code, sizeof(lang_code));
+	lua_pushlstring(L, lang_code, lang_code_len);
 	return 1;
 }
 
