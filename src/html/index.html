@@ -759,7 +759,7 @@ for (let game_choice_row_info of game_choice_row_infos) {
 	const widgetId = URL_args.matrix_widget_id;
 	const userId   = URL_args.matrix_user_id;
 	const widgetApi = new mxwidgets.WidgetApi(widgetId, '*');
-	const gamesEventType = "club.squarebowl.alexgames";
+	const gamesEventType = "net.alexbarry.alexgames.game_evt";
 
 	widgetApi.requestCapabilityToReceiveEvent(gamesEventType);
 	widgetApi.requestCapabilityToReceiveMessage(gamesEventType);
