@@ -759,10 +759,11 @@ for (let game_choice_row_info of game_choice_row_infos) {
 	const widgetId = URL_args.matrix_widget_id;
 	const userId   = URL_args.matrix_user_id;
 	const widgetApi = new mxwidgets.WidgetApi(widgetId, '*');
+	const gamesEventType = "net.alexbarry.alexgames.game_evt";
 
-	widgetApi.requestCapabilityToReceiveEvent("m.room.message");
-	widgetApi.requestCapabilityToReceiveMessage("m.room.message");
-	widgetApi.requestCapabilityToSendEvent("m.room.message");
+	widgetApi.requestCapabilityToReceiveEvent(gamesEventType);
+	widgetApi.requestCapabilityToReceiveMessage(gamesEventType);
+	widgetApi.requestCapabilityToSendEvent(gamesEventType);
 
 	{
 		let gfx = {
@@ -859,12 +860,9 @@ for (let game_choice_row_info of game_choice_row_infos) {
 		console.log("[alex-matrix] Sending message body: ", msg_data);
 		console.log(`[alex-matrix] Sending message body: ${msg_data}`);
 
-        const evt_type = "m.room.message";
+        const evt_type = gamesEventType;
         const msg = {
-                "msgtype":        "m.text",
-                "body":           msg_data,
-                "format":         "org.matrix.custom.html",
-                "formatted_body": "<p>" + msg_data + "</p>",
+                "body": msg_data,
         }
         console.log(`Attempting to send text "${JSON.stringify(msg)}" as event type ${evt_type}...`);
         widgetApi.sendRoomEvent(evt_type, msg).then((e) => {
