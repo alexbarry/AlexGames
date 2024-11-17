@@ -608,6 +608,14 @@ pub trait AlexGamesApi {
             evt_id, pos_y, pos_x, buttons
         );
     }
+    fn handle_key_evt(&mut self, key_evt: &str, key_code: &str) -> bool {
+        println!(
+            "handle_key_evt unimplemented, key_evt={}, key_code={}",
+            key_evt, key_code
+        );
+        return false;
+    }
+
     fn handle_touch_evt(&mut self, evt_id: &str, touches: Vec<TouchInfo>) {
         println!(
             "handle_touch_evt unimplemented, evt_id={:#?}, touches={:#?}",

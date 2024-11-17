@@ -11,6 +11,8 @@ extern void rust_game_api_handle_btn_clicked(void *L, const char *btn_id);
 extern void rust_game_api_destroy_game(void *L);
 extern void rust_game_api_handle_mousemove(void *L, int pos_y, int pos_x, int buttons);
 extern void rust_game_api_handle_mouse_evt(void *L, int evt_id, int pos_y, int pos_x, int buttons);
+extern bool rust_game_api_handle_key_evt(void *L,
+                                           const char *evt_id_str, const char *key_code_str);
 extern void rust_game_api_handle_touch_evt(void *L, 
                                            const char *evt_id_str, int evt_id_str_len, 
                                            void *changed_touches, int changed_touches_len);
@@ -47,6 +49,7 @@ const struct game_api * get_rust_api(void) {
 	rust_api.destroy_game        = rust_game_api_destroy_game;
 	rust_api.handle_mousemove    = rust_game_api_handle_mousemove;
 	rust_api.handle_mouse_evt    = rust_game_api_handle_mouse_evt;
+	rust_api.handle_key_evt      = rust_game_api_handle_key_evt;
 	rust_api.handle_touch_evt    = rust_game_api_handle_touch_evt;
 	rust_api.handle_popup_btn_clicked = rust_game_api_handle_popup_btn_clicked;
 	return &rust_api;

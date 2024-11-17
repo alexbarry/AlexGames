@@ -147,6 +147,18 @@ pub extern "C" fn rust_game_api_handle_mouse_evt(
 }
 
 #[no_mangle]
+pub extern "C" fn rust_game_api_handle_key_evt(
+    handle: *mut c_void,
+    evt_id_cstr: *const u8,
+    key_code_cstr: *const u8,
+) -> bool {
+    let handle = handle_void_ptr_to_trait_ref(handle);
+    let evt_id = c_str_to_str(evt_id_cstr, None);
+    let key_code = c_str_to_str(key_code_cstr, None);
+	return handle.handle_key_evt(&evt_id, &key_code);
+}
+
+#[no_mangle]
 pub extern "C" fn rust_game_api_handle_touch_evt(
     handle: *mut c_void,
     evt_id_cstr: *const u8,
