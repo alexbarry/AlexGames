@@ -43,10 +43,10 @@ impl TableTennisDraw {
 
 		let player_colour = ball_colour;
 		let player_thickness = 12;
-		let player1_pos1 = TableTennisDraw::game_pt_to_draw_pt(&state.get_player_pos(Player::PLAYER1, Side::TOP_LEFT));
-		let player1_pos2 = TableTennisDraw::game_pt_to_draw_pt(&state.get_player_pos(Player::PLAYER1, Side::BOTTOM_RIGHT));
-		let player2_pos1 = TableTennisDraw::game_pt_to_draw_pt(&state.get_player_pos(Player::PLAYER2, Side::TOP_LEFT));
-		let player2_pos2 = TableTennisDraw::game_pt_to_draw_pt(&state.get_player_pos(Player::PLAYER2, Side::BOTTOM_RIGHT));
+		let player1_pos1 = TableTennisDraw::game_pt_to_draw_pt(&state.get_player_pos(&Player::PLAYER1, &Side::TOP_LEFT));
+		let player1_pos2 = TableTennisDraw::game_pt_to_draw_pt(&state.get_player_pos(&Player::PLAYER1, &Side::BOTTOM_RIGHT));
+		let player2_pos1 = TableTennisDraw::game_pt_to_draw_pt(&state.get_player_pos(&Player::PLAYER2, &Side::TOP_LEFT));
+		let player2_pos2 = TableTennisDraw::game_pt_to_draw_pt(&state.get_player_pos(&Player::PLAYER2, &Side::BOTTOM_RIGHT));
 
 		callbacks.draw_rect(&player_colour,
 		                    player1_pos1.y,
