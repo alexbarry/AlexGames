@@ -2,6 +2,7 @@ mod rust_game_api;
 
 mod gem_match;
 mod libs;
+mod table_tennis;
 mod reversi;
 mod trivia;
 
@@ -14,6 +15,7 @@ use libc::{c_int, c_void, size_t};
 use gem_match::gem_match_main;
 use reversi::reversi_main;
 use trivia::trivia_main;
+use table_tennis::table_tennis_main;
 use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, TouchInfo, PopupState};
 
 // A pointer to this struct is returned to C, and then passed back
@@ -41,6 +43,7 @@ fn get_rust_game_init_func(
     return match game_id {
         "reversi" => Some(reversi_main::init_reversi),
         "gem_match" => Some(gem_match_main::init_gem_match),
+        "table_tennis" => Some(table_tennis_main::init_table_tennis),
         "trivia" => Some(trivia_main::init_trivia),
         _ => None,
     };
@@ -84,6 +87,7 @@ fn handle_void_ptr_to_trait_ref(handle: *mut c_void) -> &'static mut dyn AlexGam
     let api: *mut dyn AlexGamesApi = match handle.game_id.as_str() {
         "reversi" => handle.api as *mut reversi_main::AlexGamesReversi,
         "gem_match" => handle.api as *mut gem_match_main::AlexGamesGemMatch,
+        "table_tennis" => handle.api as *mut table_tennis_main::AlexGamesTableTennis,
         "trivia" => handle.api as *mut trivia_main::AlexGamesTrivia,
         _ => panic!("unhandled game_id passed to handle_void_ptr_to_trait_ref"),
     };
