@@ -6,7 +6,7 @@ use crate::rust_game_api;
 use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt};
 
 use crate::table_tennis::table_tennis_draw::{TableTennisDraw, FPS};
-use crate::table_tennis::table_tennis_core::{State};
+use crate::table_tennis::table_tennis_core::{State, Pt};
 
 pub struct AlexGamesTableTennis {
     state: State,
@@ -54,7 +54,6 @@ impl AlexGamesApi for AlexGamesTableTennis {
     }
 
     fn init(&mut self, callbacks: &rust_game_api::CCallbacksPtr) {
-        self.state = State::new();
         callbacks.enable_evt("mouse_move");
         callbacks.enable_evt("mouse_updown");
         callbacks.enable_evt("touch");
@@ -66,7 +65,7 @@ pub fn init_table_tennis(
     callbacks: &'static rust_game_api::CCallbacksPtr,
 ) -> Box<dyn AlexGamesApi + '_> {
     let mut api = AlexGamesTableTennis {
-        state: State::new(),
+        state: State::new(Pt{ y: 100, x: 100 }),
         callbacks: callbacks,
         session_id: None,
 
