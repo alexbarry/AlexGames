@@ -1,7 +1,7 @@
 // Author: Alex Barry (github.com/alexbarry)
 // Game: "Table Tennis"
 
-pub use crate::libs::point::Pt;
+pub use crate::libs::point::{Pt, Ptf};
 
 #[derive(Clone)]
 pub enum Player {
@@ -29,13 +29,18 @@ pub struct State {
 
 	pub player_thickness: i32,
 
-	pub ball: Pt,
+	pub ball: Ptf,
+	ball_velocity: Ptf,
 
-	pub game_board_size: Pt,
+	pub game_board_size: Ptf,
 }
+
+const init_ball_vel_y: f64 = 25.0;
+const init_ball_vel_x: f64 = 25.0;
 
 impl State {
 	pub fn new(board_size: Pt) -> State {
+		let board_size = Ptf { y: board_size.y as f64, x: board_size.x as f64 };
 		State {
 			player1_pos: 50.0,
 			player2_pos: 50.0,
@@ -43,8 +48,9 @@ impl State {
 			player1_size: 12,
 			player2_size: 12,
 
-			ball: Pt { y: 50, x: 50 },
-			game_board_size: Pt {y: board_size.y, x: board_size.x},
+			ball: Ptf { y: board_size.y/2.0, x: board_size.x/2.0 },
+			ball_velocity: Ptf { y: init_ball_vel_y, x: init_ball_vel_x },
+			game_board_size: Ptf {y: board_size.y, x: board_size.x},
 
 			player_thickness: 2,
 
@@ -56,14 +62,14 @@ impl State {
 
 	pub fn get_player_pos(&self, player: &Player, side: &Side) -> Pt {
 		Pt {
-			y: match player {
-				Player::PLAYER1 => self.game_board_size.y - self.player_thickness,
-				Player::PLAYER2 => 0,
+			y: (match player {
+				Player::PLAYER1 => self.game_board_size.y - self.player_thickness as f64,
+				Player::PLAYER2 => 0.0,
 			} + match side {
-				Side::TOP_LEFT =>  0,
-				Side::BOTTOM_RIGHT => self.player_thickness,
-			},
-			x: match player {
+				Side::TOP_LEFT =>  0.0,
+				Side::BOTTOM_RIGHT => self.player_thickness as f64,
+			}) as i32,
+			x: (match player {
 				Player::PLAYER1 => self.player1_pos as i32,
 				Player::PLAYER2 => self.player2_pos as i32,
 			} + match side {
@@ -72,7 +78,7 @@ impl State {
 			} * match player {
 				Player::PLAYER1 => self.player1_size,
 				Player::PLAYER2 => self.player2_size,
-			},
+			}) as i32,
 		}
 	}
 
@@ -91,6 +97,62 @@ impl State {
 
 		*player_pos += dir * player_speed * dt_ms / 1000.0;
 		*player_pos = player_pos.clamp(0.0, 100.0);
+	}
+
+	fn reset_ball_pos(&mut self) {
+		// TODO toggle which direction it goes in
+		self.ball_velocity = Ptf {
+			y: init_ball_vel_y,
+			x: init_ball_vel_x,
+		};
+		self.ball = Ptf {
+			y: self.game_board_size.y/2.0,
+			x: self.game_board_size.x/2.0,
+		};
+	}
+
+	fn within_player(&self, player: &Player, pos_x: f64) -> bool {
+		let l = self.get_player_pos(player, &Side::TOP_LEFT).x as f64;
+		let r = self.get_player_pos(player, &Side::BOTTOM_RIGHT).x as f64;
+
+		return l <= pos_x && pos_x <= r;
+	}
+
+	pub fn update(&mut self, dt_ms: i32) {
+		let dt_ms = dt_ms as f64;
+		self.ball = self.ball.add(self.ball_velocity.mult(dt_ms/1000.0));
+
+		let top_bound = self.player_thickness as f64;
+		let bottom_bound = self.game_board_size.y - self.player_thickness as f64;
+		if self.ball.y < top_bound {
+			if self.within_player(&Player::PLAYER2, self.ball.x) {
+				println!("ping");
+				self.ball_velocity.y *= -1.0;
+				self.ball.y = top_bound;
+			} else {
+				println!("point for player1");
+				// TODO point for a player
+				self.reset_ball_pos()
+			}
+		} else if self.ball.y > bottom_bound {
+			if self.within_player(&Player::PLAYER1, self.ball.x) {
+				println!("pong");
+				self.ball_velocity.y *= -1.0;
+				self.ball.y = bottom_bound;
+			} else {
+				println!("point for player1");
+				// TODO point for a player
+				self.reset_ball_pos()
+			}
+		}
+
+		if self.ball.x < 0.0 {
+			self.ball.x = 0.0;
+			self.ball_velocity.x *= -1.0;
+		} else if self.ball.x > self.game_board_size.x {
+			self.ball.x = self.game_board_size.x;
+			self.ball_velocity.x *= -1.0;
+		}
 	}
 }
 

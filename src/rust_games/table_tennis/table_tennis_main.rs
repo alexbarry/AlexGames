@@ -34,8 +34,8 @@ impl AlexGamesApi for AlexGamesTableTennis {
 
     fn update(&mut self, dt_ms: i32) {
 
-		let player = Player::PLAYER1;
 
+		let player = Player::PLAYER1;
 		if *self.keys_down.get("ArrowLeft").unwrap_or(&false) ||
 		   *self.keys_down.get("KeyH").unwrap_or(&false) {
 			self.state.move_player(&player, -1, dt_ms);
@@ -45,6 +45,16 @@ impl AlexGamesApi for AlexGamesTableTennis {
 			self.state.move_player(&player, 1, dt_ms);
 		}
 
+		let player = Player::PLAYER2;
+		if *self.keys_down.get("KeyA").unwrap_or(&false) {
+			self.state.move_player(&player, -1, dt_ms);
+		}
+		if *self.keys_down.get("KeyD").unwrap_or(&false) {
+			self.state.move_player(&player, 1, dt_ms);
+		}
+
+
+		self.state.update(dt_ms);
         self.draw.draw_state(&self.state);
     }
 
@@ -62,7 +72,8 @@ impl AlexGamesApi for AlexGamesTableTennis {
 	fn handle_key_evt(&mut self, key_evt: &str, key_code: &str) -> bool {
 		if let Some(rc) = match key_code {
 			"ArrowLeft"|"ArrowRight"
-			|"KeyH"|"KeyL" => None,
+			|"KeyH"|"KeyL"
+			|"KeyA"|"KeyD" => None,
 			_ => Some(false),
 		} {
 			return rc;

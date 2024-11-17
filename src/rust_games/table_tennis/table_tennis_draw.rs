@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::table_tennis::table_tennis_core::{State, Pt, Player, Side};
+use crate::table_tennis::table_tennis_core::{State, Pt, Ptf, Player, Side};
 use crate::rust_game_api;
 use crate::rust_game_api::{TimeMs, CANVAS_HEIGHT, CANVAS_WIDTH};
 
@@ -25,12 +25,18 @@ impl TableTennisDraw {
 			x: game_pt.x * CANVAS_WIDTH / 100,
 		}
 	}
+	fn game_ptf_to_draw_pt(game_pt: &Ptf) -> Pt {
+		Pt {
+			y: (game_pt.y * CANVAS_HEIGHT as f64 / 100.0) as i32,
+			x: (game_pt.x * CANVAS_WIDTH  as f64 / 100.0) as i32,
+		}
+	}
 
     pub fn draw_state(&self, state: &State) {
 		let callbacks = &self.callbacks;
         callbacks.draw_clear();
 
-		let ball_pos = TableTennisDraw::game_pt_to_draw_pt(&state.ball);
+		let ball_pos = TableTennisDraw::game_ptf_to_draw_pt(&state.ball);
 		let ball_width  = 12;
 		let ball_height = 12;
 		let ball_colour = "#ff0000";
@@ -59,6 +65,18 @@ impl TableTennisDraw {
 		                    player2_pos1.x,
 		                    player2_pos2.y,
 		                    player2_pos2.x);
+
+		let border_colour = "#00ffff";
+		let line_thickness = 1;
+		callbacks.draw_line(&border_colour, line_thickness,
+		                    0, 0, 0, CANVAS_WIDTH);
+		callbacks.draw_line(&border_colour, line_thickness,
+		                    0, 0, CANVAS_HEIGHT, 0);
+		callbacks.draw_line(&border_colour, line_thickness,
+		                    CANVAS_HEIGHT, CANVAS_WIDTH, 0, CANVAS_WIDTH);
+		callbacks.draw_line(&border_colour, line_thickness,
+		                    CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_HEIGHT, 0);
+
 
         callbacks.draw_refresh();
     }
