@@ -595,7 +595,14 @@ pub trait AlexGamesApi {
     fn start_game(&mut self, state: Option<(i32, Vec<u8>)>);
     fn update(&mut self, dt_ms: i32);
     fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32);
-    fn handle_btn_clicked(&mut self, btn_id: &str);
+    fn handle_btn_clicked(&mut self, btn_id: &str) {
+        println!(
+            "handle_btn_clicked unimplemented, btn_id={}",
+            btn_id
+        );
+
+	}
+
     fn handle_mousemove(&mut self, pos_y: i32, pos_x: i32, buttons: i32) {
         println!(
             "handle_mousemove unimplemented, y={}, x={} buttons={:x}",
