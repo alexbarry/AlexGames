@@ -53,10 +53,10 @@ fn find_null_terminator(str_ptr: *const u8, max_bytes: usize) -> Option<usize> {
     let mut str_end_pos: usize = 0;
     for i in 0..=max_bytes {
         let val = unsafe { *str_ptr.add(i) };
-        println!("Checking i={}, val is {:#?}", i, val);
+        //println!("Checking i={}, val is {:#?}", i, val);
         if val == 0 {
             str_end_pos = i;
-            println!("breaking");
+            //println!("breaking");
             break;
         }
         if i == max_bytes {
