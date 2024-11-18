@@ -38,19 +38,19 @@ impl AlexGamesApi for AlexGamesTableTennis {
 		let player = Player::PLAYER1;
 		if *self.keys_down.get("ArrowLeft").unwrap_or(&false) ||
 		   *self.keys_down.get("KeyH").unwrap_or(&false) {
-			self.state.move_player(&player, -1, dt_ms);
+			self.state.move_player(player, -1, dt_ms);
 		}
 		if *self.keys_down.get("ArrowRight").unwrap_or(&false) ||
 		   *self.keys_down.get("KeyL").unwrap_or(&false) {
-			self.state.move_player(&player, 1, dt_ms);
+			self.state.move_player(player, 1, dt_ms);
 		}
 
 		let player = Player::PLAYER2;
 		if *self.keys_down.get("KeyA").unwrap_or(&false) {
-			self.state.move_player(&player, -1, dt_ms);
+			self.state.move_player(player, -1, dt_ms);
 		}
 		if *self.keys_down.get("KeyD").unwrap_or(&false) {
-			self.state.move_player(&player, 1, dt_ms);
+			self.state.move_player(player, 1, dt_ms);
 		}
 
 

@@ -3,13 +3,13 @@
 
 pub use crate::libs::point::{Pt, Ptf};
 
-#[derive(Clone)]
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
 pub enum Player {
 	PLAYER1,
 	PLAYER2,
 }
 
-#[derive(Clone)]
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
 pub enum Side {
 	TOP_LEFT,
 	BOTTOM_RIGHT,
@@ -66,7 +66,7 @@ impl State {
 		}
 	}
 
-	pub fn get_player_pos(&self, player: &Player, side: &Side) -> Pt {
+	pub fn get_player_pos(&self, player: Player, side: Side) -> Pt {
 		Pt {
 			y: (match player {
 				Player::PLAYER1 => self.game_board_size.y - self.player_thickness as f64,
@@ -88,7 +88,7 @@ impl State {
 		}
 	}
 
-	pub fn move_player(&mut self, player: &Player, dir: i32, dt_ms: i32) {
+	pub fn move_player(&mut self, player: Player, dir: i32, dt_ms: i32) {
 		let dir = dir as f64;
 		let player_speed = match player {
 			Player::PLAYER1 => self.player1_speed,
@@ -118,9 +118,9 @@ impl State {
 		self.dir_to_start_ball *= -1;
 	}
 
-	fn within_player(&self, player: &Player, pos_x: f64) -> bool {
-		let l = self.get_player_pos(player, &Side::TOP_LEFT).x as f64;
-		let r = self.get_player_pos(player, &Side::BOTTOM_RIGHT).x as f64;
+	fn within_player(&self, player: Player, pos_x: f64) -> bool {
+		let l = self.get_player_pos(player, Side::TOP_LEFT).x as f64;
+		let r = self.get_player_pos(player, Side::BOTTOM_RIGHT).x as f64;
 
 		return l <= pos_x && pos_x <= r;
 	}
@@ -142,7 +142,7 @@ impl State {
 		let top_bound = self.player_thickness as f64;
 		let bottom_bound = self.game_board_size.y - self.player_thickness as f64;
 		if self.ball.y < top_bound {
-			if self.within_player(&Player::PLAYER2, self.ball.x) {
+			if self.within_player(Player::PLAYER2, self.ball.x) {
 				println!("ping");
 				//self.ball_velocity.y *= -1.0;
 				let dist_to_centre_position = (self.ball.x - self.player2_pos)/self.player2_size as f64;
@@ -154,7 +154,7 @@ impl State {
 				self.reset_ball_pos()
 			}
 		} else if self.ball.y > bottom_bound {
-			if self.within_player(&Player::PLAYER1, self.ball.x) {
+			if self.within_player(Player::PLAYER1, self.ball.x) {
 				println!("pong");
 				//self.ball_velocity.y *= -1.0;
 				let dist_to_centre_position = (self.ball.x - self.player1_pos)/self.player1_size as f64;
