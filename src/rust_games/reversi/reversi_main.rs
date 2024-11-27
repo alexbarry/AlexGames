@@ -15,7 +15,7 @@ use bincode;
 
 use crate::rust_game_api;
 
-use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, CANVAS_HEIGHT, CANVAS_WIDTH};
+use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, CANVAS_HEIGHT, CANVAS_WIDTH, TextAlign, OptionType, OptionInfo};
 
 // TODO there must be a better way than this? This file is in the same directory
 use crate::reversi::reversi_core;
@@ -28,6 +28,8 @@ impl rust_game_api::GameState for reversi_core::State {
 
 const BTN_ID_UNDO: &str = "btn_undo";
 const BTN_ID_REDO: &str = "btn_redo";
+
+const GAME_OPTION_NEW_GAME: &str = "option_id_new_game";
 
 pub struct AlexGamesReversi {
     game_state: reversi_core::State,
@@ -392,6 +394,21 @@ impl AlexGamesApi for AlexGamesReversi {
         }
     }
 
+	fn handle_game_option_evt(&mut self, option_id: &str, option_type: OptionType, value: i32) {
+		match option_id {
+			GAME_OPTION_NEW_GAME => {
+				self.game_state = reversi_core::State::new();
+				self.game_state.session_id = self.callbacks.get_new_session_id();
+				self.save_state();
+				self.draw_state();
+			},
+			_ => {
+				panic!("Unhandled game option");
+			},
+		}
+	}
+
+
     //fn init(_callbacks: &rust_game_api::Callbacks) -> Box <dyn rust_game_api::GameState> {
     fn init(&mut self, callbacks: &rust_game_api::CCallbacksPtr) {
         self.game_state = reversi_core::State::new();
@@ -399,6 +416,12 @@ impl AlexGamesApi for AlexGamesReversi {
         callbacks.create_btn(BTN_ID_REDO, "Redo", 1);
         callbacks.set_btn_enabled(BTN_ID_UNDO, false);
         callbacks.set_btn_enabled(BTN_ID_REDO, false);
+
+		callbacks.add_game_option(GAME_OPTION_NEW_GAME, &OptionInfo {
+			option_type: OptionType::Button,
+			label: "New Game".to_string(),
+			value: 0,
+		});
     }
 }
 
