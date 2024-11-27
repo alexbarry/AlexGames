@@ -18,6 +18,11 @@ extern void rust_game_api_handle_popup_btn_clicked(void *L,
                                                    const char *popup_id, int btn_idx,
                                                    const struct popup_state *popup_state);
 
+extern void rust_game_api_handle_game_option_evt(void *L,
+                                                 enum option_type option_type,
+                                                 const char *option_id,
+                                                 int value);
+
 
 // This one is defined in rust
 extern void *start_rust_game_rust(const char *game_str, size_t game_str_len, const struct game_api_callbacks *callbacks);
@@ -49,5 +54,6 @@ const struct game_api * get_rust_api(void) {
 	rust_api.handle_mouse_evt    = rust_game_api_handle_mouse_evt;
 	rust_api.handle_touch_evt    = rust_game_api_handle_touch_evt;
 	rust_api.handle_popup_btn_clicked = rust_game_api_handle_popup_btn_clicked;
+	rust_api.handle_game_option_evt = rust_game_api_handle_game_option_evt;
 	return &rust_api;
 }

@@ -14,7 +14,7 @@ use libc::{c_int, c_void, size_t};
 use gem_match::gem_match_main;
 use reversi::reversi_main;
 use trivia::trivia_main;
-use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, TouchInfo, PopupState};
+use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, TouchInfo, PopupState, OptionType};
 
 // A pointer to this struct is returned to C, and then passed back
 // to the rust APIs. A pointer to AlexGamesApi is needed, and also
@@ -172,6 +172,20 @@ pub fn rust_game_api_handle_popup_btn_clicked(handle: *mut c_void, popup_id: *co
 	let popup_id = c_str_to_str(popup_id, None);
 	let popup_state = PopupState {}; // TODO add real state here
 	handle.handle_popup_btn_clicked(&popup_id, btn_idx, &popup_state);
+}
+
+
+#[no_mangle]
+pub fn rust_game_api_handle_game_option_evt(handle: *mut c_void, option_type: i32, option_id: *const u8, value: i32) {
+    let handle = handle_void_ptr_to_trait_ref(handle);
+	let option_type = match option_type {
+		1 => OptionType::Button,
+		2 => OptionType::Toggle,
+		_ => { panic!("unhandled option type"); },
+	};
+	let option_id = c_str_to_str(option_id, None);
+	handle.handle_game_option_evt(&option_id, option_type, value);
+
 }
 
 #[no_mangle]
