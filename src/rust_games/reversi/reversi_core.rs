@@ -52,6 +52,18 @@ impl State {
         state
     }
 
+	pub fn score(&self, player: CellState) -> i32 {
+		let mut score = 0;
+		for y in 0..BOARD_SIZE {
+			for x in 0..BOARD_SIZE {
+				if self.board[y][x] == player {
+					score += 1;
+				}
+			}
+		}
+		return score;
+	}
+
     pub fn cell(&self, pt: Pt) -> CellState {
         self.board[pt.y as usize][pt.x as usize]
     }

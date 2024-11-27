@@ -19,7 +19,7 @@ use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, CANVAS_HEIGHT, CANVAS_WI
 
 // TODO there must be a better way than this? This file is in the same directory
 use crate::reversi::reversi_core;
-use crate::reversi::reversi_core::{Pt, ReversiErr};
+use crate::reversi::reversi_core::{Pt, ReversiErr, CellState};
 
 /*
 impl rust_game_api::GameState for reversi_core::State {
@@ -34,6 +34,26 @@ pub struct AlexGamesReversi {
     //callbacks: *mut rust_game_api::CCallbacksPtr,
     //callbacks: &'a rust_game_api::CCallbacksPtr,
     callbacks: &'static rust_game_api::CCallbacksPtr,
+}
+
+fn draw_rect_outline(callbacks: &CCallbacksPtr, colour: &str, thickness: i32, y1: i32, x1: i32, y2: i32, x2: i32) {
+		callbacks.draw_line(&colour,
+		                    thickness,
+		                    y1, x1,
+		                    y1, x2);
+		callbacks.draw_line(&colour,
+		                    thickness,
+		                    y1, x1,
+		                    y2, x1);
+
+		callbacks.draw_line(&colour,
+		                    thickness,
+		                    y2, x2,
+		                    y2, x1);
+		callbacks.draw_line(&colour,
+		                    thickness,
+		                    y2, x2,
+		                    y1, x2);
 }
 
 impl AlexGamesReversi {
@@ -201,6 +221,69 @@ impl AlexGamesReversi {
                 }
             }
         }
+
+		let score1 = self.game_state.score(CellState::PLAYER1);
+		let score2 = self.game_state.score(CellState::PLAYER2);
+		let score_bg_colour = "#88888888";
+		let score1_text_colour = "#ffffff88";
+		let score2_text_colour = "#00000088";
+
+		//let player_move_highlight_colour = "#ffff00";
+		let player_move_highlight_colour = "#00ffff88";
+		let player_move_highlight_thickness = 3;
+		let score_text_width = 32;
+		let score_text_size = 24;
+		let score_padding = 4;
+
+		let score1_pos_x = CANVAS_WIDTH/4;
+		let score2_pos_x = CANVAS_WIDTH*3/4;
+		let score1_rect_y1 = 0;
+		let score1_rect_x1 = score1_pos_x - score_text_width/2 - score_padding;
+		let score1_rect_y2 = score_text_size + 2*score_padding;
+		let score1_rect_x2 = score1_pos_x + score_text_width/2 + score_padding;
+		callbacks.draw_rect(score_bg_colour,
+		                    score1_rect_y1, score1_rect_x1,
+		                    score1_rect_y2, score1_rect_x2);
+		if self.game_state.player_turn == CellState::PLAYER1 {
+			draw_rect_outline(callbacks,
+			                  &player_move_highlight_colour,
+			                  player_move_highlight_thickness,
+			                  score1_rect_y1, score1_rect_x1,
+			                  score1_rect_y2, score1_rect_x2);
+		}
+		let score2_rect_y1 = 0;
+		let score2_rect_x1 = score2_pos_x - score_text_width/2 - score_padding;
+		let score2_rect_y2 = score_text_size + 2*score_padding;
+		let score2_rect_x2 = score2_pos_x + score_text_width/2 + score_padding;
+
+		callbacks.draw_rect(score_bg_colour,
+		                    0,
+		                    score2_pos_x - score_text_width/2 - score_padding,
+		                    score_text_size + 2*score_padding,
+		                    score2_pos_x + score_text_width/2 + score_padding);
+
+		if self.game_state.player_turn == CellState::PLAYER2 {
+			draw_rect_outline(callbacks,
+			                  &player_move_highlight_colour,
+			                  player_move_highlight_thickness,
+			                  score2_rect_y1, score2_rect_x1,
+			                  score2_rect_y2, score2_rect_x2);
+		}
+
+
+		callbacks.draw_text(&format!("{}", score1),
+		                    score1_text_colour,
+		                    score_text_size + score_padding,
+		                    score1_pos_x,
+		                    score_text_size,
+		                    TextAlign::Middle);
+		callbacks.draw_text(&format!("{}", score2),
+		                    score2_text_colour,
+		                    score_text_size + score_padding,
+		                    score2_pos_x,
+		                    score_text_size,
+		                    TextAlign::Middle);
+							
 
         let session_id = state.session_id;
         callbacks.set_btn_enabled(
