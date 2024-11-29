@@ -176,6 +176,14 @@ struct game_api_callbacks {
 	void (*set_game_handle)(const void *L, const char *game_id);
 	void (*get_game_id)(const void *L, char *game_id_out, size_t game_id_out_len_max);
 
+	/**
+	 * Sets the game canvas size ratio.
+	 *
+	 * Note that in the web implementation the canvas is automatically scaled up to
+	 * take up as much of the screen as possible, but maintaining the ratio.
+	 */
+	void (*set_canvas_size)(int width, int height);
+
 	void (*draw_graphic)(const char *img_id,
 	                     int y, int x,
 	                     int width, int height,

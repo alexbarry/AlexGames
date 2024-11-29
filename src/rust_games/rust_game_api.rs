@@ -77,6 +77,7 @@ pub struct OptionInfo {
 pub struct CCallbacksPtr {
     pub set_game_handle: Option<unsafe extern "C" fn(*mut c_void, *const c_char)>,
     pub get_game_id: Option<unsafe extern "C" fn(*mut c_void, *mut c_char, size_t)>,
+    pub set_game_canvas_size: Option<unsafe extern "C" fn(i32, i32)>,
     pub draw_graphic:
         Option<unsafe extern "C" fn(*const c_char, c_int, c_int, c_int, c_int, *mut c_void)>,
     pub draw_line: Option<unsafe extern "C" fn(*const c_char, c_int, c_int, c_int, c_int, c_int)>,
@@ -308,6 +309,16 @@ impl CCallbacksPtr {
             println!("draw_circle is null");
         }
     }
+
+	pub fn set_game_canvas_size(&self, width: i32, height: i32) {
+		if let Some(set_game_canvas_size) = self.set_game_canvas_size {
+			unsafe {
+				(set_game_canvas_size)(width, height);
+			}
+		} else {
+			println!("set_game_canvas_size is null");
+		}
+	}
 
     pub fn draw_line(&self, line_colour: &str, line_size: i32, y1: i32, x1: i32, y2: i32, x2: i32) {
         let line_colour_cstr = CString::new(line_colour).expect("CString::new failed");

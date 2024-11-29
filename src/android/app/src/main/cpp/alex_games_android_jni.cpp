@@ -135,6 +135,10 @@ static void jni_get_game_id(const void *L, char *game_id_out, size_t game_id_out
 	// TODO
 }
 
+static void jni_set_game_canvas_size(int width, int height) {
+	// TODO
+}
+
 static void jni_draw_graphic(const char *img_id,
                              int y, int x,
                              int width, int height, const struct draw_graphic_params *params) {
@@ -454,6 +458,7 @@ Java_net_alexbarry_alexgames_AlexGamesJni_jniHello( JNIEnv* env, jobject thiz )
 static const struct game_api_callbacks api = {
 	jni_set_game_handle,
 	jni_get_game_id,
+	jni_set_game_canvas_size,
 	jni_draw_graphic,
 	jni_draw_line,
 	jni_draw_text,

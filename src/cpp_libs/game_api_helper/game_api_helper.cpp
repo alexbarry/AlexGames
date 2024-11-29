@@ -3,6 +3,7 @@
 
 void set_game_handle(const void *L, const char *game_id) {}
 void get_game_id(const void *L, char *game_id_out, size_t game_id_out_len_max) {}
+void set_canvas_size(int width, int height) {}
 static void draw_graphic(const char *img_id,
                   int y, int x,
                   int width, int height,
@@ -81,6 +82,7 @@ struct game_api_callbacks create_default_callbacks(void) {
 	const struct game_api_callbacks callbacks = {
 	set_game_handle,
 	get_game_id,
+    set_canvas_size,
 		/* .draw_graphic           = */ draw_graphic,
 		/* .draw_line              = */ draw_line,
 		/* .draw_text              = */ draw_text,
