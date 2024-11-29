@@ -30,8 +30,6 @@ pub struct State {
     pub board: [[CellState; BOARD_SIZE]; BOARD_SIZE],
     pub player_turn: CellState,
 
-    // TODO don't include in this state, make another state struct to include game metadata like this
-    pub session_id: i32,
 }
 
 impl State {
@@ -40,8 +38,6 @@ impl State {
             board: [[CellState::EMPTY; BOARD_SIZE]; BOARD_SIZE],
             player_turn: CellState::PLAYER1,
 
-            // TODO remove
-            session_id: 0,
         };
 
         state.board[3][3] = CellState::PLAYER1;

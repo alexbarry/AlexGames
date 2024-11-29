@@ -41,6 +41,7 @@ const y_offset: i32 = text_box_size_y;
 
 pub struct AlexGamesReversi {
     game_state: reversi_core::State,
+	session_id: i32,
     //callbacks: *mut rust_game_api::CCallbacksPtr,
     //callbacks: &'a rust_game_api::CCallbacksPtr,
     callbacks: &'static rust_game_api::CCallbacksPtr,
@@ -76,14 +77,14 @@ impl AlexGamesReversi {
 
     fn save_state(&self) {
         //let rust_game_api::GameState::ReversiGameState(reversi_state) = &handle.game_state;
-        let session_id = self.game_state.session_id;
+        let session_id = self.session_id;
         let serialized_state = self.get_state().expect("state is none?");
         self.callbacks.save_state(session_id, serialized_state);
     }
 
     fn load_state_offset(&mut self, offset: i32) {
         println!("load_state_offset({})", offset);
-        let session_id = self.game_state.session_id;
+        let session_id = self.session_id;
         let saved_state = self.callbacks.adjust_saved_state_offset(session_id, offset);
         let saved_state = saved_state.expect("saved state is none from adjust_saved_state_offset?");
         self.set_state(&saved_state, session_id);
@@ -97,7 +98,7 @@ impl AlexGamesReversi {
         if let Ok(game_state) = game_state {
             println!("Received game state: {:#?}", game_state);
             self.game_state = game_state;
-            self.game_state.session_id = session_id;
+            self.session_id = session_id;
         } else {
             self.callbacks
                 .set_status_err(&format!("Error decoding state: {:?}", game_state));
@@ -341,7 +342,7 @@ impl AlexGamesReversi {
 		                    TextAlign::Middle);
 							
 
-        let session_id = state.session_id;
+        let session_id = self.session_id;
         callbacks.set_btn_enabled(
             BTN_ID_UNDO,
             callbacks.has_saved_state_offset(session_id, -1),
@@ -424,7 +425,7 @@ impl AlexGamesApi for AlexGamesReversi {
         } else if let Some(_session_id) = self.callbacks.get_last_session_id("reversi") {
             self.load_state_offset(0);
         } else {
-            self.game_state.session_id = self.callbacks.get_new_session_id();
+            self.session_id = self.callbacks.get_new_session_id();
         }
     }
 
@@ -452,7 +453,7 @@ impl AlexGamesApi for AlexGamesReversi {
 		match option_id {
 			GAME_OPTION_NEW_GAME => {
 				self.game_state = reversi_core::State::new();
-				self.game_state.session_id = self.callbacks.get_new_session_id();
+				self.session_id = self.callbacks.get_new_session_id();
 				self.save_state();
 				self.draw_state();
 			},
@@ -487,6 +488,7 @@ pub fn init_reversi(
 ) -> Box<dyn AlexGamesApi + 'static> {
     let mut reversi = AlexGamesReversi {
         game_state: reversi_core::State::new(),
+		session_id: 0,
         callbacks: callbacks,
     };
     reversi.init(callbacks);
