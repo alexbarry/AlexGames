@@ -30,20 +30,20 @@
 				    hostname == "localhost") {
 					// when hosting this locally, I don't have any SSL certs.
 					console.warn("Connecting to unsecured websocket server: " + hostname);
-					set_status_err(gfx, "Warning: attempting to connect to unsecured websocket server: " + hostname);
+					set_status_err(gfx, translations.unsecure_websocket_server_warning + hostname);
 					ws_addr = "ws://" + hostname + ":" + DEFAULT_WS_PORT;
 				} else {
 					ws_addr = "wss://" + hostname + ":" + DEFAULT_WS_PORT;
 				}
 			}
-			let msg = "Connecting to: " + ws_addr;
+			let msg = translations.connecting_to + ws_addr;
 			console.log(msg);
 			set_status_msg(gfx, msg);
 			try {
 				ws = new WebSocket(ws_addr);
 			} catch (err) {
 				console.error("Error connecting to websocket", err);
-				set_status_err(gfx, "Failed to connect to websocket: " + err.message);
+				set_status_err(gfx, translations.failed_to_connect_to_websocket + err.message);
 				//throw err;
 				ws_error = true;
 				partial_init();
@@ -53,7 +53,7 @@
 				ws.onerror = function (err) {
 					console.log(err);
 					console.error("Error connecting to websocket", err);
-					let msg = "Failed to connect to websocket, ws.onerror() called.";
+					let msg = translations.ws_onerror;
 					//msg += "not loading game";
 					set_status_err(gfx, msg);
 					ws_error = true;
@@ -65,7 +65,7 @@
 			return ws;
 		
 		} else {
-			set_status_msg(gfx, "Skipping websocket connection because url arg no_ws=true");
+			set_status_msg(gfx, translations.skipping_ws);
 		}
 	}
 
@@ -191,7 +191,7 @@
 		if (gfx.no_ws) {
 			return;
 		} else if (ws == null) {
-			set_status_err(gfx, "Tried to send network msg but websocket is disconnected");
+			set_status_err(gfx, translations.tried_to_send_ws_but_disconnected);
 			return;
 		}
 		let msg_str = "";
@@ -232,7 +232,7 @@
 			console.debug("ws.onopen");
 			ws_send_message_ctrl("session: " + URL_args.id);
 			ws_send_message("all", "player_joined:");
-			set_status_msg(gfx, "Connected to websocket server " + ws.url);
+			set_status_msg(gfx, translations.connected_to_ws + " " + ws.url);
 			on_ws_ready();
 		}
 	}

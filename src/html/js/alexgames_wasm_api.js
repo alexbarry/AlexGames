@@ -685,6 +685,10 @@ function get_time_of_day() {
 	       leftPadZero(d.getSeconds(),     2);
 }
 
+function get_language_code() {
+	return language_code;
+}
+
 
 function alexgames_get_time_ms() {
 	let d = new Date();

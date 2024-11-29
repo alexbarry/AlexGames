@@ -3,6 +3,8 @@
 
 local core = {}
 
+local strings = require("games/chess/chess_strings")
+
 core.BOARD_SIZE = 8
 
 core.PLAYER_WHITE = 1
@@ -32,12 +34,12 @@ core.RC_GAME_OVER            = 5
 --core.INVALID_MOVE   = 2
 
 local ERROR_CODE_MAP = {
-	[core.SUCCESS]        = "Success",
-	[core.NOT_YOUR_PIECE] = "Not your piece",
-	[core.NOT_YOUR_TURN]  = "Not your turn",
-	[core.RC_CANT_MOVE_INTO_CHECK]  = "Can not move into check",
-	[core.RC_MUST_RESOLVE_CHECK]    = "Must move out of check",
-	[core.RC_GAME_OVER]             = "Game over!",
+	[core.SUCCESS]        = strings.success,
+	[core.NOT_YOUR_PIECE] = strings.not_your_piece,
+	[core.NOT_YOUR_TURN]  = strings.not_your_turn,
+	[core.RC_CANT_MOVE_INTO_CHECK]  = strings.cant_move_into_check,
+	[core.RC_MUST_RESOLVE_CHECK]    = strings.must_resolve_check,
+	[core.RC_GAME_OVER]             = strings.game_over_msg,
 }
 
 function core.get_err_msg(rc)
@@ -144,8 +146,8 @@ local function copy_state(state)
 end
 
 function core.get_player_name(player)
-	if     player == core.PLAYER_BLACK then return "Black"
-	elseif player == core.PLAYER_WHITE then return "White" end
+	if     player == core.PLAYER_BLACK then return strings.black
+	elseif player == core.PLAYER_WHITE then return strings.white end
 end
 
 function core.get_status_msg(state)
@@ -157,9 +159,9 @@ function core.get_status_msg(state)
 	if state.game_status == core.GAME_STATUS_NORMAL then
 		-- do nothing
 	elseif state.game_status == core.GAME_STATUS_CHECK then
-		game_status_str = string.format("%s is in check!", player_name)
+		game_status_str = string.format(strings.x_is_in_check, player_name)
 	elseif state.game_status == core.GAME_STATUS_CHECKMATE then
-		return string.format("%s is in checkmate! Game over, %s wins.", player_name, core.get_player_name(get_other_player(state.player_turn)))
+		return string.format(strings.x_is_in_checkmate_y_wins, player_name, core.get_player_name(get_other_player(state.player_turn)))
 	else
 		error(string.format("Unhandled game_status %s", state.game_status))
 	end
@@ -169,9 +171,9 @@ function core.get_status_msg(state)
 
 	local action
 	if state.selected == nil then
-		action = "select a piece to move"
+		action = strings.select_a_piece_to_move 
 	else
-		action = "select a destination"
+		action = strings.select_a_destination 
 	end
 	return string.format("%s%s, %s", game_status_str, player_name, action)
 end

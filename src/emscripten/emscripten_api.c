@@ -216,6 +216,38 @@ void unzip_file(void *L, const char *fname, const char *dst_name) {
 }
 #endif
 
+#define TRANSLATION_BUFF_LEN (16*1024)
+char translation_buff[TRANSLATION_BUFF_LEN];
+
+EMSCRIPTEN_KEEPALIVE
+char *get_translation_buff(void) {
+	return translation_buff;
+}
+
+EMSCRIPTEN_KEEPALIVE
+size_t get_translation_buff_len(void) {
+	return TRANSLATION_BUFF_LEN;
+}
+
+
+EM_JS(void, alexgames_write_translation_to_buff, (const char *translation_id_ptr), {
+	const translation_id = UTF8ToString(translation_id_ptr);
+	console.log('my translations', translations);
+	let translation_str = translations[translation_id];
+	const translation_buff = Module.ccall('get_translation_buff', 'number', [], []);
+	const translation_buff_len = Module.ccall('get_translation_buff_len', 'number', [], []);;
+	stringToUTF8(translation_str, translation_buff, translation_buff_len);
+
+	//console.log(`getting translation "${translation_id}": "${translation}"`);
+	//console.log(`translation_buff is "${translation_buff}"`);
+});
+
+const char *alexgames_get_translation(const char *translation_id_ptr) {
+	alexgames_write_translation_to_buff(translation_id_ptr);
+	printf("alexgames_get_translation, buff=%p\n", translation_buff);
+	return translation_buff;
+}
+
 EM_JS(void, js_draw_graphic_raw, (const char *img_id_ptr, int y, int x, int width, int height, int angle_degrees, int flip_y, int flip_x, int brightness_percent, bool invert), {
 	let img_id = UTF8ToString(img_id_ptr);
 	let params = {
@@ -538,6 +570,12 @@ EM_JS(size_t, js_get_time_of_day, (char *time_str, size_t max_time_str_len), {
 	return time_str_js.length;
 });
 
+EM_JS(size_t, js_get_language_code, (char *lang_code_str_out, size_t max_lang_code_str_len), {
+	let lang_code = get_language_code();
+	stringToUTF8(lang_code, lang_code_str_out, max_lang_code_str_len);
+	return lang_code.length;
+});
+
 EM_JS(void, js_set_game_handle2, (const void *L, const char *game_id), {
 	let game_id_str = UTF8ToString(game_id);
 	set_game_handle(L, game_id_str);
@@ -611,6 +649,7 @@ const struct game_api_callbacks api_callbacks = {
 	.disable_evt = js_disable_evt,
 	.get_time_ms = js_get_time_ms,
 	.get_time_of_day = js_get_time_of_day,
+	.get_language_code = js_get_language_code,
 	.store_data  = js_store_data,
 	.read_stored_data  = js_read_stored_data,
 	.get_new_session_id = db_helper_get_new_session_id,

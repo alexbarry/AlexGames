@@ -46,6 +46,11 @@ static void enable_evt(const char *evt_id_str, size_t evt_id_len) {}
 static void disable_evt(const char *evt_id_str, size_t evt_id_len) {}
 static time_ms_t get_time_ms(void) { return 0; }
 static size_t get_time_of_day(char *time_str, size_t max_time_str_len) { return 0; }
+static size_t get_language_code(char *lang_code_out, size_t max_lang_code_len) {
+	static const char lang_en[] = "en";
+	memcpy(lang_code_out, lang_en, sizeof(lang_en));
+	return sizeof(lang_en);
+}
 
 static void store_data(void *L, const char *key, const uint8_t *value, size_t value_len) {}
 static size_t read_stored_data(void *L, const char *key, uint8_t *value_out, size_t max_val_len) { return -1; }
@@ -105,6 +110,7 @@ struct game_api_callbacks create_default_callbacks(void) {
 		/* .disable_evt            = */ disable_evt,
 		/* .get_time_ms            = */ get_time_ms,
 		/* .get_time_of_day        = */ get_time_of_day,
+		/* .get_language_code      = */ get_language_code,
 		/* .store_data             = */ store_data,
 		/* .read_stored_data       = */ read_stored_data,
 		/* .get_new_session_id     = */ get_new_session_id,
