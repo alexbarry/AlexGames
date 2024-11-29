@@ -19,6 +19,7 @@ use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, CANVAS_HEIGHT, CANVAS_WI
 
 // TODO there must be a better way than this? This file is in the same directory
 use crate::reversi::reversi_core;
+use crate::reversi::reversi_serialize;
 use crate::reversi::reversi_core::{Pt, ReversiErr, CellState};
 
 /*
@@ -89,8 +90,10 @@ impl AlexGamesReversi {
     }
 
     fn set_state(&mut self, serialized_state: &Vec<u8>, session_id: i32) {
-        println!("set_state");
-        let game_state = bincode::deserialize::<reversi_core::State>(&serialized_state);
+        let serialized_state_len = serialized_state.len();
+        println!("set_state, serialized state len is {serialized_state_len}");
+        //let game_state = bincode::deserialize::<reversi_core::State>(&serialized_state);
+        let game_state = reversi_serialize::deserialize(&serialized_state);
         if let Ok(game_state) = game_state {
             println!("Received game state: {:#?}", game_state);
             self.game_state = game_state;

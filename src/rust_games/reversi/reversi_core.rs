@@ -27,7 +27,7 @@ pub struct Pt {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct State {
-    board: [[CellState; BOARD_SIZE]; BOARD_SIZE],
+    pub board: [[CellState; BOARD_SIZE]; BOARD_SIZE],
     pub player_turn: CellState,
 
     // TODO don't include in this state, make another state struct to include game metadata like this
