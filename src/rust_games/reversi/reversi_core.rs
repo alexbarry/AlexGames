@@ -19,17 +19,19 @@ pub enum ReversiErr {
     InvalidMove,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub struct Pt {
     pub y: i32,
     pub x: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+//#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct State {
     pub board: [[CellState; BOARD_SIZE]; BOARD_SIZE],
     pub player_turn: CellState,
 
+	pub last_move: Option<Pt>,
 }
 
 impl State {
@@ -38,6 +40,7 @@ impl State {
             board: [[CellState::EMPTY; BOARD_SIZE]; BOARD_SIZE],
             player_turn: CellState::PLAYER1,
 
+			last_move: None,
         };
 
         state.board[3][3] = CellState::PLAYER1;
@@ -224,6 +227,7 @@ pub fn player_move(mut state: &mut State, player: CellState, pt: Pt) -> Result<(
 
     println!("player_move: setting cell {:?} to {:?}", pt, player);
     state.set_cell(pt, player);
+	state.last_move = Some(pt);
     state.player_turn = other_player(state.player_turn);
 
     Ok(())

@@ -3,15 +3,10 @@
 //
 // TODO:
 //  * fix deserialization errors in reversi in wasm? I'm not sure I see it anymore. Check the wxWidgets build, I saw it there too
-//  * add option button to start a new game
 //  * network multiplayer
-//  * make saved state smaller
-//  * add version to saved state
-//  * separate "session_id" from saved state struct
-//  * highlight last move
+//  * either allow player to pass when they can't move, or auto skip to next player
 //  * set_status_msg indicating whose turn is first
 
-use bincode;
 
 use crate::rust_game_api;
 
@@ -130,6 +125,16 @@ impl AlexGamesReversi {
 
 		let score_bg_colour;
 
+        let cell_height = height / board_size_flt;
+        let cell_width = width / board_size_flt;
+		let piece_radius = (cell_height / 2.0 - 3.0) as i32;
+
+		let last_move_highlight_bg;
+		let last_move_highlight_outline;
+		let last_move_highlight_radius = piece_radius;
+		let last_move_highlight_thickness = 2;
+
+
         match user_colour_pref {
             "dark" => {
                 bg_colour = "#003300";
@@ -142,6 +147,9 @@ impl AlexGamesReversi {
 
                 highlight_fill = "#88880088";
                 highlight_outline = "#888800";
+
+				last_move_highlight_bg = "#88000088";
+				last_move_highlight_outline = "#880000";
             }
             "very_dark" => {
                 bg_colour = "#003300";
@@ -154,8 +162,13 @@ impl AlexGamesReversi {
 
                 highlight_fill = "#88880088";
                 highlight_outline = "#888800";
+
+				last_move_highlight_bg = "#88000088";
+				last_move_highlight_outline = "#880000";
             }
+
             _ => {
+
                 bg_colour = "#008800";
                 bg_line_colour = "#000000";
                 piece_white_colour = "#dddddd";
@@ -166,6 +179,9 @@ impl AlexGamesReversi {
 
                 highlight_fill = "#ffff0088";
                 highlight_outline = "#ffff00";
+
+				last_move_highlight_bg = "#88000088";
+				last_move_highlight_outline = "#ff0000";
             }
         }
 
@@ -182,8 +198,6 @@ impl AlexGamesReversi {
         //let reversi_state = &handle.game_state as reversi_core::State;
         //let reversi_state = handle.game_state;
 
-        let cell_height = height / board_size_flt;
-        let cell_width = width / board_size_flt;
 
         callbacks.draw_rect(bg_colour, y_offset, 0, y_offset + CANVAS_HEIGHT, CANVAS_HEIGHT);
 
@@ -238,6 +252,15 @@ impl AlexGamesReversi {
                     let radius = (cell_height / 2.0 - 3.0) as i32;
 
                     callbacks.draw_circle(colour, piece_outline_colour, circ_y, circ_x, radius, 2);
+					// TODO figure out a more concise way to do this
+					if let Some(last_move) = state.last_move {
+						if last_move == pt {
+							callbacks.draw_circle(last_move_highlight_bg, last_move_highlight_outline,
+							                      circ_y, circ_x,
+							                      last_move_highlight_radius,
+							                      last_move_highlight_thickness);
+						}
+					}
                 } else if state.is_valid_move(self.game_state.player_turn, pt) {
                     let highlight_radius = 15;
                     let highlight_outline_width = 3;
@@ -436,15 +459,22 @@ impl AlexGamesApi for AlexGamesReversi {
         // TODO also add a version number and abstract it into a function
 
         // TODO check what endianness I used in Lua games
-        match bincode::serialize(&self.game_state) {
+        //match bincode::serialize(&self.game_state) {
+        match reversi_serialize::serialize(&self.game_state) {
             Ok(state_encoded) => {
+				let test_state_decoded = reversi_serialize::deserialize(&state_encoded).unwrap();
+				assert_eq!(self.game_state, test_state_decoded);
                 return Some(state_encoded);
-            }
-            Err(e) => {
+            },
+            //Err(e) => {
+            Err(..) => {
+				/*
                 // TODO use format macro and pass this more useful string to the API
                 println!("Error encoding state: {}", e);
                 self.callbacks.set_status_err("Error encoding state");
                 return None;
+				*/
+				return None;
             }
         }
     }
