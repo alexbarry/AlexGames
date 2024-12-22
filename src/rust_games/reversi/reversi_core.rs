@@ -26,7 +26,7 @@ pub struct Pt {
     pub x: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Serialize, Deserialize, Debug)]
 pub struct State {
     board: [[CellState; BOARD_SIZE]; BOARD_SIZE],
     pub player_turn: CellState,
@@ -86,6 +86,19 @@ impl State {
         }
         return false;
     }
+
+	pub fn get_valid_moves(&self) -> Vec<Pt> {
+		let mut moves = Vec::new();
+		for y in 0..BOARD_SIZE {
+			for x in 0..BOARD_SIZE {
+				let pt = Pt { y: y as i32, x: x as i32 };
+				if self.is_valid_move(self.player_turn, pt) {
+					moves.push(pt);
+				}
+			}
+		}
+		return moves;
+	}
 }
 
 impl fmt::Display for State {

@@ -17,6 +17,8 @@ use crate::rust_game_api;
 
 use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, CANVAS_HEIGHT, CANVAS_WIDTH, TextAlign, OptionType, OptionInfo};
 
+use crate::libs::ai::mcts;
+
 // TODO there must be a better way than this? This file is in the same directory
 use crate::reversi::reversi_core;
 use crate::reversi::reversi_core::{Pt, ReversiErr, CellState};
@@ -36,6 +38,8 @@ pub struct AlexGamesReversi {
     //callbacks: *mut rust_game_api::CCallbacksPtr,
     //callbacks: &'a rust_game_api::CCallbacksPtr,
     callbacks: &'static rust_game_api::CCallbacksPtr,
+
+	ai_state: mcts::MCTSState<reversi_core::State, reversi_core::Pt>,
 }
 
 fn draw_rect_outline(callbacks: &CCallbacksPtr, colour: &str, thickness: i32, y1: i32, x1: i32, y2: i32, x2: i32) {
@@ -316,11 +320,11 @@ impl AlexGamesApi for AlexGamesReversi {
 
         let cell_y = pos_y / cell_height;
         let cell_x = pos_x / cell_width;
-        println!("User clicked cell {cell_y} {cell_x}");
         //handle.draw_rect("#ff0000", pos_y, pos_x, pos_y + 20, pos_x + 20);
         //let rust_game_api::GameState::ReversiGameState(reversi_state) = &mut handle.game_state;
 
         let player_turn = self.game_state.player_turn;
+        println!("User clicked cell {cell_y} {cell_x}, player_turn={player_turn:?}");
         let rc = reversi_core::player_move(
             &mut self.game_state,
             player_turn,
@@ -334,6 +338,23 @@ impl AlexGamesApi for AlexGamesReversi {
             let msg = AlexGamesReversi::rc_to_err_msg(err);
             self.callbacks.set_status_err(msg);
         } else {
+			// TODO need a delay between player's move and AI move
+			// TODO only do this if AI multiplayer is chosen
+			// TODO maybe an animation would make it easier?
+			// Handle AI move
+			if player_turn == CellState::PLAYER1 {
+				let ai_move = self.ai_state.get_move(self.game_state).expect("empty move from ai::get_move");
+				println!("AI move is: {:?}", ai_move);
+				let rc = reversi_core::player_move(
+					&mut self.game_state,
+					CellState::PLAYER2,
+					ai_move,
+				);
+				if let Err(err) = rc {
+					panic!("Error from AI move: {:?}", err);
+				}
+			}
+
             self.save_state();
         }
         self.draw_state();
@@ -431,6 +452,13 @@ pub fn init_reversi(
     let mut reversi = AlexGamesReversi {
         game_state: reversi_core::State::new(),
         callbacks: callbacks,
+
+		ai_state: mcts::MCTSState::init(mcts::MCTSParams {
+			get_possible_moves: |game_state| {
+				//println!("reversi_main: get_possible_moves called with state {:?}", game_state);
+				game_state.get_valid_moves()
+			},
+		}),
     };
     reversi.init(callbacks);
     Box::from(reversi)
