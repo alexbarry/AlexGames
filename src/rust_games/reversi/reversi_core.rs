@@ -73,6 +73,10 @@ impl State {
     }
 
     pub fn is_valid_move(&self, player: CellState, pt: Pt) -> bool {
+		if self.cell(pt) != CellState::EMPTY {
+			return false;
+		}
+
         for dir in DIRS {
             let jumpable_piece_count = get_jumpable_pieces(self, player, pt, dir);
             if jumpable_piece_count > 0 {
