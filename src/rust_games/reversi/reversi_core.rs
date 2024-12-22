@@ -1,5 +1,6 @@
 //use std::io;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 pub const BOARD_SIZE: usize = 8;
 
@@ -87,6 +88,19 @@ impl State {
     }
 }
 
+impl fmt::Display for State {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write_board_to_fmt(self, f)
+	}
+}
+
+//impl fmt::Debug for State {
+//	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//		write_board_to_fmt(self, f)
+//	}
+//}
+
+
 const DIRS: [(i32, i32); 8] = [
     (0, 1),
     (0, -1),
@@ -100,43 +114,48 @@ const DIRS: [(i32, i32); 8] = [
 
 // TODO move to struct impl
 pub fn _print_board(state: &State) {
-    print!("  ");
+	print!("{}", state);
+}
+fn write_board_to_fmt(state: &State, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "  ")?;
     for x in 0..BOARD_SIZE {
-        print!("{} ", x)
+        write!(f, "{} ", x)?;
     }
-    println!("");
-    print!(" +");
+    write!(f, "\n")?;
+    write!(f, " +")?;
     for _x in 0..(2 * BOARD_SIZE - 1) {
-        print!("-");
+        write!(f, "-")?;
     }
-    print!("+");
-    println!("");
+    write!(f, "+")?;
+    write!(f, "\n")?;
     for y in 0..BOARD_SIZE {
-        print!("{}|", y);
+        write!(f, "{}|", y)?;
         for x in 0..BOARD_SIZE {
             match state.board[y][x] {
-                CellState::EMPTY => print!(" "),
-                CellState::PLAYER1 => print!("x"),
-                CellState::PLAYER2 => print!("o"),
+                CellState::EMPTY => write!(f, " ")?,
+                CellState::PLAYER1 => write!(f, "x")?,
+                CellState::PLAYER2 => write!(f, "o")?,
             }
-            print!("|");
+            write!(f, "|")?;
         }
-        println!("");
+        write!(f, "\n")?;
         if y < BOARD_SIZE - 1 {
-            print!(" |");
+            write!(f, " |")?;
             for _x in 0..(2 * BOARD_SIZE - 1) {
-                print!("-");
+                write!(f, "-")?;
             }
-            print!("|");
-            println!("");
+            write!(f, "|")?;
+            write!(f, "\n")?;
         }
     }
-    print!(" +");
+    write!(f, " +")?;
     for _x in 0..(2 * BOARD_SIZE - 1) {
-        print!("-");
+        write!(f, "-")?;
     }
-    print!("+");
-    println!("");
+    write!(f, "+")?;
+    write!(f, "\n")?;
+
+	Ok(())
 }
 
 fn pos_in_range(pt: Pt) -> bool {
