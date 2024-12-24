@@ -517,6 +517,31 @@ EM_JS(size_t, js_get_user_colour_pref, (char *colour_str_out, size_t max_colour_
 	return colour_pref_str_js.length;
 });
 
+EM_JS(size_t, js_get_multiplayer_session_id, (char *session_id_out, size_t max_session_id_out_len), {
+	let session_id_js = get_multiplayer_session_id();
+
+	let i;
+	for (i=0; i<session_id_js.length; i++) {
+		if (i >= max_session_id_out_len) {
+			console.error("Multiplayer ID session str buff is not long enough");
+			return -1;
+		}
+		setValue(session_id_out + i, session_id_js.charCodeAt(i), 'i8');
+	}
+	setValue(session_id_out + i, 0, 'i8');
+
+	return session_id_js.length;
+});
+
+EM_JS(bool, js_is_multiplayer_session_id_needed, (), {
+	// For now, all web clients need session IDs. Technically you could have a server that only supports one session,
+	// but I didn't implement anything like that in the multiplayer protocol yet.
+	return true;
+});
+
+
+
+
 EM_JS(bool, js_is_feature_supported, (const char *feature_id, size_t feature_id_len), {
 	// TODO:
 	//   "draw_graphic_invert": figure out how to check if context.filter supports invert
@@ -629,6 +654,8 @@ const struct game_api_callbacks api_callbacks = {
 	.set_active_canvas     = js_set_active_canvas,
 	.delete_extra_canvases = js_delete_extra_canvases,
 	.get_user_colour_pref  = js_get_user_colour_pref,
+	.is_multiplayer_session_id_needed = js_is_multiplayer_session_id_needed,
+	.get_multiplayer_session_id = js_get_multiplayer_session_id,
 	.is_feature_supported  = js_is_feature_supported,
 
 	.destroy_all           = js_destroy_all,

@@ -439,6 +439,14 @@ static size_t jni_get_user_colour_pref(char *colour_pref_out, size_t max_colour_
 	return 0;
 }
 
+static bool jni_is_multiplayer_session_needed() {
+	return false;
+}
+
+static size_t jni_get_multiplayer_session_id(char *str_out, size_t max_str_out_len) {
+	return snprintf(str_out, max_str_out_len, "");
+}
+
 static bool jni_is_feature_supported(const char *feature_id, size_t feature_id_len) {
 	// TODO
 	return false;
@@ -498,6 +506,9 @@ static const struct game_api_callbacks api = {
 	jni_delete_extra_canvases,
 
 	jni_get_user_colour_pref,
+
+	jni_is_multiplayer_session_needed,
+	jni_get_multiplayer_session_id,
 
 	jni_is_feature_supported,
 	jni_destroy_all

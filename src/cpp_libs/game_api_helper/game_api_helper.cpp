@@ -71,6 +71,12 @@ static void delete_extra_canvases(void) {}
 static size_t get_user_colour_pref(char *colour_pref_out, size_t max_colour_pref_out_len) {
 	return snprintf(colour_pref_out, max_colour_pref_out_len, "");
 }
+static size_t get_multiplayer_session_id(char *colour_pref_out, size_t max_colour_pref_out_len) {
+	return snprintf(colour_pref_out, max_colour_pref_out_len, "");
+}
+static bool is_multiplayer_session_id_needed() {
+	return true;
+}
 static bool is_feature_supported(const char *feature_id, size_t feature_id_len) {
 	return false;
 }
@@ -119,6 +125,8 @@ struct game_api_callbacks create_default_callbacks(void) {
 		/* .set_active_canvas      = */ set_active_canvas,
 		/* .delete_extra_canvases  = */ delete_extra_canvases,
 		/* .get_user_colour_pref   = */ get_user_colour_pref,
+		/* .is_multiplayer_session_id_needed = */ is_multiplayer_session_id_needed,
+		/* .get_multiplayer_session_id = */ get_multiplayer_session_id,
 		/* .is_feature_supported   = */ is_feature_supported,
 		/* .destroy_all            = */ destroy_all,
 	};

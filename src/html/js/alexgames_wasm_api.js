@@ -648,6 +648,10 @@ function set_game_handle(L, game_id_str) {
 	gfx.game_id = game_id_str;
 }
 
+function get_multiplayer_session_id() {
+	return g_session_id;
+}
+
 function destroy_all(L) {
 	let button_row = document.getElementById("game_button_row");
 	while (button_row.firstChild) {

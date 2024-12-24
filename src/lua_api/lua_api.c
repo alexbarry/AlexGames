@@ -111,6 +111,8 @@ static int lua_set_active_canvas(lua_State *L);
 static int lua_delete_extra_canvases(lua_State *L);
 
 static int lua_get_user_colour_pref(lua_State *L);
+static int lua_get_multiplayer_session_id(lua_State *L);
+static int lua_is_multiplayer_session_id_needed(lua_State *L);
 static int lua_is_feature_supported(lua_State *L);
 
 #ifdef ENABLE_WORD_DICT
@@ -182,6 +184,8 @@ static const struct luaL_Reg lua_c_api[] = {
 	{"set_active_canvas",     lua_set_active_canvas     },
 	{"delete_extra_canvases", lua_delete_extra_canvases },
 	{"get_user_colour_pref",  lua_get_user_colour_pref},
+	{"is_multiplayer_session_id_needed",  lua_is_multiplayer_session_id_needed},
+	{"get_multiplayer_session_id",  lua_get_multiplayer_session_id},
 	{"is_feature_supported",  lua_is_feature_supported},
 
 	{NULL, NULL}
@@ -1895,6 +1899,21 @@ static int lua_get_user_colour_pref(lua_State *L) {
 	//printf("User's colour preference is [%zu]: \"%.*s\"\n", str_len, (int)str_len, str_buff);
 
 	lua_pushlstring(L, str_buff, str_len);
+	return 1;
+}
+
+static int lua_get_multiplayer_session_id(lua_State *L) {
+	char str_buff[128];
+	size_t str_len = api->get_multiplayer_session_id(str_buff, sizeof(str_buff));
+
+	lua_pushlstring(L, str_buff, str_len);
+	return 1;
+}
+
+static int lua_is_multiplayer_session_id_needed(lua_State *L) {
+	bool is_sess_id_needed = api->is_multiplayer_session_id_needed();
+
+	lua_pushboolean(L, is_sess_id_needed);
 	return 1;
 }
 
