@@ -52,7 +52,7 @@ local function get_key_pos(params, row_idx, col_idx, special_idx)
 	elseif special_idx == draw_keyboard.SPECIAL_KEY_BKSP then
 		local pos = {
 			y_start = params.y_start + 2 * (params.key_height + params.padding),
-			x_start = params.y_end - 1.5 * params.key_width - 3/2*padding
+			x_start = params.x_end - 1.5 * params.key_width - 3/2*padding
 		}
 		pos.y_end = pos.y_start + params.key_height
 		pos.x_end = pos.x_start + 1.5 * params.key_width
