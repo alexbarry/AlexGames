@@ -157,7 +157,8 @@ void get_client_name(void *handle_arg, const char *name_out, size_t max_name_len
 
 	struct sockaddr_storage addr;
 	int len = sizeof(addr);
-	getpeername(handle->socket, &addr, &len);
+	//getpeername(handle->socket, &addr, &len);
+	getpeername(handle->socket, (struct sockaddr*)&addr, &len);
 
 	char addr_str[256];
 	addr_str[0] = 0;
