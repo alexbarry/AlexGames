@@ -28,7 +28,7 @@ var readyPromise = new Promise((resolve, reject) => {
   readyPromiseResolve = resolve;
   readyPromiseReject = reject;
 });
-["_malloc","_free","getExceptionMessage","incrementExceptionRefcount","decrementExceptionRefcount","_memory","_get_game_count","_get_game_name","_start_game","___indirect_function_table","_update","_handle_user_string_input","_handle_user_clicked","_handle_mousemove","_handle_mouse_evt","_handle_wheel_changed","_handle_key_evt","_handle_touch_evt","_handle_msg_received","_handle_btn_clicked","_handle_popup_btn_clicked","_handle_game_option_evt","_start_game_b64","_get_state","_get_init_state","_lua_run_cmd","_destroy_game","_new_file","_write_to_file","_close_file","_dump_file","_unzip_file","_init_game_api","_js_draw_graphic_raw","_js_draw_text","_js_draw_line","_js_draw_rect","_js_draw_triangle","_js_draw_circle","_js_draw_clear","_js_draw_refresh","_js_send_message","_js_create_btn","_js_set_btn_enabled","_js_set_btn_visible","_js_show_popup_json","_js_add_game_option_json_str","_js_prompt_string","_js_hide_popup","_js_set_status_msg","_js_set_status_err","_js_update_timer_ms","_js_delete_timer","_js_enable_evt","_js_disable_evt","_js_get_time_ms","_js_store_data","_js_read_stored_data","_js_draw_extra_canvas","_js_new_extra_canvas","_js_set_active_canvas","_js_delete_extra_canvases","_js_get_user_colour_pref","_js_is_feature_supported","_js_get_time_of_day","_js_set_game_handle2","_js_get_game_id","_js_destroy_all","_update_dict","_em_js_dict_init","onRuntimeInitialized"].forEach((prop) => {
+["_malloc","_free","getExceptionMessage","incrementExceptionRefcount","decrementExceptionRefcount","_memory","_get_game_count","_get_game_name","_start_game","___indirect_function_table","_update","_handle_user_string_input","_handle_user_clicked","_handle_mousemove","_handle_mouse_evt","_handle_wheel_changed","_handle_key_evt","_handle_touch_evt","_handle_msg_received","_handle_btn_clicked","_handle_popup_btn_clicked","_handle_game_option_evt","_start_game_b64","_get_state","_get_init_state","_lua_run_cmd","_destroy_game","_new_file","_write_to_file","_close_file","_dump_file","_unzip_file","_init_game_api","_js_draw_graphic_raw","_js_draw_text","_js_draw_line","_js_draw_rect","_js_draw_triangle","_js_draw_circle","_js_draw_clear","_js_draw_refresh","_js_send_message","_js_create_btn","_js_set_btn_enabled","_js_set_btn_visible","_js_show_popup_json","_js_add_game_option_json_str","_js_prompt_string","_js_hide_popup","_js_set_status_msg","_js_set_status_err","_js_update_timer_ms","_js_delete_timer","_js_enable_evt","_js_disable_evt","_js_get_time_ms","_js_store_data","_js_read_stored_data","_js_draw_extra_canvas","_js_new_extra_canvas","_js_set_active_canvas","_js_delete_extra_canvases","_js_get_user_colour_pref","_js_get_multiplayer_session_id","_js_is_multiplayer_session_id_needed","_js_is_feature_supported","_js_get_time_of_day","_js_set_game_handle2","_js_get_game_id","_js_destroy_all","_update_dict","_em_js_dict_init","onRuntimeInitialized"].forEach((prop) => {
   if (!Object.getOwnPropertyDescriptor(readyPromise, prop)) {
     Object.defineProperty(readyPromise, prop, {
       get: () => abort('You are getting ' + prop + ' on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js'),
@@ -58,7 +58,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpl74mykdk.js
+// include: /tmp/tmpzulxj05u.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -272,25 +272,25 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/preload/games/31s/31s_core.lua", "start": 0, "end": 12412}, {"filename": "/preload/games/31s/31s_draw.lua", "start": 12412, "end": 20896}, {"filename": "/preload/games/31s/31s_main.lua", "start": 20896, "end": 30790}, {"filename": "/preload/games/api_demo/game.lua", "start": 30790, "end": 38423}, {"filename": "/preload/games/api_demo/game_core.lua", "start": 38423, "end": 40596}, {"filename": "/preload/games/api_demo/game_draw.lua", "start": 40596, "end": 47273}, {"filename": "/preload/games/backgammon/backgammon_core.lua", "start": 47273, "end": 75504}, {"filename": "/preload/games/backgammon/backgammon_draw.lua", "start": 75504, "end": 97848}, {"filename": "/preload/games/backgammon/backgammon_main.lua", "start": 97848, "end": 116742}, {"filename": "/preload/games/backgammon/backgammon_serialize.lua", "start": 116742, "end": 121116}, {"filename": "/preload/games/blue/blue_core.lua", "start": 121116, "end": 124571}, {"filename": "/preload/games/blue/blue_draw.lua", "start": 124571, "end": 151947}, {"filename": "/preload/games/blue/blue_main.lua", "start": 151947, "end": 152946}, {"filename": "/preload/games/blue/blue_ui.lua", "start": 152946, "end": 155846}, {"filename": "/preload/games/bound/bound_core.lua", "start": 155846, "end": 184403}, {"filename": "/preload/games/bound/bound_draw.lua", "start": 184403, "end": 207441}, {"filename": "/preload/games/bound/bound_main.lua", "start": 207441, "end": 219510}, {"filename": "/preload/games/bound/bound_serialize.lua", "start": 219510, "end": 230497}, {"filename": "/preload/games/card_sim/card_generic_core.lua", "start": 230497, "end": 238520}, {"filename": "/preload/games/card_sim/card_generic_draw.lua", "start": 238520, "end": 240727}, {"filename": "/preload/games/card_sim/card_generic_main.lua", "start": 240727, "end": 246880}, {"filename": "/preload/games/card_sim/card_generic_serialize.lua", "start": 246880, "end": 250102}, {"filename": "/preload/games/checkers/checkers_core.lua", "start": 250102, "end": 260109}, {"filename": "/preload/games/checkers/checkers_draw.lua", "start": 260109, "end": 264338}, {"filename": "/preload/games/checkers/checkers_main.lua", "start": 264338, "end": 271666}, {"filename": "/preload/games/checkers/checkers_serialize.lua", "start": 271666, "end": 273820}, {"filename": "/preload/games/chess/chess_core.lua", "start": 273820, "end": 288089}, {"filename": "/preload/games/chess/chess_draw.lua", "start": 288089, "end": 297396}, {"filename": "/preload/games/chess/chess_main.lua", "start": 297396, "end": 307391}, {"filename": "/preload/games/chess/chess_serialize.lua", "start": 307391, "end": 308317}, {"filename": "/preload/games/crib/crib_core.lua", "start": 308317, "end": 344400}, {"filename": "/preload/games/crib/crib_draw.lua", "start": 344400, "end": 359436}, {"filename": "/preload/games/crib/crib_main.lua", "start": 359436, "end": 366006}, {"filename": "/preload/games/crib/crib_serialize.lua", "start": 366006, "end": 371878}, {"filename": "/preload/games/crib/crib_test.lua", "start": 371878, "end": 375715}, {"filename": "/preload/games/crossword_builder/crossword_builder_core.lua", "start": 375715, "end": 390236}, {"filename": "/preload/games/crossword_builder/crossword_builder_draw.lua", "start": 390236, "end": 394540}, {"filename": "/preload/games/crossword_builder/crossword_builder_main.lua", "start": 394540, "end": 398122}, {"filename": "/preload/games/crossword_letters/crossword_letters_core.lua", "start": 398122, "end": 417117}, {"filename": "/preload/games/crossword_letters/crossword_letters_draw.lua", "start": 417117, "end": 428229}, {"filename": "/preload/games/crossword_letters/crossword_letters_gen_puzzles.lua", "start": 428229, "end": 432610}, {"filename": "/preload/games/crossword_letters/crossword_letters_main.lua", "start": 432610, "end": 441547}, {"filename": "/preload/games/crossword_letters/crossword_letters_puzzles.lua", "start": 441547, "end": 566923}, {"filename": "/preload/games/crossword_letters/crossword_letters_serialize.lua", "start": 566923, "end": 570585}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters.py", "start": 570585, "end": 579015}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters2.py", "start": 579015, "end": 592974}, {"filename": "/preload/games/crossword_letters/list_puzzle_words.lua", "start": 592974, "end": 593868}, {"filename": "/preload/games/crossword_letters/list_right_diffs.py", "start": 593868, "end": 594223}, {"filename": "/preload/games/endless_runner/endless_runner_core.lua", "start": 594223, "end": 599423}, {"filename": "/preload/games/endless_runner/endless_runner_draw.lua", "start": 599423, "end": 602353}, {"filename": "/preload/games/endless_runner/endless_runner_main.lua", "start": 602353, "end": 603790}, {"filename": "/preload/games/fluid_mix/fluid_mix_core.lua", "start": 603790, "end": 606033}, {"filename": "/preload/games/fluid_mix/fluid_mix_draw.lua", "start": 606033, "end": 611841}, {"filename": "/preload/games/fluid_mix/fluid_mix_main.lua", "start": 611841, "end": 614837}, {"filename": "/preload/games/fluid_mix/fluid_mix_serialize.lua", "start": 614837, "end": 616992}, {"filename": "/preload/games/go/go_core.lua", "start": 616992, "end": 626415}, {"filename": "/preload/games/go/go_ctrl.lua", "start": 626415, "end": 627165}, {"filename": "/preload/games/go/go_main.lua", "start": 627165, "end": 640355}, {"filename": "/preload/games/go/go_ui.lua", "start": 640355, "end": 643745}, {"filename": "/preload/games/hospital/hospital_core.lua", "start": 643745, "end": 670011}, {"filename": "/preload/games/hospital/hospital_draw.lua", "start": 670011, "end": 692467}, {"filename": "/preload/games/hospital/hospital_main.lua", "start": 692467, "end": 701278}, {"filename": "/preload/games/hospital/hospital_serialize.lua", "start": 701278, "end": 711288}, {"filename": "/preload/games/life/life_core.lua", "start": 711288, "end": 714034}, {"filename": "/preload/games/life/life_draw.lua", "start": 714034, "end": 715024}, {"filename": "/preload/games/life/life_main.lua", "start": 715024, "end": 717197}, {"filename": "/preload/games/minesweeper/minesweeper_core.lua", "start": 717197, "end": 726120}, {"filename": "/preload/games/minesweeper/minesweeper_draw.lua", "start": 726120, "end": 731561}, {"filename": "/preload/games/minesweeper/minesweeper_main.lua", "start": 731561, "end": 744106}, {"filename": "/preload/games/minesweeper/minesweeper_serialize.lua", "start": 744106, "end": 749309}, {"filename": "/preload/games/minesweeper_life/minesweeper_draw.lua", "start": 749309, "end": 754914}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_core.lua", "start": 754914, "end": 770678}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_main.lua", "start": 770678, "end": 789614}, {"filename": "/preload/games/minesweeper_life/minesweeper_serialize.lua", "start": 789614, "end": 794827}, {"filename": "/preload/games/poker_chips/poker_chips_core.lua", "start": 794827, "end": 800198}, {"filename": "/preload/games/poker_chips/poker_chips_main.lua", "start": 800198, "end": 804393}, {"filename": "/preload/games/poker_chips/poker_chips_serialize.lua", "start": 804393, "end": 807008}, {"filename": "/preload/games/poker_chips/poker_chips_ui.lua", "start": 807008, "end": 809381}, {"filename": "/preload/games/poker_chips/ui/bet_input.lua", "start": 809381, "end": 817820}, {"filename": "/preload/games/poker_chips/ui/control.lua", "start": 817820, "end": 821860}, {"filename": "/preload/games/poker_chips/ui/view_others.lua", "start": 821860, "end": 827808}, {"filename": "/preload/games/solitaire/solitaire_core.lua", "start": 827808, "end": 847504}, {"filename": "/preload/games/solitaire/solitaire_draw.lua", "start": 847504, "end": 865846}, {"filename": "/preload/games/solitaire/solitaire_main.lua", "start": 865846, "end": 883128}, {"filename": "/preload/games/solitaire/solitaire_serialize.lua", "start": 883128, "end": 888181}, {"filename": "/preload/games/solitaire/solitaire_solve.lua", "start": 888181, "end": 906162}, {"filename": "/preload/games/spider_swing/spider_swing_core.lua", "start": 906162, "end": 911613}, {"filename": "/preload/games/spider_swing/spider_swing_draw.lua", "start": 911613, "end": 917734}, {"filename": "/preload/games/spider_swing/spider_swing_main.lua", "start": 917734, "end": 920454}, {"filename": "/preload/games/sudoku/sudoku_core.lua", "start": 920454, "end": 930957}, {"filename": "/preload/games/sudoku/sudoku_draw.lua", "start": 930957, "end": 934941}, {"filename": "/preload/games/sudoku/sudoku_main.lua", "start": 934941, "end": 935662}, {"filename": "/preload/games/swarm/swarm_core.lua", "start": 935662, "end": 950011}, {"filename": "/preload/games/swarm/swarm_draw.lua", "start": 950011, "end": 953328}, {"filename": "/preload/games/swarm/swarm_keyboard_input.lua", "start": 953328, "end": 954896}, {"filename": "/preload/games/swarm/swarm_main.lua", "start": 954896, "end": 956940}, {"filename": "/preload/games/test/card_angle_test.lua", "start": 956940, "end": 960160}, {"filename": "/preload/games/test/draw_graphics_test.lua", "start": 960160, "end": 962071}, {"filename": "/preload/games/test/timer_test.lua", "start": 962071, "end": 964226}, {"filename": "/preload/games/thrust/thrust_core.lua", "start": 964226, "end": 975180}, {"filename": "/preload/games/thrust/thrust_draw.lua", "start": 975180, "end": 982231}, {"filename": "/preload/games/thrust/thrust_keyboard_input.lua", "start": 982231, "end": 984096}, {"filename": "/preload/games/thrust/thrust_main.lua", "start": 984096, "end": 986360}, {"filename": "/preload/games/touch_test/touch_test.lua", "start": 986360, "end": 988710}, {"filename": "/preload/games/word_mastermind/word_mastermind_core.lua", "start": 988710, "end": 995450}, {"filename": "/preload/games/word_mastermind/word_mastermind_draw.lua", "start": 995450, "end": 1004971}, {"filename": "/preload/games/word_mastermind/word_mastermind_main.lua", "start": 1004971, "end": 1011085}, {"filename": "/preload/games/word_mastermind/word_mastermind_serialize.lua", "start": 1011085, "end": 1013009}, {"filename": "/preload/games/wu/wu_core.lua", "start": 1013009, "end": 1019133}, {"filename": "/preload/games/wu/wu_ctrl.lua", "start": 1019133, "end": 1019954}, {"filename": "/preload/games/wu/wu_main.lua", "start": 1019954, "end": 1029593}, {"filename": "/preload/libs/cards/card_test.lua", "start": 1029593, "end": 1030387}, {"filename": "/preload/libs/cards/cards.lua", "start": 1030387, "end": 1035794}, {"filename": "/preload/libs/cards/cards_draw.lua", "start": 1035794, "end": 1045363}, {"filename": "/preload/libs/cards/cards_set.lua", "start": 1045363, "end": 1045714}, {"filename": "/preload/libs/combinations.lua", "start": 1045714, "end": 1048006}, {"filename": "/preload/libs/dice/dice.lua", "start": 1048006, "end": 1048265}, {"filename": "/preload/libs/dice/dice_draw.lua", "start": 1048265, "end": 1049700}, {"filename": "/preload/libs/draw/draw_celebration_anim.lua", "start": 1049700, "end": 1059114}, {"filename": "/preload/libs/draw/draw_colours.lua", "start": 1059114, "end": 1059935}, {"filename": "/preload/libs/draw/draw_keyboard.lua", "start": 1059935, "end": 1064744}, {"filename": "/preload/libs/draw/draw_more.lua", "start": 1064744, "end": 1068711}, {"filename": "/preload/libs/draw/draw_shapes.lua", "start": 1068711, "end": 1070336}, {"filename": "/preload/libs/letter_tiles.lua", "start": 1070336, "end": 1093515}, {"filename": "/preload/libs/multiplayer/two_player.lua", "start": 1093515, "end": 1105113}, {"filename": "/preload/libs/multiplayer/wait_for_players.lua", "start": 1105113, "end": 1111988}, {"filename": "/preload/libs/serialize/bit_pack.lua", "start": 1111988, "end": 1115011}, {"filename": "/preload/libs/serialize/serialize.lua", "start": 1115011, "end": 1120452}, {"filename": "/preload/libs/serialize/storage_helpers.lua", "start": 1120452, "end": 1121232}, {"filename": "/preload/libs/shuffle.lua", "start": 1121232, "end": 1121585}, {"filename": "/preload/libs/touch_to_mouse_evts.lua", "start": 1121585, "end": 1122718}, {"filename": "/preload/libs/ui/buttons.lua", "start": 1122718, "end": 1126607}, {"filename": "/preload/libs/ui/show_buttons_popup.lua", "start": 1126607, "end": 1127386}, {"filename": "/preload/libs/ui/soft_numpad.lua", "start": 1127386, "end": 1131379}, {"filename": "/preload/libs/ui/touchpad.lua", "start": 1131379, "end": 1132717}, {"filename": "/preload/libs/utils.lua", "start": 1132717, "end": 1137243}, {"filename": "/preload/libs/words.lua", "start": 1137243, "end": 1140544}], "remote_package_size": 1140544});
+    loadPackage({"files": [{"filename": "/preload/games/31s/31s_core.lua", "start": 0, "end": 12412}, {"filename": "/preload/games/31s/31s_draw.lua", "start": 12412, "end": 20896}, {"filename": "/preload/games/31s/31s_main.lua", "start": 20896, "end": 30790}, {"filename": "/preload/games/api_demo/game.lua", "start": 30790, "end": 38423}, {"filename": "/preload/games/api_demo/game_core.lua", "start": 38423, "end": 40596}, {"filename": "/preload/games/api_demo/game_draw.lua", "start": 40596, "end": 47273}, {"filename": "/preload/games/backgammon/backgammon_core.lua", "start": 47273, "end": 75504}, {"filename": "/preload/games/backgammon/backgammon_draw.lua", "start": 75504, "end": 97848}, {"filename": "/preload/games/backgammon/backgammon_main.lua", "start": 97848, "end": 116742}, {"filename": "/preload/games/backgammon/backgammon_serialize.lua", "start": 116742, "end": 121116}, {"filename": "/preload/games/blue/blue_core.lua", "start": 121116, "end": 124571}, {"filename": "/preload/games/blue/blue_draw.lua", "start": 124571, "end": 151947}, {"filename": "/preload/games/blue/blue_main.lua", "start": 151947, "end": 152946}, {"filename": "/preload/games/blue/blue_ui.lua", "start": 152946, "end": 155846}, {"filename": "/preload/games/bound/bound_core.lua", "start": 155846, "end": 184403}, {"filename": "/preload/games/bound/bound_draw.lua", "start": 184403, "end": 207441}, {"filename": "/preload/games/bound/bound_main.lua", "start": 207441, "end": 219510}, {"filename": "/preload/games/bound/bound_serialize.lua", "start": 219510, "end": 230497}, {"filename": "/preload/games/card_sim/card_generic_core.lua", "start": 230497, "end": 238520}, {"filename": "/preload/games/card_sim/card_generic_draw.lua", "start": 238520, "end": 240727}, {"filename": "/preload/games/card_sim/card_generic_main.lua", "start": 240727, "end": 246880}, {"filename": "/preload/games/card_sim/card_generic_serialize.lua", "start": 246880, "end": 250102}, {"filename": "/preload/games/checkers/checkers_core.lua", "start": 250102, "end": 260109}, {"filename": "/preload/games/checkers/checkers_draw.lua", "start": 260109, "end": 264338}, {"filename": "/preload/games/checkers/checkers_main.lua", "start": 264338, "end": 271666}, {"filename": "/preload/games/checkers/checkers_serialize.lua", "start": 271666, "end": 273820}, {"filename": "/preload/games/chess/chess_core.lua", "start": 273820, "end": 288089}, {"filename": "/preload/games/chess/chess_draw.lua", "start": 288089, "end": 297396}, {"filename": "/preload/games/chess/chess_main.lua", "start": 297396, "end": 307391}, {"filename": "/preload/games/chess/chess_serialize.lua", "start": 307391, "end": 308317}, {"filename": "/preload/games/crib/crib_core.lua", "start": 308317, "end": 344400}, {"filename": "/preload/games/crib/crib_draw.lua", "start": 344400, "end": 359436}, {"filename": "/preload/games/crib/crib_main.lua", "start": 359436, "end": 366006}, {"filename": "/preload/games/crib/crib_serialize.lua", "start": 366006, "end": 371878}, {"filename": "/preload/games/crib/crib_test.lua", "start": 371878, "end": 375715}, {"filename": "/preload/games/crossword_builder/crossword_builder_core.lua", "start": 375715, "end": 390236}, {"filename": "/preload/games/crossword_builder/crossword_builder_draw.lua", "start": 390236, "end": 394540}, {"filename": "/preload/games/crossword_builder/crossword_builder_main.lua", "start": 394540, "end": 398122}, {"filename": "/preload/games/crossword_letters/crossword_letters_core.lua", "start": 398122, "end": 417117}, {"filename": "/preload/games/crossword_letters/crossword_letters_draw.lua", "start": 417117, "end": 428229}, {"filename": "/preload/games/crossword_letters/crossword_letters_gen_puzzles.lua", "start": 428229, "end": 432610}, {"filename": "/preload/games/crossword_letters/crossword_letters_main.lua", "start": 432610, "end": 441547}, {"filename": "/preload/games/crossword_letters/crossword_letters_puzzles.lua", "start": 441547, "end": 566923}, {"filename": "/preload/games/crossword_letters/crossword_letters_serialize.lua", "start": 566923, "end": 570585}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters.py", "start": 570585, "end": 579015}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters2.py", "start": 579015, "end": 592974}, {"filename": "/preload/games/crossword_letters/list_puzzle_words.lua", "start": 592974, "end": 593868}, {"filename": "/preload/games/crossword_letters/list_right_diffs.py", "start": 593868, "end": 594223}, {"filename": "/preload/games/endless_runner/endless_runner_core.lua", "start": 594223, "end": 599423}, {"filename": "/preload/games/endless_runner/endless_runner_draw.lua", "start": 599423, "end": 602353}, {"filename": "/preload/games/endless_runner/endless_runner_main.lua", "start": 602353, "end": 603790}, {"filename": "/preload/games/fluid_mix/fluid_mix_core.lua", "start": 603790, "end": 606033}, {"filename": "/preload/games/fluid_mix/fluid_mix_draw.lua", "start": 606033, "end": 611841}, {"filename": "/preload/games/fluid_mix/fluid_mix_main.lua", "start": 611841, "end": 614837}, {"filename": "/preload/games/fluid_mix/fluid_mix_serialize.lua", "start": 614837, "end": 616992}, {"filename": "/preload/games/go/go_core.lua", "start": 616992, "end": 626415}, {"filename": "/preload/games/go/go_ctrl.lua", "start": 626415, "end": 627165}, {"filename": "/preload/games/go/go_main.lua", "start": 627165, "end": 640355}, {"filename": "/preload/games/go/go_ui.lua", "start": 640355, "end": 643745}, {"filename": "/preload/games/hospital/hospital_core.lua", "start": 643745, "end": 670011}, {"filename": "/preload/games/hospital/hospital_draw.lua", "start": 670011, "end": 692467}, {"filename": "/preload/games/hospital/hospital_main.lua", "start": 692467, "end": 701278}, {"filename": "/preload/games/hospital/hospital_serialize.lua", "start": 701278, "end": 711288}, {"filename": "/preload/games/life/life_core.lua", "start": 711288, "end": 714034}, {"filename": "/preload/games/life/life_draw.lua", "start": 714034, "end": 715024}, {"filename": "/preload/games/life/life_main.lua", "start": 715024, "end": 717197}, {"filename": "/preload/games/minesweeper/minesweeper_core.lua", "start": 717197, "end": 726120}, {"filename": "/preload/games/minesweeper/minesweeper_draw.lua", "start": 726120, "end": 731561}, {"filename": "/preload/games/minesweeper/minesweeper_main.lua", "start": 731561, "end": 744106}, {"filename": "/preload/games/minesweeper/minesweeper_serialize.lua", "start": 744106, "end": 749309}, {"filename": "/preload/games/minesweeper_life/minesweeper_draw.lua", "start": 749309, "end": 754914}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_core.lua", "start": 754914, "end": 770678}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_main.lua", "start": 770678, "end": 789614}, {"filename": "/preload/games/minesweeper_life/minesweeper_serialize.lua", "start": 789614, "end": 794827}, {"filename": "/preload/games/poker_chips/poker_chips_core.lua", "start": 794827, "end": 800198}, {"filename": "/preload/games/poker_chips/poker_chips_main.lua", "start": 800198, "end": 804393}, {"filename": "/preload/games/poker_chips/poker_chips_serialize.lua", "start": 804393, "end": 807008}, {"filename": "/preload/games/poker_chips/poker_chips_ui.lua", "start": 807008, "end": 809381}, {"filename": "/preload/games/poker_chips/ui/bet_input.lua", "start": 809381, "end": 817820}, {"filename": "/preload/games/poker_chips/ui/control.lua", "start": 817820, "end": 821860}, {"filename": "/preload/games/poker_chips/ui/view_others.lua", "start": 821860, "end": 827808}, {"filename": "/preload/games/solitaire/solitaire_core.lua", "start": 827808, "end": 847504}, {"filename": "/preload/games/solitaire/solitaire_draw.lua", "start": 847504, "end": 865846}, {"filename": "/preload/games/solitaire/solitaire_main.lua", "start": 865846, "end": 883128}, {"filename": "/preload/games/solitaire/solitaire_serialize.lua", "start": 883128, "end": 888181}, {"filename": "/preload/games/solitaire/solitaire_solve.lua", "start": 888181, "end": 906162}, {"filename": "/preload/games/spider_swing/spider_swing_core.lua", "start": 906162, "end": 911613}, {"filename": "/preload/games/spider_swing/spider_swing_draw.lua", "start": 911613, "end": 917734}, {"filename": "/preload/games/spider_swing/spider_swing_main.lua", "start": 917734, "end": 920454}, {"filename": "/preload/games/sudoku/sudoku_core.lua", "start": 920454, "end": 930957}, {"filename": "/preload/games/sudoku/sudoku_draw.lua", "start": 930957, "end": 934941}, {"filename": "/preload/games/sudoku/sudoku_main.lua", "start": 934941, "end": 935662}, {"filename": "/preload/games/swarm/swarm_core.lua", "start": 935662, "end": 950011}, {"filename": "/preload/games/swarm/swarm_draw.lua", "start": 950011, "end": 953328}, {"filename": "/preload/games/swarm/swarm_keyboard_input.lua", "start": 953328, "end": 954896}, {"filename": "/preload/games/swarm/swarm_main.lua", "start": 954896, "end": 956940}, {"filename": "/preload/games/test/card_angle_test.lua", "start": 956940, "end": 960160}, {"filename": "/preload/games/test/draw_graphics_test.lua", "start": 960160, "end": 962071}, {"filename": "/preload/games/test/timer_test.lua", "start": 962071, "end": 964226}, {"filename": "/preload/games/thrust/thrust_core.lua", "start": 964226, "end": 975180}, {"filename": "/preload/games/thrust/thrust_draw.lua", "start": 975180, "end": 982231}, {"filename": "/preload/games/thrust/thrust_keyboard_input.lua", "start": 982231, "end": 984096}, {"filename": "/preload/games/thrust/thrust_main.lua", "start": 984096, "end": 986360}, {"filename": "/preload/games/touch_test/touch_test.lua", "start": 986360, "end": 988710}, {"filename": "/preload/games/word_mastermind/word_mastermind_core.lua", "start": 988710, "end": 995450}, {"filename": "/preload/games/word_mastermind/word_mastermind_draw.lua", "start": 995450, "end": 1004971}, {"filename": "/preload/games/word_mastermind/word_mastermind_main.lua", "start": 1004971, "end": 1011085}, {"filename": "/preload/games/word_mastermind/word_mastermind_serialize.lua", "start": 1011085, "end": 1013009}, {"filename": "/preload/games/wu/wu_core.lua", "start": 1013009, "end": 1019133}, {"filename": "/preload/games/wu/wu_ctrl.lua", "start": 1019133, "end": 1019954}, {"filename": "/preload/games/wu/wu_main.lua", "start": 1019954, "end": 1029593}, {"filename": "/preload/libs/cards/card_test.lua", "start": 1029593, "end": 1030387}, {"filename": "/preload/libs/cards/cards.lua", "start": 1030387, "end": 1035794}, {"filename": "/preload/libs/cards/cards_draw.lua", "start": 1035794, "end": 1045363}, {"filename": "/preload/libs/cards/cards_set.lua", "start": 1045363, "end": 1045714}, {"filename": "/preload/libs/combinations.lua", "start": 1045714, "end": 1048006}, {"filename": "/preload/libs/dice/dice.lua", "start": 1048006, "end": 1048265}, {"filename": "/preload/libs/dice/dice_draw.lua", "start": 1048265, "end": 1049700}, {"filename": "/preload/libs/draw/draw_celebration_anim.lua", "start": 1049700, "end": 1059114}, {"filename": "/preload/libs/draw/draw_colours.lua", "start": 1059114, "end": 1059935}, {"filename": "/preload/libs/draw/draw_keyboard.lua", "start": 1059935, "end": 1064744}, {"filename": "/preload/libs/draw/draw_more.lua", "start": 1064744, "end": 1068711}, {"filename": "/preload/libs/draw/draw_shapes.lua", "start": 1068711, "end": 1070336}, {"filename": "/preload/libs/letter_tiles.lua", "start": 1070336, "end": 1093515}, {"filename": "/preload/libs/multiplayer/two_player.lua", "start": 1093515, "end": 1105547}, {"filename": "/preload/libs/multiplayer/wait_for_players.lua", "start": 1105547, "end": 1113003}, {"filename": "/preload/libs/serialize/bit_pack.lua", "start": 1113003, "end": 1116026}, {"filename": "/preload/libs/serialize/serialize.lua", "start": 1116026, "end": 1121467}, {"filename": "/preload/libs/serialize/storage_helpers.lua", "start": 1121467, "end": 1122247}, {"filename": "/preload/libs/shuffle.lua", "start": 1122247, "end": 1122600}, {"filename": "/preload/libs/touch_to_mouse_evts.lua", "start": 1122600, "end": 1123733}, {"filename": "/preload/libs/ui/buttons.lua", "start": 1123733, "end": 1127622}, {"filename": "/preload/libs/ui/show_buttons_popup.lua", "start": 1127622, "end": 1128401}, {"filename": "/preload/libs/ui/soft_numpad.lua", "start": 1128401, "end": 1132394}, {"filename": "/preload/libs/ui/touchpad.lua", "start": 1132394, "end": 1133732}, {"filename": "/preload/libs/utils.lua", "start": 1133732, "end": 1138258}, {"filename": "/preload/libs/words.lua", "start": 1138258, "end": 1141559}], "remote_package_size": 1141559});
 
   })();
 
-// end include: /tmp/tmpl74mykdk.js
-// include: /tmp/tmpj81n09r3.js
+// end include: /tmp/tmpzulxj05u.js
+// include: /tmp/tmp_jbpr8rk.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpj81n09r3.js
-// include: /tmp/tmpa5s3uc22.js
+  // end include: /tmp/tmp_jbpr8rk.js
+// include: /tmp/tmplftle_fe.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpa5s3uc22.js
+  // end include: /tmp/tmplftle_fe.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -338,23 +338,19 @@ if (ENVIRONMENT_IS_NODE) {
 
 // include: node_shell_read.js
 readBinary = (filename) => {
-  // We need to re-wrap `file://` strings to URLs. Normalizing isn't
-  // necessary in that case, the path should already be absolute.
-  filename = isFileURI(filename) ? new URL(filename) : nodePath.normalize(filename);
+  // We need to re-wrap `file://` strings to URLs.
+  filename = isFileURI(filename) ? new URL(filename) : filename;
   var ret = fs.readFileSync(filename);
-  assert(ret.buffer);
+  assert(Buffer.isBuffer(ret));
   return ret;
 };
 
-readAsync = (filename, binary = true) => {
+readAsync = async (filename, binary = true) => {
   // See the comment in the `readBinary` function.
-  filename = isFileURI(filename) ? new URL(filename) : nodePath.normalize(filename);
-  return new Promise((resolve, reject) => {
-    fs.readFile(filename, binary ? undefined : 'utf8', (err, data) => {
-      if (err) reject(err);
-      else resolve(binary ? data.buffer : data);
-    });
-  });
+  filename = isFileURI(filename) ? new URL(filename) : filename;
+  var ret = fs.readFileSync(filename, binary ? undefined : 'utf8');
+  assert(binary ? Buffer.isBuffer(ret) : typeof ret == 'string');
+  return ret;
 };
 // end include: node_shell_read.js
   if (!Module['thisProgram'] && process.argv.length > 1) {
@@ -417,7 +413,7 @@ if (ENVIRONMENT_IS_WORKER) {
     };
   }
 
-  readAsync = (url) => {
+  readAsync = async (url) => {
     // Fetch has some additional restrictions over XHR, like it can't be used on a file:// url.
     // See https://github.com/github/fetch/pull/92#issuecomment-140665932
     // Cordova or Electron apps are typically loaded from a file:// url.
@@ -438,13 +434,11 @@ if (ENVIRONMENT_IS_WORKER) {
         xhr.send(null);
       });
     }
-    return fetch(url, { credentials: 'same-origin' })
-      .then((response) => {
-        if (response.ok) {
-          return response.arrayBuffer();
-        }
-        return Promise.reject(new Error(response.status + ' : ' + response.url));
-      })
+    var response = await fetch(url, { credentials: 'same-origin' });
+    if (response.ok) {
+      return response.arrayBuffer();
+    }
+    throw new Error(response.status + ' : ' + response.url);
   };
 // end include: web_or_worker_shell_read.js
   }
@@ -746,9 +740,9 @@ assert(Math.trunc, 'This browser does not support Math.trunc(), build with LEGAC
 // it happens right before run - run will be postponed until
 // the dependencies are met.
 var runDependencies = 0;
-var runDependencyWatcher = null;
 var dependenciesFulfilled = null; // overridden to take different actions when all run dependencies are fulfilled
 var runDependencyTracking = {};
+var runDependencyWatcher = null;
 
 function getUniqueRunDependency(id) {
   var orig = id;
@@ -915,26 +909,29 @@ function getBinarySync(file) {
   throw 'both async and sync fetching of the wasm failed';
 }
 
-function getBinaryPromise(binaryFile) {
+async function getWasmBinary(binaryFile) {
   // If we don't have the binary yet, load it asynchronously using readAsync.
   if (!wasmBinary
       ) {
     // Fetch the binary using readAsync
-    return readAsync(binaryFile).then(
-      (response) => new Uint8Array(/** @type{!ArrayBuffer} */(response)),
-      // Fall back to getBinarySync if readAsync fails
-      () => getBinarySync(binaryFile)
-    );
+    try {
+      var response = await readAsync(binaryFile);
+      return new Uint8Array(response);
+    } catch {
+      // Fall back to getBinarySync below;
+    }
   }
 
   // Otherwise, getBinarySync should be able to get it synchronously
-  return Promise.resolve().then(() => getBinarySync(binaryFile));
+  return getBinarySync(binaryFile);
 }
 
-function instantiateArrayBuffer(binaryFile, imports, receiver) {
-  return getBinaryPromise(binaryFile).then((binary) => {
-    return WebAssembly.instantiate(binary, imports);
-  }).then(receiver, (reason) => {
+async function instantiateArrayBuffer(binaryFile, imports) {
+  try {
+    var binary = await getWasmBinary(binaryFile);
+    var instance = await WebAssembly.instantiate(binary, imports);
+    return instance;
+  } catch (reason) {
     err(`failed to asynchronously prepare wasm: ${reason}`);
 
     // Warn on some common problems.
@@ -942,10 +939,10 @@ function instantiateArrayBuffer(binaryFile, imports, receiver) {
       err(`warning: Loading from a file URI (${wasmBinaryFile}) is not supported in most browsers. See https://emscripten.org/docs/getting_started/FAQ.html#how-do-i-run-a-local-webserver-for-testing-why-does-my-program-stall-in-downloading-or-preparing`);
     }
     abort(reason);
-  });
+  }
 }
 
-function instantiateAsync(binary, binaryFile, imports, callback) {
+async function instantiateAsync(binary, binaryFile, imports) {
   if (!binary &&
       typeof WebAssembly.instantiateStreaming == 'function' &&
       !isDataURI(binaryFile) &&
@@ -959,26 +956,19 @@ function instantiateAsync(binary, binaryFile, imports, callback) {
       //   https://github.com/emscripten-core/emscripten/pull/16917
       !ENVIRONMENT_IS_NODE &&
       typeof fetch == 'function') {
-    return fetch(binaryFile, { credentials: 'same-origin' }).then((response) => {
-      // Suppress closure warning here since the upstream definition for
-      // instantiateStreaming only allows Promise<Repsponse> rather than
-      // an actual Response.
-      // TODO(https://github.com/google/closure-compiler/pull/3913): Remove if/when upstream closure is fixed.
-      /** @suppress {checkTypes} */
-      var result = WebAssembly.instantiateStreaming(response, imports);
-
-      return result.then(
-        callback,
-        function(reason) {
-          // We expect the most common failure cause to be a bad MIME type for the binary,
-          // in which case falling back to ArrayBuffer instantiation should work.
-          err(`wasm streaming compile failed: ${reason}`);
-          err('falling back to ArrayBuffer instantiation');
-          return instantiateArrayBuffer(binaryFile, imports, callback);
-        });
-    });
+    try {
+      var response = fetch(binaryFile, { credentials: 'same-origin' });
+      var instantiationResult = await WebAssembly.instantiateStreaming(response, imports);
+      return instantiationResult;
+    } catch (reason) {
+      // We expect the most common failure cause to be a bad MIME type for the binary,
+      // in which case falling back to ArrayBuffer instantiation should work.
+      err(`wasm streaming compile failed: ${reason}`);
+      err('falling back to ArrayBuffer instantiation');
+      // fall back of instantiateArrayBuffer below
+    };
   }
-  return instantiateArrayBuffer(binaryFile, imports, callback);
+  return instantiateArrayBuffer(binaryFile, imports);
 }
 
 function getWasmImports() {
@@ -991,7 +981,7 @@ function getWasmImports() {
 
 // Create the wasm instance.
 // Receives the wasm imports, returns the exports.
-function createWasm() {
+async function createWasm() {
   // Load the wasm module and create an instance of using native support in the JS engine.
   // handle a generated wasm instance, receiving its exports and
   // performing other necessary setup
@@ -1053,9 +1043,15 @@ function createWasm() {
 
   wasmBinaryFile ??= findWasmBinary();
 
-  // If instantiation fails, reject the module ready promise.
-  instantiateAsync(wasmBinary, wasmBinaryFile, info, receiveInstantiationResult).catch(readyPromiseReject);
-  return {}; // no exports yet; we'll fill them in later
+  try {
+    var result = await instantiateAsync(wasmBinary, wasmBinaryFile, info);
+    receiveInstantiationResult(result);
+    return result;
+  } catch (e) {
+    // If instantiation fails, reject the module ready promise.
+    readyPromiseReject(e);
+    return;
+  }
 }
 
 // include: runtime_debug.js
@@ -1176,7 +1172,7 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  1186323: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  1187301: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
@@ -1208,6 +1204,8 @@ function js_new_extra_canvas(canvas_id) { let canvas_id_str = UTF8ToString(canva
 function js_set_active_canvas(canvas_id) { let canvas_id_str = UTF8ToString(canvas_id); set_active_canvas(gfx, canvas_id_str); }
 function js_delete_extra_canvases() { delete_extra_canvases(); }
 function js_get_user_colour_pref(colour_str_out,max_colour_str_out_len) { let colour_pref_str_js = get_user_colour_pref(); let i; for (i=0; i<colour_pref_str_js.length; i++) { if (i >= max_colour_str_out_len) { console.error("User colour pref str buff is not long enough"); return -1; } setValue(colour_str_out + i, colour_pref_str_js.charCodeAt(i), 'i8'); } setValue(colour_str_out + i, 0, 'i8'); return colour_pref_str_js.length; }
+function js_get_multiplayer_session_id(session_id_out,max_session_id_out_len) { let session_id_js = get_multiplayer_session_id(); let i; for (i=0; i<session_id_js.length; i++) { if (i >= max_session_id_out_len) { console.error("Multiplayer ID session str buff is not long enough"); return -1; } setValue(session_id_out + i, session_id_js.charCodeAt(i), 'i8'); } setValue(session_id_out + i, 0, 'i8'); return session_id_js.length; }
+function js_is_multiplayer_session_id_needed() { return true; }
 function js_is_feature_supported(feature_id,feature_id_len) { return false; }
 function js_get_time_of_day(time_str,max_time_str_len) { let time_str_js = get_time_of_day(); for (let i=0; i<time_str_js.length; i++) { if (i >= max_time_str_len) { console.error("Time string is not long enough"); return -1; } setValue(time_str + i, time_str_js.charCodeAt(i), 'i8'); } return time_str_js.length; }
 function js_set_game_handle2(L,game_id) { let game_id_str = UTF8ToString(game_id); set_game_handle(L, game_id_str); }
@@ -1369,9 +1367,8 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       assert(typeof ptr == 'number', `UTF8ToString expects a number (got ${typeof ptr})`);
       return ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead) : '';
     };
-  var ___assert_fail = (condition, filename, line, func) => {
+  var ___assert_fail = (condition, filename, line, func) =>
       abort(`Assertion failed: ${UTF8ToString(condition)}, at: ` + [filename ? UTF8ToString(filename) : 'unknown filename', line, func ? UTF8ToString(func) : 'unknown function']);
-    };
 
   var exceptionCaught =  [];
   
@@ -1894,7 +1891,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
             buffer[offset+i] = result;
           }
           if (bytesRead) {
-            stream.node.timestamp = Date.now();
+            stream.node.atime = Date.now();
           }
           return bytesRead;
         },
@@ -1910,7 +1907,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
             throw new FS.ErrnoError(29);
           }
           if (length) {
-            stream.node.timestamp = Date.now();
+            stream.node.mtime = stream.node.ctime = Date.now();
           }
           return i;
         },
@@ -1988,7 +1985,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   var MEMFS = {
   ops_table:null,
   mount(mount) {
-        return MEMFS.createNode(null, '/', 16384 | 511 /* 0777 */, 0);
+        return MEMFS.createNode(null, '/', 16895, 0);
       },
   createNode(parent, name, mode, dev) {
         if (FS.isBlkdev(mode) || FS.isFIFO(mode)) {
@@ -2062,11 +2059,11 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           node.node_ops = MEMFS.ops_table.chrdev.node;
           node.stream_ops = MEMFS.ops_table.chrdev.stream;
         }
-        node.timestamp = Date.now();
+        node.atime = node.mtime = node.ctime = Date.now();
         // add the new node to the parent
         if (parent) {
           parent.contents[name] = node;
-          parent.timestamp = node.timestamp;
+          parent.atime = parent.mtime = parent.ctime = node.atime;
         }
         return node;
       },
@@ -2122,9 +2119,9 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           } else {
             attr.size = 0;
           }
-          attr.atime = new Date(node.timestamp);
-          attr.mtime = new Date(node.timestamp);
-          attr.ctime = new Date(node.timestamp);
+          attr.atime = new Date(node.atime);
+          attr.mtime = new Date(node.mtime);
+          attr.ctime = new Date(node.ctime);
           // NOTE: In our implementation, st_blocks = Math.ceil(st_size/st_blksize),
           //       but this is not required by the standard.
           attr.blksize = 4096;
@@ -2132,11 +2129,10 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           return attr;
         },
   setattr(node, attr) {
-          if (attr.mode !== undefined) {
-            node.mode = attr.mode;
-          }
-          if (attr.timestamp !== undefined) {
-            node.timestamp = attr.timestamp;
+          for (const key of ["mode", "atime", "mtime", "ctime"]) {
+            if (attr[key]) {
+              node[key] = attr[key];
+            }
           }
           if (attr.size !== undefined) {
             MEMFS.resizeFileStorage(node, attr.size);
@@ -2149,29 +2145,28 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           return MEMFS.createNode(parent, name, mode, dev);
         },
   rename(old_node, new_dir, new_name) {
-          // if we're overwriting a directory at new_name, make sure it's empty.
-          if (FS.isDir(old_node.mode)) {
-            var new_node;
-            try {
-              new_node = FS.lookupNode(new_dir, new_name);
-            } catch (e) {
-            }
-            if (new_node) {
+          var new_node;
+          try {
+            new_node = FS.lookupNode(new_dir, new_name);
+          } catch (e) {}
+          if (new_node) {
+            if (FS.isDir(old_node.mode)) {
+              // if we're overwriting a directory at new_name, make sure it's empty.
               for (var i in new_node.contents) {
                 throw new FS.ErrnoError(55);
               }
             }
+            FS.hashRemoveNode(new_node);
           }
           // do the internal rewiring
           delete old_node.parent.contents[old_node.name];
-          old_node.parent.timestamp = Date.now()
-          old_node.name = new_name;
           new_dir.contents[new_name] = old_node;
-          new_dir.timestamp = old_node.parent.timestamp;
+          old_node.name = new_name;
+          new_dir.ctime = new_dir.mtime = old_node.parent.ctime = old_node.parent.mtime = Date.now();
         },
   unlink(parent, name) {
           delete parent.contents[name];
-          parent.timestamp = Date.now();
+          parent.ctime = parent.mtime = Date.now();
         },
   rmdir(parent, name) {
           var node = FS.lookupNode(parent, name);
@@ -2179,17 +2174,13 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
             throw new FS.ErrnoError(55);
           }
           delete parent.contents[name];
-          parent.timestamp = Date.now();
+          parent.ctime = parent.mtime = Date.now();
         },
   readdir(node) {
-          var entries = ['.', '..'];
-          for (var key of Object.keys(node.contents)) {
-            entries.push(key);
-          }
-          return entries;
+          return ['.', '..', ...Object.keys(node.contents)];
         },
   symlink(parent, newname, oldpath) {
-          var node = MEMFS.createNode(parent, newname, 511 /* 0777 */ | 40960, 0);
+          var node = MEMFS.createNode(parent, newname, 0o777 | 40960, 0);
           node.link = oldpath;
           return node;
         },
@@ -2226,7 +2217,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   
           if (!length) return 0;
           var node = stream.node;
-          node.timestamp = Date.now();
+          node.mtime = node.ctime = Date.now();
   
           if (buffer.subarray && (!node.contents || node.contents.subarray)) { // This write is from a typed array to a typed array?
             if (canOwn) {
@@ -2316,24 +2307,10 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   },
   };
   
-  /** @param {boolean=} noRunDep */
-  var asyncLoad = (url, onload, onerror, noRunDep) => {
-      var dep = !noRunDep ? getUniqueRunDependency(`al ${url}`) : '';
-      readAsync(url).then(
-        (arrayBuffer) => {
-          assert(arrayBuffer, `Loading data file "${url}" failed (no arrayBuffer).`);
-          onload(new Uint8Array(arrayBuffer));
-          if (dep) removeRunDependency(dep);
-        },
-        (err) => {
-          if (onerror) {
-            onerror();
-          } else {
-            throw `Loading data file "${url}" failed.`;
-          }
-        }
-      );
-      if (dep) addRunDependency(dep);
+  var asyncLoad = async (url) => {
+      var arrayBuffer = await readAsync(url);
+      assert(arrayBuffer, `Loading data file "${url}" failed (no arrayBuffer).`);
+      return new Uint8Array(arrayBuffer);
     };
   
   
@@ -2380,7 +2357,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       }
       addRunDependency(dep);
       if (typeof url == 'string') {
-        asyncLoad(url, processData, onerror);
+        asyncLoad(url).then(processData, onerror);
       } else {
         processData(url);
       }
@@ -2414,9 +2391,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   
   
   
-  var strError = (errno) => {
-      return UTF8ToString(_strerror(errno));
-    };
+  var strError = (errno) => UTF8ToString(_strerror(errno));
   
   var ERRNO_CODES = {
       'EPERM': 63,
@@ -2621,6 +2596,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           this.name = name;
           this.mode = mode;
           this.rdev = rdev;
+          this.atime = this.mtime = this.ctime = Date.now();
         }
         get read() {
           return (this.mode & this.readMode) === this.readMode;
@@ -2642,63 +2618,70 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         }
       },
   lookupPath(path, opts = {}) {
-        path = PATH_FS.resolve(path);
-  
         if (!path) return { path: '', node: null };
+        opts.follow_mount ??= true
   
-        var defaults = {
-          follow_mount: true,
-          recurse_count: 0
-        };
-        opts = Object.assign(defaults, opts)
-  
-        if (opts.recurse_count > 8) {  // max recursive lookup of 8
-          throw new FS.ErrnoError(32);
+        if (!PATH.isAbs(path)) {
+          path = FS.cwd() + '/' + path;
         }
   
-        // split the absolute path
-        var parts = path.split('/').filter((p) => !!p);
+        // limit max consecutive symlinks to 40 (SYMLOOP_MAX).
+        linkloop: for (var nlinks = 0; nlinks < 40; nlinks++) {
+          // split the absolute path
+          var parts = path.split('/').filter((p) => !!p && (p !== '.'));
   
-        // start at the root
-        var current = FS.root;
-        var current_path = '/';
+          // start at the root
+          var current = FS.root;
+          var current_path = '/';
   
-        for (var i = 0; i < parts.length; i++) {
-          var islast = (i === parts.length-1);
-          if (islast && opts.parent) {
-            // stop resolving
-            break;
-          }
+          for (var i = 0; i < parts.length; i++) {
+            var islast = (i === parts.length-1);
+            if (islast && opts.parent) {
+              // stop resolving
+              break;
+            }
   
-          current = FS.lookupNode(current, parts[i]);
-          current_path = PATH.join2(current_path, parts[i]);
+            if (parts[i] === '..') {
+              current_path = PATH.dirname(current_path);
+              current = current.parent;
+              continue;
+            }
   
-          // jump to the mount's root node if this is a mountpoint
-          if (FS.isMountpoint(current)) {
-            if (!islast || (islast && opts.follow_mount)) {
+            current_path = PATH.join2(current_path, parts[i]);
+            try {
+              current = FS.lookupNode(current, parts[i]);
+            } catch (e) {
+              // if noent_okay is true, suppress a ENOENT in the last component
+              // and return an object with an undefined node. This is needed for
+              // resolving symlinks in the path when creating a file.
+              if ((e?.errno === 44) && islast && opts.noent_okay) {
+                return { path: current_path };
+              }
+              throw e;
+            }
+  
+            // jump to the mount's root node if this is a mountpoint
+            if (FS.isMountpoint(current) && (!islast || opts.follow_mount)) {
               current = current.mounted.root;
             }
-          }
   
-          // by default, lookupPath will not follow a symlink if it is the final path component.
-          // setting opts.follow = true will override this behavior.
-          if (!islast || opts.follow) {
-            var count = 0;
-            while (FS.isLink(current.mode)) {
-              var link = FS.readlink(current_path);
-              current_path = PATH_FS.resolve(PATH.dirname(current_path), link);
-  
-              var lookup = FS.lookupPath(current_path, { recurse_count: opts.recurse_count + 1 });
-              current = lookup.node;
-  
-              if (count++ > 40) {  // limit max consecutive symlinks to 40 (SYMLOOP_MAX).
-                throw new FS.ErrnoError(32);
+            // by default, lookupPath will not follow a symlink if it is the final path component.
+            // setting opts.follow = true will override this behavior.
+            if (FS.isLink(current.mode) && (!islast || opts.follow)) {
+              if (!current.node_ops.readlink) {
+                throw new FS.ErrnoError(52);
               }
+              var link = current.node_ops.readlink(current);
+              if (!PATH.isAbs(link)) {
+                link = PATH.dirname(current_path) + '/' + link;
+              }
+              path = link + '/' + parts.slice(i + 1).join('/');
+              continue linkloop;
             }
           }
+          return { path: current_path, node: current };
         }
-  
-        return { path: current_path, node: current };
+        throw new FS.ErrnoError(32);
       },
   getPath(node) {
         var path;
@@ -2822,6 +2805,9 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         return 0;
       },
   mayCreate(dir, name) {
+        if (!FS.isDir(dir.mode)) {
+          return 54;
+        }
         try {
           var node = FS.lookupNode(dir, name);
           return 20;
@@ -3086,14 +3072,35 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         }
         return parent.node_ops.mknod(parent, name, mode, dev);
       },
-  create(path, mode) {
-        mode = mode !== undefined ? mode : 438 /* 0666 */;
+  statfs(path) {
+  
+        // NOTE: None of the defaults here are true. We're just returning safe and
+        //       sane values.
+        var rtn = {
+          bsize: 4096,
+          frsize: 4096,
+          blocks: 1e6,
+          bfree: 5e5,
+          bavail: 5e5,
+          files: FS.nextInode,
+          ffree: FS.nextInode - 1,
+          fsid: 42,
+          flags: 2,
+          namelen: 255,
+        };
+  
+        var parent = FS.lookupPath(path, {follow: true}).node;
+        if (parent?.node_ops.statfs) {
+          Object.assign(rtn, parent.node_ops.statfs(parent.mount.opts.root));
+        }
+        return rtn;
+      },
+  create(path, mode = 0o666) {
         mode &= 4095;
         mode |= 32768;
         return FS.mknod(path, mode, 0);
       },
-  mkdir(path, mode) {
-        mode = mode !== undefined ? mode : 511 /* 0777 */;
+  mkdir(path, mode = 0o777) {
         mode &= 511 | 512;
         mode |= 16384;
         return FS.mknod(path, mode, 0);
@@ -3114,7 +3121,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   mkdev(path, mode, dev) {
         if (typeof dev == 'undefined') {
           dev = mode;
-          mode = 438 /* 0666 */;
+          mode = 0o666;
         }
         mode |= 8192;
         return FS.mknod(path, mode, dev);
@@ -3212,7 +3219,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         // do the underlying fs rename
         try {
           old_dir.node_ops.rename(old_node, new_dir, new_name);
-          // update old node (we do this here to avoid each backend 
+          // update old node (we do this here to avoid each backend
           // needing to)
           old_node.parent = new_dir;
         } catch (e) {
@@ -3282,7 +3289,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         if (!link.node_ops.readlink) {
           throw new FS.ErrnoError(28);
         }
-        return PATH_FS.resolve(FS.getPath(link.parent), link.node_ops.readlink(link));
+        return link.node_ops.readlink(link);
       },
   stat(path, dontFollow) {
         var lookup = FS.lookupPath(path, { follow: !dontFollow });
@@ -3311,7 +3318,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         }
         node.node_ops.setattr(node, {
           mode: (mode & 4095) | (node.mode & ~4095),
-          timestamp: Date.now()
+          ctime: Date.now()
         });
       },
   lchmod(path, mode) {
@@ -3384,16 +3391,16 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         var lookup = FS.lookupPath(path, { follow: true });
         var node = lookup.node;
         node.node_ops.setattr(node, {
-          timestamp: Math.max(atime, mtime)
+          atime: atime,
+          mtime: mtime
         });
       },
-  open(path, flags, mode) {
+  open(path, flags, mode = 0o666) {
         if (path === "") {
           throw new FS.ErrnoError(44);
         }
         flags = typeof flags == 'string' ? FS_modeStringToFlags(flags) : flags;
         if ((flags & 64)) {
-          mode = typeof mode == 'undefined' ? 438 /* 0666 */ : mode;
           mode = (mode & 4095) | 32768;
         } else {
           mode = 0;
@@ -3402,15 +3409,15 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         if (typeof path == 'object') {
           node = path;
         } else {
-          path = PATH.normalize(path);
-          try {
-            var lookup = FS.lookupPath(path, {
-              follow: !(flags & 131072)
-            });
-            node = lookup.node;
-          } catch (e) {
-            // ignore
-          }
+          // noent_okay makes it so that if the final component of the path
+          // doesn't exist, lookupPath returns `node: undefined`. `path` will be
+          // updated to point to the target of all symlinks.
+          var lookup = FS.lookupPath(path, {
+            follow: !(flags & 131072),
+            noent_okay: true
+          });
+          node = lookup.node;
+          path = lookup.path;
         }
         // perhaps we need to create the node
         var created = false;
@@ -3716,7 +3723,10 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         FS.mkdir('/proc/self/fd');
         FS.mount({
           mount() {
-            var node = FS.createNode(proc_self, 'fd', 16384 | 511 /* 0777 */, 73);
+            var node = FS.createNode(proc_self, 'fd', 16895, 73);
+            node.stream_ops = {
+              llseek: MEMFS.stream_ops.llseek,
+            };
             node.node_ops = {
               lookup(parent, name) {
                 var fd = +name;
@@ -3725,9 +3735,15 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
                   parent: null,
                   mount: { mountpoint: 'fake' },
                   node_ops: { readlink: () => stream.path },
+                  id: fd + 1,
                 };
                 ret.parent = ret; // make it look like a simple root node
                 return ret;
+              },
+              readdir() {
+                return Array.from(FS.streams.entries())
+                  .filter(([k, v]) => v)
+                  .map(([k, v]) => k.toString());
               }
             };
             return node;
@@ -3916,7 +3932,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
               buffer[offset+i] = result;
             }
             if (bytesRead) {
-              stream.node.timestamp = Date.now();
+              stream.node.atime = Date.now();
             }
             return bytesRead;
           },
@@ -3929,7 +3945,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
               }
             }
             if (length) {
-              stream.node.timestamp = Date.now();
+              stream.node.mtime = stream.node.ctime = Date.now();
             }
             return i;
           }
@@ -4151,7 +4167,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           }
           return dir;
         }
-        return PATH.join2(dir, path);
+        return dir + '/' + path;
       },
   doStat(func, path, buf) {
         var stat = func(path);
@@ -4466,10 +4482,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   
       path = SYSCALLS.getStr(path);
       path = SYSCALLS.calculateAt(dirfd, path);
-      // remove a trailing slash, if one - /a/b/ has basename of '', but
-      // we want to create b in the context of this function
-      path = PATH.normalize(path);
-      if (path[path.length-1] === '/') path = path.substr(0, path.length-1);
       FS.mkdir(path, mode, 0);
       return 0;
     } catch (e) {
@@ -4589,12 +4601,8 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   }
   }
 
-  var __abort_js = () => {
+  var __abort_js = () =>
       abort('native code called abort()');
-    };
-
-  var nowIsMonotonic = 1;
-  var __emscripten_get_now_is_monotonic = () => nowIsMonotonic;
 
   var __emscripten_system = (command) => {
       if (ENVIRONMENT_IS_NODE) {
@@ -4806,6 +4814,37 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       }
     };
 
+  var _emscripten_get_now = () => performance.now();
+  
+  var _emscripten_date_now = () => Date.now();
+  
+  var nowIsMonotonic = 1;
+  
+  var checkWasiClock = (clock_id) => clock_id >= 0 && clock_id <= 3;
+  
+  function _clock_time_get(clk_id, ignored_precision, ptime) {
+    ignored_precision = bigintToI53Checked(ignored_precision);
+  
+    
+      if (!checkWasiClock(clk_id)) {
+        return 28;
+      }
+      var now;
+      // all wasi clocks but realtime are monotonic
+      if (clk_id === 0) {
+        now = _emscripten_date_now();
+      } else if (nowIsMonotonic) {
+        now = _emscripten_get_now();
+      } else {
+        return 52;
+      }
+      // "now" is in ms, and wasi times are in ns.
+      var nsec = Math.round(now * 1000 * 1000);
+      HEAP64[((ptime)>>3)] = BigInt(nsec);
+      return 0;
+    ;
+  }
+
   var readEmAsmArgsArray = [];
   var readEmAsmArgs = (sigPtr, buf) => {
       // Nobody should have mutated _readEmAsmArgsArray underneath us to be something else than an array.
@@ -4848,9 +4887,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       return runEmAsmFunction(code, sigPtr, argbuf);
     };
 
-  var _emscripten_date_now = () => Date.now();
-
-  var _emscripten_get_now = () => performance.now();
 
   var getHeapMax = () =>
       // Stay one Wasm page short of 4GB: while e.g. Chrome is able to allocate
@@ -4930,9 +4966,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   var ENV = {
   };
   
-  var getExecutableName = () => {
-      return thisProgram || './this.program';
-    };
+  var getExecutableName = () => thisProgram || './this.program';
   var getEnvStrings = () => {
       if (!getEnvStrings.strings) {
         // Default values.
@@ -5378,8 +5412,6 @@ var wasmImports = {
   /** @export */
   _abort_js: __abort_js,
   /** @export */
-  _emscripten_get_now_is_monotonic: __emscripten_get_now_is_monotonic,
-  /** @export */
   _emscripten_system: __emscripten_system,
   /** @export */
   _emscripten_throw_longjmp: __emscripten_throw_longjmp,
@@ -5392,13 +5424,13 @@ var wasmImports = {
   /** @export */
   _tzset_js: __tzset_js,
   /** @export */
+  clock_time_get: _clock_time_get,
+  /** @export */
   em_js_dict_init,
   /** @export */
   emscripten_asm_const_double: _emscripten_asm_const_double,
   /** @export */
   emscripten_date_now: _emscripten_date_now,
-  /** @export */
-  emscripten_get_now: _emscripten_get_now,
   /** @export */
   emscripten_resize_heap: _emscripten_resize_heap,
   /** @export */
@@ -5526,6 +5558,8 @@ var wasmImports = {
   /** @export */
   js_get_game_id,
   /** @export */
+  js_get_multiplayer_session_id,
+  /** @export */
   js_get_time_ms,
   /** @export */
   js_get_time_of_day,
@@ -5535,6 +5569,8 @@ var wasmImports = {
   js_hide_popup,
   /** @export */
   js_is_feature_supported,
+  /** @export */
+  js_is_multiplayer_session_id_needed,
   /** @export */
   js_new_extra_canvas,
   /** @export */
@@ -5564,7 +5600,8 @@ var wasmImports = {
   /** @export */
   random_get: _random_get
 };
-var wasmExports = createWasm();
+var wasmExports;
+createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
 var _get_game_count = Module['_get_game_count'] = createExportWrapper('get_game_count', 0);
 var _get_game_name = Module['_get_game_name'] = createExportWrapper('get_game_name', 1);
@@ -5781,17 +5818,6 @@ function invoke_iiiii(index,a1,a2,a3,a4) {
   }
 }
 
-function invoke_viiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7,a8,a9);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
 function invoke_jiii(index,a1,a2,a3) {
   var sp = stackSave();
   try {
@@ -5812,6 +5838,18 @@ function invoke_iij(index,a1,a2) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
     _setThrew(1, 0);
+  }
+}
+
+function invoke_ji(index,a1) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)(a1);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+    return 0n;
   }
 }
 
@@ -5849,22 +5887,10 @@ function invoke_iijii(index,a1,a2,a3,a4) {
   }
 }
 
-function invoke_ji(index,a1) {
+function invoke_viiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9) {
   var sp = stackSave();
   try {
-    return getWasmTableEntry(index)(a1);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-    return 0n;
-  }
-}
-
-function invoke_d(index) {
-  var sp = stackSave();
-  try {
-    return getWasmTableEntry(index)();
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7,a8,a9);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
@@ -5887,6 +5913,17 @@ function invoke_dd(index,a1) {
   var sp = stackSave();
   try {
     return getWasmTableEntry(index)(a1);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_d(index) {
+  var sp = stackSave();
+  try {
+    return getWasmTableEntry(index)();
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
@@ -6147,7 +6184,6 @@ var missingLibrarySymbols = [
   'jsStackTrace',
   'getCallstack',
   'convertPCtoSourceLocation',
-  'checkWasiClock',
   'wasiRightsToMuslOFlags',
   'wasiOFlagsToMuslOFlags',
   'safeSetTimeout',
@@ -6271,6 +6307,7 @@ var unexportedSymbols = [
   'UNWIND_CACHE',
   'ExitStatus',
   'getEnvStrings',
+  'checkWasiClock',
   'doReadv',
   'doWritev',
   'initRandomFill',
@@ -6472,7 +6509,10 @@ for (const prop of Object.keys(Module)) {
 }
 );
 })();
-if (typeof exports === 'object' && typeof module === 'object')
+if (typeof exports === 'object' && typeof module === 'object') {
   module.exports = createMyModule;
-else if (typeof define === 'function' && define['amd'])
+  // This default export looks redundant, but it allows TS to import this
+  // commonjs style module.
+  module.exports.default = createMyModule;
+} else if (typeof define === 'function' && define['amd'])
   define([], () => createMyModule);
