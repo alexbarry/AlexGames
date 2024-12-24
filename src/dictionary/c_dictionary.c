@@ -140,7 +140,7 @@ static bool get_next_word_from_frame(const struct word_dict_frame *frame, int *p
 		(*pos)++;
 	}
 	(*pos)++;
-	word_info_out->freq = frame->data + *pos;
+	word_info_out->freq = (word_freq_t*) frame->data + *pos;
 	//memcpy(freq, frame->data + *pos, sizeof(word_freq_t));
 	*pos += sizeof(word_freq_t);
 
@@ -178,6 +178,19 @@ int find_char(const char *str, size_t str_len, char c, int start_pos) {
 		}
 	}
 	return -1;
+}
+
+float str_and_len_to_float(const char *str, size_t len) {
+	#define MAX_LEN (128)
+	char tmp_str[MAX_LEN];
+	if (len-1 >= MAX_LEN) {
+		alex_log_err("[dict] ERROR: str %.*s (len %d) is larger than max buff len %d\n", len, str, len, MAX_LEN);
+		return 0;
+	}
+	memcpy(tmp_str, str, len);
+	tmp_str[len] = '\0';
+	return strtof(tmp_str, NULL);
+	
 }
 
 void *build_word_dict_from_file(const char *fname) {
@@ -259,7 +272,8 @@ void *build_word_dict_from_file(const char *fname) {
 #ifndef ALEXGAMES_WASM
 		// This line is really slow on WASM.
 		// Calling it 200k times seems to add ~500 ms on Firefox 119.0 for linux
-		word_freq_t freq = strtof(freq_str, freq_str + freq_str_len);
+		//word_freq_t freq = strtof(freq_str, freq_str + freq_str_len);
+		word_freq_t freq = str_and_len_to_float(freq_str, freq_str_len);
 #else
 		// TODO refactor this into a nice portable helper function
 		// don't put emscripten specific stuff here.
