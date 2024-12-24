@@ -270,9 +270,13 @@ struct game_api_callbacks {
 	size_t (*read_stored_data)(void *L, const char *key, uint8_t *value_out, size_t max_val_len);
 
 	/**
-	 * Gets a new session ID, usually when the player is starting a new game.
+	 * Gets a new **storage** session ID, usually when the player is starting a new game.
 	 * This lets the game code store the game's state in the database, and
 	 * any new moves in that game will be stored together.
+	 *
+	 * NOTE: these APIs use a session ID used to identify the game in storage,
+	 *       it has nothing to do with the multiplayer session ID, which is
+	 *       used to identify which players the server should connect the player with.
 	 */
 	int  (*get_new_session_id)(void);
 
@@ -336,6 +340,24 @@ struct game_api_callbacks {
 	void (*delete_extra_canvases)(void);
 
 	size_t (*get_user_colour_pref)(char *colour_pref_out, size_t max_colour_pref_out_len);
+
+	/**
+	 * Gets whether or not the multiplayer session ID is needed (on this client) or not.
+	 *
+	 * Currently the HTML implementation uses multiplayer session IDs (one server is used for many different clients),
+	 * but on wxWidgets for the socket server, the client actually hosts its own server, so there's no need to
+	 * support multiple sessions.
+	 *
+	 */
+	bool (*is_multiplayer_session_id_needed)();
+
+	/**
+	 * Gets the multiplayer session ID.
+	 *
+	 * This ID should be shown to the user so that they know that it must match their friend's session ID
+	 * so they can play together.
+	 */
+	size_t (*get_multiplayer_session_id)(char *multiplayer_session_id_out, size_t max_multiplayer_session_id_out_len);
 
 	bool (*is_feature_supported)(const char *feature_id, size_t feature_id_len);
 
