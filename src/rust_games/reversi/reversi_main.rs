@@ -3,15 +3,10 @@
 //
 // TODO:
 //  * fix deserialization errors in reversi in wasm? I'm not sure I see it anymore. Check the wxWidgets build, I saw it there too
-//  * add option button to start a new game
 //  * network multiplayer
-//  * make saved state smaller
-//  * add version to saved state
-//  * separate "session_id" from saved state struct
-//  * highlight last move
+//  * either allow player to pass when they can't move, or auto skip to next player
 //  * set_status_msg indicating whose turn is first
 
-use bincode;
 
 use crate::rust_game_api;
 
@@ -21,6 +16,7 @@ use crate::libs::ai::mcts;
 
 // TODO there must be a better way than this? This file is in the same directory
 use crate::reversi::reversi_core;
+use crate::reversi::reversi_serialize;
 use crate::reversi::reversi_core::{Pt, ReversiErr, CellState};
 
 /*
@@ -33,8 +29,16 @@ const BTN_ID_REDO: &str = "btn_redo";
 
 const GAME_OPTION_NEW_GAME: &str = "option_id_new_game";
 
+
+const score_text_size: i32 = 24;
+const score_padding: i32 = 4;
+const player_move_highlight_thickness: i32 = 4;
+const text_box_size_y: i32 = score_text_size + 2 * score_padding;
+const y_offset: i32 = text_box_size_y;
+
 pub struct AlexGamesReversi {
     game_state: reversi_core::State,
+	session_id: i32,
     //callbacks: *mut rust_game_api::CCallbacksPtr,
     //callbacks: &'a rust_game_api::CCallbacksPtr,
     callbacks: &'static rust_game_api::CCallbacksPtr,
@@ -45,21 +49,21 @@ pub struct AlexGamesReversi {
 fn draw_rect_outline(callbacks: &CCallbacksPtr, colour: &str, thickness: i32, y1: i32, x1: i32, y2: i32, x2: i32) {
 		callbacks.draw_line(&colour,
 		                    thickness,
-		                    y1, x1,
-		                    y1, x2);
+		                    y1, x1 - thickness/2,
+		                    y1, x2 + thickness/2);
 		callbacks.draw_line(&colour,
 		                    thickness,
-		                    y1, x1,
-		                    y2, x1);
+		                    y1 - thickness/2, x1,
+		                    y2 + thickness/2, x1);
 
 		callbacks.draw_line(&colour,
 		                    thickness,
-		                    y2, x2,
-		                    y2, x1);
+		                    y2, x2 + thickness/2,
+		                    y2, x1 - thickness/2);
 		callbacks.draw_line(&colour,
 		                    thickness,
-		                    y2, x2,
-		                    y1, x2);
+		                    y2 + thickness/2, x2,
+		                    y1 - thickness/2, x2);
 }
 
 impl AlexGamesReversi {
@@ -72,26 +76,28 @@ impl AlexGamesReversi {
 
     fn save_state(&self) {
         //let rust_game_api::GameState::ReversiGameState(reversi_state) = &handle.game_state;
-        let session_id = self.game_state.session_id;
+        let session_id = self.session_id;
         let serialized_state = self.get_state().expect("state is none?");
         self.callbacks.save_state(session_id, serialized_state);
     }
 
     fn load_state_offset(&mut self, offset: i32) {
         println!("load_state_offset({})", offset);
-        let session_id = self.game_state.session_id;
+        let session_id = self.session_id;
         let saved_state = self.callbacks.adjust_saved_state_offset(session_id, offset);
         let saved_state = saved_state.expect("saved state is none from adjust_saved_state_offset?");
         self.set_state(&saved_state, session_id);
     }
 
     fn set_state(&mut self, serialized_state: &Vec<u8>, session_id: i32) {
-        println!("set_state");
-        let game_state = bincode::deserialize::<reversi_core::State>(&serialized_state);
+        let serialized_state_len = serialized_state.len();
+        println!("set_state, serialized state len is {serialized_state_len}");
+        //let game_state = bincode::deserialize::<reversi_core::State>(&serialized_state);
+        let game_state = reversi_serialize::deserialize(&serialized_state);
         if let Ok(game_state) = game_state {
             println!("Received game state: {:#?}", game_state);
             self.game_state = game_state;
-            self.game_state.session_id = session_id;
+            self.session_id = session_id;
         } else {
             self.callbacks
                 .set_status_err(&format!("Error decoding state: {:?}", game_state));
@@ -121,26 +127,65 @@ impl AlexGamesReversi {
 
         //println!("reversi user_colour_pref is '{}'", user_colour_pref);
 
+		let score_bg_colour;
+
+        let cell_height = height / board_size_flt;
+        let cell_width = width / board_size_flt;
+		let piece_radius = (cell_height / 2.0 - 3.0) as i32;
+
+		let last_move_highlight_bg;
+		let last_move_highlight_outline;
+		let last_move_highlight_radius = piece_radius;
+		let last_move_highlight_thickness = 2;
+
+
         match user_colour_pref {
-            "dark" | "very_dark" => {
+            "dark" => {
+                bg_colour = "#003300";
+                bg_line_colour = "#000000";
+                piece_white_colour = "#bbbbbb";
+                piece_black_colour = "#000000";
+                piece_outline_colour = "#555555";
+				//score_bg_colour = "#222255";
+				score_bg_colour = "#003300";
+
+                highlight_fill = "#88880088";
+                highlight_outline = "#888800";
+
+				last_move_highlight_bg = "#88000088";
+				last_move_highlight_outline = "#880000";
+            }
+            "very_dark" => {
                 bg_colour = "#003300";
                 bg_line_colour = "#000000";
                 piece_white_colour = "#444444";
                 piece_black_colour = "#000000";
                 piece_outline_colour = "#333333";
+				//score_bg_colour = "#222255";
+				score_bg_colour = "#003300";
 
                 highlight_fill = "#88880088";
                 highlight_outline = "#888800";
+
+				last_move_highlight_bg = "#88000088";
+				last_move_highlight_outline = "#880000";
             }
+
             _ => {
+
                 bg_colour = "#008800";
                 bg_line_colour = "#000000";
                 piece_white_colour = "#dddddd";
                 piece_black_colour = "#333333";
                 piece_outline_colour = "#000000";
+				//score_bg_colour = "#888888";
+                score_bg_colour = "#008800";
 
                 highlight_fill = "#ffff0088";
                 highlight_outline = "#ffff00";
+
+				last_move_highlight_bg = "#88000088";
+				last_move_highlight_outline = "#ff0000";
             }
         }
 
@@ -157,10 +202,8 @@ impl AlexGamesReversi {
         //let reversi_state = &handle.game_state as reversi_core::State;
         //let reversi_state = handle.game_state;
 
-        let cell_height = height / board_size_flt;
-        let cell_width = width / board_size_flt;
 
-        callbacks.draw_rect(bg_colour, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        callbacks.draw_rect(bg_colour, y_offset, 0, y_offset + CANVAS_HEIGHT, CANVAS_HEIGHT);
 
         let line_size = 1;
         for y in 1..reversi_core::BOARD_SIZE {
@@ -169,9 +212,9 @@ impl AlexGamesReversi {
             callbacks.draw_line(
                 bg_line_colour,
                 line_size,
-                y * cell_height,
+                y_offset + y * cell_height,
                 0,
-                y * cell_height,
+                y_offset + y * cell_height,
                 CANVAS_WIDTH,
             );
         }
@@ -181,9 +224,9 @@ impl AlexGamesReversi {
             callbacks.draw_line(
                 bg_line_colour,
                 0,
-                line_size,
+                y_offset + line_size,
                 x * cell_width,
-                CANVAS_HEIGHT,
+                y_offset + CANVAS_HEIGHT,
                 x * cell_width,
             );
         }
@@ -197,7 +240,7 @@ impl AlexGamesReversi {
                 let y = y as f64;
                 let x = x as f64;
 
-                let y1 = (y / board_size_flt * height) as i32;
+                let y1 = y_offset + (y / board_size_flt * height) as i32;
                 let x1 = (x / board_size_flt * width) as i32;
                 let player_colour = match state.cell(Pt {
                     y: y as i32,
@@ -213,6 +256,15 @@ impl AlexGamesReversi {
                     let radius = (cell_height / 2.0 - 3.0) as i32;
 
                     callbacks.draw_circle(colour, piece_outline_colour, circ_y, circ_x, radius, 2);
+					// TODO figure out a more concise way to do this
+					if let Some(last_move) = state.last_move {
+						if last_move == pt {
+							callbacks.draw_circle(last_move_highlight_bg, last_move_highlight_outline,
+							                      circ_y, circ_x,
+							                      last_move_highlight_radius,
+							                      last_move_highlight_thickness);
+						}
+					}
                 } else if state.is_valid_move(self.game_state.player_turn, pt) {
                     let highlight_radius = 15;
                     let highlight_outline_width = 3;
@@ -230,16 +282,16 @@ impl AlexGamesReversi {
 
 		let score1 = self.game_state.score(CellState::PLAYER1);
 		let score2 = self.game_state.score(CellState::PLAYER2);
-		let score_bg_colour = "#88888888";
-		let score1_text_colour = "#ffffff88";
-		let score2_text_colour = "#00000088";
+		//let score1_text_colour = "#ffffff";
+		//let score2_text_colour = "#000000";
+		let score1_text_colour = piece_white_colour;
+		let score2_text_colour = piece_black_colour;
+		let player_move_highlight_bg_colour = "#00ffff66";
 
 		//let player_move_highlight_colour = "#ffff00";
-		let player_move_highlight_colour = "#00ffff88";
-		let player_move_highlight_thickness = 3;
+		let player_move_highlight_colour = "#00ffff";
+		let player_move_highlight_inner_offset = 0;
 		let score_text_width = 32;
-		let score_text_size = 24;
-		let score_padding = 4;
 
 		let score1_pos_x = CANVAS_WIDTH/4;
 		let score2_pos_x = CANVAS_WIDTH*3/4;
@@ -247,10 +299,23 @@ impl AlexGamesReversi {
 		let score1_rect_x1 = score1_pos_x - score_text_width/2 - score_padding;
 		let score1_rect_y2 = score_text_size + 2*score_padding;
 		let score1_rect_x2 = score1_pos_x + score_text_width/2 + score_padding;
+		/*
 		callbacks.draw_rect(score_bg_colour,
 		                    score1_rect_y1, score1_rect_x1,
 		                    score1_rect_y2, score1_rect_x2);
+		*/
+		callbacks.draw_circle(score_bg_colour, "#00000000", 
+		                      (score1_rect_y1 + score1_rect_y2)/2,
+		                      (score1_rect_x1 + score1_rect_x2)/2,
+		                      score_text_size/2 + 2*score_padding, 0);
 		if self.game_state.player_turn == CellState::PLAYER1 {
+			callbacks.draw_rect(player_move_highlight_bg_colour,
+			                    score1_rect_y1, score1_rect_x1,
+			                    score1_rect_y2, score1_rect_x2);
+			let score1_rect_y1 = score1_rect_y1 + player_move_highlight_inner_offset;
+			let score1_rect_x1 = score1_rect_x1 + player_move_highlight_inner_offset;
+			let score1_rect_y2 = score1_rect_y2 - player_move_highlight_inner_offset;
+			let score1_rect_x2 = score1_rect_x2 - player_move_highlight_inner_offset;
 			draw_rect_outline(callbacks,
 			                  &player_move_highlight_colour,
 			                  player_move_highlight_thickness,
@@ -262,13 +327,26 @@ impl AlexGamesReversi {
 		let score2_rect_y2 = score_text_size + 2*score_padding;
 		let score2_rect_x2 = score2_pos_x + score_text_width/2 + score_padding;
 
-		callbacks.draw_rect(score_bg_colour,
-		                    0,
-		                    score2_pos_x - score_text_width/2 - score_padding,
-		                    score_text_size + 2*score_padding,
-		                    score2_pos_x + score_text_width/2 + score_padding);
+		//callbacks.draw_rect(score_bg_colour,
+		//                    0,
+		//                    score2_pos_x - score_text_width/2 - score_padding,
+		//                    score_text_size + 2*score_padding,
+		//                    score2_pos_x + score_text_width/2 + score_padding);
+		callbacks.draw_circle(score_bg_colour, "#00000000", 
+		                      (score2_rect_y1 + score2_rect_y2)/2,
+		                      (score2_rect_x1 + score2_rect_x2)/2,
+		                      score_text_size/2 + 2*score_padding, 0);
+
 
 		if self.game_state.player_turn == CellState::PLAYER2 {
+			callbacks.draw_rect(player_move_highlight_bg_colour,
+			                    score2_rect_y1, score2_rect_x1,
+			                    score2_rect_y2, score2_rect_x2);
+
+			let score2_rect_y1 = score2_rect_y1 + player_move_highlight_inner_offset;
+			let score2_rect_x1 = score2_rect_x1 + player_move_highlight_inner_offset;
+			let score2_rect_y2 = score2_rect_y2 - player_move_highlight_inner_offset;
+			let score2_rect_x2 = score2_rect_x2 - player_move_highlight_inner_offset;
 			draw_rect_outline(callbacks,
 			                  &player_move_highlight_colour,
 			                  player_move_highlight_thickness,
@@ -291,7 +369,7 @@ impl AlexGamesReversi {
 		                    TextAlign::Middle);
 							
 
-        let session_id = state.session_id;
+        let session_id = self.session_id;
         callbacks.set_btn_enabled(
             BTN_ID_UNDO,
             callbacks.has_saved_state_offset(session_id, -1),
@@ -318,7 +396,7 @@ impl AlexGamesApi for AlexGamesReversi {
         let cell_height = CANVAS_HEIGHT / (reversi_core::BOARD_SIZE as i32);
         let cell_width = CANVAS_WIDTH / (reversi_core::BOARD_SIZE as i32);
 
-        let cell_y = pos_y / cell_height;
+        let cell_y = (pos_y - y_offset) / cell_height;
         let cell_x = pos_x / cell_width;
         //handle.draw_rect("#ff0000", pos_y, pos_x, pos_y + 20, pos_x + 20);
         //let rust_game_api::GameState::ReversiGameState(reversi_state) = &mut handle.game_state;
@@ -391,7 +469,7 @@ impl AlexGamesApi for AlexGamesReversi {
         } else if let Some(_session_id) = self.callbacks.get_last_session_id("reversi") {
             self.load_state_offset(0);
         } else {
-            self.game_state.session_id = self.callbacks.get_new_session_id();
+            self.session_id = self.callbacks.get_new_session_id();
         }
     }
 
@@ -402,15 +480,22 @@ impl AlexGamesApi for AlexGamesReversi {
         // TODO also add a version number and abstract it into a function
 
         // TODO check what endianness I used in Lua games
-        match bincode::serialize(&self.game_state) {
+        //match bincode::serialize(&self.game_state) {
+        match reversi_serialize::serialize(&self.game_state) {
             Ok(state_encoded) => {
+				let test_state_decoded = reversi_serialize::deserialize(&state_encoded).unwrap();
+				assert_eq!(self.game_state, test_state_decoded);
                 return Some(state_encoded);
-            }
-            Err(e) => {
+            },
+            //Err(e) => {
+            Err(..) => {
+				/*
                 // TODO use format macro and pass this more useful string to the API
                 println!("Error encoding state: {}", e);
                 self.callbacks.set_status_err("Error encoding state");
                 return None;
+				*/
+				return None;
             }
         }
     }
@@ -419,7 +504,7 @@ impl AlexGamesApi for AlexGamesReversi {
 		match option_id {
 			GAME_OPTION_NEW_GAME => {
 				self.game_state = reversi_core::State::new();
-				self.game_state.session_id = self.callbacks.get_new_session_id();
+				self.session_id = self.callbacks.get_new_session_id();
 				self.save_state();
 				self.draw_state();
 			},
@@ -438,6 +523,9 @@ impl AlexGamesApi for AlexGamesReversi {
         callbacks.set_btn_enabled(BTN_ID_UNDO, false);
         callbacks.set_btn_enabled(BTN_ID_REDO, false);
 
+		//callbacks.set_game_canvas_size(CANVAS_WIDTH, CANVAS_HEIGHT);
+		callbacks.set_game_canvas_size(480, 480+32);
+
 		callbacks.add_game_option(GAME_OPTION_NEW_GAME, &OptionInfo {
 			option_type: OptionType::Button,
 			label: "New Game".to_string(),
@@ -451,6 +539,7 @@ pub fn init_reversi(
 ) -> Box<dyn AlexGamesApi + 'static> {
     let mut reversi = AlexGamesReversi {
         game_state: reversi_core::State::new(),
+		session_id: 0,
         callbacks: callbacks,
 
 		ai_state: mcts::MCTSState::init(mcts::MCTSParams {

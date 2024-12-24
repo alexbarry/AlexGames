@@ -20,19 +20,18 @@ pub enum ReversiErr {
     InvalidMove,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub struct Pt {
     pub y: i32,
     pub x: i32,
 }
 
-#[derive(Copy, Clone, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct State {
-    board: [[CellState; BOARD_SIZE]; BOARD_SIZE],
+    pub board: [[CellState; BOARD_SIZE]; BOARD_SIZE],
     pub player_turn: CellState,
 
-    // TODO don't include in this state, make another state struct to include game metadata like this
-    pub session_id: i32,
+	pub last_move: Option<Pt>,
 }
 
 impl State {
@@ -41,8 +40,7 @@ impl State {
             board: [[CellState::EMPTY; BOARD_SIZE]; BOARD_SIZE],
             player_turn: CellState::PLAYER1,
 
-            // TODO remove
-            session_id: 0,
+			last_move: None,
         };
 
         state.board[3][3] = CellState::PLAYER1;
@@ -264,6 +262,7 @@ pub fn player_move(mut state: &mut State, player: CellState, pt: Pt) -> Result<(
 
     println!("player_move: setting cell {:?} to {:?}", pt, player);
     state.set_cell(pt, player);
+	state.last_move = Some(pt);
     state.player_turn = other_player(state.player_turn);
 
     Ok(())

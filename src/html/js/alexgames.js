@@ -642,6 +642,12 @@
 		document.title = TITLE_BASE + game_title;
 	}
 
+	function set_game_canvas_size(width, height) {
+		console.log(`set_game_canvas_size(width={width}, height={height})`);
+		canvas.width = width;
+		canvas.height = height;
+	}
+
 
 	function set_about_popup_visible(is_visible) {
 		const popup = document.getElementById("about_popup");

@@ -552,6 +552,10 @@ void js_set_game_handle(const void *L, const char *game_id) {
 	js_set_game_handle2(L, game_id);
 }
 
+EM_JS(void, js_set_game_canvas_size, (int width, int height), {
+	set_game_canvas_size(width, height);
+});
+
 EM_JS(void, js_get_game_id, (const void *L, char *game_id_out, size_t game_id_out_len_max), {
 	console.log("js_get_game_id called, returning gfx.game_id: ", gfx.game_id);
 	write_str(game_id_out, game_id_out_len_max, gfx.game_id);
@@ -586,6 +590,7 @@ static int db_helper_get_saved_state_offset(int session_id, int move_id_offset, 
 const struct game_api_callbacks api_callbacks = {
 	.set_game_handle = js_set_game_handle,
 	.get_game_id = js_get_game_id,
+	.set_canvas_size = js_set_game_canvas_size,
 	.draw_graphic = js_draw_graphic,
 	.draw_line = js_draw_line,
 	.draw_text = js_draw_text,

@@ -37,6 +37,7 @@
 
 static void wx_set_game_handle(const void *L, const char *game_id);
 static void wx_get_game_id(const void *L, char *game_id_out, size_t game_id_out_max_len);
+static void wx_set_game_canvas_size(int width, int height);
 static void wx_draw_graphic(const char *img_id,
                             int y, int x,
                             int width, int height,
@@ -166,6 +167,7 @@ static const struct img_info IMAGES_TABLE[] = {
 static const struct game_api_callbacks api = {
 	wx_set_game_handle,
 	wx_get_game_id,
+	wx_set_game_canvas_size,
 	wx_draw_graphic,
 	wx_draw_line,
 	wx_draw_text,
@@ -616,6 +618,12 @@ static void wx_set_game_handle(const void *L, const char *game_id) {
 
 static void wx_get_game_id(const void *L, char *game_id_out, size_t game_id_out_max_len) {
 	strncpy(game_id_out, g_game_id, game_id_out_max_len);
+}
+
+static void wx_set_game_canvas_size(int width, int height) {
+	// TODO need to resize wxBitmap. May need to delete the old one and replace with a new one,
+	// and use a unique_ptr instead of a class field variable
+	NOT_IMPL();
 }
 
 static void wx_draw_graphic(const char *img_id,
