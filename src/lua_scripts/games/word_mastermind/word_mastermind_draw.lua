@@ -50,12 +50,14 @@ local FG_COLOURS = {
 	[core.LETTER_UNKNOWN]         = CHAR_TEXT_COLOUR_UNKNOWN,
 }
 
-local TEXT_SIZE = 32
+--local TEXT_SIZE = 32
+local TEXT_SIZE = 48
 local padding = 10
 
 -- TODO this might be the first game that requires me to increase the height of the canvas
 local board_width = 480
-local board_height = 480
+--local board_height = 480
+local board_height = 600
 
 local text_start_x = math.floor((board_width - (TEXT_SIZE + padding) * 5)/2)
 local big_text_size_y = (TEXT_SIZE + padding) * 6 + 2*padding

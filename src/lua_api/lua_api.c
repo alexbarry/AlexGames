@@ -73,6 +73,7 @@ extern void alexgames_mutex_release();
 
 static const char *lua_tolstring_notnil(lua_State* L, int idx, size_t *len);
 
+static int lua_set_game_canvas_size(lua_State *L);
 static int lua_draw_graphic(lua_State *L);
 static int lua_draw_line(lua_State *L);
 static int lua_draw_text(lua_State *L);
@@ -145,6 +146,7 @@ static bool lua_dead = false;
 static const struct game_api_callbacks *api;
 
 static const struct luaL_Reg lua_c_api[] = {
+	{"set_game_canvas_size", lua_set_game_canvas_size },
 	{"draw_graphic",    lua_draw_graphic    },
 	{"draw_line",       lua_draw_line       },
 	{"draw_text",       lua_draw_text       },
@@ -1109,6 +1111,17 @@ const struct game_api lua_game_api = {
 	.lua_run_cmd = lua_run_cmd,
 };
 
+
+static int lua_set_game_canvas_size(lua_State *L) {
+	lua_Integer width  = lua_get_int_or_float(L, 1, "width");
+	lua_Integer height = lua_get_int_or_float(L, 2, "height");
+
+	GAME_LUA_TRACE("lua_set_game_canvas_size(width=%d, height=%d)\n", width, height);
+
+	api->set_canvas_size(width, height);
+
+	return 0;
+}
 
 // draw_graphic(string img_id, int y, int x, int width, int height
 static int lua_draw_graphic(lua_State *L) {

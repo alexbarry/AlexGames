@@ -19,6 +19,8 @@ local state = {
 }
 state.ui_state   = draw.init()
 
+alexgames.set_game_canvas_size(480,600)
+
 function update(dt_ms)
 	draw.draw_state(state.ui_state, state.game_state, dt_ms)
 end
