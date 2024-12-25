@@ -26,7 +26,7 @@ where
     }
 
     pub fn get_move(&self, game_state: GameState) -> Option<GameMove> {
-        let moves = (self.get_possible_moves)(game_state);
+        let moves = self.get_possible_moves(game_state);
         //println!("AI get_move called with state: {:?}", game_state);
         //println!("AI get_move found {} possible moves", moves.len());
 
