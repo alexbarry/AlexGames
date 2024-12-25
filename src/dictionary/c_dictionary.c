@@ -140,7 +140,8 @@ static bool get_next_word_from_frame(const struct word_dict_frame *frame, int *p
 		(*pos)++;
 	}
 	(*pos)++;
-	word_info_out->freq = (word_freq_t*) frame->data + *pos;
+	word_info_out->freq = (word_freq_t*) (frame->data + *pos);
+	//printf("found word %s, freq=%.1e\n", word_info_out->word, *word_info_out->freq);
 	//memcpy(freq, frame->data + *pos, sizeof(word_freq_t));
 	*pos += sizeof(word_freq_t);
 
