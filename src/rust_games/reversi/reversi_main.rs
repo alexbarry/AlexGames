@@ -33,6 +33,8 @@ pub struct AlexGamesReversi {
     callbacks: &'static rust_game_api::CCallbacksPtr,
 
 	ai_state: mcts::MCTSState<reversi_core::State, reversi_core::Pt>,
+
+	draw: reversi_draw::DrawState,
 }
 
 impl AlexGamesReversi {
@@ -74,7 +76,7 @@ impl AlexGamesReversi {
 	}
 
 	fn draw_state(&self) {
-		reversi_draw::draw_state(self.callbacks, &self.game_state, self.session_id);
+		self.draw.draw_state(self.callbacks, &self.game_state, self.session_id);
 	}
 }
 
@@ -92,7 +94,7 @@ impl AlexGamesApi for AlexGamesReversi {
     fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32) {
         println!("From rust, user clicked {} {}", pos_y, pos_x);
 
-		let cell = reversi_draw::draw_pos_to_cell(pos_y, pos_x);
+		let cell = self.draw.draw_pos_to_cell(pos_y, pos_x);
 		let cell_y = cell.y;
 		let cell_x = cell.x;
 
@@ -243,6 +245,7 @@ pub fn init_reversi(
 				game_state.get_valid_moves()
 			},
 		}),
+		draw: reversi_draw::DrawState::new(),
     };
     reversi.init(callbacks);
     Box::from(reversi)
