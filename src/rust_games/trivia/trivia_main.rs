@@ -8,7 +8,7 @@
 
 use crate::rust_game_api;
 use crate::rust_game_api::{
-    AlexGamesApi, CCallbacksPtr, MouseEvt, PopupInfo, PopupItem, PopupState,
+    AlexGamesApi, CCallbacksPtr, PopupInfo, PopupItem, PopupState,
 };
 
 use lazy_static::lazy_static;
@@ -194,7 +194,7 @@ impl AlexGamesTrivia {
 }
 
 impl AlexGamesApi for AlexGamesTrivia {
-    fn init(&mut self, callbacks: &rust_game_api::CCallbacksPtr) {
+    fn init(&mut self, _callbacks: &rust_game_api::CCallbacksPtr) {
         //self.state = State::new();
         //print_questions();
     }
@@ -203,13 +203,13 @@ impl AlexGamesApi for AlexGamesTrivia {
         self.callbacks
     }
 
-    fn start_game(&mut self, state: Option<(i32, Vec<u8>)>) {
+    fn start_game(&mut self, _state: Option<(i32, Vec<u8>)>) {
         self.show_question_popup();
     }
 
-    fn update(&mut self, dt_ms: i32) {}
-    fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32) {}
-    fn handle_btn_clicked(&mut self, btn_id: &str) {}
+    fn update(&mut self, _dt_ms: i32) {}
+    fn handle_user_clicked(&mut self, _pos_y: i32, _pos_x: i32) {}
+    fn handle_btn_clicked(&mut self, _btn_id: &str) {}
 
     fn handle_popup_btn_clicked(
         &mut self,

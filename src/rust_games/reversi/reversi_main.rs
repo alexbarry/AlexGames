@@ -10,7 +10,7 @@
 
 use crate::rust_game_api;
 
-use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, CANVAS_HEIGHT, CANVAS_WIDTH, TextAlign, OptionType, OptionInfo};
+use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, OptionType, OptionInfo};
 
 use crate::libs::ai::mcts;
 
@@ -117,7 +117,7 @@ impl AlexGamesApi for AlexGamesReversi {
 			// TODO only do this if AI multiplayer is chosen
 			// TODO maybe an animation would make it easier?
 			// Handle AI move
-			if player_turn == CellState::PLAYER1 {
+			if false && player_turn == CellState::PLAYER1 {
 				let ai_move = self.ai_state.get_move(self.game_state).expect("empty move from ai::get_move");
 				println!("AI move is: {:?}", ai_move);
 				let rc = reversi_core::player_move(
@@ -138,12 +138,12 @@ impl AlexGamesApi for AlexGamesReversi {
     fn handle_btn_clicked(&mut self, btn_id: &str) {
         println!("reversi handle_btn_clicked, btn_id=\"{}\"", btn_id);
         match btn_id {
-            BTN_ID_UNDO => {
+            reversi_draw::BTN_ID_UNDO => {
                 self.load_state_offset(-1);
-            }
-            BTN_ID_REDO => {
+            },
+            reversi_draw::BTN_ID_REDO => {
                 self.load_state_offset(1);
-            }
+            },
             _ => {
                 let err_msg = format!("Unhandled btn_id {}", btn_id);
                 println!("{}", err_msg);
@@ -197,9 +197,9 @@ impl AlexGamesApi for AlexGamesReversi {
         }
     }
 
-	fn handle_game_option_evt(&mut self, option_id: &str, option_type: OptionType, value: i32) {
+	fn handle_game_option_evt(&mut self, option_id: &str, _option_type: OptionType, _value: i32) {
 		match option_id {
-			GAME_OPTION_NEW_GAME => {
+			reversi_draw::GAME_OPTION_NEW_GAME => {
 				self.game_state = reversi_core::State::new();
 				self.session_id = self.callbacks.get_new_session_id();
 				self.save_state();

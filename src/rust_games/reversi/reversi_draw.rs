@@ -1,24 +1,27 @@
-use crate::rust_game_api;
+use crate::rust_game_api::{CCallbacksPtr, CANVAS_HEIGHT, CANVAS_WIDTH, TextAlign};
 
-use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, CANVAS_HEIGHT, CANVAS_WIDTH, TextAlign, OptionType, OptionInfo};
-
-// TODO there must be a better way than this? This file is in the same directory
 use crate::reversi::reversi_core;
-use crate::reversi::reversi_serialize;
-use crate::reversi::reversi_core::{Pt, ReversiErr, CellState};
+use crate::reversi::reversi_core::{Pt, CellState};
 
-const score_text_size: i32 = 24;
-const score_padding: i32 = 4;
-const player_move_highlight_thickness: i32 = 4;
-const text_box_size_y: i32 = score_text_size + 2 * score_padding;
-const y_offset: i32 = text_box_size_y;
+const SCORE_TEXT_SIZE: i32 = 24;
+const SCORE_PADDING: i32 = 4;
+const PLAYER_MOVE_HIGHLIGHT_THICKNESS: i32 = 4;
+const TEXT_BOX_SIZE_Y: i32 = SCORE_TEXT_SIZE + 2 * SCORE_PADDING;
+const Y_OFFSET: i32 = TEXT_BOX_SIZE_Y;
 
 pub const BTN_ID_UNDO: &str = "btn_undo";
 pub const BTN_ID_REDO: &str = "btn_redo";
 
 pub const GAME_OPTION_NEW_GAME: &str = "option_id_new_game";
 
+//struct AnimationKeyframe {
+//	prev_game_state: reversi_core::State,
+//	new_game_state: reversi_core::State,
+//	progress: f32,
+//}
+
 pub struct DrawState {
+//	animation_queue: Vec<AnimationKeyframe>,
 }
 
 fn draw_rect_outline(callbacks: &CCallbacksPtr, colour: &str, thickness: i32, y1: i32, x1: i32, y2: i32, x2: i32) {
@@ -42,6 +45,16 @@ fn draw_rect_outline(callbacks: &CCallbacksPtr, colour: &str, thickness: i32, y1
 }
 
 impl DrawState {
+/*
+	pub fn add_animation(&self, _old_state: &reversi_core::State, _new_state: &reversi_core::State) {
+		
+	}
+
+	pub fn update_state(&self, _callbacks: &CCallbacksPtr, _dt_ms: i32) {
+		// TODO
+	}
+*/
+
 	pub fn draw_state(&self, callbacks: &CCallbacksPtr, state: &reversi_core::State, session_id: i32) {
 	   //let callbacks = self.callbacks;
 	   //let state = &self.game_state;
@@ -142,7 +155,7 @@ impl DrawState {
 	   //let reversi_state = handle.game_state;
 	
 	
-	   callbacks.draw_rect(bg_colour, y_offset, 0, y_offset + CANVAS_HEIGHT, CANVAS_HEIGHT);
+	   callbacks.draw_rect(bg_colour, Y_OFFSET, 0, Y_OFFSET + CANVAS_HEIGHT, CANVAS_HEIGHT);
 	
 	   let line_size = 1;
 	   for y in 1..reversi_core::BOARD_SIZE {
@@ -151,9 +164,9 @@ impl DrawState {
 	       callbacks.draw_line(
 	           bg_line_colour,
 	           line_size,
-	           y_offset + y * cell_height,
+	           Y_OFFSET + y * cell_height,
 	           0,
-	           y_offset + y * cell_height,
+	           Y_OFFSET + y * cell_height,
 	           CANVAS_WIDTH,
 	       );
 	   }
@@ -163,9 +176,9 @@ impl DrawState {
 	       callbacks.draw_line(
 	           bg_line_colour,
 	           0,
-	           y_offset + line_size,
+	           Y_OFFSET + line_size,
 	           x * cell_width,
-	           y_offset + CANVAS_HEIGHT,
+	           Y_OFFSET + CANVAS_HEIGHT,
 	           x * cell_width,
 	       );
 	   }
@@ -179,7 +192,7 @@ impl DrawState {
 	           let y = y as f64;
 	           let x = x as f64;
 	
-	           let y1 = y_offset + (y / board_size_flt * height) as i32;
+	           let y1 = Y_OFFSET + (y / board_size_flt * height) as i32;
 	           let x1 = (x / board_size_flt * width) as i32;
 	           let player_colour = match state.cell(Pt {
 	               y: y as i32,
@@ -235,9 +248,9 @@ impl DrawState {
 	   let score1_pos_x = CANVAS_WIDTH/4;
 	   let score2_pos_x = CANVAS_WIDTH*3/4;
 	   let score1_rect_y1 = 0;
-	   let score1_rect_x1 = score1_pos_x - score_text_width/2 - score_padding;
-	   let score1_rect_y2 = score_text_size + 2*score_padding;
-	   let score1_rect_x2 = score1_pos_x + score_text_width/2 + score_padding;
+	   let score1_rect_x1 = score1_pos_x - score_text_width/2 - SCORE_PADDING;
+	   let score1_rect_y2 = SCORE_TEXT_SIZE + 2*SCORE_PADDING;
+	   let score1_rect_x2 = score1_pos_x + score_text_width/2 + SCORE_PADDING;
 	   /*
 	   callbacks.draw_rect(score_bg_colour,
 	                       score1_rect_y1, score1_rect_x1,
@@ -246,7 +259,7 @@ impl DrawState {
 	   callbacks.draw_circle(score_bg_colour, "#00000000", 
 	                         (score1_rect_y1 + score1_rect_y2)/2,
 	                         (score1_rect_x1 + score1_rect_x2)/2,
-	                         score_text_size/2 + 2*score_padding, 0);
+	                         SCORE_TEXT_SIZE/2 + 2*SCORE_PADDING, 0);
 	   if state.player_turn == CellState::PLAYER1 {
 	   	callbacks.draw_rect(player_move_highlight_bg_colour,
 	   	                    score1_rect_y1, score1_rect_x1,
@@ -257,24 +270,24 @@ impl DrawState {
 	   	let score1_rect_x2 = score1_rect_x2 - player_move_highlight_inner_offset;
 	   	draw_rect_outline(callbacks,
 	   	                  &player_move_highlight_colour,
-	   	                  player_move_highlight_thickness,
+	   	                  PLAYER_MOVE_HIGHLIGHT_THICKNESS,
 	   	                  score1_rect_y1, score1_rect_x1,
 	   	                  score1_rect_y2, score1_rect_x2);
 	   }
 	   let score2_rect_y1 = 0;
-	   let score2_rect_x1 = score2_pos_x - score_text_width/2 - score_padding;
-	   let score2_rect_y2 = score_text_size + 2*score_padding;
-	   let score2_rect_x2 = score2_pos_x + score_text_width/2 + score_padding;
+	   let score2_rect_x1 = score2_pos_x - score_text_width/2 - SCORE_PADDING;
+	   let score2_rect_y2 = SCORE_TEXT_SIZE + 2*SCORE_PADDING;
+	   let score2_rect_x2 = score2_pos_x + score_text_width/2 + SCORE_PADDING;
 	
 	   //callbacks.draw_rect(score_bg_colour,
 	   //                    0,
-	   //                    score2_pos_x - score_text_width/2 - score_padding,
-	   //                    score_text_size + 2*score_padding,
-	   //                    score2_pos_x + score_text_width/2 + score_padding);
+	   //                    score2_pos_x - score_text_width/2 - SCORE_PADDING,
+	   //                    SCORE_TEXT_SIZE + 2*SCORE_PADDING,
+	   //                    score2_pos_x + score_text_width/2 + SCORE_PADDING);
 	   callbacks.draw_circle(score_bg_colour, "#00000000", 
 	                         (score2_rect_y1 + score2_rect_y2)/2,
 	                         (score2_rect_x1 + score2_rect_x2)/2,
-	                         score_text_size/2 + 2*score_padding, 0);
+	                         SCORE_TEXT_SIZE/2 + 2*SCORE_PADDING, 0);
 	
 	
 	   if state.player_turn == CellState::PLAYER2 {
@@ -288,7 +301,7 @@ impl DrawState {
 	   	let score2_rect_x2 = score2_rect_x2 - player_move_highlight_inner_offset;
 	   	draw_rect_outline(callbacks,
 	   	                  &player_move_highlight_colour,
-	   	                  player_move_highlight_thickness,
+	   	                  PLAYER_MOVE_HIGHLIGHT_THICKNESS,
 	   	                  score2_rect_y1, score2_rect_x1,
 	   	                  score2_rect_y2, score2_rect_x2);
 	   }
@@ -296,15 +309,15 @@ impl DrawState {
 	
 	   callbacks.draw_text(&format!("{}", score1),
 	                       score1_text_colour,
-	                       score_text_size + score_padding,
+	                       SCORE_TEXT_SIZE + SCORE_PADDING,
 	                       score1_pos_x,
-	                       score_text_size,
+	                       SCORE_TEXT_SIZE,
 	                       TextAlign::Middle);
 	   callbacks.draw_text(&format!("{}", score2),
 	                       score2_text_colour,
-	                       score_text_size + score_padding,
+	                       SCORE_TEXT_SIZE + SCORE_PADDING,
 	                       score2_pos_x,
-	                       score_text_size,
+	                       SCORE_TEXT_SIZE,
 	                       TextAlign::Middle);
 	   					
 	
@@ -322,7 +335,7 @@ impl DrawState {
         let cell_height = CANVAS_HEIGHT / (reversi_core::BOARD_SIZE as i32);
         let cell_width = CANVAS_WIDTH / (reversi_core::BOARD_SIZE as i32);
 
-        let cell_y = (pos_y - y_offset) / cell_height;
+        let cell_y = (pos_y - Y_OFFSET) / cell_height;
         let cell_x = pos_x / cell_width;
         //handle.draw_rect("#ff0000", pos_y, pos_x, pos_y + 20, pos_x + 20);
         //let rust_game_api::GameState::ReversiGameState(reversi_state) = &mut handle.game_state;
@@ -333,6 +346,7 @@ impl DrawState {
 
 	pub fn new() -> DrawState {
 		DrawState {
+			//animation_queue: Vec::new(),
 		}
 	}
 }

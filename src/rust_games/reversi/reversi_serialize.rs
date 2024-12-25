@@ -1,8 +1,8 @@
 
-use bincode;
+//use bincode;
 
 use crate::reversi::reversi_core;
-use crate::reversi::reversi_core::{Pt, ReversiErr, CellState, State, BOARD_SIZE};
+use crate::reversi::reversi_core::{Pt, CellState, State, BOARD_SIZE};
 
 use serde::{Deserialize, Serialize};
 
@@ -113,10 +113,10 @@ pub fn serialize(state: &State) -> Result<Vec<u8>, ()> {
 	Ok(serialized)
 }
 
-const sizeof_u32: usize = 4;
+const SIZEOF_U32: usize = 4;
 const_assert!(BOARD_SIZE == 8);
 // board, player turn, and session ID
-const_assert!(sizeof_u32*(BOARD_SIZE*BOARD_SIZE + 2) == 264);
+const_assert!(SIZEOF_U32*(BOARD_SIZE*BOARD_SIZE + 2) == 264);
 
 //#[derive(Serialize, Deserialize, Debug)]
 //pub struct State {
@@ -134,7 +134,7 @@ fn deserialize_v1(serialized_state: &Vec<u8>) -> Result<State, ()> {
 
 	for y in 0..BOARD_SIZE {
 		for x in 0..BOARD_SIZE {
-			let i = (y * BOARD_SIZE + x) * sizeof_u32;
+			let i = (y * BOARD_SIZE + x) * SIZEOF_U32;
 			assert_eq!(serialized_state[i+1], 0, "Expected byte {} to be zero, was {}", i+1, serialized_state[i+1]);
 			assert_eq!(serialized_state[i+2], 0, "Expected byte {} to be zero, was {}", i+2, serialized_state[i+2]);
 			assert_eq!(serialized_state[i+3], 0, "Expected byte {} to be zero, was {}", i+3, serialized_state[i+3]);
@@ -149,7 +149,7 @@ fn deserialize_v1(serialized_state: &Vec<u8>) -> Result<State, ()> {
 		}
 	}
 
-	let offset = sizeof_u32 * BOARD_SIZE * BOARD_SIZE;
+	let offset = SIZEOF_U32 * BOARD_SIZE * BOARD_SIZE;
 
 	state.player_turn = match serialized_state[offset] {
 		1 => CellState::PLAYER1,
@@ -160,14 +160,14 @@ fn deserialize_v1(serialized_state: &Vec<u8>) -> Result<State, ()> {
 	assert_eq!(serialized_state[offset+2], 0, "Expected byte {} to be zero, was {}", offset+2, serialized_state[offset+2]);
 	assert_eq!(serialized_state[offset+3], 0, "Expected byte {} to be zero, was {}", offset+3, serialized_state[offset+3]);
 
-	let offset = offset + sizeof_u32;
-	let session_id_bytes = &serialized_state[offset..(offset + sizeof_u32)];
+	let offset = offset + SIZEOF_U32;
+	let session_id_bytes = &serialized_state[offset..(offset + SIZEOF_U32)];
 	let session_id_bytes: [u8; 4] = session_id_bytes.try_into().unwrap();
 	let session_id = i32::from_le_bytes(session_id_bytes);
 
 	println!("read session_id {}", session_id);
 
-	let offset = offset + sizeof_u32;
+	let offset = offset + SIZEOF_U32;
 	assert_eq!(offset, 264, "Expected to have parsed all 264 bytes but offset is {}", offset);
 
 	Ok(state)

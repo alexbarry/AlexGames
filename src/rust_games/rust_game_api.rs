@@ -673,11 +673,11 @@ pub trait AlexGamesApi {
         );
     }
 
-	fn handle_popup_btn_clicked(&mut self, popup_id: &str, btn_idx: i32, _popup_state: &PopupState) {
+	fn handle_popup_btn_clicked(&mut self, _popup_id: &str, _btn_idx: i32, _popup_state: &PopupState) {
 		println!("handle_popup_btn_clicked unimplemented");
 	}
 
-	fn handle_game_option_evt(&mut self, option_id: &str, option_type: OptionType, value: i32) {
+	fn handle_game_option_evt(&mut self, option_id: &str, option_type: OptionType, _value: i32) {
 		println!("handle_game_option_evt unimplemented, option_id={option_id}, option_type={option_type:#?}");
 	}
 
