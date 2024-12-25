@@ -24,6 +24,9 @@ impl rust_game_api::GameState for reversi_core::State {
 }
 */
 
+const FPS: i32 = 60;
+const UPDATE_TIME_MS: i32 = 1000 / FPS;
+
 pub struct AlexGamesReversi {
     game_state: reversi_core::State,
     session_id: i32,
@@ -85,7 +88,8 @@ impl AlexGamesApi for AlexGamesReversi {
         self.callbacks
     }
 
-    fn update(&mut self, _dt_ms: i32) {
+    fn update(&mut self, dt_ms: i32) {
+        self.draw.update_state(self.callbacks, dt_ms);
         //println!("rust: update called");
         //draw_state(&handle.game_state as reversi_core::State);
         self.draw_state();
@@ -100,6 +104,7 @@ impl AlexGamesApi for AlexGamesReversi {
 
         let player_turn = self.game_state.player_turn;
         println!("User clicked cell {cell_y} {cell_x}, player_turn={player_turn:?}");
+        let old_game_state = self.game_state.clone();
         let rc = reversi_core::player_move(
             &mut self.game_state,
             player_turn,
@@ -113,11 +118,15 @@ impl AlexGamesApi for AlexGamesReversi {
             let msg = AlexGamesReversi::rc_to_err_msg(err);
             self.callbacks.set_status_err(msg);
         } else {
+            self.draw
+                .add_animation(&old_game_state, &self.game_state, 500);
             // TODO need a delay between player's move and AI move
             // TODO only do this if AI multiplayer is chosen
             // TODO maybe an animation would make it easier?
             // Handle AI move
             if false && player_turn == CellState::PLAYER1 {
+                self.draw.add_thinking_animation(&self.game_state, 1000);
+                let old_game_state = self.game_state.clone();
                 let ai_move = self
                     .ai_state
                     .get_move(self.game_state)
@@ -128,6 +137,8 @@ impl AlexGamesApi for AlexGamesReversi {
                 if let Err(err) = rc {
                     panic!("Error from AI move: {:?}", err);
                 }
+                self.draw
+                    .add_animation(&old_game_state, &self.game_state, 500);
             }
 
             self.save_state();
@@ -230,6 +241,8 @@ impl AlexGamesApi for AlexGamesReversi {
                 value: 0,
             },
         );
+
+        callbacks.update_timer_ms(UPDATE_TIME_MS);
     }
 }
 

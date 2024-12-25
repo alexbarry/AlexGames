@@ -14,14 +14,27 @@ pub const BTN_ID_REDO: &str = "btn_redo";
 
 pub const GAME_OPTION_NEW_GAME: &str = "option_id_new_game";
 
-//struct AnimationKeyframe {
-//	prev_game_state: reversi_core::State,
-//	new_game_state: reversi_core::State,
-//	progress: f32,
-//}
+struct AnimationKeyframe {
+    prev_game_state: reversi_core::State,
+    new_game_state: reversi_core::State,
+    duration_ms: i32,
+    time_elapsed_ms: i32,
+
+    is_thinking: bool,
+}
+
+impl AnimationKeyframe {
+    fn progress(&self) -> f32 {
+        (self.time_elapsed_ms as f32) / (self.duration_ms as f32)
+    }
+}
 
 pub struct DrawState {
-    //	animation_queue: Vec<AnimationKeyframe>,
+    animation_queue: Vec<AnimationKeyframe>,
+}
+
+fn smoothstep(x: f64) -> f64 {
+    3.0 * x * x - 2.0 * x * x
 }
 
 fn draw_rect_outline(
@@ -69,15 +82,45 @@ fn draw_rect_outline(
 }
 
 impl DrawState {
-    /*
-        pub fn add_animation(&self, _old_state: &reversi_core::State, _new_state: &reversi_core::State) {
+    pub fn add_animation(
+        &mut self,
+        old_state: &reversi_core::State,
+        new_state: &reversi_core::State,
+        duration_ms: i32,
+    ) {
+        self.animation_queue.push(AnimationKeyframe {
+            prev_game_state: old_state.clone(),
+            new_game_state: new_state.clone(),
+            duration_ms: duration_ms,
+            time_elapsed_ms: 0,
+            is_thinking: false,
+        });
+    }
 
-        }
+    pub fn add_thinking_animation(&mut self, state: &reversi_core::State, duration_ms: i32) {
+        self.animation_queue.push(AnimationKeyframe {
+            prev_game_state: state.clone(),
+            new_game_state: state.clone(),
+            duration_ms: duration_ms,
+            time_elapsed_ms: 0,
+            is_thinking: true,
+        });
+    }
 
-        pub fn update_state(&self, _callbacks: &CCallbacksPtr, _dt_ms: i32) {
-            // TODO
+    pub fn update_state(&mut self, _callbacks: &CCallbacksPtr, dt_ms: i32) {
+        let mut dt_ms = dt_ms;
+        while self.animation_queue.len() > 0 && dt_ms > 0 {
+            let anim = &mut self.animation_queue[0];
+            anim.time_elapsed_ms += dt_ms;
+
+            if anim.time_elapsed_ms >= anim.duration_ms {
+                dt_ms -= anim.time_elapsed_ms - anim.duration_ms;
+                self.animation_queue.remove(0);
+            } else {
+                break;
+            }
         }
-    */
+    }
 
     pub fn draw_state(
         &self,
@@ -85,6 +128,19 @@ impl DrawState {
         state: &reversi_core::State,
         session_id: i32,
     ) {
+        let (prev_state, new_state, progress, is_animating, is_thinking) =
+            if self.animation_queue.len() > 0 {
+                let anim = &self.animation_queue[0];
+                (
+                    &anim.prev_game_state,
+                    &anim.new_game_state,
+                    anim.progress(),
+                    true,
+                    anim.is_thinking,
+                )
+            } else {
+                (state, state, 0.0, false, false)
+            };
         //let callbacks = self.callbacks;
         //let state = &self.game_state;
         callbacks.draw_clear();
@@ -226,10 +282,14 @@ impl DrawState {
 
                 let y1 = Y_OFFSET + (y / board_size_flt * height) as i32;
                 let x1 = (x / board_size_flt * width) as i32;
-                let player_colour = match state.cell(Pt {
-                    y: y as i32,
-                    x: x as i32,
-                }) {
+
+                let state = if progress < 0.5 {
+                    prev_state
+                } else {
+                    new_state
+                };
+
+                let player_colour = match state.cell(pt) {
                     reversi_core::CellState::PLAYER1 => Some(piece_white_colour),
                     reversi_core::CellState::PLAYER2 => Some(piece_black_colour),
                     _ => None,
@@ -237,7 +297,18 @@ impl DrawState {
                 let circ_y = (y1 as f64 + cell_height / 2.0) as i32;
                 let circ_x = (x1 as f64 + cell_height / 2.0) as i32;
                 if let Some(colour) = player_colour {
+                    let progress = progress as f64;
                     let radius = (cell_height / 2.0 - 3.0) as i32;
+                    let radius_frac = if prev_state.cell(pt) == new_state.cell(pt) {
+                        1.0 as f64
+                    } else if progress < 0.5 {
+                        (0.5 - progress) / 0.5
+                    } else {
+                        (progress - 0.5) / 0.5
+                    };
+                    //let radius = smoothstep(radius) as i32;
+                    let radius_frac = smoothstep(radius_frac);
+                    let radius = ((radius as f64) * radius_frac) as i32;
 
                     callbacks.draw_circle(colour, piece_outline_colour, circ_y, circ_x, radius, 2);
                     // TODO figure out a more concise way to do this
@@ -253,7 +324,7 @@ impl DrawState {
                             );
                         }
                     }
-                } else if state.is_valid_move(state.player_turn, pt) {
+                } else if !is_animating && state.is_valid_move(state.player_turn, pt) {
                     let highlight_radius = 15;
                     let highlight_outline_width = 3;
                     callbacks.draw_circle(
@@ -382,6 +453,18 @@ impl DrawState {
             TextAlign::Middle,
         );
 
+        const THINKING_TEXT_SIZE: i32 = 24;
+        if is_thinking {
+            callbacks.draw_text(
+                "Thinking...",
+                "#888888",
+                THINKING_TEXT_SIZE + SCORE_PADDING,
+                CANVAS_WIDTH / 2,
+                THINKING_TEXT_SIZE,
+                TextAlign::Middle,
+            );
+        }
+
         callbacks.set_btn_enabled(
             BTN_ID_UNDO,
             callbacks.has_saved_state_offset(session_id, -1),
@@ -409,7 +492,7 @@ impl DrawState {
 
     pub fn new() -> DrawState {
         DrawState {
-			//animation_queue: Vec::new(),
-		}
+            animation_queue: Vec::new(),
+        }
     }
 }
