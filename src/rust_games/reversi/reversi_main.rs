@@ -178,7 +178,9 @@ impl AlexGamesApi for AlexGamesReversi {
         if let Some(session_id_and_state) = session_id_and_state {
             let (session_id, state_serialized) = session_id_and_state;
             self.set_state(&state_serialized, session_id);
-        } else if let Some(_session_id) = self.callbacks.get_last_session_id("reversi") {
+        } else if let Some(session_id) = self.callbacks.get_last_session_id("reversi") {
+            println!("Loading saved state for last session ID {}", session_id);
+            self.session_id = session_id;
             self.load_state_offset(0);
         } else {
             self.session_id = self.callbacks.get_new_session_id();
