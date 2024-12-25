@@ -7,9 +7,7 @@
 //   * saved state?
 
 use crate::rust_game_api;
-use crate::rust_game_api::{
-    AlexGamesApi, CCallbacksPtr, PopupInfo, PopupItem, PopupState,
-};
+use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, PopupInfo, PopupItem, PopupState};
 
 use lazy_static::lazy_static;
 

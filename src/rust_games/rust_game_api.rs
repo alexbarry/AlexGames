@@ -44,34 +44,42 @@ pub struct TouchInfo {
 }
 
 pub enum PopupItem<'a> {
-	Message { text: &'a str },
-	Button { id: i32, text: &'a str },
-	Dropdown { id: &'a str, label: &'a str , options: Vec<&'a str> },
+    Message {
+        text: &'a str,
+    },
+    Button {
+        id: i32,
+        text: &'a str,
+    },
+    Dropdown {
+        id: &'a str,
+        label: &'a str,
+        options: Vec<&'a str>,
+    },
 }
 
 pub struct PopupInfo<'a> {
-	pub title: &'a str,
-	pub items: Vec<&'a PopupItem<'a>>,
+    pub title: &'a str,
+    pub items: Vec<&'a PopupItem<'a>>,
 }
 
 pub struct PopupState {
-	// TODO
+    // TODO
 }
 
 #[derive(Copy, Clone, Debug)]
 pub enum OptionType {
-	Button = 1,
-	Toggle = 2,
+    Button = 1,
+    Toggle = 2,
 }
 
 pub struct OptionInfo {
-	pub option_type: OptionType,
-	pub label: String,
-	
-	/* only for toggle */
-	pub value: i32,
-}
+    pub option_type: OptionType,
+    pub label: String,
 
+    /* only for toggle */
+    pub value: i32,
+}
 
 #[repr(C)]
 pub struct CCallbacksPtr {
@@ -126,7 +134,8 @@ pub struct CCallbacksPtr {
     pub set_status_msg: Option<unsafe extern "C" fn(*const c_char, size_t)>,
     pub set_status_err: Option<unsafe extern "C" fn(*const c_char, size_t)>,
 
-    pub show_popup: Option<unsafe extern "C" fn(*const c_void, *const c_char, size_t, *const c_void)>,
+    pub show_popup:
+        Option<unsafe extern "C" fn(*const c_void, *const c_char, size_t, *const c_void)>,
 
     pub prompt_string: Option<unsafe extern "C" fn(*const c_char, size_t, *const c_char, size_t)>,
 
@@ -164,62 +173,59 @@ pub struct CCallbacksPtr {
     pub destroy_all: Option<unsafe extern "C" fn()>,
 }
 
-
 // TODO use bindgen or at least replace all of these hardcoded sizes
 #[repr(C)]
 #[derive(Copy, Clone)]
 struct CPopupInfo {
-	title: [c_char; 128],
-	item_count: i32,
-	items: [CPopupItem; 64],
+    title: [c_char; 128],
+    item_count: i32,
+    items: [CPopupItem; 64],
 }
-
 
 #[repr(C)]
 #[derive(Copy, Clone)]
 struct CPopupItem {
-	item_type: i32,
-	info: CPopupItemInfo,
+    item_type: i32,
+    info: CPopupItemInfo,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone)]
 union CPopupItemInfo {
-	msg: CPopupItemInfoMsg,
-	btn: CPopupItemInfoBtn,
-	dropdown: CPopupItemInfoDropdown,
+    msg: CPopupItemInfoMsg,
+    btn: CPopupItemInfoBtn,
+    dropdown: CPopupItemInfoDropdown,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 struct CPopupItemInfoMsg {
-	msg: [c_char; 4096],
+    msg: [c_char; 4096],
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 struct CPopupItemInfoBtn {
-	id: i32,
-	text: [c_char; 256],
+    id: i32,
+    text: [c_char; 256],
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 struct CPopupItemInfoDropdown {
-	id: i32,
-	label: [c_char; 256],
-	option_count: i32,
-	options: [[c_char; 128]; 16],
+    id: i32,
+    label: [c_char; 256],
+    option_count: i32,
+    options: [[c_char; 128]; 16],
 }
 
 #[repr(C)]
 #[derive(Copy, Clone)]
 struct COptionInfo {
-	option_type: i32,
-	label: [c_char; 256],
-	value: i32,
+    option_type: i32,
+    label: [c_char; 256],
+    value: i32,
 }
-
 
 fn copy_str_to_c_array(src: &str, dest: &mut [c_char]) {
     let c_str = CString::new(src).unwrap();
@@ -310,15 +316,15 @@ impl CCallbacksPtr {
         }
     }
 
-	pub fn set_game_canvas_size(&self, width: i32, height: i32) {
-		if let Some(set_game_canvas_size) = self.set_game_canvas_size {
-			unsafe {
-				(set_game_canvas_size)(width, height);
-			}
-		} else {
-			println!("set_game_canvas_size is null");
-		}
-	}
+    pub fn set_game_canvas_size(&self, width: i32, height: i32) {
+        if let Some(set_game_canvas_size) = self.set_game_canvas_size {
+            unsafe {
+                (set_game_canvas_size)(width, height);
+            }
+        } else {
+            println!("set_game_canvas_size is null");
+        }
+    }
 
     pub fn draw_line(&self, line_colour: &str, line_size: i32, y1: i32, x1: i32, y2: i32, x2: i32) {
         let line_colour_cstr = CString::new(line_colour).expect("CString::new failed");
@@ -436,32 +442,37 @@ impl CCallbacksPtr {
         }
     }
 
-	pub fn add_game_option(&self, option_id: &str, option_info: &OptionInfo) {
-		let option_id_cstr = CString::new(option_id).expect("CString::new failed");
-		let c_option_info = rust_option_info_to_c(&option_info);
-		let c_option_info_ptr: *const COptionInfo = &c_option_info;
-		if let Some(add_game_option) = self.add_game_option {
-			unsafe {
-				(add_game_option)(option_id_cstr.as_ptr(), c_option_info_ptr as *const c_void);
-			}
-		} else {
-			println!("add_game_option is null");
-		}
-	}
+    pub fn add_game_option(&self, option_id: &str, option_info: &OptionInfo) {
+        let option_id_cstr = CString::new(option_id).expect("CString::new failed");
+        let c_option_info = rust_option_info_to_c(&option_info);
+        let c_option_info_ptr: *const COptionInfo = &c_option_info;
+        if let Some(add_game_option) = self.add_game_option {
+            unsafe {
+                (add_game_option)(option_id_cstr.as_ptr(), c_option_info_ptr as *const c_void);
+            }
+        } else {
+            println!("add_game_option is null");
+        }
+    }
 
-	pub fn show_popup(&self, id: &str, popup_info: &PopupInfo) {
-		let popup_id_c_str = CString::new(id).expect("CString::new failed");
-		let c_popup_info = rust_popup_info_to_c(popup_info);
-		let c_popup_info_ptr: *const CPopupInfo = &c_popup_info;
-		let handle = 0 as *const c_void;
-		if let Some(show_popup) = self.show_popup {
-			unsafe {
-				(show_popup)(handle, popup_id_c_str.as_ptr(), id.len(), c_popup_info_ptr as *const c_void);
-			}
-		} else {
-			println!("show_popup is null");
-		}
-	}
+    pub fn show_popup(&self, id: &str, popup_info: &PopupInfo) {
+        let popup_id_c_str = CString::new(id).expect("CString::new failed");
+        let c_popup_info = rust_popup_info_to_c(popup_info);
+        let c_popup_info_ptr: *const CPopupInfo = &c_popup_info;
+        let handle = 0 as *const c_void;
+        if let Some(show_popup) = self.show_popup {
+            unsafe {
+                (show_popup)(
+                    handle,
+                    popup_id_c_str.as_ptr(),
+                    id.len(),
+                    c_popup_info_ptr as *const c_void,
+                );
+            }
+        } else {
+            println!("show_popup is null");
+        }
+    }
 
     pub fn get_time_ms(&self) -> TimeMs {
         if let Some(get_time_ms) = self.get_time_ms {
@@ -593,57 +604,63 @@ impl CCallbacksPtr {
 }
 
 fn default_c_popup_item() -> CPopupItem {
-	CPopupItem {
-		item_type: 0,
-		info: CPopupItemInfo {
-			msg: CPopupItemInfoMsg {
-				msg: [ 0; 4096],
-			},
-		},
-	}
+    CPopupItem {
+        item_type: 0,
+        info: CPopupItemInfo {
+            msg: CPopupItemInfoMsg { msg: [0; 4096] },
+        },
+    }
 }
 
 fn rust_popup_info_to_c(popup_info: &PopupInfo) -> CPopupInfo {
-	let mut c_popup_info = CPopupInfo {
-		title: [ 0; 128],
-		item_count: 0,
-		items: [default_c_popup_item(); 64],
-	};
-	copy_str_to_c_array(&popup_info.title, &mut c_popup_info.title);
+    let mut c_popup_info = CPopupInfo {
+        title: [0; 128],
+        item_count: 0,
+        items: [default_c_popup_item(); 64],
+    };
+    copy_str_to_c_array(&popup_info.title, &mut c_popup_info.title);
 
-	for (item_idx, &item) in popup_info.items.iter().enumerate() {
-		match item {
-			PopupItem::Message { text } => {
-				c_popup_info.items[item_idx].item_type = 1;
-				copy_str_to_c_array(&text, unsafe {&mut c_popup_info.items[item_idx].info.msg.msg });
-			},
-			PopupItem::Button { id, text } => {
-				c_popup_info.items[item_idx].item_type = 2;
-				c_popup_info.items[item_idx].info.btn.id = *id;
-				println!("creating popup button with text {}", text);
-				copy_str_to_c_array(&text, unsafe { &mut c_popup_info.items[item_idx].info.btn.text });
-			},
-			PopupItem::Dropdown { id: _, label: _, options: _ } => {
-				c_popup_info.items[item_idx].item_type = 3;
-				panic!("popup dropdown not implemented in Rust yet");
-				// TODO
-			},
-		}
-	}
-	c_popup_info.item_count = popup_info.items.len() as i32;
+    for (item_idx, &item) in popup_info.items.iter().enumerate() {
+        match item {
+            PopupItem::Message { text } => {
+                c_popup_info.items[item_idx].item_type = 1;
+                copy_str_to_c_array(&text, unsafe {
+                    &mut c_popup_info.items[item_idx].info.msg.msg
+                });
+            }
+            PopupItem::Button { id, text } => {
+                c_popup_info.items[item_idx].item_type = 2;
+                c_popup_info.items[item_idx].info.btn.id = *id;
+                println!("creating popup button with text {}", text);
+                copy_str_to_c_array(&text, unsafe {
+                    &mut c_popup_info.items[item_idx].info.btn.text
+                });
+            }
+            PopupItem::Dropdown {
+                id: _,
+                label: _,
+                options: _,
+            } => {
+                c_popup_info.items[item_idx].item_type = 3;
+                panic!("popup dropdown not implemented in Rust yet");
+                // TODO
+            }
+        }
+    }
+    c_popup_info.item_count = popup_info.items.len() as i32;
 
-	c_popup_info
+    c_popup_info
 }
 
 fn rust_option_info_to_c(option_info: &OptionInfo) -> COptionInfo {
-	let mut c_option_info = COptionInfo {
-		option_type: option_info.option_type as i32,
-		label: [0; 256],
-		value: option_info.value,
-	};
-	copy_str_to_c_array(&option_info.label, &mut c_option_info.label);
+    let mut c_option_info = COptionInfo {
+        option_type: option_info.option_type as i32,
+        label: [0; 256],
+        value: option_info.value,
+    };
+    copy_str_to_c_array(&option_info.label, &mut c_option_info.label);
 
-	c_option_info
+    c_option_info
 }
 
 pub trait AlexGamesApi {
@@ -673,14 +690,18 @@ pub trait AlexGamesApi {
         );
     }
 
-	fn handle_popup_btn_clicked(&mut self, _popup_id: &str, _btn_idx: i32, _popup_state: &PopupState) {
-		println!("handle_popup_btn_clicked unimplemented");
-	}
+    fn handle_popup_btn_clicked(
+        &mut self,
+        _popup_id: &str,
+        _btn_idx: i32,
+        _popup_state: &PopupState,
+    ) {
+        println!("handle_popup_btn_clicked unimplemented");
+    }
 
-	fn handle_game_option_evt(&mut self, option_id: &str, option_type: OptionType, _value: i32) {
-		println!("handle_game_option_evt unimplemented, option_id={option_id}, option_type={option_type:#?}");
-	}
-
+    fn handle_game_option_evt(&mut self, option_id: &str, option_type: OptionType, _value: i32) {
+        println!("handle_game_option_evt unimplemented, option_id={option_id}, option_type={option_type:#?}");
+    }
 
     fn get_state(&self) -> Option<Vec<u8>> {
         println!("get_state not implemented");

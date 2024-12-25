@@ -174,29 +174,30 @@ impl AlexGamesApi for AlexGamesGemMatch {
     fn start_game(&mut self, session_id_and_state: Option<(i32, Vec<u8>)>) {
         if let Some((session_id, serialized_state)) = session_id_and_state {
             match deserialize(&serialized_state) {
-				Ok(state) => {
-	                self.state = state;
-	                self.session_id = Some(session_id);
-				},
-            	Err(e) => {
-					let err_msg = format!("Error decoding serialized state: {:?}", e);
-	                self.callbacks.set_status_err(&err_msg);
-				}
+                Ok(state) => {
+                    self.state = state;
+                    self.session_id = Some(session_id);
+                }
+                Err(e) => {
+                    let err_msg = format!("Error decoding serialized state: {:?}", e);
+                    self.callbacks.set_status_err(&err_msg);
+                }
             }
         } else if let Some(prev_session_id) = self.callbacks.get_last_session_id("gem_match") {
             let state_serialized = self.callbacks.adjust_saved_state_offset(prev_session_id, 0);
             let state_serialized =
                 state_serialized.expect("state_serialized is none from adjust_saved_state_offset?");
             match deserialize(&state_serialized) {
-				Ok(state) => {
-	                self.state = state;
-	                self.session_id = Some(prev_session_id);
-				},
-            	Err(e) => {
-					let err_msg = format!("Error decoding serialized state: {:?}", e);
-	                self.callbacks.set_status_err(&err_msg);
-				}
-            }        }
+                Ok(state) => {
+                    self.state = state;
+                    self.session_id = Some(prev_session_id);
+                }
+                Err(e) => {
+                    let err_msg = format!("Error decoding serialized state: {:?}", e);
+                    self.callbacks.set_status_err(&err_msg);
+                }
+            }
+        }
 
         if let None = self.session_id {
             self.session_id = Some(self.callbacks.get_new_session_id());

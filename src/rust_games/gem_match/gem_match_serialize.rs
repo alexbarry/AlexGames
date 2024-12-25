@@ -6,12 +6,12 @@ pub const VERSION: u8 = 1;
 
 #[derive(Debug)]
 pub enum Error {
-	// These fields are printed in the debug message, which is
-	// helpful. But they aren't otherwise used in the program, so I need to
-	// suppress this warning.
-	#[allow(dead_code)]
+    // These fields are printed in the debug message, which is
+    // helpful. But they aren't otherwise used in the program, so I need to
+    // suppress this warning.
+    #[allow(dead_code)]
     UnhandledVersion(u8),
-	#[allow(dead_code)]
+    #[allow(dead_code)]
     SerdeError(bincode::Error),
 }
 

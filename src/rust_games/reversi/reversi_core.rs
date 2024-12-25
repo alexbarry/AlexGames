@@ -31,7 +31,7 @@ pub struct State {
     pub board: [[CellState; BOARD_SIZE]; BOARD_SIZE],
     pub player_turn: CellState,
 
-	pub last_move: Option<Pt>,
+    pub last_move: Option<Pt>,
 }
 
 impl State {
@@ -40,7 +40,7 @@ impl State {
             board: [[CellState::EMPTY; BOARD_SIZE]; BOARD_SIZE],
             player_turn: CellState::PLAYER1,
 
-			last_move: None,
+            last_move: None,
         };
 
         state.board[3][3] = CellState::PLAYER1;
@@ -51,17 +51,17 @@ impl State {
         state
     }
 
-	pub fn score(&self, player: CellState) -> i32 {
-		let mut score = 0;
-		for y in 0..BOARD_SIZE {
-			for x in 0..BOARD_SIZE {
-				if self.board[y][x] == player {
-					score += 1;
-				}
-			}
-		}
-		return score;
-	}
+    pub fn score(&self, player: CellState) -> i32 {
+        let mut score = 0;
+        for y in 0..BOARD_SIZE {
+            for x in 0..BOARD_SIZE {
+                if self.board[y][x] == player {
+                    score += 1;
+                }
+            }
+        }
+        return score;
+    }
 
     pub fn cell(&self, pt: Pt) -> CellState {
         self.board[pt.y as usize][pt.x as usize]
@@ -72,9 +72,9 @@ impl State {
     }
 
     pub fn is_valid_move(&self, player: CellState, pt: Pt) -> bool {
-		if self.cell(pt) != CellState::EMPTY {
-			return false;
-		}
+        if self.cell(pt) != CellState::EMPTY {
+            return false;
+        }
 
         for dir in DIRS {
             let jumpable_piece_count = get_jumpable_pieces(self, player, pt, dir);
@@ -85,24 +85,27 @@ impl State {
         return false;
     }
 
-	pub fn get_valid_moves(&self) -> Vec<Pt> {
-		let mut moves = Vec::new();
-		for y in 0..BOARD_SIZE {
-			for x in 0..BOARD_SIZE {
-				let pt = Pt { y: y as i32, x: x as i32 };
-				if self.is_valid_move(self.player_turn, pt) {
-					moves.push(pt);
-				}
-			}
-		}
-		return moves;
-	}
+    pub fn get_valid_moves(&self) -> Vec<Pt> {
+        let mut moves = Vec::new();
+        for y in 0..BOARD_SIZE {
+            for x in 0..BOARD_SIZE {
+                let pt = Pt {
+                    y: y as i32,
+                    x: x as i32,
+                };
+                if self.is_valid_move(self.player_turn, pt) {
+                    moves.push(pt);
+                }
+            }
+        }
+        return moves;
+    }
 }
 
 impl fmt::Display for State {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write_board_to_fmt(self, f)
-	}
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write_board_to_fmt(self, f)
+    }
 }
 
 //impl fmt::Debug for State {
@@ -110,7 +113,6 @@ impl fmt::Display for State {
 //		write_board_to_fmt(self, f)
 //	}
 //}
-
 
 const DIRS: [(i32, i32); 8] = [
     (0, 1),
@@ -125,7 +127,7 @@ const DIRS: [(i32, i32); 8] = [
 
 // TODO move to struct impl
 pub fn _print_board(state: &State) {
-	print!("{}", state);
+    print!("{}", state);
 }
 fn write_board_to_fmt(state: &State, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "  ")?;
@@ -166,7 +168,7 @@ fn write_board_to_fmt(state: &State, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "+")?;
     write!(f, "\n")?;
 
-	Ok(())
+    Ok(())
 }
 
 fn pos_in_range(pt: Pt) -> bool {
@@ -262,7 +264,7 @@ pub fn player_move(mut state: &mut State, player: CellState, pt: Pt) -> Result<(
 
     println!("player_move: setting cell {:?} to {:?}", pt, player);
     state.set_cell(pt, player);
-	state.last_move = Some(pt);
+    state.last_move = Some(pt);
     state.player_turn = other_player(state.player_turn);
 
     Ok(())
