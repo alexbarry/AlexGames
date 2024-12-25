@@ -490,6 +490,10 @@ impl DrawState {
         }
     }
 
+    pub fn is_animating(&self) -> bool {
+        self.animation_queue.len() > 0
+    }
+
     pub fn new() -> DrawState {
         DrawState {
             animation_queue: Vec::new(),
