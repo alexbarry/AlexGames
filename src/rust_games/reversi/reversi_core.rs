@@ -1,6 +1,7 @@
 //use std::io;
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::hash::Hash;
 
 pub const BOARD_SIZE: usize = 8;
 
@@ -20,7 +21,7 @@ pub enum ReversiErr {
     InvalidMove,
 }
 
-#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug, Hash)]
 pub struct Pt {
     pub y: i32,
     pub x: i32,

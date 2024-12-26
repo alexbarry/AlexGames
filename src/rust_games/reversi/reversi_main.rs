@@ -128,7 +128,7 @@ impl AlexGamesApi for AlexGamesReversi {
             // TODO only do this if AI multiplayer is chosen
             // TODO maybe an animation would make it easier?
             // Handle AI move
-            if false && player_turn == CellState::PLAYER1 {
+            if true && player_turn == CellState::PLAYER1 {
                 self.draw.add_thinking_animation(&self.game_state, 1000);
                 let old_game_state = self.game_state.clone();
                 let ai_move = self
@@ -255,15 +255,30 @@ impl AlexGamesApi for AlexGamesReversi {
 pub fn init_reversi(
     callbacks: &'static rust_game_api::CCallbacksPtr,
 ) -> Box<dyn AlexGamesApi + 'static> {
+    let game_state = reversi_core::State::new();
     let mut reversi = AlexGamesReversi {
-        game_state: reversi_core::State::new(),
+        game_state: game_state,
         session_id: 0,
         callbacks: callbacks,
 
         ai_state: mcts::MCTSState::init(mcts::MCTSParams {
+            // TODO need to init ai_state when we get init game state, not here
+            init_state: game_state,
             get_possible_moves: |game_state| {
                 //println!("reversi_main: get_possible_moves called with state {:?}", game_state);
                 game_state.get_valid_moves()
+            },
+            apply_move: |game_state, game_move| {
+                let mut game_state = game_state.clone();
+                let player_turn = game_state.player_turn;
+                let rc = reversi_core::player_move(&mut game_state, player_turn, game_move);
+                if !rc.is_ok() {
+                    panic!("mcts.apply_move !is_ok");
+                }
+                game_state
+            },
+            get_score: |game_state| {
+                game_state.score(CellState::PLAYER2) - game_state.score(CellState::PLAYER1)
             },
         }),
         draw: reversi_draw::DrawState::new(),
