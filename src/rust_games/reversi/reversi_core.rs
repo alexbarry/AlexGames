@@ -227,7 +227,7 @@ fn reverse_cells(state: &mut State, player: CellState, pt: Pt, dir: (i32, i32)) 
         } else if cell == player {
             return;
         } else if cell == other_player(player) {
-            println!("reverse_cells: Setting {:?} to {:?}", pt, player);
+            //println!("reverse_cells: Setting {:?} to {:?}", pt, player);
             state.set_cell(pt, player);
         }
     }
@@ -263,7 +263,7 @@ pub fn player_move(mut state: &mut State, player: CellState, pt: Pt) -> Result<(
         return Err(ReversiErr::InvalidMove);
     }
 
-    println!("player_move: setting cell {:?} to {:?}", pt, player);
+    //println!("player_move: setting cell {:?} to {:?}", pt, player);
     state.set_cell(pt, player);
     state.last_move = Some(pt);
     state.player_turn = other_player(state.player_turn);

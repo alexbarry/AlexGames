@@ -117,6 +117,7 @@ impl AlexGamesApi for AlexGamesReversi {
                 x: cell_x,
             },
         );
+        self.ai_state.move_node(old_game_state, cell);
         println!("player_move returned {:#?}", rc);
         if let Err(err) = rc {
             let msg = AlexGamesReversi::rc_to_err_msg(err);
@@ -141,6 +142,7 @@ impl AlexGamesApi for AlexGamesReversi {
                 if let Err(err) = rc {
                     panic!("Error from AI move: {:?}", err);
                 }
+                self.ai_state.move_node(old_game_state, ai_move);
                 self.draw
                     .add_animation(&old_game_state, &self.game_state, 500);
             }
@@ -277,8 +279,14 @@ pub fn init_reversi(
                 }
                 game_state
             },
-            get_score: |game_state| {
-                game_state.score(CellState::PLAYER2) - game_state.score(CellState::PLAYER1)
+            get_score: |game_state| match game_state.player_turn {
+                CellState::PLAYER1 => {
+                    game_state.score(CellState::PLAYER1) - game_state.score(CellState::PLAYER2)
+                }
+                CellState::PLAYER2 => {
+                    game_state.score(CellState::PLAYER2) - game_state.score(CellState::PLAYER1)
+                }
+                _ => panic!("Invalid player turn"),
             },
         }),
         draw: reversi_draw::DrawState::new(),
