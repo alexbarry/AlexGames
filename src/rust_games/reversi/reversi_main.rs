@@ -72,7 +72,7 @@ impl AlexGamesReversi {
             self.game_state = game_state;
             self.session_id = session_id;
             // TODO should re-use the same tree?
-            self.ai_state = init_ai_state(game_state);
+            self.ai_state = init_ai_state(self.callbacks, game_state);
         } else {
             self.callbacks
                 .set_status_err(&format!("Error decoding state: {:?}", game_state));
@@ -110,6 +110,11 @@ impl AlexGamesApi for AlexGamesReversi {
 
         let player_turn = self.game_state.player_turn;
         println!("User clicked cell {cell_y} {cell_x}, player_turn={player_turn:?}");
+        let player_ai_move_score = self.ai_state.get_move_score(cell);
+        self.callbacks.set_status_msg(&format!(
+            "Player's move {:?} has score {}",
+            cell, player_ai_move_score
+        ));
         let old_game_state = self.game_state.clone();
         let rc = reversi_core::player_move(
             &mut self.game_state,
@@ -134,11 +139,16 @@ impl AlexGamesApi for AlexGamesReversi {
             if true && player_turn == CellState::PLAYER1 {
                 self.draw.add_thinking_animation(&self.game_state, 1000);
                 let old_game_state = self.game_state.clone();
-                let ai_move = self
-                    .ai_state
-                    .get_move(self.game_state)
-                    .expect("empty move from ai::get_move");
+                // TODO Dammit... I need a way to yield to animation updates while running the MCTS
+                // TODO would a separate rust thread work in the browser? For now that might be easier
+                // than adding a whole AI  that manages threads
+                let (ai_move, ai_info) = self.ai_state.get_move(self.game_state);
+                let ai_move = ai_move.expect("empty move from MCTS::get_move??");
                 println!("AI move is: {:?}", ai_move);
+                self.callbacks.set_status_msg(&format!(
+                    "Chose AI move {:?}, metadata {:?}",
+                    ai_move, ai_info
+                ));
                 let rc =
                     reversi_core::player_move(&mut self.game_state, CellState::PLAYER2, ai_move);
                 if let Err(err) = rc {
@@ -222,7 +232,7 @@ impl AlexGamesApi for AlexGamesReversi {
         match option_id {
             reversi_draw::GAME_OPTION_NEW_GAME => {
                 self.game_state = reversi_core::State::new();
-                self.ai_state = init_ai_state(self.game_state); // TODO re-use same tree?
+                self.ai_state = init_ai_state(self.callbacks, self.game_state); // TODO re-use same tree?
                 self.session_id = self.callbacks.get_new_session_id();
                 self.save_state();
                 self.draw_state();
@@ -258,9 +268,19 @@ impl AlexGamesApi for AlexGamesReversi {
 }
 
 pub fn init_ai_state(
+    callbacks: &'static CCallbacksPtr,
     game_state: reversi_core::State,
 ) -> mcts::MCTSState<reversi_core::State, reversi_core::Pt> {
     mcts::MCTSState::init(mcts::MCTSParams {
+        get_time_ms: None, // TODO part of default
+        //get_time_ms: Some(|callbacks| callbacks.get_time_ms() as i32),
+        callbacks: callbacks,
+
+        // Takes ~5-15 seconds on my linux desktop in the wxWidgets version
+        // expansion_count: 10_000,
+
+        // Takes ~5-15 seconds on my linux desktop in Firefox in the wasm version
+        expansion_count: 300,
         // TODO need to init ai_state when we get init game state, not here
         init_state: game_state,
         get_possible_moves: |game_state| {
@@ -297,7 +317,7 @@ pub fn init_reversi(
         session_id: 0,
         callbacks: callbacks,
 
-        ai_state: init_ai_state(game_state),
+        ai_state: init_ai_state(callbacks, game_state),
         draw: reversi_draw::DrawState::new(),
     };
     reversi.init(callbacks);

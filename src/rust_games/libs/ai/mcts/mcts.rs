@@ -2,6 +2,10 @@ use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
+use std::time::{SystemTime, UNIX_EPOCH};
+
+// TODO REMOVE, figure out how to remove this
+use crate::rust_game_api::{CCallbacksPtr, TimeMs};
 
 use rand::Rng;
 
@@ -17,6 +21,20 @@ pub struct MCTSParams<GameState, GameMove> {
     pub apply_move: fn(GameState, GameMove) -> GameState,
     pub get_score: fn(GameState) -> i32,
     pub init_state: GameState,
+
+    pub get_time_ms: Option<fn() -> TimeMs>,
+    pub expansion_count: i32,
+
+    // TODO REMOVE, figure out how to remove this
+    pub callbacks: &'static CCallbacksPtr,
+}
+
+#[derive(Debug)]
+pub struct MCTSInfo {
+    pub score: f64,
+    pub max_depth: i32,
+    pub node_count: i32,
+    pub time_ms: i32,
 }
 
 pub struct MCTSState<GameState, GameMove> {
@@ -24,7 +42,7 @@ pub struct MCTSState<GameState, GameMove> {
     current_node: Rc<RefCell<Node<GameState, GameMove>>>,
 }
 
-static mut node_count: i64 = 10;
+static mut g_node_count: i64 = 10;
 
 struct Node<GameState, GameMove> {
     id: i64,
@@ -53,9 +71,9 @@ impl<GameState, GameMove> Clone for Node<GameState, GameMove> {
 
 impl<GameState, GameMove> Node<GameState, GameMove> {
     pub fn new(init_state: GameState) -> Rc<RefCell<Node<GameState, GameMove>>> {
-        //println!("[mcts] Read node count {} for new node...", unsafe { node_count });
+        //println!("[mcts] Read node count {} for new node...", unsafe { g_node_count });
         let new_node = Node {
-            id: unsafe { node_count },
+            id: unsafe { g_node_count },
             state: init_state,
             win_count: 0,
             sim_count: 0,
@@ -64,9 +82,9 @@ impl<GameState, GameMove> Node<GameState, GameMove> {
         };
         let new_node = Rc::new(RefCell::new(new_node));
         unsafe {
-            node_count += 1;
+            g_node_count += 1;
         }
-        //println!("[mcts] Node count is now {}, returned new node with id {}", unsafe { node_count }, new_node.borrow().id);
+        //println!("[mcts] Node count is now {}, returned new node with id {}", unsafe { g_node_count }, new_node.borrow().id);
         new_node
     }
 
@@ -87,6 +105,23 @@ impl<GameState, GameMove> Node<GameState, GameMove> {
             } else {
                 0.0
             }
+    }
+
+    fn get_info(&self) -> (i32, i32) {
+        let mut max_depth = 1;
+        let mut node_count = 1;
+
+        let mut max_depth_from_here = 0;
+        for (_, child) in self.children.iter() {
+            let (child_max_depth, child_node_count) = child.borrow().get_info();
+            if child_max_depth > max_depth_from_here {
+                max_depth_from_here = child_max_depth;
+            }
+            node_count += child_node_count;
+        }
+        max_depth += max_depth_from_here;
+
+        (max_depth, node_count)
     }
 }
 
@@ -120,7 +155,18 @@ where
         self.current_node = new_node;
     }
 
-    pub fn get_move(&mut self, game_state: GameState) -> Option<GameMove> {
+    fn get_time_ms(&self) -> TimeMs {
+        if let Some(get_time_ms) = self.params.get_time_ms {
+            return (get_time_ms)();
+        } else {
+            //return SystemTime::now().duration_since(UNIX_EPOCH).expect("error getting time from std::time::Instant").as_millis() as i32;
+            return self.params.callbacks.get_time_ms();
+        }
+    }
+
+    pub fn get_move(&mut self, game_state: GameState) -> (Option<GameMove>, MCTSInfo) {
+        //let start_time = Instant::now();
+        let start_time = self.get_time_ms();
         //println!("get_move");
         //println!("AI get_move called with state: {:?}", game_state);
         //println!("AI get_move found {} possible moves", moves.len());
@@ -135,11 +181,21 @@ where
         if false {
             let moves = self.get_possible_moves(game_state);
             let random_index = rand::thread_rng().gen_range(0..moves.len());
-            return Some(moves[random_index]);
+            let duration = (start_time - self.get_time_ms()) as i32;
+            return (
+                Some(moves[random_index]),
+                MCTSInfo {
+                    max_depth: 0,
+                    node_count: 0,
+                    score: -1.0,
+                    time_ms: duration,
+                },
+            );
         }
 
+        //let expansion_count = 300;
         //for _ in 0..10_000 {
-        for _ in 0..100 {
+        for _ in 0..self.params.expansion_count {
             //println!("expand_tree_once count");
             self.expand_tree_once();
         }
@@ -161,7 +217,16 @@ where
             "[mcts] Choosing best move {:?}, score: {}",
             best_move, best_move_score
         );
-        return best_move.copied();
+        let search_duration = (self.get_time_ms() - start_time) as i32;
+
+        let (max_depth, node_count) = self.current_node.borrow().get_info();
+        let info = MCTSInfo {
+            max_depth: max_depth,
+            node_count: node_count,
+            score: best_move_score,
+            time_ms: search_duration,
+        };
+        return (best_move.copied(), info);
     }
 
     fn get_possible_moves(&self, game_state: GameState) -> Vec<GameMove> {
@@ -196,8 +261,9 @@ where
         win_change: i32,
         sim_change: i32,
     ) {
-        let max_depth = 1000;
-        for _ in 0..max_depth {
+        //let max_depth = 1000;
+        //for _ in 0..max_depth {
+        loop {
             //println!("Incremented node counts by ({}, {})", win_change, sim_change);
             node.borrow_mut().win_count += win_change;
             node.borrow_mut().sim_count += sim_change;
@@ -237,7 +303,8 @@ where
             //println!("[mcts] 1/5 Double checking new node id {} ###", new_node.borrow().id);
             let score = MCTSState::simulate_node(params.clone(), &new_node);
             //println!("[mcts] 2/5 Double checking new node id {} ###", new_node.borrow().id);
-            let score_inc = if score > 0 { 1 } else { 0 };
+            //let score_inc = if score > 0 { 1 } else { 0 };
+            let score_inc = if score > 0 { 1 + (score / 10) } else { 0 };
             //println!("[mcts] 3/5 Double checking new node id {} ###", new_node.borrow().id);
             new_node.borrow_mut().parent = Some(Rc::downgrade(node));
             //println!("[mcts] 4/5 Double checking new node id {} ###", new_node.borrow().id);
@@ -258,8 +325,9 @@ where
         for (game_move, child_node) in node.borrow().children.iter() {
             //println!("[mcts]     child: node {}", child_node.borrow().id);
         }
-        let max_depth = 10_000;
-        for _ in 0..max_depth {
+        //let max_depth = 10_000;
+        //for _ in 0..max_depth {
+        loop {
             if node.borrow().children.len() == 0 {
                 MCTSState::expand_node(self.params.clone(), &mut node);
                 //println!("Expanded tree at depth {}", depth);
@@ -293,6 +361,16 @@ where
             //println!("[mcts] Moving to node {}", node.borrow().id);
             depth += 1;
         }
+    }
+
+    pub fn get_move_score(&self, game_move: GameMove) -> f64 {
+        self.current_node
+            .borrow()
+            .children
+            .get(&game_move)
+            .unwrap()
+            .borrow()
+            .uct_score(0)
     }
 
     fn print_node(
