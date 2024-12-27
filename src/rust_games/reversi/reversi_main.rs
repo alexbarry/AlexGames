@@ -71,6 +71,8 @@ impl AlexGamesReversi {
             println!("Received game state: {:#?}", game_state);
             self.game_state = game_state;
             self.session_id = session_id;
+            // TODO should re-use the same tree?
+            self.ai_state = init_ai_state(game_state);
         } else {
             self.callbacks
                 .set_status_err(&format!("Error decoding state: {:?}", game_state));
@@ -220,6 +222,7 @@ impl AlexGamesApi for AlexGamesReversi {
         match option_id {
             reversi_draw::GAME_OPTION_NEW_GAME => {
                 self.game_state = reversi_core::State::new();
+                self.ai_state = init_ai_state(self.game_state); // TODO re-use same tree?
                 self.session_id = self.callbacks.get_new_session_id();
                 self.save_state();
                 self.draw_state();
@@ -254,6 +257,37 @@ impl AlexGamesApi for AlexGamesReversi {
     }
 }
 
+pub fn init_ai_state(
+    game_state: reversi_core::State,
+) -> mcts::MCTSState<reversi_core::State, reversi_core::Pt> {
+    mcts::MCTSState::init(mcts::MCTSParams {
+        // TODO need to init ai_state when we get init game state, not here
+        init_state: game_state,
+        get_possible_moves: |game_state| {
+            //println!("reversi_main: get_possible_moves called with state {:?}", game_state);
+            game_state.get_valid_moves()
+        },
+        apply_move: |game_state, game_move| {
+            let mut game_state = game_state.clone();
+            let player_turn = game_state.player_turn;
+            let rc = reversi_core::player_move(&mut game_state, player_turn, game_move);
+            if !rc.is_ok() {
+                panic!("mcts.apply_move !is_ok");
+            }
+            game_state
+        },
+        get_score: |game_state| match game_state.player_turn {
+            CellState::PLAYER1 => {
+                game_state.score(CellState::PLAYER1) - game_state.score(CellState::PLAYER2)
+            }
+            CellState::PLAYER2 => {
+                game_state.score(CellState::PLAYER2) - game_state.score(CellState::PLAYER1)
+            }
+            _ => panic!("Invalid player turn"),
+        },
+    })
+}
+
 pub fn init_reversi(
     callbacks: &'static rust_game_api::CCallbacksPtr,
 ) -> Box<dyn AlexGamesApi + 'static> {
@@ -263,32 +297,7 @@ pub fn init_reversi(
         session_id: 0,
         callbacks: callbacks,
 
-        ai_state: mcts::MCTSState::init(mcts::MCTSParams {
-            // TODO need to init ai_state when we get init game state, not here
-            init_state: game_state,
-            get_possible_moves: |game_state| {
-                //println!("reversi_main: get_possible_moves called with state {:?}", game_state);
-                game_state.get_valid_moves()
-            },
-            apply_move: |game_state, game_move| {
-                let mut game_state = game_state.clone();
-                let player_turn = game_state.player_turn;
-                let rc = reversi_core::player_move(&mut game_state, player_turn, game_move);
-                if !rc.is_ok() {
-                    panic!("mcts.apply_move !is_ok");
-                }
-                game_state
-            },
-            get_score: |game_state| match game_state.player_turn {
-                CellState::PLAYER1 => {
-                    game_state.score(CellState::PLAYER1) - game_state.score(CellState::PLAYER2)
-                }
-                CellState::PLAYER2 => {
-                    game_state.score(CellState::PLAYER2) - game_state.score(CellState::PLAYER1)
-                }
-                _ => panic!("Invalid player turn"),
-            },
-        }),
+        ai_state: init_ai_state(game_state),
         draw: reversi_draw::DrawState::new(),
     };
     reversi.init(callbacks);
