@@ -377,6 +377,16 @@ where
             .uct_score(0)
     }
 
+    pub fn get_info(&self) -> MCTSInfo {
+        let (max_depth, node_count) = self.current_node.borrow().get_info();
+        MCTSInfo {
+            score: 0.0,
+            max_depth: max_depth,
+            node_count: node_count,
+            time_ms: 0,
+        }
+    }
+
     fn print_node(
         &self,
         node: &Node<GameState, GameMove>,

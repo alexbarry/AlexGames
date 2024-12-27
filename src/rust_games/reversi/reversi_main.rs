@@ -110,7 +110,9 @@ impl AlexGamesApi for AlexGamesReversi {
 
         let player_turn = self.game_state.player_turn;
         println!("User clicked cell {cell_y} {cell_x}, player_turn={player_turn:?}");
-        let player_ai_move_score = self.ai_state.get_move_score(cell);
+        let ai_state = &mut self.ai_state;
+        println!("AI state before move is: {:?}", ai_state.get_info());
+        let player_ai_move_score = ai_state.get_move_score(cell);
         self.callbacks.set_status_msg(&format!(
             "Player's move {:?} has score {}",
             cell, player_ai_move_score
@@ -124,7 +126,7 @@ impl AlexGamesApi for AlexGamesReversi {
                 x: cell_x,
             },
         );
-        self.ai_state.move_node(old_game_state, cell);
+        ai_state.move_node(old_game_state, cell);
         println!("player_move returned {:#?}", rc);
         if let Err(err) = rc {
             let msg = AlexGamesReversi::rc_to_err_msg(err);
@@ -142,7 +144,7 @@ impl AlexGamesApi for AlexGamesReversi {
                 // TODO Dammit... I need a way to yield to animation updates while running the MCTS
                 // TODO would a separate rust thread work in the browser? For now that might be easier
                 // than adding a whole AI  that manages threads
-                let (ai_move, ai_info) = self.ai_state.get_move(self.game_state);
+                let (ai_move, ai_info) = ai_state.get_move(self.game_state);
                 let ai_move = ai_move.expect("empty move from MCTS::get_move??");
                 println!("AI move is: {:?}", ai_move);
                 self.callbacks.set_status_msg(&format!(
@@ -154,7 +156,7 @@ impl AlexGamesApi for AlexGamesReversi {
                 if let Err(err) = rc {
                     panic!("Error from AI move: {:?}", err);
                 }
-                self.ai_state.move_node(old_game_state, ai_move);
+                ai_state.move_node(old_game_state, ai_move);
                 self.draw
                     .add_animation(&old_game_state, &self.game_state, 500);
             }
