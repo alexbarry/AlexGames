@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
-use std::time::{SystemTime, UNIX_EPOCH};
+//use std::time::{SystemTime, UNIX_EPOCH};
 
 // TODO REMOVE, figure out how to remove this
 use crate::rust_game_api::{CCallbacksPtr, TimeMs};
@@ -29,6 +29,7 @@ pub struct MCTSParams<GameState, GameMove> {
     pub callbacks: &'static CCallbacksPtr,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct MCTSInfo {
     pub score: f64,
@@ -42,9 +43,12 @@ pub struct MCTSState<GameState, GameMove> {
     current_node: Rc<RefCell<Node<GameState, GameMove>>>,
 }
 
+// I don't understand this, why would I make this uppercase if it changes?
+#[allow(non_upper_case_globals)]
 static mut g_node_count: i64 = 10;
 
 struct Node<GameState, GameMove> {
+    #[allow(dead_code)]
     id: i64,
     state: GameState,
     win_count: i32,
@@ -295,7 +299,7 @@ where
         for game_move in moves.iter() {
             let new_game_state = game_state.clone();
             let new_game_state = (params.apply_move)(new_game_state, *game_move);
-            let mut new_node = Node::new(new_game_state);
+            let new_node = Node::new(new_game_state);
             //println!("[mcts] Created new node with id {}", new_node.borrow().id);
 
             //let parent = &mut *node;
@@ -319,10 +323,10 @@ where
         //println!("[mcts] expand_tree_once");
         //let mut node = &mut self.current_node;
         let mut node = Rc::clone(&self.current_node);
-        let mut depth = 0;
+        //let mut depth = 0;
 
         //println!("[mcts] Starting with node {}, (children count: {})", node.borrow().id, node.borrow().children.len());
-        for (game_move, child_node) in node.borrow().children.iter() {
+        for (_game_move, _child_node) in node.borrow().children.iter() {
             //println!("[mcts]     child: node {}", child_node.borrow().id);
         }
         //let max_depth = 10_000;
@@ -359,7 +363,7 @@ where
             //node = Rc::clone(next_node);
             node = next_node.clone();
             //println!("[mcts] Moving to node {}", node.borrow().id);
-            depth += 1;
+            //depth += 1;
         }
     }
 
