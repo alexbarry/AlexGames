@@ -154,6 +154,7 @@ pub fn _print_board(state: &State) {
     print!("{}", state);
 }
 fn write_board_to_fmt(state: &State, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "player_turn: {:?}\n", state.player_turn)?;
     write!(f, "  ")?;
     for x in 0..BOARD_SIZE {
         write!(f, "{} ", x)?;
