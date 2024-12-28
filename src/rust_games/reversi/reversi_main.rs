@@ -305,9 +305,8 @@ pub fn init_ai_state(
         // Takes ~5-15 seconds on my linux desktop in Firefox in the wasm version
         // initial move took ~8 seconds
         //expansion_count: 300,
-
-        //expansion_count: 10_000,
-        expansion_count: 100_000,
+        expansion_count: 10_000,
+        //expansion_count: 100_000,
         //expansion_count: 1_000_000,
 
         // TODO need to init ai_state when we get init game state, not here
