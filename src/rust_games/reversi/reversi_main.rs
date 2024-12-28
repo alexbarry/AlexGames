@@ -108,15 +108,19 @@ impl AlexGamesApi for AlexGamesReversi {
         let cell_y = cell.y;
         let cell_x = cell.x;
 
+        let enable_ai = false;
+
         let player_turn = self.game_state.player_turn;
         println!("User clicked cell {cell_y} {cell_x}, player_turn={player_turn:?}");
         let ai_state = &mut self.ai_state;
-        println!("AI state before move is: {:?}", ai_state.get_info());
-        let player_ai_move_score = ai_state.get_move_score(cell);
-        self.callbacks.set_status_msg(&format!(
-            "Player's move {:?} has score {}",
-            cell, player_ai_move_score
-        ));
+        if enable_ai {
+            println!("AI state before move is: {:?}", ai_state.get_info());
+            let player_ai_move_score = ai_state.get_move_score(cell);
+            self.callbacks.set_status_msg(&format!(
+                "Player's move {:?} has score {}",
+                cell, player_ai_move_score
+            ));
+        }
         let old_game_state = self.game_state.clone();
         let rc = reversi_core::player_move(
             &mut self.game_state,
@@ -126,7 +130,9 @@ impl AlexGamesApi for AlexGamesReversi {
                 x: cell_x,
             },
         );
-        ai_state.move_node(old_game_state, cell);
+        if enable_ai {
+            ai_state.move_node(old_game_state, cell);
+        }
         println!("player_move returned {:#?}", rc);
         if let Err(err) = rc {
             let msg = AlexGamesReversi::rc_to_err_msg(err);
@@ -138,7 +144,7 @@ impl AlexGamesApi for AlexGamesReversi {
             // TODO only do this if AI multiplayer is chosen
             // TODO maybe an animation would make it easier?
             // Handle AI move
-            if true && player_turn == CellState::PLAYER1 {
+            if enable_ai && player_turn == CellState::PLAYER1 {
                 self.draw.add_thinking_animation(&self.game_state, 1000);
                 let old_game_state = self.game_state.clone();
                 // TODO Dammit... I need a way to yield to animation updates while running the MCTS
