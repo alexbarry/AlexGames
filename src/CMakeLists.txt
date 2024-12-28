@@ -219,7 +219,7 @@ else()
 endif()
 
 # TODO replace "debug" with "release" (or blank?) if not debug build
-set(RUST_LIB ${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/${RUST_TARGET_PATH}/debug/libalexgames_rust.a)
+set(RUST_LIB ${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/${RUST_TARGET_PATH}/release/libalexgames_rust.a)
 
 file(GLOB_RECURSE RUST_SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rust_games/*.rs
@@ -231,7 +231,7 @@ message("Rust sources: ${RUST_SOURCE_FILES}")
 # TODO add --release if ALEXGAMES_DEBUG_BUILD is not set
 add_custom_command(
 	OUTPUT "${RUST_LIB}"
-	COMMAND cargo build "${RUST_TARGET_CMD}"
+	COMMAND cargo build --release "${RUST_TARGET_CMD}"
 	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/rust_games"
 	COMMENT "Building alexgames rust_games library with cargo for target=${RUST_TARGET}"
 	DEPENDS ${RUST_SOURCE_FILES}
