@@ -398,7 +398,7 @@ where
         }
     }
 
-    fn print_node(
+    fn _print_node(
         &self,
         node: &Node<GameState, GameMove>,
         parent_sim_count: i32,
@@ -415,7 +415,7 @@ where
             node.children.len()
         );
         for (_game_move, child) in node.children.iter() {
-            self.print_node(&child.borrow(), node.sim_count, indent_depth + 1);
+            self._print_node(&child.borrow(), node.sim_count, indent_depth + 1);
         }
     }
 }
