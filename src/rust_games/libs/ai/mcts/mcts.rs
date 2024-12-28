@@ -13,13 +13,16 @@ use rand::Rng;
 // and maybe make a "random" implementation of AI,
 // then make MCTS separate
 
+type PlayerId = i32;
+
 //pub struct MCTSParams<GameState> {
 #[derive(Clone)]
 pub struct MCTSParams<GameState, GameMove> {
     //get_game_state: fn(GameState) -> String,
     pub get_possible_moves: fn(&GameState) -> Vec<GameMove>,
+    pub get_player_turn: fn(&GameState) -> PlayerId,
     pub apply_move: fn(&GameState, GameMove) -> GameState,
-    pub get_score: fn(&GameState) -> i32,
+    pub get_score: fn(&GameState, PlayerId) -> i32,
     pub init_state: GameState,
 
     pub get_time_ms: Option<fn() -> TimeMs>,
@@ -203,7 +206,7 @@ where
             //println!("expand_tree_once count");
             self.expand_tree_once();
         }
-        self.print_node(&self.current_node.borrow(), 0, 0);
+        //self.print_node(&self.current_node.borrow(), 0, 0);
 
         let mut best_move = None;
         let mut best_move_score = 0.0;
@@ -244,6 +247,7 @@ where
         let mut rng = rand::thread_rng();
 
         let mut state = current_node.borrow().state;
+        let player = (params.get_player_turn)(&state);
         loop {
             let moves = (params.get_possible_moves)(&state);
             // TODO: right now a pass is not an option
@@ -257,11 +261,13 @@ where
             let game_move = moves[rng.gen_range(0..moves.len())];
             state = (params.apply_move)(&state, game_move);
         }
-        return (params.get_score)(&state);
+        return (params.get_score)(&state, player);
     }
 
     fn update_node_counts(
+        params: &MCTSParams<GameState, GameMove>,
         mut node: Rc<RefCell<Node<GameState, GameMove>>>,
+        player: PlayerId,
         win_change: i32,
         sim_change: i32,
     ) {
@@ -269,7 +275,11 @@ where
         //for _ in 0..max_depth {
         loop {
             //println!("Incremented node counts by ({}, {})", win_change, sim_change);
-            node.borrow_mut().win_count += win_change;
+            let node_player = (params.get_player_turn)(&node.borrow().state);
+
+            if player == node_player {
+                node.borrow_mut().win_count += win_change;
+            }
             node.borrow_mut().sim_count += sim_change;
 
             let parent_opt = {
@@ -297,6 +307,8 @@ where
         let moves = (params.get_possible_moves)(&game_state);
 
         for game_move in moves.iter() {
+            //let new_game_state = game_state.clone();
+            let player = (params.get_player_turn)(&game_state);
             let new_game_state = (params.apply_move)(&game_state, *game_move);
             let new_node = Node::new(new_game_state);
             //println!("[mcts] Created new node with id {}", new_node.borrow().id);
@@ -306,12 +318,12 @@ where
             //println!("[mcts] 1/5 Double checking new node id {} ###", new_node.borrow().id);
             let score = MCTSState::simulate_node(params.clone(), &new_node);
             //println!("[mcts] 2/5 Double checking new node id {} ###", new_node.borrow().id);
-            //let score_inc = if score > 0 { 1 } else { 0 };
-            let score_inc = if score > 0 { 1 + (score / 10) } else { 0 };
+            let score_inc = if score > 0 { 1 } else { 0 };
+            //let score_inc = if score > 0 { 1 + (score / 10) } else { 0 };
             //println!("[mcts] 3/5 Double checking new node id {} ###", new_node.borrow().id);
             new_node.borrow_mut().parent = Some(Rc::downgrade(node));
             //println!("[mcts] 4/5 Double checking new node id {} ###", new_node.borrow().id);
-            MCTSState::update_node_counts(Rc::clone(&new_node), score_inc, 1);
+            MCTSState::update_node_counts(&params, Rc::clone(&new_node), player, score_inc, 1);
             //println!("[mcts] 5/5 Double checking new node id {} ###", new_node.borrow().id);
             //println!("[mcts] to node {}, added child node {}", node.borrow().id, new_node.borrow().id);
             node.borrow_mut().children.insert(*game_move, new_node);

@@ -282,12 +282,29 @@ pub fn init_ai_state(
         // expansion_count: 10_000,
 
         // Takes ~5-15 seconds on my linux desktop in Firefox in the wasm version
-        expansion_count: 300,
+        // initial move took ~8 seconds
+        //expansion_count: 300,
+
+        //expansion_count: 10_000,
+        expansion_count: 100_000,
+        //expansion_count: 1_000_000,
+
         // TODO need to init ai_state when we get init game state, not here
         init_state: game_state,
         get_possible_moves: |game_state| {
             //println!("reversi_main: get_possible_moves called with state {:?}", game_state);
             game_state.get_valid_moves()
+        },
+        get_player_turn: |game_state| {
+            // TODO I really don't want to add another generic... I think I only need this for
+            // separating nodes' win scores
+            match game_state.player_turn {
+                CellState::PLAYER1 => 1,
+                CellState::PLAYER2 => 2,
+                CellState::EMPTY => {
+                    panic!("game_state.player_turn was empty");
+                }
+            }
         },
         apply_move: |game_state, game_move| {
             let mut game_state = game_state.clone();
@@ -298,13 +315,9 @@ pub fn init_ai_state(
             }
             game_state
         },
-        get_score: |game_state| match game_state.player_turn {
-            CellState::PLAYER1 => {
-                game_state.score(CellState::PLAYER1) - game_state.score(CellState::PLAYER2)
-            }
-            CellState::PLAYER2 => {
-                game_state.score(CellState::PLAYER2) - game_state.score(CellState::PLAYER1)
-            }
+        get_score: |game_state, player| match player {
+            1 => game_state.score(CellState::PLAYER1) - game_state.score(CellState::PLAYER2),
+            2 => game_state.score(CellState::PLAYER2) - game_state.score(CellState::PLAYER1),
             _ => panic!("Invalid player turn"),
         },
     })
