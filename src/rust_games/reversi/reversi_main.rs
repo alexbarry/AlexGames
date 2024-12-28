@@ -172,6 +172,20 @@ impl AlexGamesApi for AlexGamesReversi {
             reversi_draw::BTN_ID_UNDO => {
                 self.load_state_offset(-1);
             }
+            reversi_draw::BTN_ID_PASS => {
+                let player_turn = self.game_state.player_turn;
+                let rc = reversi_core::player_move(
+                    &mut self.game_state,
+                    player_turn,
+                    reversi_core::MOVE_PASS,
+                );
+                if let Err(err) = rc {
+                    let msg = AlexGamesReversi::rc_to_err_msg(err);
+                    self.callbacks.set_status_err(msg);
+                } else {
+                    self.save_state();
+                }
+            }
             reversi_draw::BTN_ID_REDO => {
                 self.load_state_offset(1);
             }
@@ -249,6 +263,7 @@ impl AlexGamesApi for AlexGamesReversi {
     fn init(&mut self, callbacks: &rust_game_api::CCallbacksPtr) {
         self.game_state = reversi_core::State::new();
         callbacks.create_btn(reversi_draw::BTN_ID_UNDO, "Undo", 1);
+        callbacks.create_btn(reversi_draw::BTN_ID_PASS, "Pass", 2);
         callbacks.create_btn(reversi_draw::BTN_ID_REDO, "Redo", 1);
         callbacks.set_btn_enabled(reversi_draw::BTN_ID_UNDO, false);
         callbacks.set_btn_enabled(reversi_draw::BTN_ID_REDO, false);
@@ -293,7 +308,28 @@ pub fn init_ai_state(
         init_state: game_state,
         get_possible_moves: |game_state| {
             //println!("reversi_main: get_possible_moves called with state {:?}", game_state);
-            game_state.get_valid_moves()
+            let moves = game_state.get_valid_moves();
+            if moves.len() == 0 && !game_state.board_full() {
+                //println!("get_possible_moves returning pass because moves len is 0");
+                let mut possible_game_state = game_state.clone();
+                let player_turn = possible_game_state.player_turn;
+                let rc = reversi_core::player_move(
+                    &mut possible_game_state,
+                    player_turn,
+                    reversi_core::MOVE_PASS,
+                );
+                if !rc.is_ok() {
+                    panic!("pass was not okay!");
+                }
+
+                if possible_game_state.get_valid_moves().len() > 0 {
+                    vec![reversi_core::MOVE_PASS]
+                } else {
+                    vec![]
+                }
+            } else {
+                moves
+            }
         },
         get_player_turn: |game_state| {
             // TODO I really don't want to add another generic... I think I only need this for
@@ -311,6 +347,9 @@ pub fn init_ai_state(
             let player_turn = game_state.player_turn;
             let rc = reversi_core::player_move(&mut game_state, player_turn, game_move);
             if !rc.is_ok() {
+                println!("Failed to apply move {:?}", game_move);
+                println!("to board state:");
+                reversi_core::_print_board(&game_state);
                 panic!("mcts.apply_move !is_ok");
             }
             game_state

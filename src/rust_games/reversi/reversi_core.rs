@@ -35,6 +35,8 @@ pub struct State {
     pub last_move: Option<Pt>,
 }
 
+pub const MOVE_PASS: Pt = Pt { y: 9, x: 9 };
+
 impl State {
     pub fn new() -> State {
         let mut state = State {
@@ -99,7 +101,28 @@ impl State {
                 }
             }
         }
-        return moves;
+        // Do this in the AI function instead
+        // get_valid_moves is used to check if a pass is a valid option
+        /*
+                if moves.len() > 0 || self.board_full() {
+                    moves
+                } else {
+                    vec![ MOVE_PASS ]
+                }
+        */
+
+        moves
+    }
+
+    pub fn board_full(&self) -> bool {
+        for y in 0..BOARD_SIZE {
+            for x in 0..BOARD_SIZE {
+                if self.board[y][x] != CellState::EMPTY {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
 
@@ -237,6 +260,18 @@ fn reverse_cells(state: &mut State, player: CellState, pt: Pt, dir: (i32, i32)) 
 pub fn player_move(mut state: &mut State, player: CellState, pt: Pt) -> Result<(), ReversiErr> {
     if state.player_turn != player {
         return Err(ReversiErr::NotYourTurn);
+    }
+
+    if pt == MOVE_PASS {
+        //println!("Player tried to pass...");
+        if (&state).get_valid_moves().len() > 0 {
+            //println!("pass failed because valid moves len > 0!");
+            return Err(ReversiErr::InvalidMove);
+        } else {
+            //println!("pass succeeded");
+            state.player_turn = other_player(state.player_turn);
+            return Ok(());
+        }
     }
 
     if !pos_in_range(pt) {

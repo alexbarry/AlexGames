@@ -10,6 +10,7 @@ const TEXT_BOX_SIZE_Y: i32 = SCORE_TEXT_SIZE + 2 * SCORE_PADDING;
 const Y_OFFSET: i32 = TEXT_BOX_SIZE_Y;
 
 pub const BTN_ID_UNDO: &str = "btn_undo";
+pub const BTN_ID_PASS: &str = "btn_pass";
 pub const BTN_ID_REDO: &str = "btn_redo";
 
 pub const GAME_OPTION_NEW_GAME: &str = "option_id_new_game";
@@ -469,6 +470,7 @@ impl DrawState {
             BTN_ID_UNDO,
             callbacks.has_saved_state_offset(session_id, -1),
         );
+        callbacks.set_btn_enabled(BTN_ID_PASS, state.get_valid_moves().len() == 0);
         callbacks.set_btn_enabled(BTN_ID_REDO, callbacks.has_saved_state_offset(session_id, 1));
 
         callbacks.draw_refresh();
