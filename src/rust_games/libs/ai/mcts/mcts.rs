@@ -17,9 +17,9 @@ use rand::Rng;
 #[derive(Clone)]
 pub struct MCTSParams<GameState, GameMove> {
     //get_game_state: fn(GameState) -> String,
-    pub get_possible_moves: fn(GameState) -> Vec<GameMove>,
-    pub apply_move: fn(GameState, GameMove) -> GameState,
-    pub get_score: fn(GameState) -> i32,
+    pub get_possible_moves: fn(&GameState) -> Vec<GameMove>,
+    pub apply_move: fn(&GameState, GameMove) -> GameState,
+    pub get_score: fn(&GameState) -> i32,
     pub init_state: GameState,
 
     pub get_time_ms: Option<fn() -> TimeMs>,
@@ -151,7 +151,7 @@ where
         if debug {
             assert!(self.current_node.borrow().state == game_state);
             assert!(self
-                .get_possible_moves(self.current_node.borrow().state)
+                .get_possible_moves(&self.current_node.borrow().state)
                 .contains(&game_move));
         }
 
@@ -183,7 +183,7 @@ where
 
         // Get random move
         if false {
-            let moves = self.get_possible_moves(game_state);
+            let moves = self.get_possible_moves(&game_state);
             let random_index = rand::thread_rng().gen_range(0..moves.len());
             let duration = (start_time - self.get_time_ms()) as i32;
             return (
@@ -233,7 +233,7 @@ where
         return (best_move.copied(), info);
     }
 
-    fn get_possible_moves(&self, game_state: GameState) -> Vec<GameMove> {
+    fn get_possible_moves(&self, game_state: &GameState) -> Vec<GameMove> {
         return (self.params.get_possible_moves)(game_state);
     }
 
@@ -245,7 +245,7 @@ where
 
         let mut state = current_node.borrow().state;
         loop {
-            let moves = (params.get_possible_moves)(state);
+            let moves = (params.get_possible_moves)(&state);
             // TODO: right now a pass is not an option
             // but it should be. Perhaps just hack something in to have get_possible_moves return a pass if
             // there aren't any other moves, so that the game can continue simulating
@@ -255,9 +255,9 @@ where
                 break;
             }
             let game_move = moves[rng.gen_range(0..moves.len())];
-            state = (params.apply_move)(state, game_move);
+            state = (params.apply_move)(&state, game_move);
         }
-        return (params.get_score)(state);
+        return (params.get_score)(&state);
     }
 
     fn update_node_counts(
@@ -294,11 +294,10 @@ where
         //let node = &mut self.current_node;
         let node = current_node;
         let game_state = node.borrow().state;
-        let moves = (params.get_possible_moves)(game_state);
+        let moves = (params.get_possible_moves)(&game_state);
 
         for game_move in moves.iter() {
-            let new_game_state = game_state.clone();
-            let new_game_state = (params.apply_move)(new_game_state, *game_move);
+            let new_game_state = (params.apply_move)(&game_state, *game_move);
             let new_node = Node::new(new_game_state);
             //println!("[mcts] Created new node with id {}", new_node.borrow().id);
 
