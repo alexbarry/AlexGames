@@ -49,7 +49,6 @@ pub struct MCTSState<GameState, GameMove> {
 // I don't understand this, why would I make this uppercase if it changes?
 #[allow(non_upper_case_globals)]
 static mut g_node_count: i64 = 10;
-
 struct Node<GameState, GameMove> {
     #[allow(dead_code)]
     id: i64,
@@ -171,7 +170,9 @@ where
         }
     }
 
-    pub fn get_move(&mut self, game_state: GameState) -> (Option<GameMove>, MCTSInfo) {
+    /*
+    pub fn iter_mcts(&mut self, game_state: GameState, iter_count: i32) {
+    //pub fn get_move(&mut self, game_state: GameState) -> (Option<GameMove>, MCTSInfo) {
         //let start_time = Instant::now();
         let start_time = self.get_time_ms();
         //println!("get_move");
@@ -184,22 +185,6 @@ where
         // populate it randomly, update scores of previous nodes
         // that's it?
 
-        // Get random move
-        if false {
-            let moves = self.get_possible_moves(&game_state);
-            let random_index = rand::thread_rng().gen_range(0..moves.len());
-            let duration = (start_time - self.get_time_ms()) as i32;
-            return (
-                Some(moves[random_index]),
-                MCTSInfo {
-                    max_depth: 0,
-                    node_count: 0,
-                    score: -1.0,
-                    time_ms: duration,
-                },
-            );
-        }
-
         //let expansion_count = 300;
         //for _ in 0..10_000 {
         for _ in 0..self.params.expansion_count {
@@ -207,7 +192,10 @@ where
             self.expand_tree_once();
         }
         //self.print_node(&self.current_node.borrow(), 0, 0);
+    }
+    */
 
+    pub fn get_move(&mut self, game_state: GameState) -> Option<GameMove> {
         let mut best_move = None;
         let mut best_move_score = 0.0;
         let binding = self.current_node.borrow();
@@ -224,16 +212,18 @@ where
             "[mcts] Choosing best move {:?}, score: {}",
             best_move, best_move_score
         );
-        let search_duration = (self.get_time_ms() - start_time) as i32;
+        //let search_duration = (self.get_time_ms() - start_time) as i32;
 
         let (max_depth, node_count) = self.current_node.borrow().get_info();
         let info = MCTSInfo {
             max_depth: max_depth,
             node_count: node_count,
             score: best_move_score,
-            time_ms: search_duration,
+            //time_ms: search_duration,
+            time_ms: 0,
         };
-        return (best_move.copied(), info);
+        //return (best_move.copied(), info);
+        return best_move.copied();
     }
 
     fn get_possible_moves(&self, game_state: &GameState) -> Vec<GameMove> {
@@ -330,7 +320,7 @@ where
         }
     }
 
-    fn expand_tree_once(&mut self) {
+    pub fn expand_tree_once(&mut self) {
         //println!("[mcts] expand_tree_once");
         //let mut node = &mut self.current_node;
         let mut node = Rc::clone(&self.current_node);

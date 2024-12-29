@@ -9,7 +9,7 @@
 
 use crate::rust_game_api;
 
-use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, OptionInfo, OptionType};
+use crate::rust_game_api::{AlexGamesApi, CCallbacksPtr, OptionInfo, OptionType, TimeMs};
 
 use crate::libs::ai::mcts;
 
@@ -27,6 +27,8 @@ impl rust_game_api::GameState for reversi_core::State {
 const FPS: i32 = 60;
 const UPDATE_TIME_MS: i32 = 1000 / FPS;
 
+const enable_ai: bool = true;
+
 pub struct AlexGamesReversi {
     game_state: reversi_core::State,
     session_id: i32,
@@ -35,6 +37,9 @@ pub struct AlexGamesReversi {
     callbacks: &'static rust_game_api::CCallbacksPtr,
 
     ai_state: mcts::MCTSState<reversi_core::State, reversi_core::Pt>,
+    ai_iters_remaining: i32,
+    ai_iter_count: i32,
+    ai_iter_per_frame: i32,
 
     draw: reversi_draw::DrawState,
 }
@@ -80,8 +85,64 @@ impl AlexGamesReversi {
     }
 
     fn draw_state(&self) {
-        self.draw
-            .draw_state(self.callbacks, &self.game_state, self.session_id);
+        let percent_complete = ((self.ai_iter_count - self.ai_iters_remaining) as f64)
+            / (self.ai_iter_count as f64)
+            * 100.0;
+        self.draw.draw_state(
+            self.callbacks,
+            &self.game_state,
+            self.session_id,
+            self.ai_iters_remaining > 0,
+            percent_complete,
+        );
+    }
+
+    fn start_ai_processing(&mut self) {
+        // Handle AI move
+        //if enable_ai && self.game_state.player_turn == CellState::PLAYER1 {
+        self.ai_iters_remaining = self.ai_iter_count;
+        let ai_time_ms: u32 = (1000 / FPS * 4 / 5).try_into().unwrap();
+        println!("ai_iters: {}", self.ai_iters_remaining);
+        self.process_ai(self.callbacks.get_time_ms() + ai_time_ms);
+        //self.draw.draw_thinking_animation(&self.game_state, percent_complete);
+    }
+
+    fn process_ai(&mut self, end_time_ms: TimeMs) {
+        println!("ai_iters: {}", self.ai_iters_remaining);
+        if self.ai_iters_remaining <= 0 {
+            return;
+        }
+        let ai_state = &mut self.ai_state;
+        let old_game_state = self.game_state.clone();
+
+        // TODO need a way to indicate that the tree has converged?
+        //for _ in 0..self.ai_iter_per_frame {
+        let mut iters_run = 0;
+        while self.callbacks.get_time_ms() < end_time_ms {
+            ai_state.expand_tree_once();
+            iters_run += 1;
+        }
+        self.ai_iters_remaining -= iters_run;
+        println!(
+            "AI iters run this frame: {}, remaining: {}",
+            iters_run, self.ai_iters_remaining
+        );
+        //println!("AI iters remaining: {}", self.ai_iters_remaining);
+
+        if self.ai_iters_remaining <= 0 {
+            let ai_move = ai_state.get_move(self.game_state);
+            let ai_move = ai_move.expect("empty move from MCTS::get_move??");
+            println!("AI move is: {:?}", ai_move);
+            self.callbacks
+                .set_status_msg(&format!("Chose AI move {:?}, metadata {:?}", ai_move, "",));
+            let rc = reversi_core::player_move(&mut self.game_state, CellState::PLAYER2, ai_move);
+            if let Err(err) = rc {
+                panic!("Error from AI move: {:?}", err);
+            }
+            ai_state.move_node(old_game_state, ai_move);
+            self.draw
+                .add_animation(&old_game_state, &self.game_state, 500);
+        }
     }
 }
 
@@ -92,6 +153,9 @@ impl AlexGamesApi for AlexGamesReversi {
 
     fn update(&mut self, dt_ms: i32) {
         self.draw.update_state(self.callbacks, dt_ms);
+        let ai_time_ms: u32 = (1000 / FPS * 2).try_into().unwrap();
+        let end_time = self.callbacks.get_time_ms() + ai_time_ms;
+        self.process_ai(end_time);
         //println!("rust: update called");
         //draw_state(&handle.game_state as reversi_core::State);
         self.draw_state();
@@ -108,7 +172,7 @@ impl AlexGamesApi for AlexGamesReversi {
         let cell_y = cell.y;
         let cell_x = cell.x;
 
-        let enable_ai = false;
+        //let enable_ai = false;
 
         let player_turn = self.game_state.player_turn;
         println!("User clicked cell {cell_y} {cell_x}, player_turn={player_turn:?}");
@@ -140,31 +204,9 @@ impl AlexGamesApi for AlexGamesReversi {
         } else {
             self.draw
                 .add_animation(&old_game_state, &self.game_state, 500);
-            // TODO need a delay between player's move and AI move
-            // TODO only do this if AI multiplayer is chosen
-            // TODO maybe an animation would make it easier?
-            // Handle AI move
+            //self.draw.add_thinking_animation(&self.game_state, 1000);
             if enable_ai && player_turn == CellState::PLAYER1 {
-                self.draw.add_thinking_animation(&self.game_state, 1000);
-                let old_game_state = self.game_state.clone();
-                // TODO Dammit... I need a way to yield to animation updates while running the MCTS
-                // TODO would a separate rust thread work in the browser? For now that might be easier
-                // than adding a whole AI  that manages threads
-                let (ai_move, ai_info) = ai_state.get_move(self.game_state);
-                let ai_move = ai_move.expect("empty move from MCTS::get_move??");
-                println!("AI move is: {:?}", ai_move);
-                self.callbacks.set_status_msg(&format!(
-                    "Chose AI move {:?}, metadata {:?}",
-                    ai_move, ai_info
-                ));
-                let rc =
-                    reversi_core::player_move(&mut self.game_state, CellState::PLAYER2, ai_move);
-                if let Err(err) = rc {
-                    panic!("Error from AI move: {:?}", err);
-                }
-                ai_state.move_node(old_game_state, ai_move);
-                self.draw
-                    .add_animation(&old_game_state, &self.game_state, 500);
+                self.start_ai_processing();
             }
 
             self.save_state();
@@ -377,6 +419,11 @@ pub fn init_reversi(
         callbacks: callbacks,
 
         ai_state: init_ai_state(callbacks, game_state),
+
+        ai_iters_remaining: 0,
+        //ai_iter_count: 10_000,
+        ai_iter_count: 3_000,
+        ai_iter_per_frame: 10_000 / 10 / FPS,
         draw: reversi_draw::DrawState::new(),
     };
     reversi.init(callbacks);

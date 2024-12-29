@@ -128,6 +128,8 @@ impl DrawState {
         callbacks: &CCallbacksPtr,
         state: &reversi_core::State,
         session_id: i32,
+        is_thinking: bool,
+        percent_complete: f64,
     ) {
         let (prev_state, new_state, progress, is_animating, is_thinking) =
             if self.animation_queue.len() > 0 {
@@ -140,7 +142,7 @@ impl DrawState {
                     anim.is_thinking,
                 )
             } else {
-                (state, state, 0.0, false, false)
+                (state, state, 0.0, false, is_thinking)
             };
         //let callbacks = self.callbacks;
         //let state = &self.game_state;
@@ -457,7 +459,7 @@ impl DrawState {
         const THINKING_TEXT_SIZE: i32 = 24;
         if is_thinking {
             callbacks.draw_text(
-                "Thinking...",
+                &format!("Thinking... ({:.1}%)", percent_complete),
                 "#888888",
                 THINKING_TEXT_SIZE + SCORE_PADDING,
                 CANVAS_WIDTH / 2,
