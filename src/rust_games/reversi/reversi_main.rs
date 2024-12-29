@@ -101,7 +101,7 @@ impl AlexGamesReversi {
         // Handle AI move
         //if enable_ai && self.game_state.player_turn == CellState::PLAYER1 {
         self.ai_iters_remaining = self.ai_iter_count;
-        let ai_time_ms: u32 = (1000 / FPS * 4 / 5).try_into().unwrap();
+        let ai_time_ms: TimeMs = (1000 / FPS * 4 / 5).try_into().unwrap();
         println!("ai_iters: {}", self.ai_iters_remaining);
         self.process_ai(self.callbacks.get_time_ms() + ai_time_ms);
         //self.draw.draw_thinking_animation(&self.game_state, percent_complete);
@@ -153,7 +153,7 @@ impl AlexGamesApi for AlexGamesReversi {
 
     fn update(&mut self, dt_ms: i32) {
         self.draw.update_state(self.callbacks, dt_ms);
-        let ai_time_ms: u32 = (1000 / FPS * 2).try_into().unwrap();
+        let ai_time_ms: TimeMs = (1000 / FPS * 2).try_into().unwrap();
         let end_time = self.callbacks.get_time_ms() + ai_time_ms;
         self.process_ai(end_time);
         //println!("rust: update called");
