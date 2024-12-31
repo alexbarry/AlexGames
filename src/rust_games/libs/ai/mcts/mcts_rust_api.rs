@@ -4,6 +4,7 @@ use crate::rust_game_api::CCallbacksPtr;
 
 use crate::libs::ai::mcts;
 
+use std::ptr;
 use std::rc::Rc;
 
 //type GameState = [u8];
@@ -173,7 +174,9 @@ pub extern "C" fn rust_game_api_ai_init(
 
 #[no_mangle]
 pub extern "C" fn rust_game_api_ai_destroy(handle: *mut c_void) {
-    unsafe { Box::from_raw(handle) };
+    unsafe {
+        let _ = Box::from_raw(handle);
+    }
 }
 
 fn handle_ptr_to_ref(handle: *mut c_void) -> &'static mut mcts::MCTSState<GameState, GameMove> {
@@ -182,10 +185,16 @@ fn handle_ptr_to_ref(handle: *mut c_void) -> &'static mut mcts::MCTSState<GameSt
     handle
 }
 
-fn state_ptr_to_ref(state: *const u8, state_len: usize) -> GameMove {
+fn state_ptr_to_ref(state: *const u8, state_len: usize) -> GameState {
     let state = unsafe { std::slice::from_raw_parts(state, state_len) };
     let state = state.to_vec();
     state
+}
+
+fn game_move_ptr_to_ref(game_move: *const u8, game_move_len: usize) -> GameMove {
+    let game_move = unsafe { std::slice::from_raw_parts(game_move, game_move_len) };
+    let game_move = game_move.to_vec();
+    game_move
 }
 
 #[no_mangle]
@@ -212,7 +221,17 @@ pub extern "C" fn rust_game_api_ai_get_move(
     let game_move = handle.get_move(state);
     // TODO write game_move ptr to `move_out` up to max_move_out_len, return length
 
-    0
+    let game_move = game_move.expect("AI game move is null?");
+
+    if game_move.len() >= max_move_out_len {
+        panic!("rust_game_api_ai_get_move: game_move.len() >= max_move_out_len");
+    }
+
+    unsafe {
+        ptr::copy_nonoverlapping(game_move.as_ptr(), move_out, max_move_out_len);
+    }
+
+    game_move.len()
 }
 
 #[no_mangle]
@@ -222,8 +241,9 @@ pub extern "C" fn rust_game_api_ai_get_move_score(
     game_move_len: usize,
 ) -> f64 {
     // TODO
-
-    0.0
+    let mut handle = handle_ptr_to_ref(handle);
+    let game_move = game_move_ptr_to_ref(game_move, game_move_len);
+    handle.get_move_score(game_move)
 }
 
 #[no_mangle]
@@ -234,5 +254,8 @@ pub extern "C" fn rust_game_api_ai_move_node(
     game_move: *const u8,
     game_move_len: usize,
 ) {
-    // TODO
+    let mut handle = handle_ptr_to_ref(handle);
+    let state = game_move_ptr_to_ref(state, state_len);
+    let game_move = game_move_ptr_to_ref(game_move, game_move_len);
+    handle.move_node(state, game_move)
 }
