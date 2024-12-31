@@ -19,6 +19,11 @@ use crate::reversi::reversi_core::{CellState, Pt, ReversiErr};
 use crate::reversi::reversi_draw;
 use crate::reversi::reversi_serialize;
 
+use std::rc::Rc;
+
+type GameState = reversi_core::State;
+type GameMove = reversi_core::Pt;
+
 /*
 impl rust_game_api::GameState for reversi_core::State {
 }
@@ -332,10 +337,79 @@ impl AlexGamesApi for AlexGamesReversi {
     }
 }
 
+struct ReversiMCTSFuncs {
+    get_possible_moves: Box<dyn Fn(&GameState) -> Vec<GameMove>>,
+}
+
+impl mcts::MCTSGameFuncs<GameState, GameMove> for ReversiMCTSFuncs {
+    fn get_possible_moves(&self, state: &GameState) -> Vec<GameMove> {
+        (self.get_possible_moves)(state)
+    }
+}
+
 pub fn init_ai_state(
     callbacks: &'static CCallbacksPtr,
     game_state: reversi_core::State,
 ) -> mcts::MCTSState<reversi_core::State, reversi_core::Pt> {
+    let get_possible_moves = |game_state: &GameState| -> Vec<GameMove> {
+        //println!("reversi_main: get_possible_moves called with state {:?}", game_state);
+        let moves = game_state.get_valid_moves();
+        if moves.len() == 0 && !game_state.board_full() {
+            //println!("get_possible_moves returning pass because moves len is 0");
+            let mut possible_game_state = game_state.clone();
+            let player_turn = possible_game_state.player_turn;
+            let rc = reversi_core::player_move(
+                &mut possible_game_state,
+                player_turn,
+                reversi_core::MOVE_PASS,
+            );
+            if !rc.is_ok() {
+                panic!("pass was not okay!");
+            }
+
+            if possible_game_state.get_valid_moves().len() > 0 {
+                vec![reversi_core::MOVE_PASS]
+            } else {
+                vec![]
+            }
+        } else {
+            moves
+        }
+    };
+    let get_player_turn = |game_state: &GameState| -> mcts::PlayerId {
+        // TODO I really don't want to add another generic... I think I only need this for
+        // separating nodes' win scores
+        match game_state.player_turn {
+            CellState::PLAYER1 => 1,
+            CellState::PLAYER2 => 2,
+            CellState::EMPTY => {
+                panic!("game_state.player_turn was empty");
+            }
+        }
+    };
+    let apply_move = |game_state: &GameState, game_move: GameMove| -> GameState {
+        let mut game_state = game_state.clone();
+        let player_turn = game_state.player_turn;
+        let rc = reversi_core::player_move(&mut game_state, player_turn, game_move);
+        if !rc.is_ok() {
+            println!("Failed to apply move {:?}", game_move);
+            println!("to board state:");
+            reversi_core::_print_board(&game_state);
+            panic!("mcts.apply_move !is_ok");
+        }
+        game_state
+    };
+
+    let get_score = |game_state: &GameState, player: mcts::PlayerId| match player {
+        1 => game_state.score(CellState::PLAYER1) - game_state.score(CellState::PLAYER2),
+        2 => game_state.score(CellState::PLAYER2) - game_state.score(CellState::PLAYER1),
+        _ => panic!("Invalid player turn"),
+    };
+
+    let game_funcs = ReversiMCTSFuncs {
+        get_possible_moves: Box::new(get_possible_moves),
+    };
+
     mcts::MCTSState::init(mcts::MCTSParams {
         get_time_ms: None, // TODO part of default
         //get_time_ms: Some(|callbacks| callbacks.get_time_ms() as i32),
@@ -353,59 +427,12 @@ pub fn init_ai_state(
 
         // TODO need to init ai_state when we get init game state, not here
         init_state: game_state,
-        get_possible_moves: |game_state| {
-            //println!("reversi_main: get_possible_moves called with state {:?}", game_state);
-            let moves = game_state.get_valid_moves();
-            if moves.len() == 0 && !game_state.board_full() {
-                //println!("get_possible_moves returning pass because moves len is 0");
-                let mut possible_game_state = game_state.clone();
-                let player_turn = possible_game_state.player_turn;
-                let rc = reversi_core::player_move(
-                    &mut possible_game_state,
-                    player_turn,
-                    reversi_core::MOVE_PASS,
-                );
-                if !rc.is_ok() {
-                    panic!("pass was not okay!");
-                }
+        get_possible_moves: get_possible_moves,
+        get_player_turn: get_player_turn,
+        apply_move: apply_move,
+        get_score: get_score,
 
-                if possible_game_state.get_valid_moves().len() > 0 {
-                    vec![reversi_core::MOVE_PASS]
-                } else {
-                    vec![]
-                }
-            } else {
-                moves
-            }
-        },
-        get_player_turn: |game_state| {
-            // TODO I really don't want to add another generic... I think I only need this for
-            // separating nodes' win scores
-            match game_state.player_turn {
-                CellState::PLAYER1 => 1,
-                CellState::PLAYER2 => 2,
-                CellState::EMPTY => {
-                    panic!("game_state.player_turn was empty");
-                }
-            }
-        },
-        apply_move: |game_state, game_move| {
-            let mut game_state = game_state.clone();
-            let player_turn = game_state.player_turn;
-            let rc = reversi_core::player_move(&mut game_state, player_turn, game_move);
-            if !rc.is_ok() {
-                println!("Failed to apply move {:?}", game_move);
-                println!("to board state:");
-                reversi_core::_print_board(&game_state);
-                panic!("mcts.apply_move !is_ok");
-            }
-            game_state
-        },
-        get_score: |game_state, player| match player {
-            1 => game_state.score(CellState::PLAYER1) - game_state.score(CellState::PLAYER2),
-            2 => game_state.score(CellState::PLAYER2) - game_state.score(CellState::PLAYER1),
-            _ => panic!("Invalid player turn"),
-        },
+        game_funcs: Rc::new(game_funcs),
     })
 }
 

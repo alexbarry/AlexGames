@@ -13,16 +13,34 @@ use rand::Rng;
 // and maybe make a "random" implementation of AI,
 // then make MCTS separate
 
-type PlayerId = i32;
+pub type PlayerId = i32;
+
+pub trait MCTSGameFuncs<GameState: ?Sized, GameMove>: 'static {
+    fn get_possible_moves(&self, state: &GameState) -> Vec<GameMove>;
+    //fn get_possible_moves<'a>(&'a self, state: GameState<'a>) -> Vec<GameMove<'a>>;
+
+    /*
+        fn get_player_turn(&self, state: GameState) -> PlayerId;
+        fn apply_move(&mut self, state: GameState, game_move: GameMove) -> GameState;
+        fn get_score(&self, state: GameState, player: PlayerId) -> i32;
+    */
+}
 
 //pub struct MCTSParams<GameState> {
 #[derive(Clone)]
-pub struct MCTSParams<GameState, GameMove> {
+pub struct MCTSParams<GameState, GameMove>
+where
+    GameState: Clone,
+    GameMove: Clone,
+{
     //get_game_state: fn(GameState) -> String,
     pub get_possible_moves: fn(&GameState) -> Vec<GameMove>,
     pub get_player_turn: fn(&GameState) -> PlayerId,
     pub apply_move: fn(&GameState, GameMove) -> GameState,
     pub get_score: fn(&GameState, PlayerId) -> i32,
+
+    pub game_funcs: Rc<dyn MCTSGameFuncs<GameState, GameMove>>,
+
     pub init_state: GameState,
 
     pub get_time_ms: Option<fn() -> TimeMs>,
@@ -41,7 +59,11 @@ pub struct MCTSInfo {
     pub time_ms: i32,
 }
 
-pub struct MCTSState<GameState, GameMove> {
+pub struct MCTSState<GameState, GameMove>
+where
+    GameState: Clone,
+    GameMove: Clone,
+{
     params: MCTSParams<GameState, GameMove>,
     current_node: Rc<RefCell<Node<GameState, GameMove>>>,
 }
@@ -133,13 +155,16 @@ impl<GameState, GameMove> Node<GameState, GameMove> {
 
 impl<GameState, GameMove> MCTSState<GameState, GameMove>
 where
-    GameState: Copy + std::fmt::Debug /* TODO remove after debugging */ + std::cmp::PartialEq,
-    GameMove: Copy + std::cmp::Eq + std::hash::Hash + std::fmt::Debug + std::clone::Clone,
+    //GameState: Copy + std::fmt::Debug /* TODO remove after debugging */ + std::cmp::PartialEq,
+    //GameMove: Copy + std::cmp::Eq + std::hash::Hash + std::fmt::Debug + std::clone::Clone,
+    GameState:
+        std::fmt::Debug /* TODO remove after debugging */ + std::cmp::PartialEq + std::clone::Clone,
+    GameMove: std::cmp::Eq + std::hash::Hash + std::fmt::Debug + std::clone::Clone,
 {
     pub fn init(params: MCTSParams<GameState, GameMove>) -> MCTSState<GameState, GameMove> {
         let mut state = MCTSState::<GameState, GameMove> {
             params: params.clone(),
-            current_node: Node::new(params.init_state),
+            current_node: Node::new(params.clone().init_state),
         };
         //state.expand_node(current_node);
         MCTSState::expand_node(params.clone(), &mut state.current_node);
@@ -223,7 +248,8 @@ where
             time_ms: 0,
         };
         //return (best_move.copied(), info);
-        return best_move.copied();
+        //return best_move.copied();
+        return best_move.cloned();
     }
 
     fn get_possible_moves(&self, game_state: &GameState) -> Vec<GameMove> {
@@ -236,7 +262,7 @@ where
     ) -> i32 {
         let mut rng = rand::thread_rng();
 
-        let mut state = current_node.borrow().state;
+        let mut state = current_node.borrow().state.clone();
         let player = (params.get_player_turn)(&state);
         loop {
             let moves = (params.get_possible_moves)(&state);
@@ -248,7 +274,7 @@ where
             if moves.len() == 0 {
                 break;
             }
-            let game_move = moves[rng.gen_range(0..moves.len())];
+            let game_move = moves[rng.gen_range(0..moves.len())].clone();
             state = (params.apply_move)(&state, game_move);
         }
         return (params.get_score)(&state, player);
@@ -293,13 +319,13 @@ where
 
         //let node = &mut self.current_node;
         let node = current_node;
-        let game_state = node.borrow().state;
-        let moves = (params.get_possible_moves)(&game_state);
+        let game_state = &node.borrow().state;
+        let moves = (params.get_possible_moves)(game_state);
 
         for game_move in moves.iter() {
             //let new_game_state = game_state.clone();
             let player = (params.get_player_turn)(&game_state);
-            let new_game_state = (params.apply_move)(&game_state, *game_move);
+            let new_game_state = (params.apply_move)(&game_state, game_move.clone());
             let new_node = Node::new(new_game_state);
             //println!("[mcts] Created new node with id {}", new_node.borrow().id);
 
@@ -316,7 +342,9 @@ where
             MCTSState::update_node_counts(&params, Rc::clone(&new_node), player, score_inc, 1);
             //println!("[mcts] 5/5 Double checking new node id {} ###", new_node.borrow().id);
             //println!("[mcts] to node {}, added child node {}", node.borrow().id, new_node.borrow().id);
-            node.borrow_mut().children.insert(*game_move, new_node);
+            node.borrow_mut()
+                .children
+                .insert(game_move.clone(), new_node);
         }
     }
 
