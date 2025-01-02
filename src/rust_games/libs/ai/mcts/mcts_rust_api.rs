@@ -62,11 +62,10 @@ pub struct AiInitParamsCStruct {
             move_len_out: *mut usize,
         ) -> usize,
     >,
-    /*
-        get_player_turn: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize) -> i32>,
-        apply_move: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, *const u8, usize)>,
-        get_score: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize) -> i32>,
-    */
+    get_player_turn: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize) -> i32>,
+    apply_move:
+        Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, *const u8, usize) -> usize>,
+    get_score: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, i32) -> i32>,
 }
 
 impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
@@ -103,16 +102,46 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
     }
 
     fn get_player_turn(&self, state: &GameState) -> mcts::PlayerId {
-        // TODO
-        0
+        if let Some(get_player_turn) = self.get_player_turn {
+            let state_len = state.len();
+            unsafe { (get_player_turn)(self.callback_handle, state.as_ptr(), state_len) }
+        } else {
+            panic!("get_player_turn is null");
+        }
     }
+
     fn apply_move(&self, state: &GameState, game_move: GameMove) -> GameState {
-        // TODO
-        state.to_vec()
+        const MAX_GAME_STATE_OUT_LEN: usize = 1024;
+
+        if let Some(apply_move) = self.apply_move {
+            let state_len = state.len();
+            let game_move_len = game_move.len();
+            let mut state_out_buff = vec![0; MAX_GAME_STATE_OUT_LEN];
+
+            let state_out_len = unsafe {
+                (apply_move)(
+                    self.callback_handle,
+                    state.as_ptr(),
+                    state_len,
+                    game_move.as_ptr(),
+                    game_move_len,
+                )
+            };
+
+            state_out_buff.truncate(state_out_len);
+
+            state_out_buff
+        } else {
+            panic!("apply_move is null");
+        }
     }
     fn get_score(&self, state: &GameState, player: mcts::PlayerId) -> i32 {
-        // TODO
-        0
+        if let Some(get_score) = self.get_score {
+            let state_len = state.len();
+            unsafe { (get_score)(self.callback_handle, state.as_ptr(), state_len, player) }
+        } else {
+            panic!("get_score is null");
+        }
     }
 }
 
