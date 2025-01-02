@@ -69,7 +69,7 @@ pub struct AiInitParamsCStruct {
     */
 }
 
-impl mcts::MCTSGameFuncs<GameState, GameMove> for AiInitParamsCStruct {
+impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
     //impl mcts::MCTSGameFuncs<GameState<'_>, GameMove<'_>> for AiInitParamsCStruct {
     //fn get_possible_moves<'a>(&'a self, game_state: GameState) -> Vec<GameMove<'a>> {
     fn get_possible_moves(&self, game_state: &GameState) -> Vec<GameMove> {
@@ -102,20 +102,18 @@ impl mcts::MCTSGameFuncs<GameState, GameMove> for AiInitParamsCStruct {
         }
     }
 
-    /*
-        fn get_player_turn(&self, state: GameState) -> mcts::PlayerId {
-            // TODO
-            0
-        }
-        fn apply_move(&mut self, state: GameState, game_move: GameMove) -> GameState {
-            // TODO
-            state
-        }
-        fn get_score(&self, state: GameState, player: mcts::PlayerId) -> i32 {
-            // TODO
-            0
-        }
-    */
+    fn get_player_turn(&self, state: &GameState) -> mcts::PlayerId {
+        // TODO
+        0
+    }
+    fn apply_move(&self, state: &GameState, game_move: GameMove) -> GameState {
+        // TODO
+        state.to_vec()
+    }
+    fn get_score(&self, state: &GameState, player: mcts::PlayerId) -> i32 {
+        // TODO
+        0
+    }
 }
 
 #[no_mangle]
@@ -142,30 +140,31 @@ pub extern "C" fn rust_game_api_ai_init(
         game_funcs: Rc::new(params.clone()),
 
         init_state: state,
-
         /*
-        // TODO need to init ai_state when we get init game state, not here
-        init_state: state,
-        get_possible_moves: |game_state| {
-            params.get_possible_moves(game_state)
-        },
-        get_player_turn: |game_state| {
-            params.get_player_turn(game_state)
-        },
-        apply_move: |game_state, game_move| {
-            params.apply_move(game_state, game_move)
-        },
-        get_score: |game_state, player| {
-            params.get_score(game_state, player)
-        },
+                // TODO need to init ai_state when we get init game state, not here
+                init_state: state,
+                get_possible_moves: |game_state| {
+                    params.get_possible_moves(game_state)
+                },
+                get_player_turn: |game_state| {
+                    params.get_player_turn(game_state)
+                },
+                apply_move: |game_state, game_move| {
+                    params.apply_move(game_state, game_move)
+                },
+                get_score: |game_state, player| {
+                    params.get_score(game_state, player)
+                },
+                */
+        /*
+                get_possible_moves: |game_state| vec![],
+                get_player_turn: |game_state| 0,
+                apply_move: |game_state, game_move| {
+                    //Rc::new(vec![])
+                    vec![]
+                },
+                get_score: |game_state, player| 0,
         */
-        get_possible_moves: |game_state| vec![],
-        get_player_turn: |game_state| 0,
-        apply_move: |game_state, game_move| {
-            //Rc::new(vec![])
-            vec![]
-        },
-        get_score: |game_state, player| 0,
     });
 
     let mcts_state = Box::new(mcts_state);

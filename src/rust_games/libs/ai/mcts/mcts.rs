@@ -15,15 +15,12 @@ use rand::Rng;
 
 pub type PlayerId = i32;
 
-pub trait MCTSGameFuncs<GameState: ?Sized, GameMove>: 'static {
-    fn get_possible_moves(&self, state: &GameState) -> Vec<GameMove>;
-    //fn get_possible_moves<'a>(&'a self, state: GameState<'a>) -> Vec<GameMove<'a>>;
-
-    /*
-        fn get_player_turn(&self, state: GameState) -> PlayerId;
-        fn apply_move(&mut self, state: GameState, game_move: GameMove) -> GameState;
-        fn get_score(&self, state: GameState, player: PlayerId) -> i32;
-    */
+//pub trait MCTSGameFuncs<GameState: ?Sized, GameMove>: 'static {
+pub trait MCTSGameFuncs<'a, GameState: 'a + ?Sized, GameMove> {
+    fn get_possible_moves(&self, state: &'a GameState) -> Vec<GameMove>;
+    fn get_player_turn(&self, state: &'a GameState) -> PlayerId;
+    fn apply_move(&self, state: &'a GameState, game_move: GameMove) -> GameState;
+    fn get_score(&self, state: &'a GameState, player: PlayerId) -> i32;
 }
 
 //pub struct MCTSParams<GameState> {
@@ -34,12 +31,11 @@ where
     GameMove: Clone,
 {
     //get_game_state: fn(GameState) -> String,
-    pub get_possible_moves: fn(&GameState) -> Vec<GameMove>,
-    pub get_player_turn: fn(&GameState) -> PlayerId,
-    pub apply_move: fn(&GameState, GameMove) -> GameState,
-    pub get_score: fn(&GameState, PlayerId) -> i32,
-
-    pub game_funcs: Rc<dyn MCTSGameFuncs<GameState, GameMove>>,
+    //pub get_possible_moves: fn(&GameState) -> Vec<GameMove>,
+    //pub get_player_turn: fn(&GameState) -> PlayerId,
+    //pub apply_move: fn(&GameState, GameMove) -> GameState,
+    //pub get_score: fn(&GameState, PlayerId) -> i32,
+    pub game_funcs: Rc<dyn for<'a> MCTSGameFuncs<'a, GameState, GameMove>>,
 
     pub init_state: GameState,
 
@@ -253,19 +249,22 @@ where
     }
 
     fn get_possible_moves(&self, game_state: &GameState) -> Vec<GameMove> {
-        return (self.params.get_possible_moves)(game_state);
+        //return (self.params.get_possible_moves)(game_state);
+        return self.params.game_funcs.get_possible_moves(&game_state);
     }
 
     fn simulate_node(
         params: MCTSParams<GameState, GameMove>,
         current_node: &Rc<RefCell<Node<GameState, GameMove>>>,
     ) -> i32 {
+        let mut game_funcs = params.game_funcs.clone();
         let mut rng = rand::thread_rng();
 
         let mut state = current_node.borrow().state.clone();
-        let player = (params.get_player_turn)(&state);
+        //let player = (params.get_player_turn)(&state);
+        let player = params.game_funcs.get_player_turn(&state);
         loop {
-            let moves = (params.get_possible_moves)(&state);
+            let moves = params.game_funcs.get_possible_moves(&state);
             // TODO: right now a pass is not an option
             // but it should be. Perhaps just hack something in to have get_possible_moves return a pass if
             // there aren't any other moves, so that the game can continue simulating
@@ -275,9 +274,9 @@ where
                 break;
             }
             let game_move = moves[rng.gen_range(0..moves.len())].clone();
-            state = (params.apply_move)(&state, game_move);
+            state = game_funcs.apply_move(&state, game_move);
         }
-        return (params.get_score)(&state, player);
+        return game_funcs.get_score(&state, player);
     }
 
     fn update_node_counts(
@@ -291,7 +290,7 @@ where
         //for _ in 0..max_depth {
         loop {
             //println!("Incremented node counts by ({}, {})", win_change, sim_change);
-            let node_player = (params.get_player_turn)(&node.borrow().state);
+            let node_player = params.game_funcs.get_player_turn(&node.borrow().state);
 
             if player == node_player {
                 node.borrow_mut().win_count += win_change;
@@ -320,12 +319,12 @@ where
         //let node = &mut self.current_node;
         let node = current_node;
         let game_state = node.borrow().state.clone();
-        let moves = (params.get_possible_moves)(&game_state);
+        let moves = params.game_funcs.get_possible_moves(&game_state);
 
         for game_move in moves.iter() {
             //let new_game_state = game_state.clone();
-            let player = (params.get_player_turn)(&game_state);
-            let new_game_state = (params.apply_move)(&game_state, game_move.clone());
+            let player = params.game_funcs.get_player_turn(&game_state);
+            let new_game_state = params.game_funcs.apply_move(&game_state, game_move.clone());
             let new_node = Node::new(new_game_state);
             //println!("[mcts] Created new node with id {}", new_node.borrow().id);
 

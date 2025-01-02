@@ -339,11 +339,23 @@ impl AlexGamesApi for AlexGamesReversi {
 
 struct ReversiMCTSFuncs {
     get_possible_moves: Box<dyn Fn(&GameState) -> Vec<GameMove>>,
+    get_player_turn: Box<dyn Fn(&GameState) -> mcts::PlayerId>,
+    apply_move: Box<dyn Fn(&GameState, GameMove) -> GameState>,
+    get_score: Box<dyn Fn(&GameState, mcts::PlayerId) -> i32>,
 }
 
-impl mcts::MCTSGameFuncs<GameState, GameMove> for ReversiMCTSFuncs {
+impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for ReversiMCTSFuncs {
     fn get_possible_moves(&self, state: &GameState) -> Vec<GameMove> {
         (self.get_possible_moves)(state)
+    }
+    fn get_player_turn(&self, state: &GameState) -> mcts::PlayerId {
+        (self.get_player_turn)(state)
+    }
+    fn apply_move(&self, state: &GameState, game_move: GameMove) -> GameState {
+        (self.apply_move)(state, game_move)
+    }
+    fn get_score(&self, state: &GameState, player: mcts::PlayerId) -> i32 {
+        (self.get_score)(state, player)
     }
 }
 
@@ -408,6 +420,9 @@ pub fn init_ai_state(
 
     let game_funcs = ReversiMCTSFuncs {
         get_possible_moves: Box::new(get_possible_moves),
+        get_player_turn: Box::new(get_player_turn),
+        apply_move: Box::new(apply_move),
+        get_score: Box::new(get_score),
     };
 
     mcts::MCTSState::init(mcts::MCTSParams {
@@ -427,11 +442,10 @@ pub fn init_ai_state(
 
         // TODO need to init ai_state when we get init game state, not here
         init_state: game_state,
-        get_possible_moves: get_possible_moves,
-        get_player_turn: get_player_turn,
-        apply_move: apply_move,
-        get_score: get_score,
-
+        //get_possible_moves: get_possible_moves,
+        //get_player_turn: get_player_turn,
+        //apply_move: apply_move,
+        //get_score: get_score,
         game_funcs: Rc::new(game_funcs),
     })
 }
