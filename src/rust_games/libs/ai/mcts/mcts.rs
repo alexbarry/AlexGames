@@ -319,8 +319,8 @@ where
 
         //let node = &mut self.current_node;
         let node = current_node;
-        let game_state = &node.borrow().state;
-        let moves = (params.get_possible_moves)(game_state);
+        let game_state = node.borrow().state.clone();
+        let moves = (params.get_possible_moves)(&game_state);
 
         for game_move in moves.iter() {
             //let new_game_state = game_state.clone();
