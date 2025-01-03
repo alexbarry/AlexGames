@@ -24,6 +24,11 @@ static int lua_move_node(lua_State *L);
 
 */
 
+// TODO remove all this, we are inside a Lua game when any of this is called,
+// so there is already an error handler pushed, assuming lua_api.c did its job.
+// So don't push another one... I think?
+const bool push_err_handler = true;
+
 static const struct luaL_Reg lua_alexgames_ai_api[] = {
 	{"init",           lua_ai_init },
 	{"destroy",        lua_ai_destroy },
@@ -48,7 +53,7 @@ static bool read_bytearray(lua_State *L, int idx, const uint8_t **ary_out, size_
 	printf("%s: entering from %s\n", __func__, caller_func_name);
 	if (!lua_isstring(L, idx)) {
 		printf("%s: param is not string, is %d\n", caller_func_name, lua_type(L, idx));
-		luaL_error(L, "%s: read_bytearray param idx %d is not a string", caller_func_name, idx);
+		alex_log_err_user_visible(api, "%s: read_bytearray param idx %d is not a string", caller_func_name, idx);
 		return false;
 	}
 
@@ -72,13 +77,10 @@ static bool read_bytearray(lua_State *L, int idx, const uint8_t **ary_out, size_
 	}                                                                                      \
 
 
-// TODO TODO TODO
-// why is luaL_error() seemingly crashing the program without any sort of hint of what went wrong?
-// maybe I can't call this before init... or maybe I'm missing a prerequisite.
-
 static size_t lua_get_possible_moves(void *L, uint8_t *state, size_t state_len,
 	                              uint8_t *game_moves_out, size_t max_game_moves_out_len,
 	                              size_t *game_moves_out_len) {
+	size_t num_moves = 0;
 #if 0
 	//return 0; // TODO REMOVE
 	static bool returned_fake_data = false;
@@ -100,19 +102,33 @@ static size_t lua_get_possible_moves(void *L, uint8_t *state, size_t state_len,
 	// TODO call Lua global for now, maybe register a function from lua_ai_init in the future
 
 	//lua_checkstack_or_return_val(L, 2, 0);
-	lua_push_error_handler(L);
+	lua_checkstack_or_return_val(L, 2, 0);
+	int lua_err_handler_index = 0;
+	if (push_err_handler) {
+		lua_push_error_handler(L);
+		lua_err_handler_index = lua_gettop(L);
+	}
 	lua_getglobal_checktype_or_return_val(L, "get_possible_moves", LUA_TFUNCTION, 0);
 	lua_pushlstring(L, (char *)state, state_len);
 
 	// Should be returning a list of strings
-	pcall_handle_error(L, 1, 1);
+	//int rc = pcall_handle_error(L, 1, 1);
+	// TODO TODO all I need to do to fix the confusing errors is to
+	// add a parameter to point to the lua error handler index. In my previous Lua APIs, it was
+	// always at the beginning, but now it isn't because of the ai init state param
+	int rc = lua_pcall(L, 1, 1, lua_err_handler_index);
+	printf("%s: pcall returned %d\n", __func__, rc);
+	if (rc) {
+		handle_lua_err(L);
+		goto err;
+	}
 
 	if (lua_type(L, -1) != LUA_TTABLE) {
-		luaL_error(L, "%s: expected get_possible_moves to return a table, instead got type %d\n", lua_type(L, -1));
+		alex_log_err_user_visible(api, "%s: expected get_possible_moves to return a table, instead got type %d\n", __func__, lua_type(L, -1));
 		return 0;
 	}
 
-	size_t num_moves = lua_rawlen(L, -1);
+	num_moves = lua_rawlen(L, -1);
 	//printf("Read length %d\n", num_moves);
 	int i;
 	int data_len = 0;
@@ -127,12 +143,12 @@ static size_t lua_get_possible_moves(void *L, uint8_t *state, size_t state_len,
 			data_len = len;
 			*game_moves_out_len = len;
 			if (data_len*num_moves > max_game_moves_out_len) {
-				luaL_error(L, "%s: first elem len is %d, %d elems, caller's game_moves_out buffer is only %d bytes long",
-				              __func__, data_len, num_moves, max_game_moves_out_len);
+				alex_log_err_user_visible(api, "%s: first elem len is %d, %d elems, caller's game_moves_out buffer is only %d bytes long",
+				                          __func__, data_len, num_moves, max_game_moves_out_len);
 				break;
 			}
 		} else if (data_len != len) {
-			luaL_error(L, "%s: move index %d from Lua game is length %d, but first element "
+			alex_log_err_user_visible(api, "%s: move index %d from Lua game is length %d, but first element "
 			              "is len %d. Must all be the same length for now.",
 			              __func__, i, len, data_len);
 			break;
@@ -147,10 +163,16 @@ static size_t lua_get_possible_moves(void *L, uint8_t *state, size_t state_len,
 	// pop the list of moves
 	lua_pop(L, 1);
 
-	lua_pop_error_handler(L);
+	// pop the state string/bytearray that was passed as a parameter
+	lua_pop(L, 1);
+
+	err:
+	printf("%s:%d\n", __FILE__, __LINE__);
+	dump_lua_stack(L);
+	if (push_err_handler) lua_pop_error_handler(L);
 
 	if (lua_gettop(L) != 0) {
-		luaL_error(L, "Expected top to be 0, was %d\n", lua_gettop(L));
+		alex_log_err_user_visible(api, "Expected top to be 0, was %d\n", lua_gettop(L));
 	}
 
 	printf("%s: done, returning %zu, top=%d\n", __func__, data_len * num_moves, lua_gettop(L));
@@ -164,7 +186,7 @@ int32_t lua_get_player_turn(void *L, uint8_t *game_state, size_t game_state_len)
 	LUA_API_ENTER();
 	int player_turn = -1;
 
-	lua_push_error_handler(L);
+	if (push_err_handler) lua_push_error_handler(L);
 	lua_getglobal_checktype_or_return_val(L, "get_player_turn", LUA_TFUNCTION, 0);
 	lua_pushlstring(L, (char *)game_state, game_state_len);
 
@@ -175,24 +197,25 @@ int32_t lua_get_player_turn(void *L, uint8_t *game_state, size_t game_state_len)
 	lua_pop(L, 1);
 
 	if (!is_int) {
-		luaL_error(L, "%s: expected get_player_turn to return an integer, did not");
+		alex_log_err_user_visible(api, "%s: expected get_player_turn to return an integer, did not");
 		goto err;
 	}
 
 	err:
-	lua_pop_error_handler(L);
+	if (push_err_handler) lua_pop_error_handler(L);
 	LUA_API_EXIT();
 	printf("%s: returning player turn %d to Rust, top=%d\n", __func__, player_turn, lua_gettop(L));
 	return player_turn;
 }
 
 size_t lua_apply_move(void *L, const uint8_t *state, size_t state_len, const uint8_t *move, size_t move_len, uint8_t *state_out, size_t max_state_out_len) {
+	printf("[ai] C API apply_move called\n");
 	printf("%s: %s\n", __FILE__, __func__);
 	LUA_API_ENTER();
 
 	lua_checkstack_or_return_val(L, 3, 0);
 
-	lua_push_error_handler(L);
+	if (push_err_handler) lua_push_error_handler(L);
 	lua_getglobal_checktype_or_return_val(L, "apply_move", LUA_TFUNCTION, 0);
 	lua_pushlstring(L, (char *)state, state_len);
 	lua_pushlstring(L, (char *)move, move_len);
@@ -209,11 +232,13 @@ size_t lua_apply_move(void *L, const uint8_t *state, size_t state_len, const uin
 	printf("%s: successfully read bytearray\n", __func__);
 
 	if (state_out_len >= max_state_out_len) {
-		luaL_error(L, "%s: received state len %d from Lua, buff size is only %d\n", __func__, state_out_len, max_state_out_len);
+		alex_log_err_user_visible(api, "%s: received state len %d from Lua, buff size is only %d\n", __func__, state_out_len, max_state_out_len);
 		return 0;
 	}
 
+
 	memcpy(state_out, state_out_lua, state_out_len);
+	if (push_err_handler) lua_pop_error_handler(L);
 	printf("%s: done %s\n", __FILE__, __func__);
 	LUA_API_EXIT();
 	printf("%s: finished\n", __func__);
@@ -223,7 +248,7 @@ size_t lua_apply_move(void *L, const uint8_t *state, size_t state_len, const uin
 int32_t lua_get_score(void *L, const uint8_t *state, size_t state_len, int32_t player) {
 	printf("%s: %s\n", __FILE__, __func__);
 	LUA_API_ENTER();
-	lua_push_error_handler(L);
+	if (push_err_handler) lua_push_error_handler(L);
 	lua_getglobal_checktype_or_return_val(L, "apply_move", LUA_TFUNCTION, 0);
 	lua_pushlstring(L, (char *)state, state_len);
 	lua_pushinteger(L, player);
@@ -232,6 +257,7 @@ int32_t lua_get_score(void *L, const uint8_t *state, size_t state_len, int32_t p
 
 	int score = lua_tointeger(L, -1);
 	lua_pop(L, 1);
+	if (push_err_handler) lua_pop_error_handler(L);
 
 	
 	LUA_API_EXIT();
@@ -242,6 +268,10 @@ int32_t lua_get_score(void *L, const uint8_t *state, size_t state_len, int32_t p
 static int lua_ai_init(lua_State *L) {
 	printf("%s: lua_ai_init called\n", __FILE__);
 	LUA_API_ENTER();
+
+	if (lua_gettop(L) != 1) {
+		alex_log_err_user_visible(api, "%s start: Expected top to be 1, was %d\n", __func__, lua_gettop(L));
+	}
 
 
 	const uint8_t *state;
@@ -272,10 +302,11 @@ static int lua_ai_init(lua_State *L) {
 	//lua_settop(L, 0);
 	lua_pushlightuserdata(L, handle);
 
-	//if (lua_gettop(L) != 1) {
-	//	luaL_error(L, "Expected top to be 1, was %d\n", lua_gettop(L));
-	//}
+	if (lua_gettop(L) != 0) {
+		alex_log_err_user_visible(api, "%s end Expected top to be 0, was %d\n", __func__, lua_gettop(L));
+	}
 	LUA_API_EXIT();
+	printf("[ai] lua_ai_init finished\n");
 	return 1;
 }
 static int lua_ai_destroy(lua_State *L) {

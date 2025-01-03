@@ -127,7 +127,7 @@ static int lua_my_print(lua_State* L);
 
 
 int lua_err_handler(struct lua_State *L);
-static void handle_lua_err(void *L);
+void handle_lua_err(void *L);
 	
 
 static bool lua_api_busy = false;
@@ -712,7 +712,7 @@ int lua_err_handler(struct lua_State *L) {
 	return 1;
 }
 
-static void handle_lua_err(void *L) {
+void handle_lua_err(void *L) {
 	if (L == NULL) {
 		alex_log_err("%s: L == null\n", __func__);
 		return;
