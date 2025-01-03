@@ -44,6 +44,8 @@ impl CopyableVec {
 //type GameState = CopyableVec;
 //type GameMove = CopyableVec;
 
+// Passed from C to initialize the MCTS library.
+// See struct rust_ai_init_params in game_api_ai.h
 #[derive(Clone)]
 #[repr(C)]
 pub struct AiInitParamsCStruct {
@@ -89,13 +91,24 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
                 )
             };
 
+			game_moves_buff.truncate(moves_ary_len);
+
+			if game_moves_buff.len() == 0 {
+				println!("Received 0 bytes from Lua, returning empty vector");
+				return vec![];
+			}
+
             //return game_moves_buff.chunks(game_moves_len).collect();
-            return game_moves_buff
+            let moves = game_moves_buff
                 .chunks(game_moves_len)
                 .map(|chunk| chunk.to_vec())
                 //.map(|chunk| CopyableVec::new(chunk.to_vec()))
                 .collect::<Vec<Vec<u8>>>();
-        //.collect();
+		        //.collect();
+
+			println!("Received moves {:?} from Lua", moves);
+
+			return moves;
         } else {
             panic!("get_possible_moves is null");
         }

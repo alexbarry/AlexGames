@@ -10,6 +10,7 @@
 
 #include "lua_api.h"
 #include "lua_api_dict.h"
+#include "lua_api_ai.h"
 #ifdef ENABLE_WORD_DICT
 #include "dictionary.h"
 #endif
@@ -448,8 +449,12 @@ void *init_lua_game(const struct game_api_callbacks *api_callbacks_arg, const ch
 
 	init_lua_alex_dict(L, "alexgames.dict", get_game_dict_api());
 #endif
+#if 1
+	init_alexgames_ai(L, "alexgames.ai");
+#endif
 	luaL_requiref(L, "alexgames", luaopen_alexlib, 0);
 	// luaL_requiref leaves a copy of the library on the stack, so we need to pop it
+	lua_pop(L, -1);
 	lua_pop(L, -1);
 	lua_pop(L, -1);
 

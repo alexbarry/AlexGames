@@ -207,6 +207,9 @@ else()
 error("Unexpected option for WASM_USE_C_DICT_API: ${WASM_USE_C_DICT_API}")
 endif()
 
+# TODO include param to disable this
+list(APPEND libs "alexgames_lua_mcts")
+
 add_subdirectory("${SRC_DIR}/" out/alexgames_core)
 
 add_subdirectory("${SRC_DIR}/dictionary" out/dictionary)

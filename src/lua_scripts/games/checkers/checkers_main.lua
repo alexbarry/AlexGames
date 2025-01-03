@@ -6,6 +6,7 @@ local draw       = require("games/checkers/checkers_draw")
 local serialize  = require("games/checkers/checkers_serialize")
 
 local alexgames = require("alexgames")
+local alexgames_ai = require("alexgames.ai")
 
 local height = 480
 local width  = 480
@@ -261,3 +262,25 @@ function get_state()
 	return serialized_state
 end
 
+local x = true 
+
+function get_possible_moves(state)
+	print(string.format("lua get_possible_moves: received state=%s, returning some fake moves", state))
+	local vals = {
+		"hello",
+		"world",
+		"these",
+		"are__",
+		"some ",
+		"strin",
+	}
+	if x then x = false; return vals;
+	else return {} end
+	--return vals
+end
+
+local ai = alexgames_ai.init(
+	"hello world from checkers_main.lua"
+)
+
+alexgames_ai.expand_tree(ai, 100)

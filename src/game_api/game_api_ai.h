@@ -1,27 +1,35 @@
+#include <stdint.h>
 
-#if 0
+#include "game_api.h"
 
-// TODO do I really need to bother with a C layer? Why not go directly from Lua to Rust?
-// I don't plan on implementing others with the same interface right now
+#ifndef GAME_API_AI_H
+#define GAME_API_AI_H
 
-// Called by the game
+// Called by the game to query the Rust MCTS library
 struct game_api_ai_callbacks {
 	void (*init)(const uint8_t* game_state, size_t game_state_len);
 	void (*expand_tree)(int count);
-	size_t (*get_move)(const uint8_t *game_state, game_state_len, uint8_t *move_out, size_t max_move_out_len);
+	size_t (*get_move)(const uint8_t *game_state, size_t game_state_len, uint8_t *move_out, size_t max_move_out_len);
 	double (*get_move_score)(const uint8_t *move, size_t move_out_len);
-	size_t (*move_node)(const uint8_t *game_state, game_state_len, const uint8_t *move, size_t move_out_len);
+	size_t (*move_node)(const uint8_t *game_state, size_t game_state_len, const uint8_t *move, size_t move_out_len);
 };
 
-struct rust_ai_init_params {
+// Passed as AiInitParamsCStruct to Rust.
+struct ai_init_params {
     struct game_api_callbacks *callbacks;
+
+	// Pointer to the MCTS Rust struct
+	// TODO actually is this the Lua handle, which gets passed back to the callbacks to call the game functions like "get_possible_moves(state)"?
 	void *ai_handle;
+
+	// These functions are called by the Rust MCTS Library and are implemented by
+	// the game.
 	size_t (*get_possible_moves)(void *handle, uint8_t *state, size_t state_len,
 	                             uint8_t *game_moves_out, size_t max_game_moves_out_len,
 	                             size_t *game_moves_out_len);
-	int32_t (*get_player_turn)(void *handle, uint8_t *game_state, size_t game_state_len),
-	apply_move: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, *const u8, usize)>,
-	get_score: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize) -> i32>,
-}
+	int32_t (*get_player_turn)(void *handle, uint8_t *game_state, size_t game_state_len);
+	size_t (*apply_move)(void *handle, const uint8_t *state, size_t state_len, const uint8_t *move, size_t move_len);
+	int32_t (*get_score)(void *handle, const uint8_t *state, size_t state_len, int32_t player);
+};
 
 #endif

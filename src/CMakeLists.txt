@@ -201,6 +201,12 @@ add_library(alexgames_c_dict STATIC
 	dictionary/c_dictionary.c)
 target_include_directories(alexgames_c_dict PRIVATE game_api/)
 
+add_library(alexgames_lua_mcts STATIC
+	lua_api/lua_api_ai.c)
+target_include_directories(alexgames_lua_mcts PRIVATE game_api/)
+target_include_directories(alexgames_lua_mcts PRIVATE rust_games/libs/ai/mcts/)
+target_include_directories(alexgames_lua_mcts PRIVATE ${LUA_SRC_DIR})
+
 add_library(lua ${LUA_CORE_SRC_LIST})
 
 
@@ -220,6 +226,7 @@ endif()
 
 # TODO replace "debug" with "release" (or blank?) if not debug build
 set(RUST_LIB ${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/${RUST_TARGET_PATH}/release/libalexgames_rust.a)
+#set(RUST_LIB ${CMAKE_CURRENT_SOURCE_DIR}/rust_games/target/${RUST_TARGET_PATH}/debug/libalexgames_rust.a)
 
 file(GLOB_RECURSE RUST_SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rust_games/*.rs
@@ -232,6 +239,7 @@ message("Rust sources: ${RUST_SOURCE_FILES}")
 add_custom_command(
 	OUTPUT "${RUST_LIB}"
 	COMMAND cargo build --release "${RUST_TARGET_CMD}"
+	#COMMAND cargo build "${RUST_TARGET_CMD}"
 	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/rust_games"
 	COMMENT "Building alexgames rust_games library with cargo for target=${RUST_TARGET}"
 	DEPENDS ${RUST_SOURCE_FILES}
