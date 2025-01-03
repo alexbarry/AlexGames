@@ -454,9 +454,9 @@ void *init_lua_game(const struct game_api_callbacks *api_callbacks_arg, const ch
 #endif
 	luaL_requiref(L, "alexgames", luaopen_alexlib, 0);
 	// luaL_requiref leaves a copy of the library on the stack, so we need to pop it
-	lua_pop(L, -1);
-	lua_pop(L, -1);
-	lua_pop(L, -1);
+	lua_pop(L, 1);
+	lua_pop(L, 1);
+	lua_pop(L, 1);
 
 	alex_log("[lua_init] called luaL_openlibs\n");
 
@@ -530,19 +530,37 @@ void *init_lua_game(const struct game_api_callbacks *api_callbacks_arg, const ch
 	alex_log("[lua_init] about to call luaL_dofile\n");
 	//rc = luaL_dofile(L, lua_fpath);
 
+	const int expected_top = 0;
+	if (lua_gettop(L) != expected_top) {
+		alex_log("[lua_init] expected top to be %d, was %d\n", expected_top, lua_gettop(L));
+	} else {
+		//alex_log("[lua_init] top was %d, as expected\n", lua_gettop(L));
+	}
+
 	const bool enable_err_handler = true;
 	if (enable_err_handler) {
 		lua_pushcfunction(L, lua_err_handler);
 	}
 	rc = luaL_loadfile(L, lua_fpath);
 	if (rc == LUA_OK) {
+		alex_log("[lua_init] loadfile OK, calling pcall...\n");
 		if (enable_err_handler) {
+			alex_log("[lua_init] calling pcall with error handler\n");
 			rc = lua_pcall(L, 0, 0, 1);
 		} else {
+			alex_log("[lua_init] calling pcall without error handler\n");
 			rc = lua_pcall(L, 0, 0, 0);
 		}
 	}
-	alex_log("[lua_init] done calling luaL_dofile\n");
+	const char *rc_str = "unknown";
+	switch (rc) {
+		case LUA_OK:        rc_str = "LUA_OK"; break;
+		case LUA_ERRRUN:    rc_str = "LUA_ERRRUN"; break;
+		case LUA_ERRSYNTAX: rc_str = "LUA_ERRSYNTAX"; break;
+		case LUA_ERRMEM:    rc_str = "LUA_ERRMEM"; break;
+		case LUA_ERRERR:    rc_str = "LUA_ERRERR"; break;
+	}
+	alex_log("[lua_init] done calling luaL_loadfile/pcall, rc=%d (%s)\n", rc, rc_str);
 
 	if (rc != LUA_OK) {
 		alex_log_err("line %d: rc = %d\n", __LINE__, rc);

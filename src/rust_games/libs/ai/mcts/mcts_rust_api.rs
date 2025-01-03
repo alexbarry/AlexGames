@@ -66,7 +66,7 @@ pub struct AiInitParamsCStruct {
     >,
     get_player_turn: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize) -> i32>,
     apply_move:
-        Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, *const u8, usize) -> usize>,
+        Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, *const u8, usize, *mut u8, usize) -> usize>,
     get_score: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, i32) -> i32>,
 }
 
@@ -138,6 +138,8 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
                     state_len,
                     game_move.as_ptr(),
                     game_move_len,
+					state_out_buff.as_mut_ptr(),
+					MAX_GAME_STATE_OUT_LEN,
                 )
             };
 
@@ -164,6 +166,7 @@ pub extern "C" fn rust_game_api_ai_init(
     state: *const u8,
     state_len: usize,
 ) -> *mut c_void {
+	println!("from rust: rust_game_api_ai_init called");
     let params = unsafe { &(*params) };
 
     // TODO game state and moves will be &[u8] (slice)

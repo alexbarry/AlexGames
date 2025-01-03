@@ -264,23 +264,54 @@ end
 
 local x = true 
 
-function get_possible_moves(state)
-	print(string.format("lua get_possible_moves: received state=%s, returning some fake moves", state))
-	local vals = {
-		"hello",
-		"world",
-		"these",
-		"are__",
-		"some ",
-		"strin",
+local function serialize_move_for_ai(move)
+	return string.char(table.unpack({
+		move.src.y,
+		move.src.x,
+		move.dst.y,
+		move.dst.x,
+	}))
+end
+
+local function deserialize_ai_move(serialized_move)
+	local nums = {}
+	for i=1,#serialized_move do
+		table.insert(nums, string.byte(serialized_move, i))
+	end
+
+	local move = {
+		src = {
+			y = nums[0],
+			x = nums[1],
+		},
+		dst = {
+			y = nums[2],
+			x = nums[3],
+		},
 	}
-	if x then x = false; return vals;
-	else return {} end
-	--return vals
+	return move
+end
+
+function get_possible_moves(state)
+	state = serialize.deserialize_state(state)
+	local moves = core.get_possible_moves(state)
+end
+
+function get_player_turn(state)
+	return 1
+end
+
+local i = 0
+function apply_move(state, move)
+	print(string.format("lua apply_move(state=%s, move=%s)", state, move))
+	i = i + 1
+	state = state .. string.format(",%d", i)
+	print(string.format("lua apply_move returning state=\"%s\"", state))
+	return state
 end
 
 local ai = alexgames_ai.init(
 	"hello world from checkers_main.lua"
 )
 
-alexgames_ai.expand_tree(ai, 100)
+--alexgames_ai.expand_tree(ai, 100)
