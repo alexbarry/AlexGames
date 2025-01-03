@@ -127,7 +127,6 @@ static int lua_my_print(lua_State* L);
 
 int lua_err_handler(struct lua_State *L);
 static void handle_lua_err(void *L);
-static void lua_push_error_handler(void *L);
 	
 
 static bool lua_api_busy = false;
@@ -145,7 +144,7 @@ static bool lua_dead = false;
 // TODO rename to api_callbacks
 // TODO remove global variable and move to a wrapper handle that points to this and
 //      the lua state `L`
-static const struct game_api_callbacks *api;
+const struct game_api_callbacks *api;
 
 static const struct luaL_Reg lua_c_api[] = {
 	{"set_game_canvas_size", lua_set_game_canvas_size },
@@ -271,68 +270,6 @@ static int luaopen_alexdictlib(lua_State *L) {
 
 #define LUA_UPLOAD_DIR "upload/"
 
-#define lua_getglobal_checktype_or_return_statement(L, name, type, err, return_statement) \
-	{                                                                    \
-		int rc = lua_getglobal(L, (name));                               \
-		if (rc != (type)) {                                              \
-			/*lua_pop(L, 1);*/                                           \
-			lua_settop(L, 0);                                            \
-			LUA_API_EXIT();                                              \
-			if (err) {                                                   \
-				char msg[1024];                                          \
-				int msg_len = snprintf(msg, sizeof(msg), "%s is type %s, expected %s", \
-				   	     name,                                           \
-				         lua_typename(L, rc),                            \
-				         lua_typename(L, type));                         \
-				alex_log_err(msg);                                       \
-				api->set_status_err(msg, msg_len);                       \
-			}                                                            \
-			return_statement;                                            \
-		}                                                                \
-	}
-
-#define lua_getglobal_checktype_or_return(L, name, type)     \
-	lua_getglobal_checktype_or_return_statement(L, name, type, /*err=*/ true, return)
-
-#define lua_getglobal_checktype_or_return_no_err(L, name, type) \
-	lua_getglobal_checktype_or_return_statement(L, name, type, /*err=*/ false, return)
-
-#define lua_getglobal_checktype_or_return_val(L, name, type, return_val)     \
-	lua_getglobal_checktype_or_return_statement(L, name, type, /*err=*/ true, return return_val)
-
-#define lua_getglobal_checktype_or_return_val_no_err(L, name, type, return_val)     \
-	lua_getglobal_checktype_or_return_statement(L, name, type, /*err=*/ false, return return_val)
-
-
-//			fprintf(stderr, "global \"%s\" not defined with type %d in " \
-//			                "lua main, is type %d\n",                    \
-//			                (name), (type), (rc));                       \
-//
-
-#define lua_checkstack_or_return_statement(L, stack_size, return_statement) \
-	{                                                              \
-		if (!lua_checkstack(L, stack_size)) {                      \
-			alex_log_err("stack size can not fit %d more "         \
-			             "elements\n", stack_size);                \
-			LUA_API_EXIT()                                         \
-			return_statement;                                      \
-		}                                                          \
-		int stack_depth = lua_gettop(L);                           \
-		if (stack_depth >= 20) {                                   \
-			alex_log_err("lua stack depth is %d\n", stack_depth);  \
-			LUA_API_EXIT()                                         \
-			return_statement;                                      \
-		}                                                          \
-	}
-
-#define lua_checkstack_or_return(L, stack_size)                    \
-	lua_checkstack_or_return_statement(L, stack_size, return)
-
-#define lua_checkstack_or_return_val(L, stack_size, val)           \
-	lua_checkstack_or_return_statement(L, stack_size, return val)
-	
-
-
 #if 0
 static void handle_panic(void) {
 	alex_log_err("lua panic, setting lua_dead");
@@ -445,11 +382,11 @@ void *start_lua_game(const struct game_api_callbacks *api_callbacks, const char 
 }
 
 
-static void lua_push_error_handler(void *L) {
+void lua_push_error_handler(void *L) {
 	lua_pushcfunction(L, lua_err_handler);
 }
 
-static void lua_pop_error_handler(void *L) {
+void lua_pop_error_handler(void *L) {
 	int type = lua_type(L, -1);
 	if (type != LUA_TFUNCTION) {
 		luaL_error(L, "%s: expected last stack value to be error handler func, was type %d (%s)", __func__, type, lua_typename(L, type)); 
@@ -459,7 +396,7 @@ static void lua_pop_error_handler(void *L) {
 
 // Must call `lua_pop_error_handler` after calling this (and removing
 // the other stuff you need from the stack)
-static int pcall_handle_error(void *L, int nargs, int nresults) {
+int pcall_handle_error(void *L, int nargs, int nresults) {
 
 	int rc = lua_pcall(L, nargs, nresults, 1);
 
