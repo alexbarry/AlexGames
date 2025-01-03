@@ -71,5 +71,8 @@ float lua_get_int_or_float_func(void *L, int stack_idx, const char *field_name, 
 void lua_push_error_handler(void *L);
 int pcall_handle_error(void *L, int nargs, int nresults);
 void lua_pop_error_handler(void *L);
+void dump_lua_stack(struct lua_State *L);
+
+
 
 extern const struct game_api_callbacks *api;

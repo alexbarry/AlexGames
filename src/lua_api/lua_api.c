@@ -625,6 +625,51 @@ void destroy_lua_game(void *L) {
 #endif
 }
 
+void dump_lua_stack(struct lua_State *L) {
+	printf("Lua stack has %d items\n", lua_gettop(L));
+	for (int i=1; i<=lua_gettop(L); i++) {
+		switch (lua_type(L, i)) {
+			case LUA_TNIL:
+				printf("lua stack index %d is NIL\n", i);
+				break;
+			case LUA_TBOOLEAN:
+				printf("lua stack index %d is boolean: %s\n", i, lua_toboolean(L, i) ? "true" : "false");
+				break;
+			case LUA_TLIGHTUSERDATA:
+				printf("lua stack index %d is light user data\n", i);
+				break;
+			case LUA_TNUMBER:
+				printf("lua stack index %d is number %f\n", i, lua_tonumber(L, i));
+				break;
+			case LUA_TSTRING: {
+				size_t len=0;
+				const char *str = lua_tolstring(L, i, &len);
+				printf("lua stack index %d is string \"%.*s\"\n", i, (int)len, str);
+				break;
+			}
+			case LUA_TTABLE:
+				printf("lua stack index %d is table\n", i);
+				break;
+			case LUA_TFUNCTION: {
+				lua_Debug ar;
+				lua_pushvalue(L, i);
+				lua_getinfo(L, ">n", &ar);
+				printf("lua stack index %d is function, name: \"%s\"\n", i, ar.name);
+				break;
+			}
+			case LUA_TUSERDATA:
+				printf("lua stack index %d is user data\n", i);
+				break;
+			case LUA_TTHREAD:
+				printf("lua stack index %d is thread\n", i);
+				break;
+			default:
+				printf("lua stack index %d is unknown type %d\n", i, lua_type(L, i));
+				break;
+		}
+	}
+}
+
 // TODO better name for this.
 // This is meant to be called by Lua when there is an error,
 // and to do a stack trace.
