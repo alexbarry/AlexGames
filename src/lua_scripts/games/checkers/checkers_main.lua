@@ -19,6 +19,16 @@ local player = nil
 local g_other_player = nil
 local session_id = alexgames.get_new_session_id()
 local state = core.new_state()
+local g_ai = nil
+local g_ai_iters_remaining = 0
+--local g_ai_iters_per_move = 10000
+local g_ai_iters_per_move = 3
+
+-- Could reduce this to like 12 if there is no real animation,
+-- it sets how many breaks we take between running AI processing, to avoid
+-- blocking the UI thread
+local FPS = 60
+local MS_PER_FRAME = 1000/FPS
 
 local GAME_OPTION_NEW_GAME = "game_option_new_game"
 
@@ -40,6 +50,7 @@ state.board = {
 ]]
 
 function update()
+	process_ai()
 	draw.update(state)
 	alexgames.set_btn_enabled(BTN_ID_UNDO, alexgames.has_saved_state_offset(session_id, -1))
 	alexgames.set_btn_enabled(BTN_ID_REDO, alexgames.has_saved_state_offset(session_id,  1))
@@ -208,6 +219,7 @@ end
 local function load_state_move_offset(move_id_offset)
 	local serialized_state = alexgames.adjust_saved_state_offset(session_id, move_id_offset)
 	state = serialize.deserialize_state(serialized_state)
+	init_ai()
 	update()
 	broadcast_state("all")
 end
@@ -230,6 +242,7 @@ function start_game(session_id_arg, serialized_state)
 		session_id = last_sess_id
 		state = serialize.deserialize_state(serialized_state)
 	end
+	init_ai()
 	two_player_init()
 
 	--alexgames.send_message("all", "player_joined:")
@@ -245,6 +258,7 @@ function handle_game_option_evt(option_id)
 	if option_id == GAME_OPTION_NEW_GAME then
 		session_id = alexgames.get_new_session_id()
 		state = core.new_state()
+		init_ai()
 		save_state()
 		update()
 		broadcast_state("all")
@@ -281,37 +295,118 @@ local function deserialize_ai_move(serialized_move)
 
 	local move = {
 		src = {
-			y = nums[0],
-			x = nums[1],
+			y = nums[1],
+			x = nums[2],
 		},
 		dst = {
-			y = nums[2],
-			x = nums[3],
+			y = nums[3],
+			x = nums[4],
 		},
 	}
 	return move
 end
 
-function get_possible_moves(state)
-	state = serialize.deserialize_state(state)
-	local moves = core.get_possible_moves(state)
+local test_move = {
+	src = { y = 10, x = 20 },
+	dst = { y = 30, x = 40 },
+}
+local test_move2 = deserialize_ai_move(serialize_move_for_ai(test_move))
+print(string.format("1, y=%s, x=%s", test_move.src.x, test_move2.src.x))
+print(string.format("2, y=%s, x=%s", test_move.src.y, test_move2.src.y))
+print(string.format("3, y=%s, x=%s", test_move.dst.x, test_move2.dst.x))
+print(string.format("4, y=%s, x=%s", test_move.dst.y, test_move2.dst.y))
+
+-- TODO rename global `state` to `g_state` or something
+function get_possible_moves(state_arg)
+	if #state_arg == 0 then
+		error("get_possible_moves received state of len 0")
+		return {}
+	end
+	-- TODO need to favour moves that result in jumps, otherwise the random MCTS simulation will take forever to end.
+	-- So maybe put them into two groups, shuffling each of them, and have MCTS go in order. Then other games will be responsible
+	-- for shuffling their own moves?
+
+	print("[ai] lua checkers get_possible_moves called")
+	print("lua: get_possible_moves")
+	state_arg = serialize.deserialize_state(state_arg)
+	local moves = core.get_valid_moves(state_arg)
+	print(string.format("get_possible_moves returned %d possib moves", #moves))
+	for i, move in ipairs(moves) do
+		print(string.format("get_possible_moves, move=%d { src=(%d,%d), dst=(%d,%d) }", i, move.src.y, move.src.x, move.dst.y, move.dst.x))
+		moves[i] = serialize_move_for_ai(move)
+	end
+
+	--error("derp, test error")
+	return moves
 end
 
-function get_player_turn(state)
+function get_player_turn(state_arg)
 	return 1
 end
 
-local i = 0
-function apply_move(state, move)
-	print(string.format("lua apply_move(state=%s, move=%s)", state, move))
-	i = i + 1
-	state = state .. string.format(",%d", i)
-	print(string.format("lua apply_move returning state=\"%s\"", state))
-	return state
+local function copy_state(state_arg)
+	-- TODO make a real copy function, this is probably a lot slower
+	-- and certainly more error prone
+	state_arg = serialize.serialize_state(state_arg)
+	state_arg = serialize.deserialize_state(state_arg)
+	return state_arg 
 end
 
-local ai = alexgames_ai.init(
-	"hello world from checkers_main.lua"
-)
+local i = 0
+function apply_move(state_arg, move)
+	state_arg = serialize.deserialize_state(state_arg)
+	move = deserialize_ai_move(move)
 
---alexgames_ai.expand_tree(ai, 100)
+	local rc
+
+	rc = core.player_move(state_arg, state_arg.player_turn, move.src.y, move.src.x)
+	if rc ~= core.RC_SUCCESS then
+		error(string.format("apply_move step 1 resulted in error %d (%s)", rc, core.rc_to_string(rc)))
+	end
+	rc = core.player_move(state_arg, state_arg.player_turn, move.dst.y, move.dst.x)
+	if rc ~= core.RC_SUCCESS then
+		error(string.format("apply_move step 2 resulted in error %d (%s)", rc, core.rc_to_string(rc)))
+	end
+
+	state_arg = serialize.serialize_state(state_arg)
+	print(string.format("[ai verbose] lua apply_move, returning state (%d bytes) %s", #state_arg, state_arg))
+
+	return state_arg
+end
+
+function get_player_turn(state_arg)
+	if #state_arg == 0 then
+		error("get_player_turn received state len 0")
+	end
+	state_arg = serialize.deserialize_state(state_arg)
+
+	return state_arg.player_turn
+end
+
+function init_ai()
+	-- TODO only do this if AI is enabled
+	g_ai = alexgames_ai.init(
+		serialize.serialize_state(state)
+	)
+	g_ai_iters_remaining = g_ai_iters_per_move
+end
+
+function process_ai()
+	local start_time_ms = alexgames.get_time_ms()
+	local end_time_ms = start_time_ms + MS_PER_FRAME
+	local ai_iters_per_call = 50
+	while g_ai_iters_remaining > 0 and alexgames.get_time_ms() < end_time_ms do
+		print(string.format("[ai] iters remaining: %d", g_ai_iters_remaining ))
+		alexgames_ai.expand_tree(g_ai, ai_iters_per_call)
+		g_ai_iters_remaining = g_ai_iters_remaining - ai_iters_per_call
+	end
+
+	if g_ai_iters_remaining <= 0 then
+		local state_serialized = serialize.serialize_state(state)
+		local move = alexgames_ai.get_move(g_ai, state_serialized)
+		move = deserialize_ai_move(move)
+		print(string.format("AI move is: src (%d,%d) dst(%d,%d)", move.src.y, move.src.x, move.dst.y, move.dst.x))
+	end
+end
+
+alexgames.set_timer_update_ms(MS_PER_FRAME)

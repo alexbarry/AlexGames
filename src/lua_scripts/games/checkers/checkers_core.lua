@@ -205,46 +205,103 @@ local function king(player)
 	else error(string.format("Unexpected player %s", player)) end
 end
 
--- NOTE: does not check if destination is occupied
+-- TODO rename to "valid destination to highlight" or something...
+-- this only determines if a destination should be highlighted when a piece is selected,
+-- it doesn't check if the player can actually perform the move (e.g. in case they must jump)
 function core.valid_move(state, src_y, src_x, dst_y, dst_x, jumped_pieces)
 	local dy = dst_y - src_y
 	local dx = dst_x - src_x
 
+	if not in_range(dst_y, dst_x) then
+		return false
+	end
+	if state.board[dst_y][dst_x] ~= 0 then
+		return false
+	end
+
+
 	local piece = state.board[src_y][src_x]
 	local player = core.piece_to_player(piece)
 
-	print(string.format("valid_move, player = %s, dy=%s, dx=%s", player, dy, dx))
+	--print(string.format("valid_move, player = %s, dy=%s, dx=%s", player, dy, dx))
 
 	if (core.piece_is_king(piece) and math.abs(dy) == 1) or 
 	   (player == core.PLAYER1 and dy ==  1) or
 	   (player == core.PLAYER2 and dy == -1) then
-		print("hit dy == 1 case")
+		--print("hit dy == 1 case")
 		return dx == 1 or dx == -1
 	elseif (core.piece_is_king(piece) and math.abs(dy) == 2) or
 	       (player == core.PLAYER1 and dy ==  2) or
 	       (player == core.PLAYER2 and dy == -2) then
-		print("hit dy == 2 case")
+		--print("hit dy == 2 case")
 		if math.abs(dx) ~= 2 then
-			print("dx ~= 2")
+			--print("dx ~= 2")
 			return false
 		end
 		local jumped_y = src_y + sign(dy)
 		local jumped_x = src_x + sign(dx)
 		if is_player(state, jumped_y, jumped_x, other_player(player)) then
-			print("should be jumped")
+			--print("should be jumped")
 			if jumped_pieces ~= nil then
 				table.insert(jumped_pieces, {y= jumped_y, x= jumped_x })
 			end
 			return core.RC_SUCCESS
 		else
-			print("jumped player is not other player")
+			--print("jumped player is not other player")
 			return false
 		end
 	else
-		print("hit other case")
+		--print("hit other case")
 		return false
 	end
 
+end
+
+function core.get_valid_moves(state)
+	--print("[ai] checkers get_valid_moves called")
+	local move_dists = nil
+	if jumps_available_for_player(state, state.player_turn) then
+		move_dists = { 2 }
+	else
+		move_dists = { 1 }
+	end
+
+	local dirs = {
+		{ dy = -1, dx = -1, },
+		{ dy = -1, dx =  1, },
+		{ dy =  1, dx = -1, },
+		{ dy =  1, dx =  1, },
+	}
+	local moves = {}
+	for y=1,core.BOARD_HEIGHT do
+		for x=1,core.BOARD_WIDTH do
+			if state.board[y][x] ~= state.player_turn then
+				goto next_cell
+			end
+
+			local src = {
+				y = y,
+				x = x,
+			}
+
+			for _,move_dist in ipairs(move_dists) do
+				for _, dir in ipairs(dirs) do
+					local dst = {
+						y = src.y + dir.dy * move_dist,
+						x = src.x + dir.dx * move_dist,
+					}
+					if core.valid_move(state, src.y, src.x, dst.y, dst.x, {}) then
+						table.insert(moves, { src = src, dst = dst, })
+					end
+					
+				end
+			end
+			
+			::next_cell::
+		end
+	end
+
+	return moves
 end
 
 local function move_piece(state, y, x)
@@ -259,17 +316,17 @@ local function can_jump(state, y, x)
 		local x2 = x + 2*dir.x
 
 		if not in_range(y2, x2) then
-			print(string.format("Checking y2=%s, x2=%s, out of range", y2, x2))
+			--print(string.format("Checking y2=%s, x2=%s, out of range", y2, x2))
 			goto next_dir
 		end
 
 		if state.board[y2][x2] ~= core.EMPTY then
-			print(string.format("Checking y2=%s, x2=%s, occupied", y2, x2))
+			--print(string.format("Checking y2=%s, x2=%s, occupied", y2, x2))
 			goto next_dir
 		end
 
 		local dir_valid_move = core.valid_move(state, y, x, y2, x2)
-		print(string.format("Checking y2=%s, x2=%s, valid_move=%q", y2, x2, dir_valid_move))
+		--print(string.format("Checking y2=%s, x2=%s, valid_move=%q", y2, x2, dir_valid_move))
 		if dir_valid_move then
 			return true
 		end
