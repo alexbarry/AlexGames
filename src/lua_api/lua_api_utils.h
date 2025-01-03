@@ -72,6 +72,7 @@ void lua_push_error_handler(void *L);
 int pcall_handle_error(void *L, int nargs, int nresults);
 void lua_pop_error_handler(void *L);
 void dump_lua_stack(struct lua_State *L);
+void handle_lua_err(void *L);
 
 
 

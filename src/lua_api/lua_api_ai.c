@@ -39,6 +39,8 @@ static const struct luaL_Reg lua_alexgames_ai_api[] = {
 	{NULL, NULL},
 };
 
+static uint8_t move_out_buff[256];
+
 static int luaopen_alexlib_ai(lua_State *L) {
 	luaL_newlib(L, lua_alexgames_ai_api);
 	return 1;
@@ -164,7 +166,7 @@ static size_t lua_get_possible_moves(void *L, uint8_t *state, size_t state_len,
 	lua_pop(L, 1);
 
 	// pop the state string/bytearray that was passed as a parameter
-	lua_pop(L, 1);
+	//lua_pop(L, 1);
 
 	err:
 	printf("%s:%d\n", __FILE__, __LINE__);
@@ -186,11 +188,20 @@ int32_t lua_get_player_turn(void *L, uint8_t *game_state, size_t game_state_len)
 	LUA_API_ENTER();
 	int player_turn = -1;
 
-	if (push_err_handler) lua_push_error_handler(L);
+	int lua_err_handler_index = 0;
+	if (push_err_handler) {
+		lua_push_error_handler(L);
+		lua_err_handler_index = lua_gettop(L);
+	}
 	lua_getglobal_checktype_or_return_val(L, "get_player_turn", LUA_TFUNCTION, 0);
 	lua_pushlstring(L, (char *)game_state, game_state_len);
 
-	pcall_handle_error(L, 1, 1);
+	//pcall_handle_error(L, 1, 1);
+	int rc = lua_pcall(L, 1, 1, lua_err_handler_index);
+	if (rc) {
+		handle_lua_err(L);
+		goto err;
+	}
 
 	int is_int = 0;
 	player_turn = lua_tointegerx(L, -1, &is_int);
@@ -211,20 +222,29 @@ int32_t lua_get_player_turn(void *L, uint8_t *game_state, size_t game_state_len)
 size_t lua_apply_move(void *L, const uint8_t *state, size_t state_len, const uint8_t *move, size_t move_len, uint8_t *state_out, size_t max_state_out_len) {
 	printf("[ai] C API apply_move called\n");
 	printf("%s: %s\n", __FILE__, __func__);
+	size_t state_out_len = 0;
 	LUA_API_ENTER();
 
 	lua_checkstack_or_return_val(L, 3, 0);
 
-	if (push_err_handler) lua_push_error_handler(L);
+	int lua_err_handler_index = 0;
+	if (push_err_handler) {
+		lua_push_error_handler(L);
+		lua_err_handler_index = lua_gettop(L);
+	}
 	lua_getglobal_checktype_or_return_val(L, "apply_move", LUA_TFUNCTION, 0);
 	lua_pushlstring(L, (char *)state, state_len);
 	lua_pushlstring(L, (char *)move, move_len);
 
 	printf("%s: calling pcall...\n", __func__);
-	pcall_handle_error(L, 2, 1);
+	//pcall_handle_error(L, 2, 1);
+	int rc = lua_pcall(L, 2, 1, lua_err_handler_index);
+	if (rc) {
+		handle_lua_err(L);
+		goto err;
+	}
 	printf("%s: finished calling pcall\n", __func__);
 	const uint8_t *state_out_lua;
-	size_t state_out_len = 0;
 	if (!read_bytearray(L, -1, &state_out_lua, &state_out_len, __func__)) {
 		printf("%s: failed to read bytearray\n", __func__);
 		return 0;
@@ -237,26 +257,46 @@ size_t lua_apply_move(void *L, const uint8_t *state, size_t state_len, const uin
 	}
 
 
+	printf("[ai verbose] C lua_apply_move read state (%d bytes) %.*s\n", state_out_len, state_out_len, state_out_lua);
 	memcpy(state_out, state_out_lua, state_out_len);
+	lua_pop(L, 1);
+	printf("[ai verbose] %s:%d\n", __FILE__, __LINE__);
+	err:
+	printf("[ai verbose] %s:%d\n", __FILE__, __LINE__);
 	if (push_err_handler) lua_pop_error_handler(L);
+	printf("[ai verbose] %s:%d\n", __FILE__, __LINE__);
 	printf("%s: done %s\n", __FILE__, __func__);
 	LUA_API_EXIT();
 	printf("%s: finished\n", __func__);
+	printf("[ai verbose] %s:%d\n", __FILE__, __LINE__);
+	printf("[ai verbose] C lua_apply_move returning %d\n", state_out_len);
 	return state_out_len;
 }
 
 int32_t lua_get_score(void *L, const uint8_t *state, size_t state_len, int32_t player) {
+	printf("[ai] C API get_score called\n");
 	printf("%s: %s\n", __FILE__, __func__);
 	LUA_API_ENTER();
-	if (push_err_handler) lua_push_error_handler(L);
+	int lua_err_handler_index = 0;
+	if (push_err_handler) {
+		lua_push_error_handler(L);
+		lua_err_handler_index = lua_gettop(L);
+	}
 	lua_getglobal_checktype_or_return_val(L, "apply_move", LUA_TFUNCTION, 0);
 	lua_pushlstring(L, (char *)state, state_len);
 	lua_pushinteger(L, player);
 
-	pcall_handle_error(L, 2, 1);
+	//pcall_handle_error(L, 2, 1);
+	int rc = lua_pcall(L, 2, 1, lua_err_handler_index);
+	if (rc) {
+		handle_lua_err(L);
+		goto err;
+	}
+
 
 	int score = lua_tointeger(L, -1);
 	lua_pop(L, 1);
+	err:
 	if (push_err_handler) lua_pop_error_handler(L);
 
 	
@@ -314,14 +354,34 @@ static int lua_ai_destroy(lua_State *L) {
 	return 0;
 }
 static int lua_expand_tree(lua_State *L) {
-	printf("%s: %s\n", __FILE__, __func__);
-	// TODO
+	//printf("%s: %s\n", __FILE__, __func__);
+
+	void *ai_handle = lua_touserdata(L, 1);
+	int count = lua_tonumber(L, 2);
+
+	//printf("Expanding tree %d times\n", count);
+
+	rust_game_api_ai_expand_tree(ai_handle, count);
+
 	return 0;
 }
 static int lua_get_move(lua_State *L) {
 	printf("%s: %s\n", __FILE__, __func__);
-	// TODO
-	return 0;
+
+	void *ai_handle = lua_touserdata(L, 1);
+	size_t state_len = 0;
+	const uint8_t *state = (const uint8_t *)lua_tolstring(L, 2, &state_len);
+
+	size_t move_out_len = rust_game_api_ai_get_move(ai_handle,
+	                                                state, state_len,
+	                                                move_out_buff, sizeof(move_out_buff));
+
+	if (move_out_len <= 0) {
+		return 0;
+	}
+
+	lua_pushlstring(L, (char*)move_out_buff, (int)move_out_len);
+	return 1;
 }
 static int lua_get_move_score(lua_State *L) {
 	printf("%s: %s\n", __FILE__, __func__);
