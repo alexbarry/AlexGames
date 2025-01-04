@@ -100,6 +100,10 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
                 )
             };
 
+            if moves_ary_len == usize::MAX {
+                panic!("get_possible_moves raised error, see earlier messages");
+            }
+
             game_moves_buff.truncate(moves_ary_len);
 
             if game_moves_buff.len() == 0 {
@@ -151,6 +155,10 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
                     MAX_GAME_STATE_OUT_LEN,
                 )
             };
+
+            if state_out_len == usize::MAX {
+                panic!("get_possible_moves raised error, see earlier messages");
+            }
 
             state_out_buff.truncate(state_out_len);
 

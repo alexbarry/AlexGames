@@ -82,6 +82,7 @@ static bool read_bytearray(lua_State *L, int idx, const uint8_t **ary_out, size_
 static size_t lua_get_possible_moves(void *L, uint8_t *state, size_t state_len,
 	                              uint8_t *game_moves_out, size_t max_game_moves_out_len,
 	                              size_t *game_moves_out_len) {
+	size_t val_to_return = 0;
 	size_t num_moves = 0;
 #if 0
 	//return 0; // TODO REMOVE
@@ -122,12 +123,13 @@ static size_t lua_get_possible_moves(void *L, uint8_t *state, size_t state_len,
 	printf("%s: pcall returned %d\n", __func__, rc);
 	if (rc) {
 		handle_lua_err(L);
+		val_to_return = -1;
 		goto err;
 	}
 
 	if (lua_type(L, -1) != LUA_TTABLE) {
 		alex_log_err_user_visible(api, "%s: expected get_possible_moves to return a table, instead got type %d\n", __func__, lua_type(L, -1));
-		return 0;
+		return -1;
 	}
 
 	num_moves = lua_rawlen(L, -1);
@@ -162,6 +164,8 @@ static size_t lua_get_possible_moves(void *L, uint8_t *state, size_t state_len,
 		// pop the move
 		lua_pop(L, 1);
 	}
+	val_to_return = data_len * num_moves;
+
 	// pop the list of moves
 	lua_pop(L, 1);
 
@@ -177,9 +181,9 @@ static size_t lua_get_possible_moves(void *L, uint8_t *state, size_t state_len,
 		alex_log_err_user_visible(api, "Expected top to be 0, was %d\n", lua_gettop(L));
 	}
 
-	printf("%s: done, returning %zu, top=%d\n", __func__, data_len * num_moves, lua_gettop(L));
+	//printf("%s: done, returning %zu, top=%d\n", __func__, data_len * num_moves, lua_gettop(L));
 	LUA_API_EXIT();
-	return data_len * num_moves;
+	return val_to_return;
 }
 
 int32_t lua_get_player_turn(void *L, uint8_t *game_state, size_t game_state_len) {
@@ -241,6 +245,7 @@ size_t lua_apply_move(void *L, const uint8_t *state, size_t state_len, const uin
 	int rc = lua_pcall(L, 2, 1, lua_err_handler_index);
 	if (rc) {
 		handle_lua_err(L);
+		state_out_len = -1;
 		goto err;
 	}
 	printf("%s: finished calling pcall\n", __func__);
@@ -253,6 +258,7 @@ size_t lua_apply_move(void *L, const uint8_t *state, size_t state_len, const uin
 
 	if (state_out_len >= max_state_out_len) {
 		alex_log_err_user_visible(api, "%s: received state len %d from Lua, buff size is only %d\n", __func__, state_out_len, max_state_out_len);
+		state_out_len = -1;
 		return 0;
 	}
 
