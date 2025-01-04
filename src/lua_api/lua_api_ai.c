@@ -288,7 +288,7 @@ int32_t lua_get_score(void *L, const uint8_t *state, size_t state_len, int32_t p
 		lua_push_error_handler(L);
 		lua_err_handler_index = lua_gettop(L);
 	}
-	lua_getglobal_checktype_or_return_val(L, "apply_move", LUA_TFUNCTION, 0);
+	lua_getglobal_checktype_or_return_val(L, "get_score", LUA_TFUNCTION, 0);
 	lua_pushlstring(L, (char *)state, state_len);
 	lua_pushinteger(L, player);
 
