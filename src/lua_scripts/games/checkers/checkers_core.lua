@@ -261,13 +261,18 @@ function core.get_piece_count(state, player_turn)
 	local count = 0
 	for y=1,core.BOARD_HEIGHT do
 		for x=1,core.BOARD_WIDTH do
-			if is_player(state.board, y, x, player_turn) then
+			if is_player(state, y, x, player_turn) then
 				count = count + 1
 			end
 		end
 	end
 	return count
 end
+
+function core.move_to_string(move)
+	return string.format("move { src = (%d,%d), dst = (%d,%d) }", move.src.y, move.src.x, move.dst.y, move.dst.x)
+end
+
 
 function core.get_valid_moves(state)
 	--print("[ai] checkers get_valid_moves called")
@@ -287,11 +292,11 @@ function core.get_valid_moves(state)
 	local moves = {}
 	for y=1,core.BOARD_HEIGHT do
 		for x=1,core.BOARD_WIDTH do
-			if state.board[y][x] ~= state.player_turn then
+			if not is_player(state, y, x, state.player_turn) then
 				goto next_cell
 			end
 
-			if state.must_jump_selected and y ~= state.selected_y and x ~= state.selected_x then
+			if state.selected_y ~= nil and state.selected_x ~= nil and (y ~= state.selected_y or x ~= state.selected_x) then
 				goto next_cell
 			end
 

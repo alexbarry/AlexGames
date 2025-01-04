@@ -21,14 +21,22 @@ local session_id = alexgames.get_new_session_id()
 local state = core.new_state()
 local g_ai = nil
 local g_ai_iters_remaining = 0
+local g_ai_move_done = true
+--local using_ai_opponent = true
+local using_ai_opponent = true
 --local g_ai_iters_per_move = 10000
-local g_ai_iters_per_move = 3
+--local g_ai_iters_per_move = 1000
+local g_ai_iters_per_move = 100
+--local g_ai_iters_per_move = 3
+--local g_ai_iters_per_move = 1
+
 
 -- Could reduce this to like 12 if there is no real animation,
 -- it sets how many breaks we take between running AI processing, to avoid
 -- blocking the UI thread
-local FPS = 60
-local MS_PER_FRAME = 1000/FPS
+--local FPS = 60
+local FPS = 10
+local MS_PER_FRAME = math.floor(1000/FPS)
 
 local GAME_OPTION_NEW_GAME = "game_option_new_game"
 
@@ -242,7 +250,6 @@ function start_game(session_id_arg, serialized_state)
 		session_id = last_sess_id
 		state = serialize.deserialize_state(serialized_state)
 	end
-	init_ai()
 	two_player_init()
 
 	--alexgames.send_message("all", "player_joined:")
@@ -252,6 +259,12 @@ function start_game(session_id_arg, serialized_state)
 
 	alexgames.create_btn(BTN_ID_UNDO, "Undo", 1)
 	alexgames.create_btn(BTN_ID_REDO, "Redo", 1)
+
+	-- TODO this can take a while to finish.
+	-- I think it was missing a boundary condition or it raised an error or something that resulted in
+	-- the `start_game` function not finishing, so the buttons didn't get initialized. Then the 
+	-- `update` `set_btn_enabled` calls were causing a flood of errors.
+	init_ai()
 end
 
 function handle_game_option_evt(option_id)
@@ -306,16 +319,6 @@ local function deserialize_ai_move(serialized_move)
 	return move
 end
 
-local test_move = {
-	src = { y = 10, x = 20 },
-	dst = { y = 30, x = 40 },
-}
-local test_move2 = deserialize_ai_move(serialize_move_for_ai(test_move))
-print(string.format("1, y=%s, x=%s", test_move.src.x, test_move2.src.x))
-print(string.format("2, y=%s, x=%s", test_move.src.y, test_move2.src.y))
-print(string.format("3, y=%s, x=%s", test_move.dst.x, test_move2.dst.x))
-print(string.format("4, y=%s, x=%s", test_move.dst.y, test_move2.dst.y))
-
 -- TODO rename global `state` to `g_state` or something
 function get_possible_moves(state_arg)
 	if #state_arg == 0 then
@@ -326,13 +329,29 @@ function get_possible_moves(state_arg)
 	-- So maybe put them into two groups, shuffling each of them, and have MCTS go in order. Then other games will be responsible
 	-- for shuffling their own moves?
 
-	print("[ai] lua checkers get_possible_moves called")
-	print("lua: get_possible_moves")
+
+	--print("[ai] lua checkers get_possible_moves called")
+	--print("lua: get_possible_moves")
 	state_arg = serialize.deserialize_state(state_arg)
+
+	-- This is a bit of a hack... I added some stalemate detection logic in get_score.
+	-- So if we're in a stalemate, tell the MCTS algorithm that the game is over.
+	-- Therea re other moves we could make, but they aren't likely to change the outcome.
+	local score = get_score_internal(state_arg, state_arg.player_turn)
+	if score ~= 0 then
+		return {}
+	end
+
 	local moves = core.get_valid_moves(state_arg)
-	print(string.format("get_possible_moves returned %d possib moves", #moves))
+	--print(string.format("get_possible_moves returned %d possib moves", #moves))
 	for i, move in ipairs(moves) do
-		print(string.format("get_possible_moves, move=%d { src=(%d,%d), dst=(%d,%d) }", i, move.src.y, move.src.x, move.dst.y, move.dst.x))
+		if state_arg.selected_y ~= nil or state_arg.selected_y ~= nil then
+			if state_arg.selected_y ~= move.src.y or
+			   state_arg.selected_x ~= move.src.x then
+				error(string.format("got invalid move %s while state.selected =(%d,%d)", core.move_to_string(move), state_arg.selected_y, state_arg.selected_x))
+			end
+		end
+		--print(string.format("get_possible_moves, move=%d { src=(%d,%d), dst=(%d,%d) }", i, move.src.y, move.src.x, move.dst.y, move.dst.x))
 		moves[i] = serialize_move_for_ai(move)
 	end
 
@@ -370,26 +389,35 @@ function apply_move(state_arg, move)
 	-- But for the purposes of MCTS, I think it makes sense to fork the tree like this.
 	-- Well, I guess it could go either way, but currently all moves must be the same
 	-- number of bytes when passed to the MCTS API.
-	if not state_arg.must_jump_selected then
+	if not state_arg.must_jump_selected and 
+	   --(state_arg.selected_y == nil and state_arg.selected_x == nil) then
+	   true then
 		rc = core.player_move(state_arg, state_arg.player_turn, move.src.y, move.src.x)
 		if rc ~= core.RC_SUCCESS then
 			core.print_state(state_arg)
-			error(string.format("apply_move step 1 resulted in error %d (%s)", rc, core.rc_to_string(rc)))
+			error(string.format("apply_move %s step 1 resulted in error %d (%s)", core.move_to_string(move), rc, core.rc_to_string(rc)))
+		else
+			--print(string.format("Successfully applied step 1 move... (%s)", core.move_to_string(move)))
+			if state_arg.selected_y ~= move.src.y or state_arg.selected_x ~= move.src.x then
+				core.print_state(state_arg)
+				error(string.format("state_arg.selected does not match AI step 1 move"))
+			end
 		end
 	else
 		if state_arg.selected_y ~= move.src.y or state_arg.selected_x ~= move.src.x then
-			error("AI: apply move step 1 is invalid")
+			core.print_state(state_arg)
+			error(string.format("AI: apply move (%s) step 1 is invalid", core.move_to_string(move)))
 		end 
 	end
 
 	rc = core.player_move(state_arg, state_arg.player_turn, move.dst.y, move.dst.x)
 	if rc ~= core.RC_SUCCESS then
 		core.print_state(state_arg)
-		error(string.format("apply_move step 2 resulted in error %d (%s)", rc, core.rc_to_string(rc)))
+		error(string.format("apply_move %s step 2 resulted in error %d (%s)", core.move_to_string(move),  rc, core.rc_to_string(rc)))
 	end
 
 	state_arg = serialize.serialize_state(state_arg)
-	print(string.format("[ai verbose] lua apply_move, returning state (%d bytes) %s", #state_arg, state_arg))
+	--print(string.format("[ai verbose] lua apply_move, returning state (%d bytes) %s", #state_arg, state_arg))
 
 	return state_arg
 end
@@ -403,8 +431,7 @@ function get_player_turn(state_arg)
 	return state_arg.player_turn
 end
 
-function get_score(state_arg, player)
-	state_arg = serialize.deserialize_state(state_arg)
+function get_score_internal(state_arg, player)
 	local player1_pieces = core.get_piece_count(state_arg, core.PLAYER1)
 	local player2_pieces = core.get_piece_count(state_arg, core.PLAYER2)
 
@@ -443,40 +470,61 @@ function get_score(state_arg, player)
 
 	-- I don't know what the formal definition of stalemate
 	if fewer_pieces == 1 and more_pieces >= 2 then
-		if more_pieces == player then
+		if more_player == player then
 			return 1
 		else
 			return -1
 		end
 	end
-		
-		
+
+	return 0
+end
+
+function get_score(state_arg, player)
+	state_arg = serialize.deserialize_state(state_arg)
+	return get_score_internal(state_arg, player)
 end
 
 function init_ai()
+	if using_ai_opponent then
 	-- TODO only do this if AI is enabled
 	g_ai = alexgames_ai.init(
 		serialize.serialize_state(state)
 	)
 	g_ai_iters_remaining = g_ai_iters_per_move
+	g_ai_move_done = false
+	end
 end
 
 function process_ai()
-	local start_time_ms = alexgames.get_time_ms()
-	local end_time_ms = start_time_ms + MS_PER_FRAME
-	local ai_iters_per_call = 50
-	while g_ai_iters_remaining > 0 and alexgames.get_time_ms() < end_time_ms do
-		print(string.format("[ai] iters remaining: %d", g_ai_iters_remaining ))
-		alexgames_ai.expand_tree(g_ai, ai_iters_per_call)
-		g_ai_iters_remaining = g_ai_iters_remaining - ai_iters_per_call
+	if using_ai_opponent and not ai_paused then
+		local start_time_ms = alexgames.get_time_ms()
+		local end_time_ms = start_time_ms + MS_PER_FRAME
+		local ai_iters_per_call = 1
+		while g_ai_iters_remaining > 0 and alexgames.get_time_ms() < end_time_ms do
+			--print(string.format("[ai] iters remaining: %d", g_ai_iters_remaining ))
+			--print(string.format("[ai] iters remaining: %d, time: %d, end time: %d", g_ai_iters_remaining, alexgames.get_time_ms(), end_time_ms))
+			alexgames_ai.expand_tree(g_ai, ai_iters_per_call)
+			g_ai_iters_remaining = g_ai_iters_remaining - ai_iters_per_call
+		end
+		if g_ai_iters_remaining > 0 then
+			print(string.format("[ai] iters remaining: %d", g_ai_iters_remaining))
+		end
+	
+		if g_ai_iters_remaining <= 0 and not g_ai_move_done then
+			local state_serialized = serialize.serialize_state(state)
+			local move = alexgames_ai.get_move(g_ai, state_serialized)
+			move = deserialize_ai_move(move)
+			core.print_state(state)
+			print(string.format("AI move is: src (%d,%d) dst(%d,%d)", move.src.y, move.src.x, move.dst.y, move.dst.x))
+			g_ai_move_done = true
+		end
 	end
+end
 
-	if g_ai_iters_remaining <= 0 then
-		local state_serialized = serialize.serialize_state(state)
-		local move = alexgames_ai.get_move(g_ai, state_serialized)
-		move = deserialize_ai_move(move)
-		print(string.format("AI move is: src (%d,%d) dst(%d,%d)", move.src.y, move.src.x, move.dst.y, move.dst.x))
-	end
+function print_state(state_serialized)
+	local state_arg = serialize.deserialize_state(state_serialized)
+	core.print_state(state_arg)
 end
 
 alexgames.set_timer_update_ms(MS_PER_FRAME)
