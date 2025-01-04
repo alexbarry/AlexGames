@@ -276,10 +276,10 @@ where
             let game_move = moves[rng.gen_range(0..moves.len())].clone();
             state = game_funcs.apply_move(&state, game_move);
         }
-		println!("Calling get_score func...");
+        println!("Calling get_score func...");
         let score = game_funcs.get_score(&state, player);
-		println!("Returning score {:?}", score);
-		return score;
+        println!("Returning score {:?}", score);
+        return score;
     }
 
     fn update_node_counts(

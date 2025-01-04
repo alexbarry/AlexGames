@@ -65,8 +65,17 @@ pub struct AiInitParamsCStruct {
         ) -> usize,
     >,
     get_player_turn: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize) -> i32>,
-    apply_move:
-        Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, *const u8, usize, *mut u8, usize) -> usize>,
+    apply_move: Option<
+        unsafe extern "C" fn(
+            *mut c_void,
+            *const u8,
+            usize,
+            *const u8,
+            usize,
+            *mut u8,
+            usize,
+        ) -> usize,
+    >,
     get_score: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, i32) -> i32>,
 }
 
@@ -91,12 +100,12 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
                 )
             };
 
-			game_moves_buff.truncate(moves_ary_len);
+            game_moves_buff.truncate(moves_ary_len);
 
-			if game_moves_buff.len() == 0 {
-				println!("Received 0 bytes from Lua, returning empty vector");
-				return vec![];
-			}
+            if game_moves_buff.len() == 0 {
+                println!("Received 0 bytes from Lua, returning empty vector");
+                return vec![];
+            }
 
             //return game_moves_buff.chunks(game_moves_len).collect();
             let moves = game_moves_buff
@@ -104,11 +113,11 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
                 .map(|chunk| chunk.to_vec())
                 //.map(|chunk| CopyableVec::new(chunk.to_vec()))
                 .collect::<Vec<Vec<u8>>>();
-		        //.collect();
+            //.collect();
 
-			println!("Received moves {:?} from Lua", moves);
+            println!("Received moves {:?} from Lua", moves);
 
-			return moves;
+            return moves;
         } else {
             panic!("get_possible_moves is null");
         }
@@ -138,8 +147,8 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
                     state_len,
                     game_move.as_ptr(),
                     game_move_len,
-					state_out_buff.as_mut_ptr(),
-					MAX_GAME_STATE_OUT_LEN,
+                    state_out_buff.as_mut_ptr(),
+                    MAX_GAME_STATE_OUT_LEN,
                 )
             };
 
@@ -166,7 +175,7 @@ pub extern "C" fn rust_game_api_ai_init(
     state: *const u8,
     state_len: usize,
 ) -> *mut c_void {
-	println!("from rust: rust_game_api_ai_init called");
+    println!("from rust: rust_game_api_ai_init called");
     let params = unsafe { &(*params) };
 
     // TODO game state and moves will be &[u8] (slice)
