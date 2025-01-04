@@ -307,7 +307,7 @@ int32_t lua_get_score(void *L, const uint8_t *state, size_t state_len, int32_t p
 
 	
 	LUA_API_EXIT();
-	return 0;
+	return score;
 }
 
 
