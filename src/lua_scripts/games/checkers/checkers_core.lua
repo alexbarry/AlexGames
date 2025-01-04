@@ -279,6 +279,10 @@ function core.get_valid_moves(state)
 				goto next_cell
 			end
 
+			if state.must_jump_selected and y ~= state.selected_y and x ~= state.selected_x then
+				goto next_cell
+			end
+
 			local src = {
 				y = y,
 				x = x,

@@ -359,12 +359,32 @@ function apply_move(state_arg, move)
 
 	local rc
 
-	rc = core.player_move(state_arg, state_arg.player_turn, move.src.y, move.src.x)
-	if rc ~= core.RC_SUCCESS then
-		error(string.format("apply_move step 1 resulted in error %d (%s)", rc, core.rc_to_string(rc)))
+	-- Skip selecting the piece if it is already selected.
+	--
+	-- For double (or more) jumps, there can be multiple options.
+	-- Rather than add a bunch of logic into my "move" thing, I am doing a small hack
+	-- to leave the piece selected (and it will stay the same player's turn) and
+	-- treat subsequent jumps as separate "moves", when really I think most people
+	-- would consider them part of the same move.
+	--
+	-- But for the purposes of MCTS, I think it makes sense to fork the tree like this.
+	-- Well, I guess it could go either way, but currently all moves must be the same
+	-- number of bytes when passed to the MCTS API.
+	if not state_arg.must_jump_selected then
+		rc = core.player_move(state_arg, state_arg.player_turn, move.src.y, move.src.x)
+		if rc ~= core.RC_SUCCESS then
+			core.print_state(state_arg)
+			error(string.format("apply_move step 1 resulted in error %d (%s)", rc, core.rc_to_string(rc)))
+		end
+	else
+		if state_arg.selected_y ~= move.src.y or state_arg.selected_x ~= move.src.x then
+			error("AI: apply move step 1 is invalid")
+		end 
 	end
+
 	rc = core.player_move(state_arg, state_arg.player_turn, move.dst.y, move.dst.x)
 	if rc ~= core.RC_SUCCESS then
+		core.print_state(state_arg)
 		error(string.format("apply_move step 2 resulted in error %d (%s)", rc, core.rc_to_string(rc)))
 	end
 
