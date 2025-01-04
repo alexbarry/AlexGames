@@ -403,6 +403,56 @@ function get_player_turn(state_arg)
 	return state_arg.player_turn
 end
 
+function get_score(state_arg, player)
+	state_arg = serialize.deserialize_state(state_arg)
+	local player1_pieces = core.get_piece_count(state_arg, core.PLAYER1)
+	local player2_pieces = core.get_piece_count(state_arg, core.PLAYER2)
+
+	if player1_pieces == 0 and player2_pieces == 0 then
+		error("Neither player has pieces left, invalid state")
+	elseif player1_pieces == 0 then
+		if player == core.PLAYER1 then
+			return -1
+		elseif player == core.PLAYER2 then
+			return 1
+		else
+			error("invalid player param")
+		end
+	elseif player2_pieces == 0 then
+		if player == core.PLAYER1 then
+			return 1
+		elseif player == core.PLAYER2 then
+			return -1
+		else
+			error("invalid player param")
+		end
+	end
+
+	local fewer_pieces = nil
+	local more_pieces = nil
+	local more_player = nil
+	if player1_pieces < player2_pieces then
+		fewer_pieces = player1_pieces
+		more_pieces  = player2_pieces
+		more_player = core.PLAYER2
+	else
+		fewer_pieces = player2_pieces
+		more_pieces  = player1_pieces
+		more_player = core.PLAYER1
+	end
+
+	-- I don't know what the formal definition of stalemate
+	if fewer_pieces == 1 and more_pieces >= 2 then
+		if more_pieces == player then
+			return 1
+		else
+			return -1
+		end
+	end
+		
+		
+end
+
 function init_ai()
 	-- TODO only do this if AI is enabled
 	g_ai = alexgames_ai.init(

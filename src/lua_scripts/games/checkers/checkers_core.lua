@@ -257,6 +257,18 @@ function core.valid_move(state, src_y, src_x, dst_y, dst_x, jumped_pieces)
 
 end
 
+function core.get_piece_count(state, player_turn)
+	local count = 0
+	for y=1,core.BOARD_HEIGHT do
+		for x=1,core.BOARD_WIDTH do
+			if is_player(state.board, y, x, player_turn) then
+				count = count + 1
+			end
+		end
+	end
+	return count
+end
+
 function core.get_valid_moves(state)
 	--print("[ai] checkers get_valid_moves called")
 	local move_dists = nil
