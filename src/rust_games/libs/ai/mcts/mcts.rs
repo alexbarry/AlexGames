@@ -21,6 +21,7 @@ pub trait MCTSGameFuncs<'a, GameState: 'a + ?Sized, GameMove> {
     fn get_player_turn(&self, state: &'a GameState) -> PlayerId;
     fn apply_move(&self, state: &'a GameState, game_move: GameMove) -> GameState;
     fn get_score(&self, state: &'a GameState, player: PlayerId) -> i32;
+    fn print_state(&self, state: &'a GameState);
 }
 
 //pub struct MCTSParams<GameState> {
@@ -44,6 +45,8 @@ where
 
     // TODO REMOVE, figure out how to remove this
     pub callbacks: &'static CCallbacksPtr,
+
+    pub max_simulation_moves: i32,
 }
 
 #[allow(dead_code)]
@@ -243,6 +246,8 @@ where
             //time_ms: search_duration,
             time_ms: 0,
         };
+
+        println!("[mcts] Tree info: {:?}", info);
         //return (best_move.copied(), info);
         //return best_move.copied();
         return best_move.cloned();
@@ -256,6 +261,7 @@ where
     fn simulate_node(
         params: MCTSParams<GameState, GameMove>,
         current_node: &Rc<RefCell<Node<GameState, GameMove>>>,
+        max_simulation_moves: i32,
     ) -> i32 {
         let mut game_funcs = params.game_funcs.clone();
         let mut rng = rand::thread_rng();
@@ -263,22 +269,38 @@ where
         let mut state = current_node.borrow().state.clone();
         //let player = (params.get_player_turn)(&state);
         let player = params.game_funcs.get_player_turn(&state);
-        loop {
+        let max_simulation_moves = if max_simulation_moves == 0 {
+            i32::MAX
+        } else {
+            max_simulation_moves
+        };
+        for simulation_iter in 0..max_simulation_moves {
             let moves = params.game_funcs.get_possible_moves(&state);
+            //println!(
+            //    "[ai verbose] simulate_node, got possible moves: {:?}",
+            //    moves
+            //);
+
             // TODO: right now a pass is not an option
             // but it should be. Perhaps just hack something in to have get_possible_moves return a pass if
             // there aren't any other moves, so that the game can continue simulating
             // TODO: so then I don't think I strictly need a separate function for "is the game over?",
             // zero possible moves means game over
             if moves.len() == 0 {
+                //println!("simulation ended after {} iterations, score is {}", simulation_iter+1, game_funcs.get_score(&state, player));
+                //game_funcs.print_state(&state);
                 break;
             }
             let game_move = moves[rng.gen_range(0..moves.len())].clone();
             state = game_funcs.apply_move(&state, game_move);
+            if simulation_iter == max_simulation_moves - 1 {
+                //println!("giving up on simulation after {} iterations", max_simulation_moves);
+                //game_funcs.print_state(&state);
+            }
         }
-        println!("Calling get_score func...");
+        //println!("Calling get_score func...");
         let score = game_funcs.get_score(&state, player);
-        println!("Returning score {:?}", score);
+        //println!("Returning score {:?}", score);
         return score;
     }
 
@@ -323,6 +345,7 @@ where
         let node = current_node;
         let game_state = node.borrow().state.clone();
         let moves = params.game_funcs.get_possible_moves(&game_state);
+        //println!("[ai verbose] expand_node, got possible moves: {:?}", moves);
 
         for game_move in moves.iter() {
             //let new_game_state = game_state.clone();
@@ -334,7 +357,8 @@ where
             //let parent = &mut *node;
             //let parent = node;
             //println!("[mcts] 1/5 Double checking new node id {} ###", new_node.borrow().id);
-            let score = MCTSState::simulate_node(params.clone(), &new_node);
+            let score =
+                MCTSState::simulate_node(params.clone(), &new_node, params.max_simulation_moves);
             //println!("[mcts] 2/5 Double checking new node id {} ###", new_node.borrow().id);
             let score_inc = if score > 0 { 1 } else { 0 };
             //let score_inc = if score > 0 { 1 + (score / 10) } else { 0 };

@@ -22,6 +22,8 @@ struct ai_init_params {
 	// TODO actually is this the Lua handle, which gets passed back to the callbacks to call the game functions like "get_possible_moves(state)"?
 	void *ai_handle;
 
+	int32_t max_simulation_moves;
+
 	// These functions are called by the Rust MCTS Library and are implemented by
 	// the game.
 	size_t (*get_possible_moves)(void *handle, uint8_t *state, size_t state_len,
@@ -29,7 +31,8 @@ struct ai_init_params {
 	                             size_t *game_moves_out_len);
 	int32_t (*get_player_turn)(void *handle, uint8_t *game_state, size_t game_state_len);
 	size_t (*apply_move)(void *handle, const uint8_t *state, size_t state_len, const uint8_t *move, size_t move_len, uint8_t *state_out, size_t max_state_out_len);
-	int32_t (*get_score)(void *handle, const uint8_t *state, size_t state_len, int32_t player);
+	int32_t (*get_score)(void *handle, const uint8_t *state, size_t state_len, int32_t player, bool *is_err_out);
+	void (*print_state)(void *handle, const uint8_t *state, size_t state_len);
 };
 
 #endif

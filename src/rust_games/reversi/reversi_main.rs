@@ -342,6 +342,7 @@ struct ReversiMCTSFuncs {
     get_player_turn: Box<dyn Fn(&GameState) -> mcts::PlayerId>,
     apply_move: Box<dyn Fn(&GameState, GameMove) -> GameState>,
     get_score: Box<dyn Fn(&GameState, mcts::PlayerId) -> i32>,
+    print_state: Box<dyn Fn(&GameState)>,
 }
 
 impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for ReversiMCTSFuncs {
@@ -356,6 +357,9 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for ReversiMCTSFuncs {
     }
     fn get_score(&self, state: &GameState, player: mcts::PlayerId) -> i32 {
         (self.get_score)(state, player)
+    }
+    fn print_state(&self, state: &GameState) {
+        (self.print_state)(state)
     }
 }
 
@@ -418,11 +422,16 @@ pub fn init_ai_state(
         _ => panic!("Invalid player turn"),
     };
 
+    let print_state = |game_state: &GameState| {
+        println!("Reversi game state: {:?}", game_state);
+    };
+
     let game_funcs = ReversiMCTSFuncs {
         get_possible_moves: Box::new(get_possible_moves),
         get_player_turn: Box::new(get_player_turn),
         apply_move: Box::new(apply_move),
         get_score: Box::new(get_score),
+        print_state: Box::new(print_state),
     };
 
     mcts::MCTSState::init(mcts::MCTSParams {
@@ -447,6 +456,8 @@ pub fn init_ai_state(
         //apply_move: apply_move,
         //get_score: get_score,
         game_funcs: Rc::new(game_funcs),
+
+        max_simulation_moves: 0,
     })
 }
 

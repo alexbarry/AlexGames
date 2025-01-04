@@ -54,6 +54,10 @@ pub struct AiInitParamsCStruct {
     // TODO convert to reference?
     callback_handle: *mut c_void,
 
+    // after this many moves, a simulation ends, even if there are valid moves left.
+    // Set this to 0 to run an unlimited number of moves
+    max_simulation_moves: i32,
+
     get_possible_moves: Option<
         unsafe extern "C" fn(
             *mut c_void,
@@ -76,7 +80,8 @@ pub struct AiInitParamsCStruct {
             usize,
         ) -> usize,
     >,
-    get_score: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, i32) -> i32>,
+    get_score: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize, i32, *mut bool) -> i32>,
+    print_state: Option<unsafe extern "C" fn(*mut c_void, *const u8, usize)>,
 }
 
 impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
@@ -107,7 +112,7 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
             game_moves_buff.truncate(moves_ary_len);
 
             if game_moves_buff.len() == 0 {
-                println!("Received 0 bytes from Lua, returning empty vector");
+                //println!("Received 0 bytes from Lua, returning empty vector");
                 return vec![];
             }
 
@@ -119,7 +124,7 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
                 .collect::<Vec<Vec<u8>>>();
             //.collect();
 
-            println!("Received moves {:?} from Lua", moves);
+            //println!("Received moves {:?} from Lua", moves);
 
             return moves;
         } else {
@@ -130,6 +135,7 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
     fn get_player_turn(&self, state: &GameState) -> mcts::PlayerId {
         if let Some(get_player_turn) = self.get_player_turn {
             let state_len = state.len();
+            //println!("[ai verbose] Passing state {:?} to get_player_turn", state);
             unsafe { (get_player_turn)(self.callback_handle, state.as_ptr(), state_len) }
         } else {
             panic!("get_player_turn is null");
@@ -137,6 +143,7 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
     }
 
     fn apply_move(&self, state: &GameState, game_move: GameMove) -> GameState {
+        //println!("Rust apply_move called...");
         const MAX_GAME_STATE_OUT_LEN: usize = 1024;
 
         if let Some(apply_move) = self.apply_move {
@@ -170,9 +177,32 @@ impl mcts::MCTSGameFuncs<'_, GameState, GameMove> for AiInitParamsCStruct {
     fn get_score(&self, state: &GameState, player: mcts::PlayerId) -> i32 {
         if let Some(get_score) = self.get_score {
             let state_len = state.len();
-            unsafe { (get_score)(self.callback_handle, state.as_ptr(), state_len, player) }
+            let mut is_err = false;
+            let score = unsafe {
+                (get_score)(
+                    self.callback_handle,
+                    state.as_ptr(),
+                    state_len,
+                    player,
+                    &mut is_err,
+                )
+            };
+            if is_err {
+                panic!("Rust get_score C function returned an error, see earlier messages");
+            }
+            score
         } else {
             panic!("get_score is null");
+        }
+    }
+    fn print_state(&self, state: &GameState) {
+        if let Some(print_state) = self.print_state {
+            let state_len = state.len();
+            unsafe {
+                (print_state)(self.callback_handle, state.as_ptr(), state_len);
+            }
+        } else {
+            println!("print_state is null");
         }
     }
 }
@@ -194,6 +224,8 @@ pub extern "C" fn rust_game_api_ai_init(
         get_time_ms: None, // TODO part of default
         //get_time_ms: Some(|callbacks| callbacks.get_time_ms() as i32),
         callbacks: unsafe { &(*params.callbacks) },
+
+        max_simulation_moves: params.max_simulation_moves,
 
         // TODO not used anymore, now the client manually calls the expansion function
         expansion_count: 10_000,
