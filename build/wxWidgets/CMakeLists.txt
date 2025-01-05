@@ -101,6 +101,11 @@ list(APPEND libs alexgames_core)
 list(APPEND libs alexgames_c_dict)
 list(APPEND libs alexgames_sqlite_saved_state)
 
+# TODO include param to disable this
+# TODO actually this should probably be included in the common src/CMakeLists.txt, and have platform specific CMakeLists.txt just set a param
+# to enable it
+list(APPEND libs "alexgames_lua_mcts")
+
 add_executable(${PROJECT_NAME} ${SRC_LIST})
 #target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES})
 #target_include_directories(${PROJECT_NAME} PRIVATE "${WXWIDGETS_DL_DIR}/alex_out/lib/wx/include/osx_cocoa-unicode-3.3/")
