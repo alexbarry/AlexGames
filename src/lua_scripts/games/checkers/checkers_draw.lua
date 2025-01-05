@@ -25,6 +25,9 @@ local PIECE_RED    = '#aa2222'
 local PIECE_RED_OUTLINE   = '#770000'
 local PIECE_BLACK_OUTLINE = '#777777'
 
+local THINKING_TEXT_BG = "#ffffff88"
+local THINKING_TEXT_FG = "#0000bb"
+
 if alexgames.get_user_colour_pref() == "dark" then
 	SQUARE_BORDERS = '#666600'
 	SQUARE_BLACK   = '#000000'
@@ -36,6 +39,9 @@ if alexgames.get_user_colour_pref() == "dark" then
 	PIECE_RED    = '#660000'
 	PIECE_RED_OUTLINE   = '#770000'
 	PIECE_BLACK_OUTLINE = '#777777'
+
+	THINKING_TEXT_BG = "#88888888"
+	THINKING_TEXT_FG = "#000088"
 end
 
 function draw.init(height_arg, width_arg)
@@ -66,7 +72,7 @@ local function get_colour_of_square(state, y, x)
 	end
 end
 
-function draw.update(state)
+function draw.update(state, ai_progress)
 	--alexgames.draw_rect('#000000', 0, 0, height, width)
 	alexgames.draw_clear()
 	-- Why do I need to add another 2 pixels here?? Otherwise the gold edge is cutoff
@@ -109,6 +115,19 @@ function draw.update(state)
 				end
 			end
 		end
+	end
+	if ai_progress ~= nil then
+		local text = string.format("Thinking... (%2.1f%%)", ai_progress*100)
+		local text_size = 36
+		local padding = 10
+		alexgames.draw_rect(THINKING_TEXT_BG,
+		                    padding, padding,
+		                    text_size + 3*padding, width-padding)
+		alexgames.draw_text(text, THINKING_TEXT_FG,
+		                    text_size + 1.5*padding,
+		                    width/2,
+		                    text_size,
+		                    alexgames.TEXT_ALIGN_CENTRE)
 	end
 	alexgames.draw_refresh()
 end

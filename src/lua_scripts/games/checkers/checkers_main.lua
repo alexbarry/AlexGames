@@ -57,9 +57,28 @@ state.board = {
 }
 ]]
 
-function update()
+-- Basically animations, except they only change the state itself, the drawing code doesn't
+-- know about it
+local g_actions_to_take = {}
+
+function update(dt_ms)
 	process_ai()
-	draw.update(state)
+	local ai_progress = nil
+	if g_ai_iters_remaining > 0 then
+		ai_progress = (g_ai_iters_per_move - g_ai_iters_remaining)/g_ai_iters_per_move
+	end
+	if #g_actions_to_take > 0 then
+		local action = g_actions_to_take[1]
+		if action.func then
+			action.func()
+			action.func = nil
+		end
+		action.time_remaining_ms = action.time_remaining_ms - dt_ms
+		if action.time_remaining_ms <= 0 then
+			table.remove(g_actions_to_take, 1)
+		end
+	end
+	draw.update(state, ai_progress)
 	alexgames.set_btn_enabled(BTN_ID_UNDO, alexgames.has_saved_state_offset(session_id, -1))
 	alexgames.set_btn_enabled(BTN_ID_REDO, alexgames.has_saved_state_offset(session_id,  1))
 end
@@ -72,8 +91,37 @@ local function get_player()
 	end
 end
 
+
+local function get_move_from_states_diff(prev_state, dst, state)
+	if state.player_turn ~= prev_state.player_turn then
+		return {
+			src = {
+				y = prev_state.selected_y,
+				x = prev_state.selected_x,
+			},
+			dst = dst,
+		}
+	end
+
+	if prev_state.must_jump_selected then
+		error("double jumps not handled yet for AI")
+	end
+
+	-- TODO need to handle other cases:
+	--  * player performing double (or more) jumps:
+end
+
 function handle_user_clicked(coord_y, coord_x)
+	if g_ai_iters_remaining > 0 or #g_actions_to_take > 0 then
+		alexgames.set_status_err("Wait until AI is finished before moving")
+		return
+	end
 	local piece = draw.coords_to_piece_idx(coord_y, coord_x)
+	local piece_selected = {
+		y = state.selected_y,
+		x = state.selected_x,
+	}
+	local prev_state = copy_state(state)
 	local rc = core.player_move(state, get_player(), piece.y, piece.x)
 	
 	if rc ~= core.RC_SUCCESS then
@@ -91,6 +139,17 @@ function handle_user_clicked(coord_y, coord_x)
 	core.print_state(state)
 	print(string.format("serialized state is: %s", utils.binstr_to_hr_str(serialize.serialize_state(state))))
 	update()
+	local move = get_move_from_states_diff(prev_state, piece, state)
+	if move then
+		local move_serialized = serialize_move_for_ai(move)
+		-- argh this is messy... the state transitions between a move for "piece selected" then "piece moved"
+		-- maybe this should all be changed
+		prev_state.selected_y = nil
+		prev_state.selected_x = nil
+		local prev_state_serialized = serialize.serialize_state(prev_state)
+		alexgames_ai.move_node(g_ai, prev_state_serialized, move_serialized)
+		request_ai_move()
+	end
 end
 
 
@@ -291,7 +350,7 @@ end
 
 local x = true 
 
-local function serialize_move_for_ai(move)
+function serialize_move_for_ai(move)
 	return string.char(table.unpack({
 		move.src.y,
 		move.src.x,
@@ -363,7 +422,7 @@ function get_player_turn(state_arg)
 	return 1
 end
 
-local function copy_state(state_arg)
+function copy_state(state_arg)
 	-- TODO make a real copy function, this is probably a lot slower
 	-- and certainly more error prone
 	state_arg = serialize.serialize_state(state_arg)
@@ -487,12 +546,20 @@ end
 
 function init_ai()
 	if using_ai_opponent then
-	-- TODO only do this if AI is enabled
-	g_ai = alexgames_ai.init(
-		serialize.serialize_state(state)
-	)
-	g_ai_iters_remaining = g_ai_iters_per_move
-	g_ai_move_done = false
+		g_ai = alexgames_ai.init(
+			serialize.serialize_state(state)
+		)
+	
+		if state.player_turn == core.PLAYER2 then
+			request_ai_move()
+		end
+	end
+end
+
+function request_ai_move()
+	if using_ai_opponent then
+		g_ai_iters_remaining = g_ai_iters_per_move
+		g_ai_move_done = false
 	end
 end
 
@@ -515,6 +582,27 @@ function process_ai()
 			local state_serialized = serialize.serialize_state(state)
 			local move = alexgames_ai.get_move(g_ai, state_serialized)
 			move = deserialize_ai_move(move)
+			table.insert(g_actions_to_take, {
+				time_remaining_ms = 1000,
+				func = function () 
+					print(string.format("Making AI move part 1 (%s)", core.move_to_string(move)))
+					local rc = core.player_move(state, state.player_turn, move.src.y, move.src.x)
+					if rc ~= core.RC_SUCCESS then
+						error(string.format("AI move part 1 (%s) received err %d (%s)", core.move_to_string(move), rc, core.rc_to_string(rc)))
+					end
+				end,
+			})
+			table.insert(g_actions_to_take, {
+				time_remaining_ms = 0,
+				func = function () 
+					print(string.format("Making AI move part 2 (%s)", core.move_to_string(move)))
+					local rc = core.player_move(state, state.player_turn, move.dst.y, move.dst.x)
+					if rc ~= core.RC_SUCCESS then
+						error(string.format("AI move part 2 (%s) received err %d (%s)", core.move_to_string(move), rc, core.rc_to_string(rc)))
+					end
+					alexgames_ai.move_node(g_ai, state_serialized, serialize_move_for_ai(move))
+				end,
+			})
 			core.print_state(state)
 			print(string.format("AI move is: src (%d,%d) dst(%d,%d)", move.src.y, move.src.x, move.dst.y, move.dst.x))
 			g_ai_move_done = true
