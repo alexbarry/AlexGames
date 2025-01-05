@@ -42,14 +42,21 @@ impl State {
         let mut state = State {
             board: [[CellState::EMPTY; BOARD_SIZE]; BOARD_SIZE],
             player_turn: CellState::PLAYER1,
-
+            //player_turn: CellState::PLAYER2,
             last_move: None,
         };
 
-        state.board[3][3] = CellState::PLAYER1;
-        state.board[3][4] = CellState::PLAYER2;
-        state.board[4][3] = CellState::PLAYER2;
-        state.board[4][4] = CellState::PLAYER1;
+        if false {
+            state.board[3][3] = CellState::PLAYER1;
+            state.board[3][4] = CellState::PLAYER2;
+            state.board[4][3] = CellState::PLAYER2;
+            state.board[4][4] = CellState::PLAYER1;
+        } else {
+            state.board[3][3] = CellState::PLAYER2;
+            state.board[3][4] = CellState::PLAYER1;
+            state.board[4][3] = CellState::PLAYER1;
+            state.board[4][4] = CellState::PLAYER2;
+        }
 
         state
     }

@@ -34,6 +34,9 @@ const UPDATE_TIME_MS: i32 = 1000 / FPS;
 
 const enable_ai: bool = true;
 
+//const ai_player: CellState = CellState::PLAYER1;
+const ai_player: CellState = CellState::PLAYER2;
+
 pub struct AlexGamesReversi {
     game_state: reversi_core::State,
     session_id: i32,
@@ -140,7 +143,7 @@ impl AlexGamesReversi {
             println!("AI move is: {:?}", ai_move);
             self.callbacks
                 .set_status_msg(&format!("Chose AI move {:?}, metadata {:?}", ai_move, "",));
-            let rc = reversi_core::player_move(&mut self.game_state, CellState::PLAYER2, ai_move);
+            let rc = reversi_core::player_move(&mut self.game_state, ai_player, ai_move);
             if let Err(err) = rc {
                 panic!("Error from AI move: {:?}", err);
             }
@@ -210,7 +213,7 @@ impl AlexGamesApi for AlexGamesReversi {
             self.draw
                 .add_animation(&old_game_state, &self.game_state, 500);
             //self.draw.add_thinking_animation(&self.game_state, 1000);
-            if enable_ai && player_turn == CellState::PLAYER1 {
+            if enable_ai && player_turn != ai_player {
                 self.start_ai_processing();
             }
 
@@ -445,7 +448,10 @@ pub fn init_ai_state(
         // Takes ~5-15 seconds on my linux desktop in Firefox in the wasm version
         // initial move took ~8 seconds
         //expansion_count: 300,
-        expansion_count: 10_000,
+        //expansion_count: 10_000,
+        //expansion_count: 40_000,
+        expansion_count: 50_000,
+        //expansion_count: 200_000,
         //expansion_count: 100_000,
         //expansion_count: 1_000_000,
 
