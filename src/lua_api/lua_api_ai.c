@@ -438,6 +438,16 @@ static int lua_get_move_score(lua_State *L) {
 // TODO this one will be needed once I support using AI beyond the first move
 static int lua_move_node(lua_State *L) {
 	printf("%s: %s\n", __FILE__, __func__);
-	// TODO
+
+	void *ai_handle = lua_touserdata(L, 1);
+	size_t state_len = 0;
+	const uint8_t *state = (const uint8_t *)lua_tolstring(L, 2, &state_len);
+	size_t move_len = 0;
+	const uint8_t *move = (const uint8_t *)lua_tolstring(L, 3, &move_len);
+
+	rust_game_api_ai_move_node(ai_handle,
+	                           state, state_len,
+	                           move, move_len);
+
 	return 0;
 }
