@@ -171,8 +171,8 @@ impl AlexGamesApi for AlexGamesReversi {
 
     fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32) {
         println!("From rust, user clicked {} {}", pos_y, pos_x);
-        if self.draw.is_animating() {
-            println!("Ignoring user click because animations are in progress");
+        if self.draw.is_animating() || self.ai_iters_remaining > 0 {
+            println!("Ignoring user click because animations or AI are in progress");
             return;
         }
 
