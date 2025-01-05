@@ -150,6 +150,8 @@ impl AlexGamesReversi {
             ai_state.move_node(old_game_state, ai_move);
             self.draw
                 .add_animation(&old_game_state, &self.game_state, 500);
+
+            self.save_state();
         }
     }
 }
