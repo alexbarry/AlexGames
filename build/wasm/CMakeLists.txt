@@ -134,7 +134,11 @@ list(APPEND EMCC_LINK_OPTS "-s USE_ZLIB=1")
 # (at least the WKWebView on the iOS app running on the simulator)
 # when handling touch events, it seems the touch.identifier is
 # large in that case
-list(APPEND EMCC_LINK_OPTS "-s WASM_BIGINT")
+# TODO DO NOT MERGE without figuring out what this breaks again.
+# Reversi seems to work fine with it for now.
+# I commented it out so that I could build to JS instead of WASM
+#list(APPEND EMCC_LINK_OPTS "-s WASM_BIGINT")
+
 list(APPEND EMCC_LINK_OPTS "-sSUPPORT_LONGJMP=emscripten")
 list(APPEND EMCC_LINK_OPTS "-Wno-unused-main")
 
@@ -168,6 +172,8 @@ if (ENABLE_MEM_SANITIZER)
 list(APPEND EMCC_LINK_OPTS "-fsanitize=undefined")
 endif()
 
+# TODO add a parameter to enable or disable this. Surprisingly the performance seems excellent??
+list(APPEND EMCC_LINK_OPTS "-s WASM=0")
 list(APPEND EMCC_COMPILE_OPTS
     "-s" "DISABLE_EXCEPTION_CATCHING=0"
     "-Wall"
