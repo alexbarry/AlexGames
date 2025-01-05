@@ -271,6 +271,9 @@ impl AlexGamesApi for AlexGamesReversi {
         } else {
             self.session_id = self.callbacks.get_new_session_id();
         }
+        if self.game_state.player_turn == ai_player {
+            self.start_ai_processing();
+        }
     }
 
     fn get_state(&self) -> Option<Vec<u8>> {
