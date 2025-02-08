@@ -286,3 +286,8 @@ pre {
 .license {
 	font-family:monospace !important;
 }
+
+.button_in_row {
+	flex: 1;
+	margin: 5px;
+}
