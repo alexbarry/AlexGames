@@ -162,12 +162,16 @@
 				break;
 			}
 
+			case "game_id": {
+				const recvd_game_id = msg.payload;
+				console.debug(`${msg.src} is playing game ${recvd_game_id}`);
+				if (handle_recvd_player_game_id) {
+					handle_recvd_player_game_id(msg.src, recvd_game_id);
+				}
+				break;
+			}
+
 			case "game": {
-				//let payload_array = new Array(msg.payload.length);
-				//for (let i=0; i<msg.payload.length; i++) {
-				//	payload_array[i] = msg.payload.charCodeAt(i);
-				//}
-				//console.debug("recvd game msg", bin_str_to_nice_str(msg.payload));
 				handle_msg_received(gfx.ptr, msg.src, msg.payload);
 				break;
 			}
@@ -180,14 +184,15 @@
 	}
 
 	function ws_send_message(dst, msg) {
-		return ws_send_message_internal(dst, msg, false);
+		return ws_send_message_internal(dst, "game", msg);
 	}
 
 	function ws_send_message_ctrl(msg) {
-		return ws_send_message_internal("ctrl", msg, true);
+		return ws_send_message_internal("ctrl", "ctrl", msg);
 	}
 
-	function ws_send_message_internal(dst, msg, is_ctrl) {
+	function ws_send_message_internal(dst, msg_type, msg) {
+		const is_strl = (msg_type == "ctrl");
 		if (gfx.no_ws) {
 			return;
 		} else if (ws == null) {
@@ -196,8 +201,8 @@
 		}
 		let msg_str = "";
 		msg_str += "\"" + dst + "\":";
-		if (!is_ctrl) {
-			msg_str += "game:";
+		if (msg_type != "ctrl") {
+			msg_str += msg_type + ":";
 		}
 		if (typeof(msg) == "string") {
 			msg_str += msg;
@@ -233,6 +238,7 @@
 			ws_send_message_ctrl("session: " + URL_args.id);
 			ws_send_message("all", "player_joined:");
 			set_status_msg(gfx, "Connected to websocket server " + ws.url);
+			ws_send_message_internal("all", "game_id", gfx.game_id);
 			on_ws_ready();
 		}
 	}

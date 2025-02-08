@@ -162,6 +162,7 @@
 
 		/* prevent double tapping a button to zoom in on iOS */
 		touch-action: manipulation;
+		cursor:pointer;
 	}
 
 
@@ -633,6 +634,18 @@ for (let game_choice_row_info of game_choice_row_infos) {
 </div>
 </div>
 
+<div id="other_player_game_chosen" class="popup meta_popup options_popup" style="display:none">
+	<button id="btn_close_other_player_game_chosen" class="close_button">X</button>
+		<div class="popup_content_wrapper">
+			<h2 class="title">Other player chose game</h2>
+			<p>Other player <span id="span_other_player_other_player"></span> has chosen game <span id="span_other_player_new_game1">NEW GAME</span>. Switch to this game, or stay in current game <span id="span_other_player_current_game1">CURRENT GAME</span>?</p>
+			<div style="display:flex;">
+					<button id="btn_other_player_game_chosen_other_game" class="button_in_row" style="flex:1">Switch to <span id="span_other_player_new_game2">NEW GAME</span></button>
+					<button id="btn_other_player_game_chosen_stay" class="button_in_row" style="flex:1">Stay in <span id="span_other_player_current_game2">CURRENT GAME</span></button>
+			</div>
+		</div>
+</div>
+
 <!-- preload images -->
 <div style="display:none">
 <img id ="board" src="img/wooden_board.png"/>
@@ -1036,6 +1049,47 @@ document.getElementById("btn_submit_multiplayer_settings").addEventListener('cli
 
 document.getElementById("btn_close_game_choice_popup").addEventListener('click', function () {
 	set_game_choice_popup_visible(false);
+});
+
+function set_other_player_game_chosen_popup_visible(is_visible) {
+		const popup = document.getElementById("other_player_game_chosen");
+		let display;
+		if (is_visible) {
+			display = "";
+		} else {
+			display = "none";
+		}
+		popup.style.display = display;
+}
+
+document.getElementById("btn_close_other_player_game_chosen").addEventListener('click', function () {
+	set_other_player_game_chosen_popup_visible(false);
+});
+
+
+function handle_recvd_player_game_id(other_player, other_game_id) {
+	console.log(`[is playing] handle_recvd_player_game_id, other_player=${other_player}, other_game_id=${other_game_id}`);
+	if (other_game_id == "unset") {
+		return;
+	}
+	gfx.other_game_id = other_game_id;
+	if (other_game_id != gfx.game_id) {
+		set_other_player_game_chosen_popup_visible(true);
+		document.getElementById("span_other_player_other_player").innerText = other_player;
+		document.getElementById("span_other_player_new_game1").innerText = other_game_id;
+		document.getElementById("span_other_player_new_game2").innerText = other_game_id;
+		document.getElementById("span_other_player_current_game1").innerText = gfx.game_id;
+		document.getElementById("span_other_player_current_game2").innerText = gfx.game_id;
+	}
+}
+
+document.getElementById("btn_other_player_game_chosen_other_game").addEventListener('click', function () {
+	set_other_player_game_chosen_popup_visible(false);
+	game_chosen(gfx.other_game_id);
+});
+
+document.getElementById("btn_other_player_game_chosen_stay").addEventListener('click', function () {
+	set_other_player_game_chosen_popup_visible(false);
 });
 
 function update_colour_pref(colour_pref) {

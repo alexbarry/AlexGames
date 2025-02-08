@@ -107,6 +107,7 @@
 		}
 
 		update(gfx.ptr, 0);
+		ws_send_message_internal("all", "game_id", gfx.game_id, false);
 	}
 
 
