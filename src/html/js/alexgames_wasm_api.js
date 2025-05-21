@@ -598,9 +598,13 @@ function update_timer_period_ms(gfx, timer_period_ms) {
 	}
 
 	if (timer_period_ms != 0) {
+		if (gfx.update_timers.size == 0) {
+			gfx.last_timer_fired_ms = undefined;
+		}
 		const handle = setInterval(update_func, timer_period_ms);
 		console.log(`[timer] creating timer with period_ms=${timer_period_ms}, handle=${handle}`)
 		gfx.update_timers.add(handle);
+
 		return handle;
 	}
 }
