@@ -294,18 +294,18 @@ function draw_celebration_anim.update(anim_state, dt)
 	while i <= #anim_state.anims do
 		--print("anim %d, time_remaining is: %s", i, anim_state.anims[i].time_remaining)
 		if anim_state.anims[i].time_remaining <= 0 then
-			print("anim finished", i)
+			--print("anim finished", i)
 			table.remove(anim_state.anims, i)
 		else
 			i = i + 1
 		end
 	end
 
-	print(string.format("anim_state.anims remaining: %d", #anim_state.anims))
+	--print(string.format("anim_state.anims remaining: %d", #anim_state.anims))
 	if #anim_state.anims == 0 then
-		print("anims finished")
+		--print("anims finished")
 		if anim_state.on_finish then
-			print("calling anims finished")
+			--print("calling anims finished")
 			anim_state.on_finish()
 		end
 
