@@ -1,9 +1,15 @@
+// This code implements the `-sMODULARIZE` settings by taking the generated
+// JS program code (INNER_JS_CODE) and wrapping it in a factory function.
+
+// Single threaded MINIMAL_RUNTIME programs do not need access to
+// document.currentScript, so a simple export declaration is enough.
 var createMyModule = (() => {
+  // When MODULARIZE this JS may be executed later,
+  // after document.currentScript is gone, so we save it.
+  // In EXPORT_ES6 mode we can just use 'import.meta.url'.
   var _scriptName = typeof document != 'undefined' ? document.currentScript?.src : undefined;
-  if (typeof __filename != 'undefined') _scriptName = _scriptName || __filename;
-  return (
-async function(moduleArg = {}) {
-  var moduleRtn;
+  return async function(moduleArg = {}) {
+    var moduleRtn;
 
 // include: shell.js
 // The Module object: Our interface to the outside world. We import
@@ -21,13 +27,6 @@ async function(moduleArg = {}) {
 // can continue to use Module afterwards as well.
 var Module = moduleArg;
 
-// Set up the promise that indicates the Module is initialized
-var readyPromiseResolve, readyPromiseReject;
-var readyPromise = new Promise((resolve, reject) => {
-  readyPromiseResolve = resolve;
-  readyPromiseReject = reject;
-});
-
 // Determine the runtime environment we are in. You can customize this by
 // setting the ENVIRONMENT setting at compile time (see settings.js).
 
@@ -36,16 +35,12 @@ var ENVIRONMENT_IS_WEB = typeof window == 'object';
 var ENVIRONMENT_IS_WORKER = typeof WorkerGlobalScope != 'undefined';
 // N.b. Electron.js environment is simultaneously a NODE-environment, but
 // also a web environment.
-var ENVIRONMENT_IS_NODE = typeof process == 'object' && typeof process.versions == 'object' && typeof process.versions.node == 'string' && process.type != 'renderer';
+var ENVIRONMENT_IS_NODE = typeof process == 'object' && process.versions?.node && process.type != 'renderer';
 var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONMENT_IS_WORKER;
-
-if (ENVIRONMENT_IS_NODE) {
-
-}
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpw_gudtyl.js
+// include: /tmp/tmpsti41tn5.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -55,7 +50,7 @@ if (ENVIRONMENT_IS_NODE) {
     var isWasmWorker = typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER;
     if (isPthread || isWasmWorker) return;
     var isNode = typeof process === 'object' && typeof process.versions === 'object' && typeof process.versions.node === 'string';
-    function loadPackage(metadata) {
+    async function loadPackage(metadata) {
 
       var PACKAGE_PATH = '';
       if (typeof window === 'object') {
@@ -66,94 +61,81 @@ if (ENVIRONMENT_IS_NODE) {
       }
       var PACKAGE_NAME = 'alexgames_wasm.data';
       var REMOTE_PACKAGE_BASE = 'alexgames_wasm.data';
-      var REMOTE_PACKAGE_NAME = Module['locateFile'] ? Module['locateFile'](REMOTE_PACKAGE_BASE, '') : REMOTE_PACKAGE_BASE;
-var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
+      var REMOTE_PACKAGE_NAME = Module['locateFile']?.(REMOTE_PACKAGE_BASE, '') ?? REMOTE_PACKAGE_BASE;
+      var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
 
-      function fetchRemotePackage(packageName, packageSize, callback, errback) {
+      async function fetchRemotePackage(packageName, packageSize) {
         if (isNode) {
-          require('fs').readFile(packageName, (err, contents) => {
-            if (err) {
-              errback(err);
-            } else {
-              callback(contents.buffer);
-            }
-          });
-          return;
+          var fsPromises = require('fs/promises');
+          var contents = await fsPromises.readFile(packageName);
+          return contents.buffer;
         }
         Module['dataFileDownloads'] ??= {};
-        fetch(packageName)
-          .catch((cause) => Promise.reject(new Error(`Network Error: ${packageName}`, {cause}))) // If fetch fails, rewrite the error to include the failing URL & the cause.
-          .then((response) => {
-            if (!response.ok) {
-              return Promise.reject(new Error(`${response.status}: ${response.url}`));
-            }
-
-            if (!response.body && response.arrayBuffer) { // If we're using the polyfill, readers won't be available...
-              return response.arrayBuffer().then(callback);
-            }
-
-            const reader = response.body.getReader();
-            const iterate = () => reader.read().then(handleChunk).catch((cause) => {
-              return Promise.reject(new Error(`Unexpected error while handling : ${response.url} ${cause}`, {cause}));
-            });
-
-            const chunks = [];
-            const headers = response.headers;
-            const total = Number(headers.get('Content-Length') ?? packageSize);
-            let loaded = 0;
-
-            const handleChunk = ({done, value}) => {
-              if (!done) {
-                chunks.push(value);
-                loaded += value.length;
-                Module['dataFileDownloads'][packageName] = {loaded, total};
-
-                let totalLoaded = 0;
-                let totalSize = 0;
-
-                for (const download of Object.values(Module['dataFileDownloads'])) {
-                  totalLoaded += download.loaded;
-                  totalSize += download.total;
-                }
-
-                Module['setStatus']?.(`Downloading data... (${totalLoaded}/${totalSize})`);
-                return iterate();
-              } else {
-                const packageData = new Uint8Array(chunks.map((c) => c.length).reduce((a, b) => a + b, 0));
-                let offset = 0;
-                for (const chunk of chunks) {
-                  packageData.set(chunk, offset);
-                  offset += chunk.length;
-                }
-                callback(packageData.buffer);
-              }
-            };
-
-            Module['setStatus']?.('Downloading data...');
-            return iterate();
-          });
-      };
-
-      function handleError(error) {
-        console.error('package error:', error);
-      };
-
-      var fetchedCallback = null;
-      var fetched = Module['getPreloadedPackage'] ? Module['getPreloadedPackage'](REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE) : null;
-
-      if (!fetched) fetchRemotePackage(REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE, (data) => {
-        if (fetchedCallback) {
-          fetchedCallback(data);
-          fetchedCallback = null;
-        } else {
-          fetched = data;
+        try {
+          var response = await fetch(packageName);
+        } catch (e) {
+          throw new Error(`Network Error: ${packageName}`, {e});
         }
-      }, handleError);
+        if (!response.ok) {
+          throw new Error(`${response.status}: ${response.url}`);
+        }
 
-    function runWithFS(Module) {
+        const chunks = [];
+        const headers = response.headers;
+        const total = Number(headers.get('Content-Length') ?? packageSize);
+        let loaded = 0;
+
+        Module['setStatus']?.('Downloading data...');
+        const reader = response.body.getReader();
+
+        while (1) {
+          var {done, value} = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          loaded += value.length;
+          Module['dataFileDownloads'][packageName] = {loaded, total};
+
+          let totalLoaded = 0;
+          let totalSize = 0;
+
+          for (const download of Object.values(Module['dataFileDownloads'])) {
+            totalLoaded += download.loaded;
+            totalSize += download.total;
+          }
+
+          Module['setStatus']?.(`Downloading data... (${totalLoaded}/${totalSize})`);
+        }
+
+        const packageData = new Uint8Array(chunks.map((c) => c.length).reduce((a, b) => a + b, 0));
+        let offset = 0;
+        for (const chunk of chunks) {
+          packageData.set(chunk, offset);
+          offset += chunk.length;
+        }
+        return packageData.buffer;
+      }
+
+      var fetchedCallback;
+      var fetched = Module['getPreloadedPackage']?.(REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE);
+
+      if (!fetched) {
+        // Note that we don't use await here because we want to execute the
+        // the rest of this function immediately.
+        fetchRemotePackage(REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE)
+          .then((data) => {
+            if (fetchedCallback) {
+              fetchedCallback(data);
+              fetchedCallback = null;
+            } else {
+              fetched = data;
+            }
+          });
+      }
+
+    async function runWithFS(Module) {
 
       function assert(check, msg) {
-        if (!check) throw msg + new Error().stack;
+        if (!check) throw new Error(msg);
       }
 Module['FS_createPath']("/", "preload", true, true);
 Module['FS_createPath']("/preload", "games", true, true);
@@ -212,9 +194,9 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
           var byteArray = this.byteArray.subarray(this.start, this.end);
           this.finish(byteArray);
         },
-        finish: function(byteArray) {
+        finish: async function(byteArray) {
           var that = this;
-          // canOwn this data in the filesystem, it is a slide into the heap that will never change
+          // canOwn this data in the filesystem, it is a slice into the heap that will never change
           Module['FS_createDataFile'](this.name, null, byteArray, true, true, true);
           Module['removeRunDependency'](`fp ${that.name}`);
           this.requests[this.name] = null;
@@ -238,7 +220,7 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
             DataRequest.prototype.requests[files[i].filename].onload();
           }          Module['removeRunDependency']('datafile_alexgames_wasm.data');
 
-      };
+      }
       Module['addRunDependency']('datafile_alexgames_wasm.data');
 
       Module['preloadResults'] ??= {};
@@ -263,35 +245,35 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
 
   })();
 
-// end include: /tmp/tmpw_gudtyl.js
-// include: /tmp/tmp_0ic651x.js
+// end include: /tmp/tmpsti41tn5.js
+// include: /tmp/tmp8rcnuwyq.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
-    if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
+    if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmp_0ic651x.js
-// include: /tmp/tmpyjqxndue.js
+  // end include: /tmp/tmp8rcnuwyq.js
+// include: /tmp/tmpxuwqajcg.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpyjqxndue.js
+  // end include: /tmp/tmpxuwqajcg.js
 
-
-// Sometimes an existing Module object exists with properties
-// meant to overwrite the default module functionality. Here
-// we collect those properties and reapply _after_ we configure
-// the current environment's defaults to avoid having to be so
-// defensive during initialization.
-var moduleOverrides = Object.assign({}, Module);
 
 var arguments_ = [];
 var thisProgram = './this.program';
 var quit_ = (status, toThrow) => {
   throw toThrow;
 };
+
+if (typeof __filename != 'undefined') { // Node
+  _scriptName = __filename;
+} else
+if (ENVIRONMENT_IS_WORKER) {
+  _scriptName = self.location.href;
+}
 
 // `/` should be present at the end if `scriptDirectory` is not empty
 var scriptDirectory = '';
@@ -306,12 +288,12 @@ function locateFile(path) {
 var readAsync, readBinary;
 
 if (ENVIRONMENT_IS_NODE) {
-  if (typeof process == 'undefined' || !process.release || process.release.name !== 'node') throw new Error('not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)');
+  const isNode = typeof process == 'object' && process.versions?.node && process.type != 'renderer';
+  if (!isNode) throw new Error('not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)');
 
   var nodeVersion = process.versions.node;
   var numericVersion = nodeVersion.split('.').slice(0, 3);
   numericVersion = (numericVersion[0] * 10000) + (numericVersion[1] * 100) + (numericVersion[2].split('-')[0] * 1);
-  var minVersion = 160000;
   if (numericVersion < 160000) {
     throw new Error('This emscripten-generated code requires node v16.0.0 (detected v' + nodeVersion + ')');
   }
@@ -319,7 +301,6 @@ if (ENVIRONMENT_IS_NODE) {
   // These modules will usually be used on Node.js. Load them eagerly to avoid
   // the complexity of lazy-loading.
   var fs = require('fs');
-  var nodePath = require('path');
 
   scriptDirectory = __dirname + '/';
 
@@ -340,13 +321,11 @@ readAsync = async (filename, binary = true) => {
   return ret;
 };
 // end include: node_shell_read.js
-  if (!Module['thisProgram'] && process.argv.length > 1) {
+  if (process.argv.length > 1) {
     thisProgram = process.argv[1].replace(/\\/g, '/');
   }
 
   arguments_ = process.argv.slice(2);
-
-  // MODULARIZE will export the module in the proper place outside, we don't need to export here
 
   quit_ = (status, toThrow) => {
     process.exitCode = status;
@@ -356,7 +335,8 @@ readAsync = async (filename, binary = true) => {
 } else
 if (ENVIRONMENT_IS_SHELL) {
 
-  if ((typeof process == 'object' && typeof require === 'function') || typeof window == 'object' || typeof WorkerGlobalScope != 'undefined') throw new Error('not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)');
+  const isNode = typeof process == 'object' && process.versions?.node && process.type != 'renderer';
+  if (isNode || typeof window == 'object' || typeof WorkerGlobalScope != 'undefined') throw new Error('not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)');
 
 } else
 
@@ -364,26 +344,11 @@ if (ENVIRONMENT_IS_SHELL) {
 // Node.js workers are detected as a combination of ENVIRONMENT_IS_WORKER and
 // ENVIRONMENT_IS_NODE.
 if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
-  if (ENVIRONMENT_IS_WORKER) { // Check worker, not web, since window could be polyfilled
-    scriptDirectory = self.location.href;
-  } else if (typeof document != 'undefined' && document.currentScript) { // web
-    scriptDirectory = document.currentScript.src;
-  }
-  // When MODULARIZE, this JS may be executed later, after document.currentScript
-  // is gone, so we saved it, and we use it here instead of any other info.
-  if (_scriptName) {
-    scriptDirectory = _scriptName;
-  }
-  // blob urls look like blob:http://site.com/etc/etc and we cannot infer anything from them.
-  // otherwise, slice off the final part of the url to find the script directory.
-  // if scriptDirectory does not contain a slash, lastIndexOf will return -1,
-  // and scriptDirectory will correctly be replaced with an empty string.
-  // If scriptDirectory contains a query (starting with ?) or a fragment (starting with #),
-  // they are removed because they could contain a slash.
-  if (scriptDirectory.startsWith('blob:')) {
-    scriptDirectory = '';
-  } else {
-    scriptDirectory = scriptDirectory.slice(0, scriptDirectory.replace(/[?#].*/, '').lastIndexOf('/')+1);
+  try {
+    scriptDirectory = new URL('.', _scriptName).href; // includes trailing slash
+  } catch {
+    // Must be a `blob:` or `data:` URL (e.g. `blob:http://site.com/etc/etc`), we cannot
+    // infer anything from them.
   }
 
   if (!(typeof window == 'object' || typeof WorkerGlobalScope != 'undefined')) throw new Error('not compiled for this environment (did you build to HTML and try to run it not on the web, or set ENVIRONMENT to something - like node - and run it someplace else - like on the web?)');
@@ -434,40 +399,9 @@ if (ENVIRONMENT_IS_WORKER) {
   throw new Error('environment detection error');
 }
 
-var out = Module['print'] || console.log.bind(console);
-var err = Module['printErr'] || console.error.bind(console);
+var out = console.log.bind(console);
+var err = console.error.bind(console);
 
-// Merge back in the overrides
-Object.assign(Module, moduleOverrides);
-// Free the object hierarchy contained in the overrides, this lets the GC
-// reclaim data used.
-moduleOverrides = null;
-checkIncomingModuleAPI();
-
-// Emit code to handle expected values on the Module object. This applies Module.x
-// to the proper local x. This has two benefits: first, we only emit it if it is
-// expected to arrive, and second, by using a local everywhere else that can be
-// minified.
-
-if (Module['arguments']) arguments_ = Module['arguments'];legacyModuleProp('arguments', 'arguments_');
-
-if (Module['thisProgram']) thisProgram = Module['thisProgram'];legacyModuleProp('thisProgram', 'thisProgram');
-
-// perform assertions in shell.js after we set up out() and err(), as otherwise if an assertion fails it cannot print the message
-// Assertions on removed incoming Module JS APIs.
-assert(typeof Module['memoryInitializerPrefixURL'] == 'undefined', 'Module.memoryInitializerPrefixURL option was removed, use Module.locateFile instead');
-assert(typeof Module['pthreadMainPrefixURL'] == 'undefined', 'Module.pthreadMainPrefixURL option was removed, use Module.locateFile instead');
-assert(typeof Module['cdInitializerPrefixURL'] == 'undefined', 'Module.cdInitializerPrefixURL option was removed, use Module.locateFile instead');
-assert(typeof Module['filePackagePrefixURL'] == 'undefined', 'Module.filePackagePrefixURL option was removed, use Module.locateFile instead');
-assert(typeof Module['read'] == 'undefined', 'Module.read option was removed');
-assert(typeof Module['readAsync'] == 'undefined', 'Module.readAsync option was removed (modify readAsync in JS)');
-assert(typeof Module['readBinary'] == 'undefined', 'Module.readBinary option was removed (modify readBinary in JS)');
-assert(typeof Module['setWindowTitle'] == 'undefined', 'Module.setWindowTitle option was removed (modify emscripten_set_window_title in JS)');
-assert(typeof Module['TOTAL_MEMORY'] == 'undefined', 'Module.TOTAL_MEMORY has been renamed Module.INITIAL_MEMORY');
-legacyModuleProp('asm', 'wasmExports');
-legacyModuleProp('readAsync', 'readAsync');
-legacyModuleProp('readBinary', 'readBinary');
-legacyModuleProp('setWindowTitle', 'setWindowTitle');
 var IDBFS = 'IDBFS is no longer included by default; build with -lidbfs.js';
 var PROXYFS = 'PROXYFS is no longer included by default; build with -lproxyfs.js';
 var WORKERFS = 'WORKERFS is no longer included by default; build with -lworkerfs.js';
@@ -477,6 +411,9 @@ var JSFILEFS = 'JSFILEFS is no longer included by default; build with -ljsfilefs
 var OPFS = 'OPFS is no longer included by default; build with -lopfs.js';
 
 var NODEFS = 'NODEFS is no longer included by default; build with -lnodefs.js';
+
+// perform assertions in shell.js after we set up out() and err(), as otherwise
+// if an assertion fails it cannot print the message
 
 assert(!ENVIRONMENT_IS_SHELL, 'shell environment detected but not enabled at build time.  Add `shell` to `-sENVIRONMENT` to enable.');
 
@@ -493,15 +430,13 @@ assert(!ENVIRONMENT_IS_SHELL, 'shell environment detected but not enabled at bui
 // An online HTML version (which may be of a different version of Emscripten)
 //    is up at http://kripken.github.io/emscripten-site/docs/api_reference/preamble.js.html
 
-var wasmBinary = Module['wasmBinary'];legacyModuleProp('wasmBinary', 'wasmBinary');
+var wasmBinary;
 
 if (typeof WebAssembly != 'object') {
   err('no native wasm support detected');
 }
 
 // Wasm globals
-
-var wasmMemory;
 
 //========================================
 // Runtime essentials
@@ -530,41 +465,13 @@ function assert(condition, text) {
 // We used to include malloc/free by default in the past. Show a helpful error in
 // builds with assertions.
 
-// Memory management
-
-var HEAP,
-/** @type {!Int8Array} */
-  HEAP8,
-/** @type {!Uint8Array} */
-  HEAPU8,
-/** @type {!Int16Array} */
-  HEAP16,
-/** @type {!Uint16Array} */
-  HEAPU16,
-/** @type {!Int32Array} */
-  HEAP32,
-/** @type {!Uint32Array} */
-  HEAPU32,
-/** @type {!Float32Array} */
-  HEAPF32,
-/* BigInt64Array type is not correctly defined in closure
-/** not-@type {!BigInt64Array} */
-  HEAP64,
-/* BigUint64Array type is not correctly defined in closure
-/** not-t@type {!BigUint64Array} */
-  HEAPU64,
-/** @type {!Float64Array} */
-  HEAPF64;
-
-var runtimeInitialized = false;
-
 /**
  * Indicates whether filename is delivered via file protocol (as opposed to http/https)
  * @noinline
  */
 var isFileURI = (filename) => filename.startsWith('file://');
 
-// include: runtime_shared.js
+// include: runtime_common.js
 // include: runtime_stack_check.js
 // Initializes the stack cookie. Called at the startup of main and at the startup of each thread in pthreads mode.
 function writeStackCookie() {
@@ -620,6 +527,16 @@ class CppException extends EmscriptenEH {
 }
 // end include: runtime_exceptions.js
 // include: runtime_debug.js
+var runtimeDebug = true; // Switch to false at runtime to disable logging at the right times
+
+// Used by XXXXX_DEBUG settings to output debug messages.
+function dbg(...args) {
+  if (!runtimeDebug && typeof runtimeDebug != 'undefined') return;
+  // TODO(sbc): Make this configurable somehow.  Its not always convenient for
+  // logging to show up as warnings.
+  console.warn(...args);
+}
+
 // Endianness check
 (() => {
   var h16 = new Int16Array(1);
@@ -628,21 +545,21 @@ class CppException extends EmscriptenEH {
   if (h8[0] !== 0x73 || h8[1] !== 0x63) throw 'Runtime error: expected the system to be little-endian! (Run with -sSUPPORT_BIG_ENDIAN to bypass)';
 })();
 
-if (Module['ENVIRONMENT']) {
-  throw new Error('Module.ENVIRONMENT has been deprecated. To force the environment, use the ENVIRONMENT compile-time option (for example, -sENVIRONMENT=web or -sENVIRONMENT=node)');
-}
-
-function legacyModuleProp(prop, newName, incoming=true) {
+function consumedModuleProp(prop) {
   if (!Object.getOwnPropertyDescriptor(Module, prop)) {
     Object.defineProperty(Module, prop, {
       configurable: true,
-      get() {
-        let extra = incoming ? ' (the initial value can be provided on Module, but after startup the value is only looked for on a local variable of that name)' : '';
-        abort(`\`Module.${prop}\` has been replaced by \`${newName}\`` + extra);
+      set() {
+        abort(`Attempt to set \`Module.${prop}\` after it has already been processed.  This can happen, for example, when code is injected via '--post-js' rather than '--pre-js'`);
 
       }
     });
   }
+}
+
+function makeInvalidEarlyAccess(name) {
+  return () => assert(false, `call to '${name}' via reference taken before Wasm module initialization`);
+
 }
 
 function ignoredModuleProp(prop) {
@@ -656,6 +573,7 @@ function isExportedByForceFilesystem(name) {
   return name === 'FS_createPath' ||
          name === 'FS_createDataFile' ||
          name === 'FS_createPreloadedFile' ||
+         name === 'FS_preloadFile' ||
          name === 'FS_unlink' ||
          name === 'addRunDependency' ||
          // The old FS has some functionality that WasmFS lacks.
@@ -727,40 +645,62 @@ function unexportedRuntimeSymbol(sym) {
   }
 }
 
-// Used by XXXXX_DEBUG settings to output debug messages.
-function dbg(...args) {
-  // TODO(sbc): Make this configurable somehow.  Its not always convenient for
-  // logging to show up as warnings.
-  console.warn(...args);
-}
 // end include: runtime_debug.js
-// include: memoryprofiler.js
-// end include: memoryprofiler.js
+var readyPromiseResolve, readyPromiseReject;
+
+// Memory management
+
+var wasmMemory;
+
+var
+/** @type {!Int8Array} */
+  HEAP8,
+/** @type {!Uint8Array} */
+  HEAPU8,
+/** @type {!Int16Array} */
+  HEAP16,
+/** @type {!Uint16Array} */
+  HEAPU16,
+/** @type {!Int32Array} */
+  HEAP32,
+/** @type {!Uint32Array} */
+  HEAPU32,
+/** @type {!Float32Array} */
+  HEAPF32,
+/** @type {!Float64Array} */
+  HEAPF64;
+
+// BigInt64Array type is not correctly defined in closure
+var
+/** not-@type {!BigInt64Array} */
+  HEAP64,
+/* BigUint64Array type is not correctly defined in closure
+/** not-@type {!BigUint64Array} */
+  HEAPU64;
+
+var runtimeInitialized = false;
+
 
 
 function updateMemoryViews() {
   var b = wasmMemory.buffer;
-  Module['HEAP8'] = HEAP8 = new Int8Array(b);
-  Module['HEAP16'] = HEAP16 = new Int16Array(b);
-  Module['HEAPU8'] = HEAPU8 = new Uint8Array(b);
-  Module['HEAPU16'] = HEAPU16 = new Uint16Array(b);
-  Module['HEAP32'] = HEAP32 = new Int32Array(b);
-  Module['HEAPU32'] = HEAPU32 = new Uint32Array(b);
-  Module['HEAPF32'] = HEAPF32 = new Float32Array(b);
-  Module['HEAPF64'] = HEAPF64 = new Float64Array(b);
-  Module['HEAP64'] = HEAP64 = new BigInt64Array(b);
-  Module['HEAPU64'] = HEAPU64 = new BigUint64Array(b);
+  HEAP8 = new Int8Array(b);
+  HEAP16 = new Int16Array(b);
+  HEAPU8 = new Uint8Array(b);
+  HEAPU16 = new Uint16Array(b);
+  HEAP32 = new Int32Array(b);
+  HEAPU32 = new Uint32Array(b);
+  HEAPF32 = new Float32Array(b);
+  HEAPF64 = new Float64Array(b);
+  HEAP64 = new BigInt64Array(b);
+  HEAPU64 = new BigUint64Array(b);
 }
 
-// end include: runtime_shared.js
-assert(!Module['STACK_SIZE'], 'STACK_SIZE can no longer be set at runtime.  Use -sSTACK_SIZE at link time')
-
+// include: memoryprofiler.js
+// end include: memoryprofiler.js
+// end include: runtime_common.js
 assert(typeof Int32Array != 'undefined' && typeof Float64Array !== 'undefined' && Int32Array.prototype.subarray != undefined && Int32Array.prototype.set != undefined,
        'JS engine does not provide full typed array support');
-
-// If memory is defined in wasm, the user can't provide it, or set INITIAL_MEMORY
-assert(!Module['wasmMemory'], 'Use of `wasmMemory` detected.  Use -sIMPORTED_MEMORY to define wasmMemory externally');
-assert(!Module['INITIAL_MEMORY'], 'Detected runtime INITIAL_MEMORY setting.  Use -sIMPORTED_MEMORY to define wasmMemory dynamically');
 
 function preRun() {
   if (Module['preRun']) {
@@ -769,7 +709,10 @@ function preRun() {
       addOnPreRun(Module['preRun'].shift());
     }
   }
+  consumedModuleProp('preRun');
+  // Begin ATPRERUNS hooks
   callRuntimeCallbacks(onPreRuns);
+  // End ATPRERUNS hooks
 }
 
 function initRuntime() {
@@ -778,16 +721,21 @@ function initRuntime() {
 
   checkStackCookie();
 
+  // Begin ATINITS hooks
   if (!Module['noFSInit'] && !FS.initialized) FS.init();
 TTY.init();
+  // End ATINITS hooks
 
   wasmExports['__wasm_call_ctors']();
 
+  // Begin ATPOSTCTORS hooks
   FS.ignorePermissions = false;
+  // End ATPOSTCTORS hooks
 }
 
 function postRun() {
   checkStackCookie();
+   // PThreads reuse the runtime from the main thread.
 
   if (Module['postRun']) {
     if (typeof Module['postRun'] == 'function') Module['postRun'] = [Module['postRun']];
@@ -795,8 +743,11 @@ function postRun() {
       addOnPostRun(Module['postRun'].shift());
     }
   }
+  consumedModuleProp('postRun');
 
+  // Begin ATPOSTRUNS hooks
   callRuntimeCallbacks(onPostRuns);
+  // End ATPOSTRUNS hooks
 }
 
 // A counter of dependencies for calling run(). If we need to
@@ -811,45 +762,37 @@ var dependenciesFulfilled = null; // overridden to take different actions when a
 var runDependencyTracking = {};
 var runDependencyWatcher = null;
 
-function getUniqueRunDependency(id) {
-  var orig = id;
-  while (1) {
-    if (!runDependencyTracking[id]) return id;
-    id = orig + Math.random();
-  }
-}
-
 function addRunDependency(id) {
   runDependencies++;
 
   Module['monitorRunDependencies']?.(runDependencies);
 
-  if (id) {
-    assert(!runDependencyTracking[id]);
-    runDependencyTracking[id] = 1;
-    if (runDependencyWatcher === null && typeof setInterval != 'undefined') {
-      // Check for missing dependencies every few seconds
-      runDependencyWatcher = setInterval(() => {
-        if (ABORT) {
-          clearInterval(runDependencyWatcher);
-          runDependencyWatcher = null;
-          return;
+  assert(id, 'addRunDependency requires an ID')
+  assert(!runDependencyTracking[id]);
+  runDependencyTracking[id] = 1;
+  if (runDependencyWatcher === null && typeof setInterval != 'undefined') {
+    // Check for missing dependencies every few seconds
+    runDependencyWatcher = setInterval(() => {
+      if (ABORT) {
+        clearInterval(runDependencyWatcher);
+        runDependencyWatcher = null;
+        return;
+      }
+      var shown = false;
+      for (var dep in runDependencyTracking) {
+        if (!shown) {
+          shown = true;
+          err('still waiting on run dependencies:');
         }
-        var shown = false;
-        for (var dep in runDependencyTracking) {
-          if (!shown) {
-            shown = true;
-            err('still waiting on run dependencies:');
-          }
-          err(`dependency: ${dep}`);
-        }
-        if (shown) {
-          err('(end of list)');
-        }
-      }, 10000);
-    }
-  } else {
-    err('warning: run dependency added without ID');
+        err(`dependency: ${dep}`);
+      }
+      if (shown) {
+        err('(end of list)');
+      }
+    }, 10000);
+    // Prevent this timer from keeping the runtime alive if nothing
+    // else is.
+    runDependencyWatcher.unref?.()
   }
 }
 
@@ -858,12 +801,9 @@ function removeRunDependency(id) {
 
   Module['monitorRunDependencies']?.(runDependencies);
 
-  if (id) {
-    assert(runDependencyTracking[id]);
-    delete runDependencyTracking[id];
-  } else {
-    err('warning: run dependency removed without ID');
-  }
+  assert(id, 'removeRunDependency requires an ID');
+  assert(runDependencyTracking[id]);
+  delete runDependencyTracking[id];
   if (runDependencies == 0) {
     if (runDependencyWatcher !== null) {
       clearInterval(runDependencyWatcher);
@@ -904,7 +844,7 @@ function abort(what) {
   /** @suppress {checkTypes} */
   var e = new WebAssembly.RuntimeError(what);
 
-  readyPromiseReject(e);
+  readyPromiseReject?.(e);
   // Throw the error whether or not MODULARIZE is set because abort is used
   // in code paths apart from instantiation where an exception is expected
   // to be thrown when abort is called.
@@ -923,6 +863,7 @@ function createExportWrapper(name, nargs) {
 }
 
 var wasmBinaryFile;
+
 function findWasmBinary() {
     return locateFile('alexgames_wasm.wasm');
 }
@@ -970,7 +911,7 @@ async function instantiateArrayBuffer(binaryFile, imports) {
 }
 
 async function instantiateAsync(binary, binaryFile, imports) {
-  if (!binary && typeof WebAssembly.instantiateStreaming == 'function'
+  if (!binary
       // Don't use streaming for file:// delivered objects in a webview, fetch them synchronously.
       && !isFileURI(binaryFile)
       // Avoid instantiateStreaming() on Node.js environment for now, as while
@@ -1025,6 +966,7 @@ async function createWasm() {
     
     assert(wasmTable, 'table not found in wasm exports');
 
+    assignWasmExports(wasmExports);
     removeRunDependency('wasm-instantiate');
     return wasmExports;
   }
@@ -1058,8 +1000,7 @@ async function createWasm() {
     return new Promise((resolve, reject) => {
       try {
         Module['instantiateWasm'](info, (mod, inst) => {
-          receiveInstance(mod, inst);
-          resolve(mod.exports);
+          resolve(receiveInstance(mod, inst));
         });
       } catch(e) {
         err(`Module.instantiateWasm callback failed with error: ${e}`);
@@ -1069,63 +1010,14 @@ async function createWasm() {
   }
 
   wasmBinaryFile ??= findWasmBinary();
-
-  try {
-    var result = await instantiateAsync(wasmBinary, wasmBinaryFile, info);
-    var exports = receiveInstantiationResult(result);
-    return exports;
-  } catch (e) {
-    // If instantiation fails, reject the module ready promise.
-    readyPromiseReject(e);
-    return Promise.reject(e);
-  }
+  var result = await instantiateAsync(wasmBinary, wasmBinaryFile, info);
+  var exports = receiveInstantiationResult(result);
+  return exports;
 }
 
-// === Body ===
-
-var ASM_CONSTS = {
-  1188613: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
-};
-function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
-function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
-function js_draw_line(colour_ptr,line_size,y1,x1,y2,x2) { let colour = UTF8ToString(colour_ptr); draw_line(gfx, colour, line_size, y1, x1, y2, x2); }
-function js_draw_rect(fill_colour_ptr,fill_colour_len,y_start,x_start,y_end,x_end) { let fill_colour = UTF8ToString(fill_colour_ptr, fill_colour_len); draw_rect(gfx, fill_colour, y_start, x_start, y_end, x_end); }
-function js_draw_triangle(fill_colour_ptr,fill_colour_len,y1,x1,y2,x2,y3,x3) { let fill_colour = UTF8ToString(fill_colour_ptr, fill_colour_len); draw_triangle(gfx, fill_colour, y1, x1, y2, x2, y3, x3); }
-function js_draw_circle(fill_colour_ptr,fill_colour_len,outline_colour_ptr,outline_colour_len,y,x,radius,outline_width) { let fill_colour = UTF8ToString(fill_colour_ptr, fill_colour_len); let outline_colour = UTF8ToString(outline_colour_ptr, outline_colour_len); draw_circle(gfx, fill_colour, outline_colour, y, x, radius, outline_width); }
-function js_draw_clear() { draw_clear(gfx); }
-function js_draw_refresh() { }
-function js_send_message(dst_ptr,dst_len,msg_ptr,msg_len) { let dst = UTF8ToString(dst_ptr, dst_len); let msg = new Array(msg_len); for (let i=0; i<msg_len; i++) { let signed_byte = getValue(msg_ptr + i, 'i8'); if (signed_byte < 0) { unsigned_byte = 256 + signed_byte; } else { unsigned_byte = signed_byte; } msg[i] = unsigned_byte; } send_message(dst, msg); }
-function js_create_btn(btn_id_ptr,btn_text_ptr,weight) { let btn_id_str = UTF8ToString(btn_id_ptr); let btn_text_str = UTF8ToString(btn_text_ptr); create_btn(gfx, btn_id_str, btn_text_str, weight); }
-function js_set_btn_enabled(btn_id_ptr,enabled) { let btn_id_str = UTF8ToString(btn_id_ptr); set_btn_enabled(gfx, btn_id_str, enabled); }
-function js_set_btn_visible(btn_id_ptr,visible) { let btn_id_str = UTF8ToString(btn_id_ptr); set_btn_visible(gfx, btn_id_str, visible); }
-function js_show_popup_json(popup_id_ptr,popup_id_str_len,info_json_ptr,info_json_str_len) { let popup_id = UTF8ToString(popup_id_ptr, popup_id_str_len); let info_json_str = UTF8ToString(info_json_ptr, info_json_str_len); console.debug("popup info_json_str: ", info_json_str); let info = JSON.parse(info_json_str); console.log("Showping popup", info); show_popup(gfx, popup_id, info); }
-function js_add_game_option_json_str(option_id_ptr,option_info,option_info_len) { console.log("js_add_game_option_json_str"); let option_id_str = UTF8ToString(option_id_ptr); let option_info_json_str = UTF8ToString(option_info, option_info_len); let option_info_json = JSON.parse(option_info_json_str); console.log("add_game_option", option_id_str, option_info_json); add_game_option(gfx, option_id_str, option_info_json); }
-function js_prompt_string(title,title_len,msg,msg_len) { { let title_str = UTF8ToString(title, title_len); let msg_str = UTF8ToString(msg, msg_len); prompt_string(gfx, title_str, msg_str); } }
-function js_hide_popup() { hide_popup(gfx); }
-function js_set_status_msg(msg_ptr,msg_len) { let msg = UTF8ToString(msg_ptr, msg_len); set_status_msg(gfx, msg); }
-function js_set_status_err(msg_ptr,msg_len) { let msg = UTF8ToString(msg_ptr, msg_len); set_status_err(gfx, msg); }
-function js_update_timer_ms(timer_period_ms) { return update_timer_period_ms(gfx, timer_period_ms); }
-function js_delete_timer(handle) { delete_timer(gfx, handle); }
-function js_enable_evt(evt_id_ptr,evt_id_len) { let evt_id = UTF8ToString(evt_id_ptr, evt_id_len); enable_event(evt_id); }
-function js_disable_evt(evt_id_ptr,evt_id_len) { let evt_id = UTF8ToString(evt_id_ptr, evt_id_len); disable_event(evt_id); }
-function js_get_time_ms() { return alexgames_get_time_ms(); }
-function js_store_data(L,key_ptr,val_ptr,val_len) { let key_str = UTF8ToString(key_ptr); if (window.localStorage == null) { console.error("Can not store key ", key_str, ", localStorage is null"); return; } let val_js_str = ""; for (let i=0; i<val_len; i++) { let signed_byte = getValue(val_ptr + i, 'i8'); if (signed_byte < 0) { unsigned_byte = 256 + signed_byte; } else { unsigned_byte = signed_byte; } val_js_str += String.fromCharCode(unsigned_byte); } window.localStorage[key_str] = val_js_str; }
-function js_read_stored_data(L,key_ptr,buff_out,buff_max) { let key_str = UTF8ToString(key_ptr); if (window.localStorage == null) { console.error("window.localStorage == null, can not load stored_data key ", key_str); return -1; } let val = window.localStorage[key_str]; let rc; if (val === undefined) { rc = -1; } else { if (buff_out == 0) { return 1; } for (let i=0; i<val.length; i++) { if (i >= buff_max) { console.error("tried to read stored data > buff_max", val.length, buff_max); break; } setValue(buff_out + i, val.charCodeAt(i), 'i8'); rc = i+1; } } return rc; }
-function js_draw_extra_canvas(canvas_id_ptr,y,x,width,height) { let canvas_id_str = UTF8ToString(canvas_id_ptr); draw_extra_canvas(gfx, canvas_id_str, y, x, width, height); }
-function js_new_extra_canvas(canvas_id) { let canvas_id_str = UTF8ToString(canvas_id); new_extra_canvas(gfx, canvas_id_str); }
-function js_set_active_canvas(canvas_id) { let canvas_id_str = UTF8ToString(canvas_id); set_active_canvas(gfx, canvas_id_str); }
-function js_delete_extra_canvases() { delete_extra_canvases(); }
-function js_get_user_colour_pref(colour_str_out,max_colour_str_out_len) { let colour_pref_str_js = get_user_colour_pref(); let i; for (i=0; i<colour_pref_str_js.length; i++) { if (i >= max_colour_str_out_len) { console.error("User colour pref str buff is not long enough"); return -1; } setValue(colour_str_out + i, colour_pref_str_js.charCodeAt(i), 'i8'); } setValue(colour_str_out + i, 0, 'i8'); return colour_pref_str_js.length; }
-function js_get_multiplayer_session_id(session_id_out,max_session_id_out_len) { let session_id_js = get_multiplayer_session_id(); let i; for (i=0; i<session_id_js.length; i++) { if (i >= max_session_id_out_len) { console.error("Multiplayer ID session str buff is not long enough"); return -1; } setValue(session_id_out + i, session_id_js.charCodeAt(i), 'i8'); } setValue(session_id_out + i, 0, 'i8'); return session_id_js.length; }
-function js_is_multiplayer_session_id_needed() { return true; }
-function js_is_feature_supported(feature_id,feature_id_len) { return false; }
-function js_get_time_of_day(time_str,max_time_str_len) { let time_str_js = get_time_of_day(); for (let i=0; i<time_str_js.length; i++) { if (i >= max_time_str_len) { console.error("Time string is not long enough"); return -1; } setValue(time_str + i, time_str_js.charCodeAt(i), 'i8'); } return time_str_js.length; }
-function js_set_game_handle2(L,game_id) { let game_id_str = UTF8ToString(game_id); set_game_handle(L, game_id_str); }
-function js_get_game_id(L,game_id_out,game_id_out_len_max) { console.log("js_get_game_id called, returning gfx.game_id: ", gfx.game_id); write_str(game_id_out, game_id_out_len_max, gfx.game_id); }
-function js_destroy_all() { console.log("destroy_all called"); destroy_all(); }
-function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_api: em_js_dict_init called. Using C dictionary after words file download complete.\n"); if (em_js_dict_init.call_counts === undefined) { em_js_dict_init.call_counts = 0; } em_js_dict_init.call_counts += 1; if (em_js_dict_init.call_counts > 2) { console.error("em_js_dict_init.call_counts is", em_js_dict_init.call_counts); return; } js_c_dict_init(); }
-
 // end include: preamble.js
+
+// Begin JS library code
 
 
   class ExitStatus {
@@ -1143,10 +1035,10 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       }
     };
   var onPostRuns = [];
-  var addOnPostRun = (cb) => onPostRuns.unshift(cb);
+  var addOnPostRun = (cb) => onPostRuns.push(cb);
 
   var onPreRuns = [];
-  var addOnPreRun = (cb) => onPreRuns.unshift(cb);
+  var addOnPreRun = (cb) => onPreRuns.push(cb);
 
 
   
@@ -1169,7 +1061,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
     }
   }
 
-  var noExitRuntime = Module['noExitRuntime'] || true;
+  var noExitRuntime = true;
 
   var ptrToString = (ptr) => {
       assert(typeof ptr === 'number');
@@ -1214,6 +1106,18 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
 
   var UTF8Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder() : undefined;
   
+  var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
+      var maxIdx = idx + maxBytesToRead;
+      if (ignoreNul) return maxIdx;
+      // TextDecoder needs to know the byte length in advance, it doesn't stop on
+      // null terminator by itself.
+      // As a tiny code save trick, compare idx against maxIdx using a negation,
+      // so that maxBytesToRead=undefined/NaN means Infinity.
+      while (heapOrArray[idx] && !(idx >= maxIdx)) ++idx;
+      return idx;
+    };
+  
+  
     /**
      * Given a pointer 'idx' to a null-terminated UTF8-encoded string in the given
      * array that contains uint8 values, returns a copy of that string as a
@@ -1221,24 +1125,18 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
      * heapOrArray is either a regular array, or a JavaScript typed array view.
      * @param {number=} idx
      * @param {number=} maxBytesToRead
+     * @param {boolean=} ignoreNul - If true, the function will not stop on a NUL character.
      * @return {string}
      */
-  var UTF8ArrayToString = (heapOrArray, idx = 0, maxBytesToRead = NaN) => {
-      var endIdx = idx + maxBytesToRead;
-      var endPtr = idx;
-      // TextDecoder needs to know the byte length in advance, it doesn't stop on
-      // null terminator by itself.  Also, use the length info to avoid running tiny
-      // strings through TextDecoder, since .subarray() allocates garbage.
-      // (As a tiny code save trick, compare endPtr against endIdx using a negation,
-      // so that undefined/NaN means Infinity)
-      while (heapOrArray[endPtr] && !(endPtr >= endIdx)) ++endPtr;
+  var UTF8ArrayToString = (heapOrArray, idx = 0, maxBytesToRead, ignoreNul) => {
   
+      var endPtr = findStringEnd(heapOrArray, idx, maxBytesToRead, ignoreNul);
+  
+      // When using conditional TextDecoder, skip it for short strings as the overhead of the native call is not worth it.
       if (endPtr - idx > 16 && heapOrArray.buffer && UTF8Decoder) {
         return UTF8Decoder.decode(heapOrArray.subarray(idx, endPtr));
       }
       var str = '';
-      // If building with TextDecoder, we have already computed the string length
-      // above, so test loop end condition against that
       while (idx < endPtr) {
         // For UTF8 byte structure, see:
         // http://en.wikipedia.org/wiki/UTF-8#Description
@@ -1275,15 +1173,13 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
      *   maximum number of bytes to read. You can omit this parameter to scan the
      *   string until the first 0 byte. If maxBytesToRead is passed, and the string
      *   at [ptr, ptr+maxBytesToReadr[ contains a null byte in the middle, then the
-     *   string will cut short at that byte index (i.e. maxBytesToRead will not
-     *   produce a string of exact length [ptr, ptr+maxBytesToRead[) N.B. mixing
-     *   frequent uses of UTF8ToString() with and without maxBytesToRead may throw
-     *   JS JIT optimizations off, so it is worth to consider consistently using one
+     *   string will cut short at that byte index.
+     * @param {boolean=} ignoreNul - If true, the function will not stop on a NUL character.
      * @return {string}
      */
-  var UTF8ToString = (ptr, maxBytesToRead) => {
+  var UTF8ToString = (ptr, maxBytesToRead, ignoreNul) => {
       assert(typeof ptr == 'number', `UTF8ToString expects a number (got ${typeof ptr})`);
-      return ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead) : '';
+      return ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead, ignoreNul) : '';
     };
   var ___assert_fail = (condition, filename, line, func) =>
       abort(`Assertion failed: ${UTF8ToString(condition)}, at: ` + [filename ? UTF8ToString(filename) : 'unknown filename', line, func ? UTF8ToString(func) : 'unknown function']);
@@ -1378,13 +1274,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       }
     }
   
-  var ___resumeException = (ptr) => {
-      if (!exceptionLast) {
-        exceptionLast = new CppException(ptr);
-      }
-      throw exceptionLast;
-    };
-  
   
   var setTempRet0 = (val) => __emscripten_tempret_set(val);
   var findMatchingCatch = (args) => {
@@ -1459,6 +1348,12 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
 
   var ___cxa_uncaught_exceptions = () => uncaughtExceptionCount;
 
+  var ___resumeException = (ptr) => {
+      if (!exceptionLast) {
+        exceptionLast = new CppException(ptr);
+      }
+      throw exceptionLast;
+    };
 
   var PATH = {
   isAbs:(path) => path.charAt(0) === '/',
@@ -1626,18 +1521,10 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       var startIdx = outIdx;
       var endIdx = outIdx + maxBytesToWrite - 1; // -1 for string null terminator.
       for (var i = 0; i < str.length; ++i) {
-        // Gotcha: charCodeAt returns a 16-bit word that is a UTF-16 encoded code
-        // unit, not a Unicode code point of the character! So decode
-        // UTF16->UTF32->UTF8.
-        // See http://unicode.org/faq/utf_bom.html#utf16-3
         // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description
         // and https://www.ietf.org/rfc/rfc2279.txt
         // and https://tools.ietf.org/html/rfc3629
-        var u = str.charCodeAt(i); // possibly a lead surrogate
-        if (u >= 0xD800 && u <= 0xDFFF) {
-          var u1 = str.charCodeAt(++i);
-          u = 0x10000 + ((u & 0x3FF) << 10) | (u1 & 0x3FF);
-        }
+        var u = str.codePointAt(i);
         if (u <= 0x7F) {
           if (outIdx >= endIdx) break;
           heap[outIdx++] = u;
@@ -1657,6 +1544,9 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           heap[outIdx++] = 0x80 | ((u >> 12) & 63);
           heap[outIdx++] = 0x80 | ((u >> 6) & 63);
           heap[outIdx++] = 0x80 | (u & 63);
+          // Gotcha: if codePoint is over 0xFFFF, it is represented as a surrogate pair in UTF-16.
+          // We need to manually skip over the second code unit for correct iteration.
+          i++;
         }
       }
       // Null-terminate the pointer to the buffer.
@@ -1862,14 +1752,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   };
   
   
-  var zeroMemory = (address, size) => {
-      HEAPU8.fill(0, address, address + size);
-    };
-  
-  var alignMemory = (size, alignment) => {
-      assert(alignment, "alignment argument is required");
-      return Math.ceil(size / alignment) * alignment;
-    };
   var mmapAlloc = (size) => {
       abort('internal error: mmapAlloc called but `emscripten_builtin_memalign` native symbol not exported');
     };
@@ -1909,7 +1791,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
               llseek: MEMFS.stream_ops.llseek,
               read: MEMFS.stream_ops.read,
               write: MEMFS.stream_ops.write,
-              allocate: MEMFS.stream_ops.allocate,
               mmap: MEMFS.stream_ops.mmap,
               msync: MEMFS.stream_ops.msync
             }
@@ -2153,10 +2034,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           }
           return position;
         },
-  allocate(stream, offset, length) {
-          MEMFS.expandFileStorage(stream.node, offset + length);
-          stream.node.usedBytes = Math.max(stream.node.usedBytes, offset + length);
-        },
   mmap(stream, length, position, prot, flags) {
           if (!FS.isFile(stream.node.mode)) {
             throw new FS.ErrnoError(43);
@@ -2198,62 +2075,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   },
   };
   
-  var asyncLoad = async (url) => {
-      var arrayBuffer = await readAsync(url);
-      assert(arrayBuffer, `Loading data file "${url}" failed (no arrayBuffer).`);
-      return new Uint8Array(arrayBuffer);
-    };
-  
-  
-  var FS_createDataFile = (parent, name, fileData, canRead, canWrite, canOwn) => {
-      FS.createDataFile(parent, name, fileData, canRead, canWrite, canOwn);
-    };
-  
-  var preloadPlugins = Module['preloadPlugins'] || [];
-  var FS_handledByPreloadPlugin = (byteArray, fullname, finish, onerror) => {
-      // Ensure plugins are ready.
-      if (typeof Browser != 'undefined') Browser.init();
-  
-      var handled = false;
-      preloadPlugins.forEach((plugin) => {
-        if (handled) return;
-        if (plugin['canHandle'](fullname)) {
-          plugin['handle'](byteArray, fullname, finish, onerror);
-          handled = true;
-        }
-      });
-      return handled;
-    };
-  var FS_createPreloadedFile = (parent, name, url, canRead, canWrite, onload, onerror, dontCreateFile, canOwn, preFinish) => {
-      // TODO we should allow people to just pass in a complete filename instead
-      // of parent and name being that we just join them anyways
-      var fullname = name ? PATH_FS.resolve(PATH.join2(parent, name)) : parent;
-      var dep = getUniqueRunDependency(`cp ${fullname}`); // might have several active requests for the same fullname
-      function processData(byteArray) {
-        function finish(byteArray) {
-          preFinish?.();
-          if (!dontCreateFile) {
-            FS_createDataFile(parent, name, byteArray, canRead, canWrite, canOwn);
-          }
-          onload?.();
-          removeRunDependency(dep);
-        }
-        if (FS_handledByPreloadPlugin(byteArray, fullname, finish, () => {
-          onerror?.();
-          removeRunDependency(dep);
-        })) {
-          return;
-        }
-        finish(byteArray);
-      }
-      addRunDependency(dep);
-      if (typeof url == 'string') {
-        asyncLoad(url).then(processData, onerror);
-      } else {
-        processData(url);
-      }
-    };
-  
   var FS_modeStringToFlags = (str) => {
       var flagModes = {
         'r': 0,
@@ -2276,8 +2097,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       if (canWrite) mode |= 146;
       return mode;
     };
-  
-  
   
   
   
@@ -2407,6 +2226,64 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       'EOWNERDEAD': 62,
       'ESTRPIPE': 135,
     };
+  
+  var asyncLoad = async (url) => {
+      var arrayBuffer = await readAsync(url);
+      assert(arrayBuffer, `Loading data file "${url}" failed (no arrayBuffer).`);
+      return new Uint8Array(arrayBuffer);
+    };
+  
+  
+  var FS_createDataFile = (...args) => FS.createDataFile(...args);
+  
+  var getUniqueRunDependency = (id) => {
+      var orig = id;
+      while (1) {
+        if (!runDependencyTracking[id]) return id;
+        id = orig + Math.random();
+      }
+    };
+  
+  var preloadPlugins = [];
+  var FS_handledByPreloadPlugin = async (byteArray, fullname) => {
+      // Ensure plugins are ready.
+      if (typeof Browser != 'undefined') Browser.init();
+  
+      for (var plugin of preloadPlugins) {
+        if (plugin['canHandle'](fullname)) {
+          assert(plugin['handle'].constructor.name === 'AsyncFunction', 'Filesystem plugin handlers must be async functions (See #24914)')
+          return plugin['handle'](byteArray, fullname);
+        }
+      }
+      // In no plugin handled this file then return the original/unmodified
+      // byteArray.
+      return byteArray;
+    };
+  var FS_preloadFile = async (parent, name, url, canRead, canWrite, dontCreateFile, canOwn, preFinish) => {
+      // TODO we should allow people to just pass in a complete filename instead
+      // of parent and name being that we just join them anyways
+      var fullname = name ? PATH_FS.resolve(PATH.join2(parent, name)) : parent;
+      var dep = getUniqueRunDependency(`cp ${fullname}`); // might have several active requests for the same fullname
+      addRunDependency(dep);
+  
+      try {
+        var byteArray = url;
+        if (typeof url == 'string') {
+          byteArray = await asyncLoad(url);
+        }
+  
+        byteArray = await FS_handledByPreloadPlugin(byteArray, fullname);
+        preFinish?.();
+        if (!dontCreateFile) {
+          FS_createDataFile(parent, name, byteArray, canRead, canWrite, canOwn);
+        }
+      } finally {
+        removeRunDependency(dep);
+      }
+    };
+  var FS_createPreloadedFile = (parent, name, url, canRead, canWrite, onload, onerror, dontCreateFile, canOwn, preFinish) => {
+      FS_preloadFile(parent, name, url, canRead, canWrite, dontCreateFile, canOwn, preFinish).then(onload).catch(onerror);
+    };
   var FS = {
   root:null,
   mounts:[],
@@ -2418,6 +2295,10 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   currentPath:"/",
   initialized:false,
   ignorePermissions:true,
+  filesystems:null,
+  syncFSRequests:0,
+  readFiles:{
+  },
   ErrnoError:class extends Error {
         name = 'ErrnoError';
         // We set the `name` property to be able to identify `FS.ErrnoError`
@@ -2437,10 +2318,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           }
         }
       },
-  filesystems:null,
-  syncFSRequests:0,
-  readFiles:{
-  },
   FSStream:class {
         shared = {};
         get object() {
@@ -2540,7 +2417,15 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   
             if (parts[i] === '..') {
               current_path = PATH.dirname(current_path);
-              current = current.parent;
+              if (FS.isRoot(current)) {
+                path = current_path + '/' + parts.slice(i + 1).join('/');
+                // We're making progress here, don't let many consecutive ..'s
+                // lead to ELOOP
+                nlinks--;
+                continue linkloop;
+              } else {
+                current = current.parent;
+              }
               continue;
             }
   
@@ -3029,9 +2914,10 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   mkdirTree(path, mode) {
         var dirs = path.split('/');
         var d = '';
-        for (var i = 0; i < dirs.length; ++i) {
-          if (!dirs[i]) continue;
-          d += '/' + dirs[i];
+        for (var dir of dirs) {
+          if (!dir) continue;
+          if (d || PATH.isAbs(path)) d += '/';
+          d += dir;
           try {
             FS.mkdir(d, mode);
           } catch(e) {
@@ -3510,24 +3396,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         if (!seeking) stream.position += bytesWritten;
         return bytesWritten;
       },
-  allocate(stream, offset, length) {
-        if (FS.isClosed(stream)) {
-          throw new FS.ErrnoError(8);
-        }
-        if (offset < 0 || length <= 0) {
-          throw new FS.ErrnoError(28);
-        }
-        if ((stream.flags & 2097155) === 0) {
-          throw new FS.ErrnoError(8);
-        }
-        if (!FS.isFile(stream.node.mode) && !FS.isDir(stream.node.mode)) {
-          throw new FS.ErrnoError(43);
-        }
-        if (!stream.stream_ops.allocate) {
-          throw new FS.ErrnoError(138);
-        }
-        stream.stream_ops.allocate(stream, offset, length);
-      },
   mmap(stream, length, position, prot, flags) {
         // User requests writing to file (prot & PROT_WRITE != 0).
         // Checking if we have permissions to write to the file unless
@@ -3570,28 +3438,24 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         if (opts.encoding !== 'utf8' && opts.encoding !== 'binary') {
           throw new Error(`Invalid encoding type "${opts.encoding}"`);
         }
-        var ret;
         var stream = FS.open(path, opts.flags);
         var stat = FS.stat(path);
         var length = stat.size;
         var buf = new Uint8Array(length);
         FS.read(stream, buf, 0, length, 0);
         if (opts.encoding === 'utf8') {
-          ret = UTF8ArrayToString(buf);
-        } else if (opts.encoding === 'binary') {
-          ret = buf;
+          buf = UTF8ArrayToString(buf);
         }
         FS.close(stream);
-        return ret;
+        return buf;
       },
   writeFile(path, data, opts = {}) {
         opts.flags = opts.flags || 577;
         var stream = FS.open(path, opts.flags, opts.mode);
         if (typeof data == 'string') {
-          var buf = new Uint8Array(lengthBytesUTF8(data)+1);
-          var actualNumBytes = stringToUTF8Array(data, buf, 0, buf.length);
-          FS.write(stream, buf, 0, actualNumBytes, undefined, opts.canOwn);
-        } else if (ArrayBuffer.isView(data)) {
+          data = new Uint8Array(intArrayFromString(data, true));
+        }
+        if (ArrayBuffer.isView(data)) {
           FS.write(stream, data, 0, data.byteLength, undefined, opts.canOwn);
         } else {
           throw new Error('Unsupported data type');
@@ -3749,12 +3613,10 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         // force-flush all streams, so we get musl std streams printed out
         _fflush(0);
         // close all of our streams
-        for (var i = 0; i < FS.streams.length; i++) {
-          var stream = FS.streams[i];
-          if (!stream) {
-            continue;
+        for (var stream of FS.streams) {
+          if (stream) {
+            FS.close(stream);
           }
-          FS.close(stream);
         }
       },
   findObject(path, dontResolveLastLink) {
@@ -3802,7 +3664,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           try {
             FS.mkdir(current);
           } catch (e) {
-            // ignore EEXIST
+            if (e.errno != 20) throw e;
           }
           parent = current;
         }
@@ -4107,12 +3969,12 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         return dir + '/' + path;
       },
   writeStat(buf, stat) {
-        HEAP32[((buf)>>2)] = stat.dev;
-        HEAP32[(((buf)+(4))>>2)] = stat.mode;
+        HEAPU32[((buf)>>2)] = stat.dev;
+        HEAPU32[(((buf)+(4))>>2)] = stat.mode;
         HEAPU32[(((buf)+(8))>>2)] = stat.nlink;
-        HEAP32[(((buf)+(12))>>2)] = stat.uid;
-        HEAP32[(((buf)+(16))>>2)] = stat.gid;
-        HEAP32[(((buf)+(20))>>2)] = stat.rdev;
+        HEAPU32[(((buf)+(12))>>2)] = stat.uid;
+        HEAPU32[(((buf)+(16))>>2)] = stat.gid;
+        HEAPU32[(((buf)+(20))>>2)] = stat.rdev;
         HEAP64[(((buf)+(24))>>3)] = BigInt(stat.size);
         HEAP32[(((buf)+(32))>>2)] = 4096;
         HEAP32[(((buf)+(36))>>2)] = stat.blocks;
@@ -4129,16 +3991,16 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         return 0;
       },
   writeStatFs(buf, stats) {
-        HEAP32[(((buf)+(4))>>2)] = stats.bsize;
-        HEAP32[(((buf)+(40))>>2)] = stats.bsize;
-        HEAP32[(((buf)+(8))>>2)] = stats.blocks;
-        HEAP32[(((buf)+(12))>>2)] = stats.bfree;
-        HEAP32[(((buf)+(16))>>2)] = stats.bavail;
-        HEAP32[(((buf)+(20))>>2)] = stats.files;
-        HEAP32[(((buf)+(24))>>2)] = stats.ffree;
-        HEAP32[(((buf)+(28))>>2)] = stats.fsid;
-        HEAP32[(((buf)+(44))>>2)] = stats.flags;  // ST_NOSUID
-        HEAP32[(((buf)+(36))>>2)] = stats.namelen;
+        HEAPU32[(((buf)+(4))>>2)] = stats.bsize;
+        HEAPU32[(((buf)+(60))>>2)] = stats.bsize;
+        HEAP64[(((buf)+(8))>>3)] = BigInt(stats.blocks);
+        HEAP64[(((buf)+(16))>>3)] = BigInt(stats.bfree);
+        HEAP64[(((buf)+(24))>>3)] = BigInt(stats.bavail);
+        HEAP64[(((buf)+(32))>>3)] = BigInt(stats.files);
+        HEAP64[(((buf)+(40))>>3)] = BigInt(stats.ffree);
+        HEAPU32[(((buf)+(48))>>2)] = stats.fsid;
+        HEAPU32[(((buf)+(64))>>2)] = stats.flags;  // ST_NOSUID
+        HEAPU32[(((buf)+(56))>>2)] = stats.namelen;
       },
   doMsync(addr, stream, len, flags, offset) {
         if (!FS.isFile(stream.node.mode)) {
@@ -4194,7 +4056,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   try {
   
       path = SYSCALLS.getStr(path);
-      assert(flags === 0 || flags == 512);
+      assert(!flags || flags == 512);
       path = SYSCALLS.calculateAt(dirfd, path);
       if (amode & ~7) {
         // need a valid mode
@@ -4278,7 +4140,11 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
         }
         case 13:
         case 14:
-          return 0; // Pretend that the locking is successful.
+          // Pretend that the locking is successful. These are process-level locks,
+          // and Emscripten programs are a single process. If we supported linking a
+          // filesystem between programs, we'd need to do more here.
+          // See https://github.com/emscripten-core/emscripten/issues/23697
+          return 0;
       }
       return -28;
     } catch (e) {
@@ -4378,6 +4244,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
           if (!stream.tty) return -59;
           return -28; // not supported
         }
+        case 21537:
         case 21531: {
           var argp = syscallGetVarargP();
           return FS.ioctl(stream, op, argp);
@@ -4534,12 +4401,12 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   
       path = SYSCALLS.getStr(path);
       path = SYSCALLS.calculateAt(dirfd, path);
-      if (flags === 0) {
+      if (!flags) {
         FS.unlink(path);
       } else if (flags === 512) {
         FS.rmdir(path);
       } else {
-        abort('Invalid flags passed to unlinkat');
+        return -28;
       }
       return 0;
     } catch (e) {
@@ -4601,7 +4468,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   function __gmtime_js(time, tmPtr) {
     time = bigintToI53Checked(time);
   
-    
+  
       var date = new Date(time * 1000);
       HEAP32[((tmPtr)>>2)] = date.getUTCSeconds();
       HEAP32[(((tmPtr)+(4))>>2)] = date.getUTCMinutes();
@@ -4632,7 +4499,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   function __localtime_js(time, tmPtr) {
     time = bigintToI53Checked(time);
   
-    
+  
       var date = new Date(time*1000);
       HEAP32[((tmPtr)>>2)] = date.getSeconds();
       HEAP32[(((tmPtr)+(4))>>2)] = date.getMinutes();
@@ -4658,7 +4525,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   
   var __mktime_js = function(tmPtr) {
   
-    var ret = (() => { 
+  var ret = (() => { 
       var date = new Date(HEAP32[(((tmPtr)+(20))>>2)] + 1900,
                           HEAP32[(((tmPtr)+(16))>>2)],
                           HEAP32[(((tmPtr)+(12))>>2)],
@@ -4704,7 +4571,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       // Return time in microseconds
       return timeMs / 1000;
      })();
-    return BigInt(ret);
+  return BigInt(ret);
   };
 
   
@@ -4772,7 +4639,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   function _clock_time_get(clk_id, ignored_precision, ptime) {
     ignored_precision = bigintToI53Checked(ignored_precision);
   
-    
+  
       if (!checkWasiClock(clk_id)) {
         return 28;
       }
@@ -4842,17 +4709,21 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       // casing all heap size related code to treat 0 specially.
       2147483648;
   
+  var alignMemory = (size, alignment) => {
+      assert(alignment, "alignment argument is required");
+      return Math.ceil(size / alignment) * alignment;
+    };
   
   var growMemory = (size) => {
-      var b = wasmMemory.buffer;
-      var pages = ((size - b.byteLength + 65535) / 65536) | 0;
+      var oldHeapSize = wasmMemory.buffer.byteLength;
+      var pages = ((size - oldHeapSize + 65535) / 65536) | 0;
       try {
         // round size grow request up to wasm page size (fixed 64KB per spec)
         wasmMemory.grow(pages); // .grow() takes a delta compared to the previous size
         updateMemoryViews();
         return 1 /*success*/;
       } catch(e) {
-        err(`growMemory: Attempted to grow heap from ${b.byteLength} bytes to ${size} bytes, but got error: ${e}`);
+        err(`growMemory: Attempted to grow heap from ${oldHeapSize} bytes to ${size} bytes, but got error: ${e}`);
       }
       // implicit 0 return to save code size (caller will cast "undefined" into 0
       // anyhow)
@@ -4918,7 +4789,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       if (!getEnvStrings.strings) {
         // Default values.
         // Browser language detection #8751
-        var lang = ((typeof navigator == 'object' && navigator.languages && navigator.languages[0]) || 'C').replace('-', '_') + '.UTF-8';
+        var lang = ((typeof navigator == 'object' && navigator.language) || 'C').replace('-', '_') + '.UTF-8';
         var env = {
           'USER': 'web_user',
           'LOGNAME': 'web_user',
@@ -4945,30 +4816,26 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       return getEnvStrings.strings;
     };
   
-  var stringToAscii = (str, buffer) => {
-      for (var i = 0; i < str.length; ++i) {
-        assert(str.charCodeAt(i) === (str.charCodeAt(i) & 0xff));
-        HEAP8[buffer++] = str.charCodeAt(i);
-      }
-      // Null-terminate the string
-      HEAP8[buffer] = 0;
-    };
   var _environ_get = (__environ, environ_buf) => {
       var bufSize = 0;
-      getEnvStrings().forEach((string, i) => {
+      var envp = 0;
+      for (var string of getEnvStrings()) {
         var ptr = environ_buf + bufSize;
-        HEAPU32[(((__environ)+(i*4))>>2)] = ptr;
-        stringToAscii(string, ptr);
-        bufSize += string.length + 1;
-      });
+        HEAPU32[(((__environ)+(envp))>>2)] = ptr;
+        bufSize += stringToUTF8(string, ptr, Infinity) + 1;
+        envp += 4;
+      }
       return 0;
     };
 
+  
   var _environ_sizes_get = (penviron_count, penviron_buf_size) => {
       var strings = getEnvStrings();
       HEAPU32[((penviron_count)>>2)] = strings.length;
       var bufSize = 0;
-      strings.forEach((string) => bufSize += string.length + 1);
+      for (var string of strings) {
+        bufSize += lengthBytesUTF8(string) + 1;
+      }
       HEAPU32[((penviron_buf_size)>>2)] = bufSize;
       return 0;
     };
@@ -4996,7 +4863,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       // if exit() was called explicitly, warn the user if the runtime isn't actually being shut down
       if (keepRuntimeAlive() && !implicit) {
         var msg = `program exited (with status: ${status}), but keepRuntimeAlive() is set (counter=${runtimeKeepaliveCounter}) due to an async operation, so halting execution but not exiting the runtime or preventing further async execution (you can use emscripten_force_exit, if you want to force a true shutdown)`;
-        readyPromiseReject(msg);
+        readyPromiseReject?.(msg);
         err(msg);
       }
   
@@ -5077,7 +4944,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   function _fd_seek(fd, offset, whence, newOffset) {
     offset = bigintToI53Checked(offset);
   
-    
+  
   try {
   
       if (isNaN(offset)) return 61;
@@ -5145,7 +5012,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
   var getWasmTableEntry = (funcPtr) => {
       var func = wasmTableMirror[funcPtr];
       if (!func) {
-        if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
         /** @suppress {checkTypes} */
         wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
       }
@@ -5183,7 +5049,7 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
     /**
      * @param {string|null=} returnType
      * @param {Array=} argTypes
-     * @param {Arguments|Array=} args
+     * @param {Array=} args
      * @param {Object=} opts
      */
   var ccall = (ident, returnType, argTypes, args, opts) => {
@@ -5237,7 +5103,6 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
     };
 
   
-  
     /**
      * @param {string=} returnType
      * @param {Array=} argTypes
@@ -5249,21 +5114,19 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
 
 
 
-  var FS_createPath = FS.createPath;
+  var FS_createPath = (...args) => FS.createPath(...args);
 
 
 
-  var FS_unlink = (path) => FS.unlink(path);
+  var FS_unlink = (...args) => FS.unlink(...args);
 
-  var FS_createLazyFile = FS.createLazyFile;
+  var FS_createLazyFile = (...args) => FS.createLazyFile(...args);
 
-  var FS_createDevice = FS.createDevice;
+  var FS_createDevice = (...args) => FS.createDevice(...args);
 
   var incrementExceptionRefcount = (ptr) => ___cxa_increment_exception_refcount(ptr);
-  Module['incrementExceptionRefcount'] = incrementExceptionRefcount;
 
   var decrementExceptionRefcount = (ptr) => ___cxa_decrement_exception_refcount(ptr);
-  Module['decrementExceptionRefcount'] = decrementExceptionRefcount;
 
   
   
@@ -5288,20 +5151,613 @@ function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_a
       return [type, message];
     };
   var getExceptionMessage = (ptr) => getExceptionMessageCommon(ptr);
-  Module['getExceptionMessage'] = getExceptionMessage;
 
   FS.createPreloadedFile = FS_createPreloadedFile;
-  FS.staticInit();
-  // Set module methods based on EXPORTED_RUNTIME_METHODS
-  Module['FS_createPath'] = FS.createPath;
-  Module['FS_createDataFile'] = FS.createDataFile;
-  Module['FS_createPreloadedFile'] = FS.createPreloadedFile;
-  Module['FS_unlink'] = FS.unlink;
-  Module['FS_createLazyFile'] = FS.createLazyFile;
-  Module['FS_createDevice'] = FS.createDevice;
-  ;
+  FS.preloadFile = FS_preloadFile;
+  FS.staticInit();;
+// End JS library code
+
+// include: postlibrary.js
+// This file is included after the automatically-generated JS library code
+// but before the wasm module is created.
+
+{
+
+  // Begin ATMODULES hooks
+  if (Module['noExitRuntime']) noExitRuntime = Module['noExitRuntime'];
+if (Module['preloadPlugins']) preloadPlugins = Module['preloadPlugins'];
+if (Module['print']) out = Module['print'];
+if (Module['printErr']) err = Module['printErr'];
+if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
+  // End ATMODULES hooks
+
+  checkIncomingModuleAPI();
+
+  if (Module['arguments']) arguments_ = Module['arguments'];
+  if (Module['thisProgram']) thisProgram = Module['thisProgram'];
+
+  // Assertions on removed incoming Module JS APIs.
+  assert(typeof Module['memoryInitializerPrefixURL'] == 'undefined', 'Module.memoryInitializerPrefixURL option was removed, use Module.locateFile instead');
+  assert(typeof Module['pthreadMainPrefixURL'] == 'undefined', 'Module.pthreadMainPrefixURL option was removed, use Module.locateFile instead');
+  assert(typeof Module['cdInitializerPrefixURL'] == 'undefined', 'Module.cdInitializerPrefixURL option was removed, use Module.locateFile instead');
+  assert(typeof Module['filePackagePrefixURL'] == 'undefined', 'Module.filePackagePrefixURL option was removed, use Module.locateFile instead');
+  assert(typeof Module['read'] == 'undefined', 'Module.read option was removed');
+  assert(typeof Module['readAsync'] == 'undefined', 'Module.readAsync option was removed (modify readAsync in JS)');
+  assert(typeof Module['readBinary'] == 'undefined', 'Module.readBinary option was removed (modify readBinary in JS)');
+  assert(typeof Module['setWindowTitle'] == 'undefined', 'Module.setWindowTitle option was removed (modify emscripten_set_window_title in JS)');
+  assert(typeof Module['TOTAL_MEMORY'] == 'undefined', 'Module.TOTAL_MEMORY has been renamed Module.INITIAL_MEMORY');
+  assert(typeof Module['ENVIRONMENT'] == 'undefined', 'Module.ENVIRONMENT has been deprecated. To force the environment, use the ENVIRONMENT compile-time option (for example, -sENVIRONMENT=web or -sENVIRONMENT=node)');
+  assert(typeof Module['STACK_SIZE'] == 'undefined', 'STACK_SIZE can no longer be set at runtime.  Use -sSTACK_SIZE at link time')
+  // If memory is defined in wasm, the user can't provide it, or set INITIAL_MEMORY
+  assert(typeof Module['wasmMemory'] == 'undefined', 'Use of `wasmMemory` detected.  Use -sIMPORTED_MEMORY to define wasmMemory externally');
+  assert(typeof Module['INITIAL_MEMORY'] == 'undefined', 'Detected runtime INITIAL_MEMORY setting.  Use -sIMPORTED_MEMORY to define wasmMemory dynamically');
+
+}
+
+// Begin runtime exports
+  Module['addRunDependency'] = addRunDependency;
+  Module['removeRunDependency'] = removeRunDependency;
+  Module['ccall'] = ccall;
+  Module['cwrap'] = cwrap;
+  Module['setValue'] = setValue;
+  Module['UTF8ToString'] = UTF8ToString;
+  Module['FS_preloadFile'] = FS_preloadFile;
+  Module['FS_unlink'] = FS_unlink;
+  Module['FS_createPath'] = FS_createPath;
+  Module['FS_createDevice'] = FS_createDevice;
+  Module['FS_createDataFile'] = FS_createDataFile;
+  Module['FS_createLazyFile'] = FS_createLazyFile;
+  var missingLibrarySymbols = [
+  'writeI53ToI64',
+  'writeI53ToI64Clamped',
+  'writeI53ToI64Signaling',
+  'writeI53ToU64Clamped',
+  'writeI53ToU64Signaling',
+  'readI53FromI64',
+  'readI53FromU64',
+  'convertI32PairToI53',
+  'convertI32PairToI53Checked',
+  'convertU32PairToI53',
+  'getTempRet0',
+  'zeroMemory',
+  'withStackSave',
+  'inetPton4',
+  'inetNtop4',
+  'inetPton6',
+  'inetNtop6',
+  'readSockaddr',
+  'writeSockaddr',
+  'runMainThreadEmAsm',
+  'jstoi_q',
+  'autoResumeAudioContext',
+  'getDynCaller',
+  'dynCall',
+  'handleException',
+  'runtimeKeepalivePush',
+  'runtimeKeepalivePop',
+  'callUserCallback',
+  'maybeExit',
+  'asmjsMangle',
+  'HandleAllocator',
+  'getNativeTypeSize',
+  'addOnInit',
+  'addOnPostCtor',
+  'addOnPreMain',
+  'addOnExit',
+  'STACK_SIZE',
+  'STACK_ALIGN',
+  'POINTER_SIZE',
+  'ASSERTIONS',
+  'convertJsFunctionToWasm',
+  'getEmptyTableSlot',
+  'updateTableMap',
+  'getFunctionAddress',
+  'addFunction',
+  'removeFunction',
+  'intArrayToString',
+  'AsciiToString',
+  'stringToAscii',
+  'UTF16ToString',
+  'stringToUTF16',
+  'lengthBytesUTF16',
+  'UTF32ToString',
+  'stringToUTF32',
+  'lengthBytesUTF32',
+  'stringToNewUTF8',
+  'registerKeyEventCallback',
+  'maybeCStringToJsString',
+  'findEventTarget',
+  'getBoundingClientRect',
+  'fillMouseEventData',
+  'registerMouseEventCallback',
+  'registerWheelEventCallback',
+  'registerUiEventCallback',
+  'registerFocusEventCallback',
+  'fillDeviceOrientationEventData',
+  'registerDeviceOrientationEventCallback',
+  'fillDeviceMotionEventData',
+  'registerDeviceMotionEventCallback',
+  'screenOrientation',
+  'fillOrientationChangeEventData',
+  'registerOrientationChangeEventCallback',
+  'fillFullscreenChangeEventData',
+  'registerFullscreenChangeEventCallback',
+  'JSEvents_requestFullscreen',
+  'JSEvents_resizeCanvasForFullscreen',
+  'registerRestoreOldStyle',
+  'hideEverythingExceptGivenElement',
+  'restoreHiddenElements',
+  'setLetterbox',
+  'softFullscreenResizeWebGLRenderTarget',
+  'doRequestFullscreen',
+  'fillPointerlockChangeEventData',
+  'registerPointerlockChangeEventCallback',
+  'registerPointerlockErrorEventCallback',
+  'requestPointerLock',
+  'fillVisibilityChangeEventData',
+  'registerVisibilityChangeEventCallback',
+  'registerTouchEventCallback',
+  'fillGamepadEventData',
+  'registerGamepadEventCallback',
+  'registerBeforeUnloadEventCallback',
+  'fillBatteryEventData',
+  'registerBatteryEventCallback',
+  'setCanvasElementSize',
+  'getCanvasElementSize',
+  'jsStackTrace',
+  'getCallstack',
+  'convertPCtoSourceLocation',
+  'wasiRightsToMuslOFlags',
+  'wasiOFlagsToMuslOFlags',
+  'safeSetTimeout',
+  'setImmediateWrapped',
+  'safeRequestAnimationFrame',
+  'clearImmediateWrapped',
+  'registerPostMainLoop',
+  'registerPreMainLoop',
+  'getPromise',
+  'makePromise',
+  'idsToPromises',
+  'makePromiseCallback',
+  'Browser_asyncPrepareDataCounter',
+  'arraySum',
+  'addDays',
+  'getSocketFromFD',
+  'getSocketAddress',
+  'FS_mkdirTree',
+  '_setNetworkCallback',
+  'heapObjectForWebGLType',
+  'toTypedArrayIndex',
+  'webgl_enable_ANGLE_instanced_arrays',
+  'webgl_enable_OES_vertex_array_object',
+  'webgl_enable_WEBGL_draw_buffers',
+  'webgl_enable_WEBGL_multi_draw',
+  'webgl_enable_EXT_polygon_offset_clamp',
+  'webgl_enable_EXT_clip_control',
+  'webgl_enable_WEBGL_polygon_mode',
+  'emscriptenWebGLGet',
+  'computeUnpackAlignedImageSize',
+  'colorChannelsInGlTextureFormat',
+  'emscriptenWebGLGetTexPixelData',
+  'emscriptenWebGLGetUniform',
+  'webglGetUniformLocation',
+  'webglPrepareUniformLocationsBeforeFirstUse',
+  'webglGetLeftBracePos',
+  'emscriptenWebGLGetVertexAttrib',
+  '__glGetActiveAttribOrUniform',
+  'writeGLArray',
+  'registerWebGlEventCallback',
+  'runAndAbortIfError',
+  'ALLOC_NORMAL',
+  'ALLOC_STACK',
+  'allocate',
+  'writeStringToMemory',
+  'writeAsciiToMemory',
+  'demangle',
+  'stackTrace',
+];
+missingLibrarySymbols.forEach(missingLibrarySymbol)
+
+  var unexportedSymbols = [
+  'run',
+  'out',
+  'err',
+  'callMain',
+  'abort',
+  'wasmMemory',
+  'wasmExports',
+  'HEAPF32',
+  'HEAPF64',
+  'HEAP8',
+  'HEAPU8',
+  'HEAP16',
+  'HEAPU16',
+  'HEAP32',
+  'HEAPU32',
+  'HEAP64',
+  'HEAPU64',
+  'writeStackCookie',
+  'checkStackCookie',
+  'INT53_MAX',
+  'INT53_MIN',
+  'bigintToI53Checked',
+  'stackSave',
+  'stackRestore',
+  'stackAlloc',
+  'setTempRet0',
+  'ptrToString',
+  'exitJS',
+  'getHeapMax',
+  'growMemory',
+  'ENV',
+  'ERRNO_CODES',
+  'strError',
+  'DNS',
+  'Protocols',
+  'Sockets',
+  'timers',
+  'warnOnce',
+  'readEmAsmArgsArray',
+  'readEmAsmArgs',
+  'runEmAsmFunction',
+  'getExecutableName',
+  'keepRuntimeAlive',
+  'asyncLoad',
+  'alignMemory',
+  'mmapAlloc',
+  'wasmTable',
+  'getUniqueRunDependency',
+  'noExitRuntime',
+  'addOnPreRun',
+  'addOnPostRun',
+  'freeTableIndexes',
+  'functionsInTableMap',
+  'getValue',
+  'PATH',
+  'PATH_FS',
+  'UTF8Decoder',
+  'UTF8ArrayToString',
+  'stringToUTF8Array',
+  'stringToUTF8',
+  'lengthBytesUTF8',
+  'intArrayFromString',
+  'UTF16Decoder',
+  'stringToUTF8OnStack',
+  'writeArrayToMemory',
+  'JSEvents',
+  'specialHTMLTargets',
+  'findCanvasEventTarget',
+  'currentFullscreenStrategy',
+  'restoreOldWindowedStyle',
+  'UNWIND_CACHE',
+  'ExitStatus',
+  'getEnvStrings',
+  'checkWasiClock',
+  'doReadv',
+  'doWritev',
+  'initRandomFill',
+  'randomFill',
+  'emSetImmediate',
+  'emClearImmediate_deps',
+  'emClearImmediate',
+  'promiseMap',
+  'uncaughtExceptionCount',
+  'exceptionLast',
+  'exceptionCaught',
+  'ExceptionInfo',
+  'findMatchingCatch',
+  'getExceptionMessageCommon',
+  'Browser',
+  'requestFullscreen',
+  'requestFullScreen',
+  'setCanvasSize',
+  'getUserMedia',
+  'createContext',
+  'getPreloadedImageData__data',
+  'wget',
+  'MONTH_DAYS_REGULAR',
+  'MONTH_DAYS_LEAP',
+  'MONTH_DAYS_REGULAR_CUMULATIVE',
+  'MONTH_DAYS_LEAP_CUMULATIVE',
+  'isLeapYear',
+  'ydayFromDate',
+  'SYSCALLS',
+  'preloadPlugins',
+  'FS_createPreloadedFile',
+  'FS_modeStringToFlags',
+  'FS_getMode',
+  'FS_stdin_getChar_buffer',
+  'FS_stdin_getChar',
+  'FS_readFile',
+  'FS',
+  'FS_root',
+  'FS_mounts',
+  'FS_devices',
+  'FS_streams',
+  'FS_nextInode',
+  'FS_nameTable',
+  'FS_currentPath',
+  'FS_initialized',
+  'FS_ignorePermissions',
+  'FS_filesystems',
+  'FS_syncFSRequests',
+  'FS_readFiles',
+  'FS_lookupPath',
+  'FS_getPath',
+  'FS_hashName',
+  'FS_hashAddNode',
+  'FS_hashRemoveNode',
+  'FS_lookupNode',
+  'FS_createNode',
+  'FS_destroyNode',
+  'FS_isRoot',
+  'FS_isMountpoint',
+  'FS_isFile',
+  'FS_isDir',
+  'FS_isLink',
+  'FS_isChrdev',
+  'FS_isBlkdev',
+  'FS_isFIFO',
+  'FS_isSocket',
+  'FS_flagsToPermissionString',
+  'FS_nodePermissions',
+  'FS_mayLookup',
+  'FS_mayCreate',
+  'FS_mayDelete',
+  'FS_mayOpen',
+  'FS_checkOpExists',
+  'FS_nextfd',
+  'FS_getStreamChecked',
+  'FS_getStream',
+  'FS_createStream',
+  'FS_closeStream',
+  'FS_dupStream',
+  'FS_doSetAttr',
+  'FS_chrdev_stream_ops',
+  'FS_major',
+  'FS_minor',
+  'FS_makedev',
+  'FS_registerDevice',
+  'FS_getDevice',
+  'FS_getMounts',
+  'FS_syncfs',
+  'FS_mount',
+  'FS_unmount',
+  'FS_lookup',
+  'FS_mknod',
+  'FS_statfs',
+  'FS_statfsStream',
+  'FS_statfsNode',
+  'FS_create',
+  'FS_mkdir',
+  'FS_mkdev',
+  'FS_symlink',
+  'FS_rename',
+  'FS_rmdir',
+  'FS_readdir',
+  'FS_readlink',
+  'FS_stat',
+  'FS_fstat',
+  'FS_lstat',
+  'FS_doChmod',
+  'FS_chmod',
+  'FS_lchmod',
+  'FS_fchmod',
+  'FS_doChown',
+  'FS_chown',
+  'FS_lchown',
+  'FS_fchown',
+  'FS_doTruncate',
+  'FS_truncate',
+  'FS_ftruncate',
+  'FS_utime',
+  'FS_open',
+  'FS_close',
+  'FS_isClosed',
+  'FS_llseek',
+  'FS_read',
+  'FS_write',
+  'FS_mmap',
+  'FS_msync',
+  'FS_ioctl',
+  'FS_writeFile',
+  'FS_cwd',
+  'FS_chdir',
+  'FS_createDefaultDirectories',
+  'FS_createDefaultDevices',
+  'FS_createSpecialDirectories',
+  'FS_createStandardStreams',
+  'FS_staticInit',
+  'FS_init',
+  'FS_quit',
+  'FS_findObject',
+  'FS_analyzePath',
+  'FS_createFile',
+  'FS_forceLoadFile',
+  'FS_absolutePath',
+  'FS_createFolder',
+  'FS_createLink',
+  'FS_joinPath',
+  'FS_mmapAlloc',
+  'FS_standardizePath',
+  'MEMFS',
+  'TTY',
+  'PIPEFS',
+  'SOCKFS',
+  'tempFixedLengthArray',
+  'miniTempWebGLFloatBuffers',
+  'miniTempWebGLIntBuffers',
+  'GL',
+  'AL',
+  'GLUT',
+  'EGL',
+  'GLEW',
+  'IDBStore',
+  'SDL',
+  'SDL_gfx',
+  'allocateUTF8',
+  'allocateUTF8OnStack',
+  'print',
+  'printErr',
+  'jstoi_s',
+];
+unexportedSymbols.forEach(unexportedRuntimeSymbol);
+
+  // End runtime exports
+  // Begin JS library exports
+  Module['incrementExceptionRefcount'] = incrementExceptionRefcount;
+  Module['decrementExceptionRefcount'] = decrementExceptionRefcount;
+  Module['getExceptionMessage'] = getExceptionMessage;
+  // End JS library exports
+
+// end include: postlibrary.js
+
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
+}
+var ASM_CONSTS = {
+  1196805: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+};
+function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
+function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
+function js_draw_line(colour_ptr,line_size,y1,x1,y2,x2) { let colour = UTF8ToString(colour_ptr); draw_line(gfx, colour, line_size, y1, x1, y2, x2); }
+function js_draw_rect(fill_colour_ptr,fill_colour_len,y_start,x_start,y_end,x_end) { let fill_colour = UTF8ToString(fill_colour_ptr, fill_colour_len); draw_rect(gfx, fill_colour, y_start, x_start, y_end, x_end); }
+function js_draw_triangle(fill_colour_ptr,fill_colour_len,y1,x1,y2,x2,y3,x3) { let fill_colour = UTF8ToString(fill_colour_ptr, fill_colour_len); draw_triangle(gfx, fill_colour, y1, x1, y2, x2, y3, x3); }
+function js_draw_circle(fill_colour_ptr,fill_colour_len,outline_colour_ptr,outline_colour_len,y,x,radius,outline_width) { let fill_colour = UTF8ToString(fill_colour_ptr, fill_colour_len); let outline_colour = UTF8ToString(outline_colour_ptr, outline_colour_len); draw_circle(gfx, fill_colour, outline_colour, y, x, radius, outline_width); }
+function js_draw_clear() { draw_clear(gfx); }
+function js_draw_refresh() { }
+function js_send_message(dst_ptr,dst_len,msg_ptr,msg_len) { let dst = UTF8ToString(dst_ptr, dst_len); let msg = new Array(msg_len); for (let i=0; i<msg_len; i++) { let signed_byte = getValue(msg_ptr + i, 'i8'); if (signed_byte < 0) { unsigned_byte = 256 + signed_byte; } else { unsigned_byte = signed_byte; } msg[i] = unsigned_byte; } send_message(dst, msg); }
+function js_create_btn(btn_id_ptr,btn_text_ptr,weight) { let btn_id_str = UTF8ToString(btn_id_ptr); let btn_text_str = UTF8ToString(btn_text_ptr); create_btn(gfx, btn_id_str, btn_text_str, weight); }
+function js_set_btn_enabled(btn_id_ptr,enabled) { let btn_id_str = UTF8ToString(btn_id_ptr); set_btn_enabled(gfx, btn_id_str, enabled); }
+function js_set_btn_visible(btn_id_ptr,visible) { let btn_id_str = UTF8ToString(btn_id_ptr); set_btn_visible(gfx, btn_id_str, visible); }
+function js_show_popup_json(popup_id_ptr,popup_id_str_len,info_json_ptr,info_json_str_len) { let popup_id = UTF8ToString(popup_id_ptr, popup_id_str_len); let info_json_str = UTF8ToString(info_json_ptr, info_json_str_len); console.debug("popup info_json_str: ", info_json_str); let info = JSON.parse(info_json_str); console.log("Showping popup", info); show_popup(gfx, popup_id, info); }
+function js_add_game_option_json_str(option_id_ptr,option_info,option_info_len) { console.log("js_add_game_option_json_str"); let option_id_str = UTF8ToString(option_id_ptr); let option_info_json_str = UTF8ToString(option_info, option_info_len); let option_info_json = JSON.parse(option_info_json_str); console.log("add_game_option", option_id_str, option_info_json); add_game_option(gfx, option_id_str, option_info_json); }
+function js_prompt_string(title,title_len,msg,msg_len) { { let title_str = UTF8ToString(title, title_len); let msg_str = UTF8ToString(msg, msg_len); prompt_string(gfx, title_str, msg_str); } }
+function js_hide_popup() { hide_popup(gfx); }
+function js_set_status_msg(msg_ptr,msg_len) { let msg = UTF8ToString(msg_ptr, msg_len); set_status_msg(gfx, msg); }
+function js_set_status_err(msg_ptr,msg_len) { let msg = UTF8ToString(msg_ptr, msg_len); set_status_err(gfx, msg); }
+function js_update_timer_ms(timer_period_ms) { return update_timer_period_ms(gfx, timer_period_ms); }
+function js_delete_timer(handle) { delete_timer(gfx, handle); }
+function js_enable_evt(evt_id_ptr,evt_id_len) { let evt_id = UTF8ToString(evt_id_ptr, evt_id_len); enable_event(evt_id); }
+function js_disable_evt(evt_id_ptr,evt_id_len) { let evt_id = UTF8ToString(evt_id_ptr, evt_id_len); disable_event(evt_id); }
+function js_get_time_ms() { return alexgames_get_time_ms(); }
+function js_store_data(L,key_ptr,val_ptr,val_len) { let key_str = UTF8ToString(key_ptr); if (window.localStorage == null) { console.error("Can not store key ", key_str, ", localStorage is null"); return; } let val_js_str = ""; for (let i=0; i<val_len; i++) { let signed_byte = getValue(val_ptr + i, 'i8'); if (signed_byte < 0) { unsigned_byte = 256 + signed_byte; } else { unsigned_byte = signed_byte; } val_js_str += String.fromCharCode(unsigned_byte); } window.localStorage[key_str] = val_js_str; }
+function js_read_stored_data(L,key_ptr,buff_out,buff_max) { let key_str = UTF8ToString(key_ptr); if (window.localStorage == null) { console.error("window.localStorage == null, can not load stored_data key ", key_str); return -1; } let val = window.localStorage[key_str]; let rc; if (val === undefined) { rc = -1; } else { if (buff_out == 0) { return 1; } for (let i=0; i<val.length; i++) { if (i >= buff_max) { console.error("tried to read stored data > buff_max", val.length, buff_max); break; } setValue(buff_out + i, val.charCodeAt(i), 'i8'); rc = i+1; } } return rc; }
+function js_draw_extra_canvas(canvas_id_ptr,y,x,width,height) { let canvas_id_str = UTF8ToString(canvas_id_ptr); draw_extra_canvas(gfx, canvas_id_str, y, x, width, height); }
+function js_new_extra_canvas(canvas_id) { let canvas_id_str = UTF8ToString(canvas_id); new_extra_canvas(gfx, canvas_id_str); }
+function js_set_active_canvas(canvas_id) { let canvas_id_str = UTF8ToString(canvas_id); set_active_canvas(gfx, canvas_id_str); }
+function js_delete_extra_canvases() { delete_extra_canvases(); }
+function js_get_user_colour_pref(colour_str_out,max_colour_str_out_len) { let colour_pref_str_js = get_user_colour_pref(); let i; for (i=0; i<colour_pref_str_js.length; i++) { if (i >= max_colour_str_out_len) { console.error("User colour pref str buff is not long enough"); return -1; } setValue(colour_str_out + i, colour_pref_str_js.charCodeAt(i), 'i8'); } setValue(colour_str_out + i, 0, 'i8'); return colour_pref_str_js.length; }
+function js_get_multiplayer_session_id(session_id_out,max_session_id_out_len) { let session_id_js = get_multiplayer_session_id(); let i; for (i=0; i<session_id_js.length; i++) { if (i >= max_session_id_out_len) { console.error("Multiplayer ID session str buff is not long enough"); return -1; } setValue(session_id_out + i, session_id_js.charCodeAt(i), 'i8'); } setValue(session_id_out + i, 0, 'i8'); return session_id_js.length; }
+function js_is_multiplayer_session_id_needed() { return true; }
+function js_is_feature_supported(feature_id,feature_id_len) { return false; }
+function js_get_time_of_day(time_str,max_time_str_len) { let time_str_js = get_time_of_day(); for (let i=0; i<time_str_js.length; i++) { if (i >= max_time_str_len) { console.error("Time string is not long enough"); return -1; } setValue(time_str + i, time_str_js.charCodeAt(i), 'i8'); } return time_str_js.length; }
+function js_set_game_handle2(L,game_id) { let game_id_str = UTF8ToString(game_id); set_game_handle(L, game_id_str); }
+function js_get_game_id(L,game_id_out,game_id_out_len_max) { console.log("js_get_game_id called, returning gfx.game_id: ", gfx.game_id); write_str(game_id_out, game_id_out_len_max, gfx.game_id); }
+function js_destroy_all() { console.log("destroy_all called"); destroy_all(); }
+function em_js_dict_init(language_ptr) { console.log("[dict] emscripten_c_dict_api: em_js_dict_init called. Using C dictionary after words file download complete.\n"); if (em_js_dict_init.call_counts === undefined) { em_js_dict_init.call_counts = 0; } em_js_dict_init.call_counts += 1; if (em_js_dict_init.call_counts > 2) { console.error("em_js_dict_init.call_counts is", em_js_dict_init.call_counts); return; } js_c_dict_init(); }
+
+// Imports from the Wasm binary.
+var _get_game_count = Module['_get_game_count'] = makeInvalidEarlyAccess('_get_game_count');
+var _get_game_name = Module['_get_game_name'] = makeInvalidEarlyAccess('_get_game_name');
+var _start_game = Module['_start_game'] = makeInvalidEarlyAccess('_start_game');
+var _update = Module['_update'] = makeInvalidEarlyAccess('_update');
+var _handle_user_string_input = Module['_handle_user_string_input'] = makeInvalidEarlyAccess('_handle_user_string_input');
+var _handle_user_clicked = Module['_handle_user_clicked'] = makeInvalidEarlyAccess('_handle_user_clicked');
+var _handle_mousemove = Module['_handle_mousemove'] = makeInvalidEarlyAccess('_handle_mousemove');
+var _handle_mouse_evt = Module['_handle_mouse_evt'] = makeInvalidEarlyAccess('_handle_mouse_evt');
+var _handle_wheel_changed = Module['_handle_wheel_changed'] = makeInvalidEarlyAccess('_handle_wheel_changed');
+var _handle_key_evt = Module['_handle_key_evt'] = makeInvalidEarlyAccess('_handle_key_evt');
+var _handle_touch_evt = Module['_handle_touch_evt'] = makeInvalidEarlyAccess('_handle_touch_evt');
+var _handle_msg_received = Module['_handle_msg_received'] = makeInvalidEarlyAccess('_handle_msg_received');
+var _handle_btn_clicked = Module['_handle_btn_clicked'] = makeInvalidEarlyAccess('_handle_btn_clicked');
+var _handle_popup_btn_clicked = Module['_handle_popup_btn_clicked'] = makeInvalidEarlyAccess('_handle_popup_btn_clicked');
+var _handle_game_option_evt = Module['_handle_game_option_evt'] = makeInvalidEarlyAccess('_handle_game_option_evt');
+var _malloc = Module['_malloc'] = makeInvalidEarlyAccess('_malloc');
+var _free = Module['_free'] = makeInvalidEarlyAccess('_free');
+var _start_game_b64 = Module['_start_game_b64'] = makeInvalidEarlyAccess('_start_game_b64');
+var _get_state = Module['_get_state'] = makeInvalidEarlyAccess('_get_state');
+var _get_init_state = Module['_get_init_state'] = makeInvalidEarlyAccess('_get_init_state');
+var _lua_run_cmd = Module['_lua_run_cmd'] = makeInvalidEarlyAccess('_lua_run_cmd');
+var _destroy_game = Module['_destroy_game'] = makeInvalidEarlyAccess('_destroy_game');
+var _new_file = Module['_new_file'] = makeInvalidEarlyAccess('_new_file');
+var _write_to_file = Module['_write_to_file'] = makeInvalidEarlyAccess('_write_to_file');
+var _close_file = Module['_close_file'] = makeInvalidEarlyAccess('_close_file');
+var _dump_file = Module['_dump_file'] = makeInvalidEarlyAccess('_dump_file');
+var _unzip_file = Module['_unzip_file'] = makeInvalidEarlyAccess('_unzip_file');
+var _init_game_api = Module['_init_game_api'] = makeInvalidEarlyAccess('_init_game_api');
+var _update_dict = Module['_update_dict'] = makeInvalidEarlyAccess('_update_dict');
+var ___cxa_free_exception = makeInvalidEarlyAccess('___cxa_free_exception');
+var _strerror = makeInvalidEarlyAccess('_strerror');
+var _fflush = makeInvalidEarlyAccess('_fflush');
+var _emscripten_stack_get_end = makeInvalidEarlyAccess('_emscripten_stack_get_end');
+var _emscripten_stack_get_base = makeInvalidEarlyAccess('_emscripten_stack_get_base');
+var _htonl = makeInvalidEarlyAccess('_htonl');
+var _htons = makeInvalidEarlyAccess('_htons');
+var _ntohs = makeInvalidEarlyAccess('_ntohs');
+var _setThrew = makeInvalidEarlyAccess('_setThrew');
+var __emscripten_tempret_set = makeInvalidEarlyAccess('__emscripten_tempret_set');
+var _emscripten_stack_init = makeInvalidEarlyAccess('_emscripten_stack_init');
+var _emscripten_stack_get_free = makeInvalidEarlyAccess('_emscripten_stack_get_free');
+var __emscripten_stack_restore = makeInvalidEarlyAccess('__emscripten_stack_restore');
+var __emscripten_stack_alloc = makeInvalidEarlyAccess('__emscripten_stack_alloc');
+var _emscripten_stack_get_current = makeInvalidEarlyAccess('_emscripten_stack_get_current');
+var ___cxa_decrement_exception_refcount = makeInvalidEarlyAccess('___cxa_decrement_exception_refcount');
+var ___cxa_increment_exception_refcount = makeInvalidEarlyAccess('___cxa_increment_exception_refcount');
+var ___get_exception_message = makeInvalidEarlyAccess('___get_exception_message');
+var ___cxa_can_catch = makeInvalidEarlyAccess('___cxa_can_catch');
+var ___cxa_get_exception_ptr = makeInvalidEarlyAccess('___cxa_get_exception_ptr');
+
+function assignWasmExports(wasmExports) {
+  Module['_get_game_count'] = _get_game_count = createExportWrapper('get_game_count', 0);
+  Module['_get_game_name'] = _get_game_name = createExportWrapper('get_game_name', 1);
+  Module['_start_game'] = _start_game = createExportWrapper('start_game', 4);
+  Module['_update'] = _update = createExportWrapper('update', 2);
+  Module['_handle_user_string_input'] = _handle_user_string_input = createExportWrapper('handle_user_string_input', 4);
+  Module['_handle_user_clicked'] = _handle_user_clicked = createExportWrapper('handle_user_clicked', 3);
+  Module['_handle_mousemove'] = _handle_mousemove = createExportWrapper('handle_mousemove', 4);
+  Module['_handle_mouse_evt'] = _handle_mouse_evt = createExportWrapper('handle_mouse_evt', 5);
+  Module['_handle_wheel_changed'] = _handle_wheel_changed = createExportWrapper('handle_wheel_changed', 3);
+  Module['_handle_key_evt'] = _handle_key_evt = createExportWrapper('handle_key_evt', 3);
+  Module['_handle_touch_evt'] = _handle_touch_evt = createExportWrapper('handle_touch_evt', 5);
+  Module['_handle_msg_received'] = _handle_msg_received = createExportWrapper('handle_msg_received', 5);
+  Module['_handle_btn_clicked'] = _handle_btn_clicked = createExportWrapper('handle_btn_clicked', 2);
+  Module['_handle_popup_btn_clicked'] = _handle_popup_btn_clicked = createExportWrapper('handle_popup_btn_clicked', 4);
+  Module['_handle_game_option_evt'] = _handle_game_option_evt = createExportWrapper('handle_game_option_evt', 4);
+  Module['_malloc'] = _malloc = createExportWrapper('malloc', 1);
+  Module['_free'] = _free = createExportWrapper('free', 1);
+  Module['_start_game_b64'] = _start_game_b64 = createExportWrapper('start_game_b64', 4);
+  Module['_get_state'] = _get_state = createExportWrapper('get_state', 3);
+  Module['_get_init_state'] = _get_init_state = createExportWrapper('get_init_state', 3);
+  Module['_lua_run_cmd'] = _lua_run_cmd = createExportWrapper('lua_run_cmd', 3);
+  Module['_destroy_game'] = _destroy_game = createExportWrapper('destroy_game', 1);
+  Module['_new_file'] = _new_file = createExportWrapper('new_file', 2);
+  Module['_write_to_file'] = _write_to_file = createExportWrapper('write_to_file', 4);
+  Module['_close_file'] = _close_file = createExportWrapper('close_file', 2);
+  Module['_dump_file'] = _dump_file = createExportWrapper('dump_file', 2);
+  Module['_unzip_file'] = _unzip_file = createExportWrapper('unzip_file', 3);
+  Module['_init_game_api'] = _init_game_api = createExportWrapper('init_game_api', 2);
+  Module['_update_dict'] = _update_dict = createExportWrapper('update_dict', 0);
+  ___cxa_free_exception = createExportWrapper('__cxa_free_exception', 1);
+  _strerror = createExportWrapper('strerror', 1);
+  _fflush = createExportWrapper('fflush', 1);
+  _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'];
+  _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'];
+  _htonl = createExportWrapper('htonl', 1);
+  _htons = createExportWrapper('htons', 1);
+  _ntohs = createExportWrapper('ntohs', 1);
+  _setThrew = createExportWrapper('setThrew', 2);
+  __emscripten_tempret_set = createExportWrapper('_emscripten_tempret_set', 1);
+  _emscripten_stack_init = wasmExports['emscripten_stack_init'];
+  _emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'];
+  __emscripten_stack_restore = wasmExports['_emscripten_stack_restore'];
+  __emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'];
+  _emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'];
+  ___cxa_decrement_exception_refcount = createExportWrapper('__cxa_decrement_exception_refcount', 1);
+  ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_exception_refcount', 1);
+  ___get_exception_message = createExportWrapper('__get_exception_message', 3);
+  ___cxa_can_catch = createExportWrapper('__cxa_can_catch', 3);
+  ___cxa_get_exception_ptr = createExportWrapper('__cxa_get_exception_ptr', 1);
 }
 var wasmImports = {
   /** @export */
@@ -5465,6 +5921,8 @@ var wasmImports = {
   /** @export */
   invoke_viiiiiiiiiiiiiii,
   /** @export */
+  invoke_viij,
+  /** @export */
   invoke_viijii,
   /** @export */
   invoke_viijj,
@@ -5550,56 +6008,6 @@ var wasmImports = {
   random_get: _random_get
 };
 var wasmExports = await createWasm();
-var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
-var _get_game_count = Module['_get_game_count'] = createExportWrapper('get_game_count', 0);
-var _get_game_name = Module['_get_game_name'] = createExportWrapper('get_game_name', 1);
-var _start_game = Module['_start_game'] = createExportWrapper('start_game', 4);
-var _update = Module['_update'] = createExportWrapper('update', 2);
-var _handle_user_string_input = Module['_handle_user_string_input'] = createExportWrapper('handle_user_string_input', 4);
-var _handle_user_clicked = Module['_handle_user_clicked'] = createExportWrapper('handle_user_clicked', 3);
-var _handle_mousemove = Module['_handle_mousemove'] = createExportWrapper('handle_mousemove', 4);
-var _handle_mouse_evt = Module['_handle_mouse_evt'] = createExportWrapper('handle_mouse_evt', 5);
-var _handle_wheel_changed = Module['_handle_wheel_changed'] = createExportWrapper('handle_wheel_changed', 3);
-var _handle_key_evt = Module['_handle_key_evt'] = createExportWrapper('handle_key_evt', 3);
-var _handle_touch_evt = Module['_handle_touch_evt'] = createExportWrapper('handle_touch_evt', 5);
-var _handle_msg_received = Module['_handle_msg_received'] = createExportWrapper('handle_msg_received', 5);
-var _handle_btn_clicked = Module['_handle_btn_clicked'] = createExportWrapper('handle_btn_clicked', 2);
-var _handle_popup_btn_clicked = Module['_handle_popup_btn_clicked'] = createExportWrapper('handle_popup_btn_clicked', 4);
-var _handle_game_option_evt = Module['_handle_game_option_evt'] = createExportWrapper('handle_game_option_evt', 4);
-var _malloc = Module['_malloc'] = createExportWrapper('malloc', 1);
-var _free = Module['_free'] = createExportWrapper('free', 1);
-var _start_game_b64 = Module['_start_game_b64'] = createExportWrapper('start_game_b64', 4);
-var _get_state = Module['_get_state'] = createExportWrapper('get_state', 3);
-var _get_init_state = Module['_get_init_state'] = createExportWrapper('get_init_state', 3);
-var _lua_run_cmd = Module['_lua_run_cmd'] = createExportWrapper('lua_run_cmd', 3);
-var _destroy_game = Module['_destroy_game'] = createExportWrapper('destroy_game', 1);
-var _new_file = Module['_new_file'] = createExportWrapper('new_file', 2);
-var _write_to_file = Module['_write_to_file'] = createExportWrapper('write_to_file', 4);
-var _close_file = Module['_close_file'] = createExportWrapper('close_file', 2);
-var _dump_file = Module['_dump_file'] = createExportWrapper('dump_file', 2);
-var _unzip_file = Module['_unzip_file'] = createExportWrapper('unzip_file', 3);
-var _init_game_api = Module['_init_game_api'] = createExportWrapper('init_game_api', 2);
-var _update_dict = Module['_update_dict'] = createExportWrapper('update_dict', 0);
-var ___cxa_free_exception = createExportWrapper('__cxa_free_exception', 1);
-var _strerror = createExportWrapper('strerror', 1);
-var _fflush = createExportWrapper('fflush', 1);
-var _htonl = createExportWrapper('htonl', 1);
-var _htons = createExportWrapper('htons', 1);
-var _ntohs = createExportWrapper('ntohs', 1);
-var _setThrew = createExportWrapper('setThrew', 2);
-var __emscripten_tempret_set = createExportWrapper('_emscripten_tempret_set', 1);
-var _emscripten_stack_init = wasmExports['emscripten_stack_init']
-var _emscripten_stack_get_free = wasmExports['emscripten_stack_get_free']
-var _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base']
-var _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end']
-var __emscripten_stack_restore = wasmExports['_emscripten_stack_restore']
-var __emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc']
-var _emscripten_stack_get_current = wasmExports['emscripten_stack_get_current']
-var ___cxa_decrement_exception_refcount = createExportWrapper('__cxa_decrement_exception_refcount', 1);
-var ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_exception_refcount', 1);
-var ___get_exception_message = createExportWrapper('__get_exception_message', 3);
-var ___cxa_can_catch = createExportWrapper('__cxa_can_catch', 3);
-var ___cxa_get_exception_ptr = createExportWrapper('__cxa_get_exception_ptr', 1);
 
 function invoke_vi(index,a1) {
   var sp = stackSave();
@@ -5678,17 +6086,6 @@ function invoke_iiii(index,a1,a2,a3) {
   }
 }
 
-function invoke_v(index) {
-  var sp = stackSave();
-  try {
-    getWasmTableEntry(index)();
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-  }
-}
-
 function invoke_viiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8) {
   var sp = stackSave();
   try {
@@ -5715,6 +6112,17 @@ function invoke_viiiiii(index,a1,a2,a3,a4,a5,a6) {
   var sp = stackSave();
   try {
     getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_v(index) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)();
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
@@ -5766,18 +6174,6 @@ function invoke_iiiii(index,a1,a2,a3,a4) {
   }
 }
 
-function invoke_ji(index,a1) {
-  var sp = stackSave();
-  try {
-    return getWasmTableEntry(index)(a1);
-  } catch(e) {
-    stackRestore(sp);
-    if (!(e instanceof EmscriptenEH)) throw e;
-    _setThrew(1, 0);
-    return 0n;
-  }
-}
-
 function invoke_jiii(index,a1,a2,a3) {
   var sp = stackSave();
   try {
@@ -5790,10 +6186,21 @@ function invoke_jiii(index,a1,a2,a3) {
   }
 }
 
-function invoke_iij(index,a1,a2) {
+function invoke_viij(index,a1,a2,a3) {
   var sp = stackSave();
   try {
-    return getWasmTableEntry(index)(a1,a2);
+    getWasmTableEntry(index)(a1,a2,a3);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_viijii(index,a1,a2,a3,a4,a5) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
@@ -5813,10 +6220,22 @@ function invoke_jii(index,a1,a2) {
   }
 }
 
-function invoke_viijii(index,a1,a2,a3,a4,a5) {
+function invoke_ji(index,a1) {
   var sp = stackSave();
   try {
-    getWasmTableEntry(index)(a1,a2,a3,a4,a5);
+    return getWasmTableEntry(index)(a1);
+  } catch(e) {
+    stackRestore(sp);
+    if (!(e instanceof EmscriptenEH)) throw e;
+    _setThrew(1, 0);
+    return 0n;
+  }
+}
+
+function invoke_viiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7,a8,a9);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
@@ -5835,10 +6254,10 @@ function invoke_iijii(index,a1,a2,a3,a4) {
   }
 }
 
-function invoke_viiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9) {
+function invoke_iij(index,a1,a2) {
   var sp = stackSave();
   try {
-    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+    return getWasmTableEntry(index)(a1,a2);
   } catch(e) {
     stackRestore(sp);
     if (!(e instanceof EmscriptenEH)) throw e;
@@ -6027,304 +6446,6 @@ function invoke_viiiiiiiiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a1
 // include: postamble.js
 // === Auto-generated postamble setup entry stuff ===
 
-Module['addRunDependency'] = addRunDependency;
-Module['removeRunDependency'] = removeRunDependency;
-Module['ccall'] = ccall;
-Module['cwrap'] = cwrap;
-Module['setValue'] = setValue;
-Module['UTF8ToString'] = UTF8ToString;
-Module['FS_createPreloadedFile'] = FS_createPreloadedFile;
-Module['FS_unlink'] = FS_unlink;
-Module['FS_createPath'] = FS_createPath;
-Module['FS_createDevice'] = FS_createDevice;
-Module['FS_createDataFile'] = FS_createDataFile;
-Module['FS_createLazyFile'] = FS_createLazyFile;
-var missingLibrarySymbols = [
-  'writeI53ToI64',
-  'writeI53ToI64Clamped',
-  'writeI53ToI64Signaling',
-  'writeI53ToU64Clamped',
-  'writeI53ToU64Signaling',
-  'readI53FromI64',
-  'readI53FromU64',
-  'convertI32PairToI53',
-  'convertI32PairToI53Checked',
-  'convertU32PairToI53',
-  'getTempRet0',
-  'inetPton4',
-  'inetNtop4',
-  'inetPton6',
-  'inetNtop6',
-  'readSockaddr',
-  'writeSockaddr',
-  'emscriptenLog',
-  'runMainThreadEmAsm',
-  'jstoi_q',
-  'listenOnce',
-  'autoResumeAudioContext',
-  'getDynCaller',
-  'dynCall',
-  'handleException',
-  'runtimeKeepalivePush',
-  'runtimeKeepalivePop',
-  'callUserCallback',
-  'maybeExit',
-  'asmjsMangle',
-  'HandleAllocator',
-  'getNativeTypeSize',
-  'addOnInit',
-  'addOnPostCtor',
-  'addOnPreMain',
-  'addOnExit',
-  'STACK_SIZE',
-  'STACK_ALIGN',
-  'POINTER_SIZE',
-  'ASSERTIONS',
-  'uleb128Encode',
-  'sigToWasmTypes',
-  'generateFuncType',
-  'convertJsFunctionToWasm',
-  'getEmptyTableSlot',
-  'updateTableMap',
-  'getFunctionAddress',
-  'addFunction',
-  'removeFunction',
-  'reallyNegative',
-  'unSign',
-  'strLen',
-  'reSign',
-  'formatString',
-  'intArrayToString',
-  'AsciiToString',
-  'UTF16ToString',
-  'stringToUTF16',
-  'lengthBytesUTF16',
-  'UTF32ToString',
-  'stringToUTF32',
-  'lengthBytesUTF32',
-  'stringToNewUTF8',
-  'registerKeyEventCallback',
-  'maybeCStringToJsString',
-  'findEventTarget',
-  'getBoundingClientRect',
-  'fillMouseEventData',
-  'registerMouseEventCallback',
-  'registerWheelEventCallback',
-  'registerUiEventCallback',
-  'registerFocusEventCallback',
-  'fillDeviceOrientationEventData',
-  'registerDeviceOrientationEventCallback',
-  'fillDeviceMotionEventData',
-  'registerDeviceMotionEventCallback',
-  'screenOrientation',
-  'fillOrientationChangeEventData',
-  'registerOrientationChangeEventCallback',
-  'fillFullscreenChangeEventData',
-  'registerFullscreenChangeEventCallback',
-  'JSEvents_requestFullscreen',
-  'JSEvents_resizeCanvasForFullscreen',
-  'registerRestoreOldStyle',
-  'hideEverythingExceptGivenElement',
-  'restoreHiddenElements',
-  'setLetterbox',
-  'softFullscreenResizeWebGLRenderTarget',
-  'doRequestFullscreen',
-  'fillPointerlockChangeEventData',
-  'registerPointerlockChangeEventCallback',
-  'registerPointerlockErrorEventCallback',
-  'requestPointerLock',
-  'fillVisibilityChangeEventData',
-  'registerVisibilityChangeEventCallback',
-  'registerTouchEventCallback',
-  'fillGamepadEventData',
-  'registerGamepadEventCallback',
-  'registerBeforeUnloadEventCallback',
-  'fillBatteryEventData',
-  'battery',
-  'registerBatteryEventCallback',
-  'setCanvasElementSize',
-  'getCanvasElementSize',
-  'jsStackTrace',
-  'getCallstack',
-  'convertPCtoSourceLocation',
-  'wasiRightsToMuslOFlags',
-  'wasiOFlagsToMuslOFlags',
-  'safeSetTimeout',
-  'setImmediateWrapped',
-  'safeRequestAnimationFrame',
-  'clearImmediateWrapped',
-  'registerPostMainLoop',
-  'registerPreMainLoop',
-  'getPromise',
-  'makePromise',
-  'idsToPromises',
-  'makePromiseCallback',
-  'Browser_asyncPrepareDataCounter',
-  'arraySum',
-  'addDays',
-  'getSocketFromFD',
-  'getSocketAddress',
-  'FS_mkdirTree',
-  '_setNetworkCallback',
-  'heapObjectForWebGLType',
-  'toTypedArrayIndex',
-  'webgl_enable_ANGLE_instanced_arrays',
-  'webgl_enable_OES_vertex_array_object',
-  'webgl_enable_WEBGL_draw_buffers',
-  'webgl_enable_WEBGL_multi_draw',
-  'webgl_enable_EXT_polygon_offset_clamp',
-  'webgl_enable_EXT_clip_control',
-  'webgl_enable_WEBGL_polygon_mode',
-  'emscriptenWebGLGet',
-  'computeUnpackAlignedImageSize',
-  'colorChannelsInGlTextureFormat',
-  'emscriptenWebGLGetTexPixelData',
-  'emscriptenWebGLGetUniform',
-  'webglGetUniformLocation',
-  'webglPrepareUniformLocationsBeforeFirstUse',
-  'webglGetLeftBracePos',
-  'emscriptenWebGLGetVertexAttrib',
-  '__glGetActiveAttribOrUniform',
-  'writeGLArray',
-  'registerWebGlEventCallback',
-  'runAndAbortIfError',
-  'ALLOC_NORMAL',
-  'ALLOC_STACK',
-  'allocate',
-  'writeStringToMemory',
-  'writeAsciiToMemory',
-  'setErrNo',
-  'demangle',
-  'stackTrace',
-];
-missingLibrarySymbols.forEach(missingLibrarySymbol)
-
-var unexportedSymbols = [
-  'run',
-  'out',
-  'err',
-  'callMain',
-  'abort',
-  'wasmMemory',
-  'wasmExports',
-  'writeStackCookie',
-  'checkStackCookie',
-  'INT53_MAX',
-  'INT53_MIN',
-  'bigintToI53Checked',
-  'stackSave',
-  'stackRestore',
-  'stackAlloc',
-  'setTempRet0',
-  'ptrToString',
-  'zeroMemory',
-  'exitJS',
-  'getHeapMax',
-  'growMemory',
-  'ENV',
-  'ERRNO_CODES',
-  'strError',
-  'DNS',
-  'Protocols',
-  'Sockets',
-  'timers',
-  'warnOnce',
-  'readEmAsmArgsArray',
-  'readEmAsmArgs',
-  'runEmAsmFunction',
-  'jstoi_s',
-  'getExecutableName',
-  'keepRuntimeAlive',
-  'asyncLoad',
-  'alignMemory',
-  'mmapAlloc',
-  'wasmTable',
-  'noExitRuntime',
-  'addOnPreRun',
-  'addOnPostRun',
-  'getCFunc',
-  'freeTableIndexes',
-  'functionsInTableMap',
-  'getValue',
-  'PATH',
-  'PATH_FS',
-  'UTF8Decoder',
-  'UTF8ArrayToString',
-  'stringToUTF8Array',
-  'stringToUTF8',
-  'lengthBytesUTF8',
-  'intArrayFromString',
-  'stringToAscii',
-  'UTF16Decoder',
-  'stringToUTF8OnStack',
-  'writeArrayToMemory',
-  'JSEvents',
-  'specialHTMLTargets',
-  'findCanvasEventTarget',
-  'currentFullscreenStrategy',
-  'restoreOldWindowedStyle',
-  'UNWIND_CACHE',
-  'ExitStatus',
-  'getEnvStrings',
-  'checkWasiClock',
-  'doReadv',
-  'doWritev',
-  'initRandomFill',
-  'randomFill',
-  'emSetImmediate',
-  'emClearImmediate_deps',
-  'emClearImmediate',
-  'promiseMap',
-  'uncaughtExceptionCount',
-  'exceptionLast',
-  'exceptionCaught',
-  'ExceptionInfo',
-  'findMatchingCatch',
-  'getExceptionMessageCommon',
-  'incrementExceptionRefcount',
-  'decrementExceptionRefcount',
-  'getExceptionMessage',
-  'Browser',
-  'getPreloadedImageData__data',
-  'wget',
-  'MONTH_DAYS_REGULAR',
-  'MONTH_DAYS_LEAP',
-  'MONTH_DAYS_REGULAR_CUMULATIVE',
-  'MONTH_DAYS_LEAP_CUMULATIVE',
-  'isLeapYear',
-  'ydayFromDate',
-  'SYSCALLS',
-  'preloadPlugins',
-  'FS_modeStringToFlags',
-  'FS_getMode',
-  'FS_stdin_getChar_buffer',
-  'FS_stdin_getChar',
-  'FS_readFile',
-  'FS',
-  'MEMFS',
-  'TTY',
-  'PIPEFS',
-  'SOCKFS',
-  'tempFixedLengthArray',
-  'miniTempWebGLFloatBuffers',
-  'miniTempWebGLIntBuffers',
-  'GL',
-  'AL',
-  'GLUT',
-  'EGL',
-  'GLEW',
-  'IDBStore',
-  'SDL',
-  'SDL_gfx',
-  'allocateUTF8',
-  'allocateUTF8OnStack',
-  'print',
-  'printErr',
-];
-unexportedSymbols.forEach(unexportedRuntimeSymbol);
-
-
-
 var calledRun;
 
 function stackCheckInit() {
@@ -6364,8 +6485,9 @@ function run() {
 
     initRuntime();
 
-    readyPromiseResolve(Module);
+    readyPromiseResolve?.(Module);
     Module['onRuntimeInitialized']?.();
+    consumedModuleProp('onRuntimeInitialized');
 
     assert(!Module['_main'], 'compiled without a main, but one is present. if you added it from JS, use Module["onRuntimeInitialized"]');
 
@@ -6424,13 +6546,17 @@ function checkUnflushedContent() {
   }
 }
 
-if (Module['preInit']) {
-  if (typeof Module['preInit'] == 'function') Module['preInit'] = [Module['preInit']];
-  while (Module['preInit'].length > 0) {
-    Module['preInit'].pop()();
+function preInit() {
+  if (Module['preInit']) {
+    if (typeof Module['preInit'] == 'function') Module['preInit'] = [Module['preInit']];
+    while (Module['preInit'].length > 0) {
+      Module['preInit'].shift()();
+    }
   }
+  consumedModuleProp('preInit');
 }
 
+preInit();
 run();
 
 // end include: postamble.js
@@ -6442,7 +6568,15 @@ run();
 // We assign to the `moduleRtn` global here and configure closure to see
 // this as and extern so it won't get minified.
 
-moduleRtn = readyPromise;
+if (runtimeInitialized)  {
+  moduleRtn = Module;
+} else {
+  // Set up the promise that indicates the Module is initialized
+  moduleRtn = new Promise((resolve, reject) => {
+    readyPromiseResolve = resolve;
+    readyPromiseReject = reject;
+  });
+}
 
 // Assertion for attempting to access module properties on the incoming
 // moduleArg.  In the past we used this object as the prototype of the module
@@ -6463,19 +6597,11 @@ for (const prop of Object.keys(Module)) {
 
 
 
-  return moduleRtn;
-}
-);
+    return moduleRtn;
+  };
 })();
-(() => {
-  // Create a small, never-async wrapper around createMyModule which
-  // checks for callers incorrectly using it with `new`.
-  var real_createMyModule = createMyModule;
-  createMyModule = function(arg) {
-    if (new.target) throw new Error("createMyModule() should not be called with `new createMyModule()`");
-    return real_createMyModule(arg);
-  }
-})();
+
+// Export using a UMD style export, or ES6 exports if selected
 if (typeof exports === 'object' && typeof module === 'object') {
   module.exports = createMyModule;
   // This default export looks redundant, but it allows TS to import this
@@ -6483,3 +6609,4 @@ if (typeof exports === 'object' && typeof module === 'object') {
   module.exports.default = createMyModule;
 } else if (typeof define === 'function' && define['amd'])
   define([], () => createMyModule);
+
