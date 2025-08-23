@@ -134,6 +134,14 @@ enum move_select_btn_id {
 	BTN_ID_BACK,
 };
 
+enum delete_info_btn_id {
+	DELETE_INFO_BTN_ID_DELETE,
+	DELETE_INFO_BTN_ID_COMPUTE_GAME_CNTS,
+
+	DELETE_INFO_BTN_COUNT,
+};
+
+#define OPTION_ID_DELETE_SESSIONS "game_option_delete_sessions"
 
 static void nice_draw_rect(std::string colour, int y_start, int x_start, int y_end, int x_end) {
 	g_callbacks->draw_rect(colour.c_str(), colour.length(), y_start, x_start, y_end, x_end);
@@ -226,17 +234,40 @@ class MoveSelectState : public HistoryBrowseWindow {
 	ButtonHelper move_select_button_helper;
 };
 
+class DeleteInfoState : public HistoryBrowseWindow {
+	public:
+	DeleteInfoState(void *state) :
+		button_helper(state)
+		{}
+	void update(void *L, int dt_ms);
+	enum user_action handle_user_pressed(history_browse_state *state, int pos_y, int pos_x);
+	void init_buttons(history_browse_state *state);
+	void handle_mousemove(history_browse_state *state, int pos_y, int pos_x, int buttons) {}
+	void handle_mouse_evt(history_browse_state *state, int mouse_evt_id, int pos_y, int pos_x, int buttons) {}
+	void handle_wheel_changed(history_browse_state *state, int delta_y, int delta_x) {}
+	bool handle_touch_evt(history_browse_state *state, std::string evt_id_str,
+                                  void *changed_touches, int changed_touches_len);
+
+	private:
+	TouchPressHandler touch_press_handler;
+	ButtonHelper button_helper;
+};
+
+
 class history_browse_state {
 
 	public:
 	history_browse_state(void *L, const struct game_api_callbacks *api_callbacks) :
 		db(L, api_callbacks),
 		session_select_state(this),
-		move_select_state(this) {}
+		move_select_state(this),
+		delete_info_state(this) {}
+
 	//std::unique_ptr<SavedStateDb> db;
 	SavedStateDb db;
 	SessionSelectState session_select_state;
 	MoveSelectState    move_select_state;
+	DeleteInfoState    delete_info_state;
 
 	int session_id_selected;
 	int move_id_selected;
@@ -533,7 +564,7 @@ void SessionSelectState::generate_state_previews(history_browse_state *state) {
 	g_callbacks->set_active_canvas("");
 }
 
-static void btn_clicked(void *handle, btn_id_t btn_id) {
+static void move_select_btn_clicked(void *handle, btn_id_t btn_id) {
 	history_browse_state *state = (history_browse_state *)handle;
 
 	const int max_move_id = state->db.get_next_move_id(state->session_id_selected);
@@ -562,20 +593,102 @@ void MoveSelectState::init_buttons(history_browse_state *state) {
 
 	this->move_select_button_helper.new_button(ButtonInfo::fromSize("|<", // "first",
 	                                            info_btn_y_start, button_padding,
-	                                            button_size_y, button_size_x, BTN_ID_FIRST, btn_clicked));
+	                                            button_size_y, button_size_x, BTN_ID_FIRST, move_select_btn_clicked));
 	this->move_select_button_helper.new_button(ButtonInfo::fromSize("<", // "prev",
 	                                            info_btn_y_start, 2*button_padding + button_size_x,
-	                                            button_size_y, button_size_x, BTN_ID_PREV, btn_clicked));
+	                                            button_size_y, button_size_x, BTN_ID_PREV, move_select_btn_clicked));
 	this->move_select_button_helper.new_button(ButtonInfo::fromSize(">", // "next",
 	                                            info_btn_y_start, CANVAS_WIDTH - 3*button_padding - 2*button_size_x,
-	                                            button_size_y, button_size_x, BTN_ID_NEXT, btn_clicked));
+	                                            button_size_y, button_size_x, BTN_ID_NEXT, move_select_btn_clicked));
 	this->move_select_button_helper.new_button(ButtonInfo::fromSize(">|", //"last",
 	                                            info_btn_y_start, CANVAS_WIDTH - 2*button_padding - button_size_x,
-	                                            button_size_y, button_size_x, BTN_ID_LAST, btn_clicked));
+	                                            button_size_y, button_size_x, BTN_ID_LAST, move_select_btn_clicked));
 
 	this->move_select_button_helper.new_button(ButtonInfo::fromSize("Back", //"last",
 	                                            state->padding, state->padding,
-	                                            button_size_y, button_size_x, BTN_ID_BACK, btn_clicked));
+	                                            button_size_y, button_size_x, BTN_ID_BACK, move_select_btn_clicked));
+}
+
+static void delete_info_btn_clicked(void *handle, btn_id_t btn_id) {
+	history_browse_state *state = (history_browse_state *)handle;
+
+	(void)state;
+
+	std::cout << "Button ID " << btn_id << " clicked" << std::endl;
+
+	switch (btn_id) {
+		case DELETE_INFO_BTN_ID_DELETE:
+			// TODO I don't know, attempt to delete last N games as long as total number of games is greater than N?
+			// just a crude workaround to unblock Sabrina
+			break;
+
+		case DELETE_INFO_BTN_ID_COMPUTE_GAME_CNTS:
+			// TODO here I chould traverse the entire DB from head to tail, computing game counts,
+			// and then display them to the user below.
+			// After testing this on Sabrina's phone (and measuring the time it took!) I can try doing it automatically
+			// in limited capacities.
+			break;
+
+	}
+}
+
+void DeleteInfoState::init_buttons(history_browse_state *state) {
+	const int button_padding = 5;
+	int button_pos_y = button_padding;
+	const int button_pos_x = button_padding;
+	const int button_size_x = CANVAS_WIDTH - 2*button_padding;
+	const int button_size_y = state->button_size_y;
+	this->button_helper.new_button(ButtonInfo::fromSize("Delete",
+	                               button_pos_y, button_pos_x,
+	                               button_size_y, button_size_x, DELETE_INFO_BTN_ID_DELETE, delete_info_btn_clicked));
+
+	button_pos_y += state->button_size_y + button_padding;
+
+	this->button_helper.new_button(ButtonInfo::fromSize("Compute game counts",
+	                               button_pos_y, button_pos_x,
+	                               button_size_y, button_size_x, DELETE_INFO_BTN_ID_COMPUTE_GAME_CNTS, delete_info_btn_clicked));
+
+}
+
+void DeleteInfoState::update(void *L_arg, int dt_ms) {
+	const int padding = 5;
+	history_browse_state *state = (history_browse_state*)L_arg;
+	int text_pos_y = padding + DELETE_INFO_BTN_COUNT * (padding + state->button_size_y) + state->text_size;
+	{
+		char str_buff[128];
+		snprintf(str_buff, sizeof(str_buff), "Head: %d", state->db.get_new_session_id());
+		std::string str(str_buff);
+		draw_text_nice(str, state->text_colour,
+			           text_pos_y,
+			           0,
+			           state->text_size,
+			           TEXT_ALIGN_LEFT);
+		text_pos_y += state->text_size + padding;
+	}
+	{
+		char str_buff[128];
+		snprintf(str_buff, sizeof(str_buff), "Tail: %d", state->db.get_session_id_tail());
+		std::string str(str_buff);
+		draw_text_nice(str, state->text_colour,
+			           text_pos_y,
+			           0,
+			           state->text_size,
+			           TEXT_ALIGN_LEFT);
+		text_pos_y += state->text_size + padding;
+	}
+	this->button_helper.draw_buttons(g_callbacks);
+}
+
+enum user_action DeleteInfoState::handle_user_pressed(history_browse_state *state, int pos_y, int pos_x) {
+	bool handled = this->button_helper.handle_user_pressed(pos_y, pos_x);
+	(void)handled;
+
+	return USER_ACTION_NONE;
+}
+
+bool DeleteInfoState::handle_touch_evt(history_browse_state *state, std::string evt_id_str,
+                                       void *changed_touches, int changed_touches_len) {
+	return false;
 }
 
 static bool is_dark_mode(const struct game_api_callbacks *callbacks) {
@@ -623,8 +736,16 @@ static void* init_lib(const struct game_api_callbacks *api_arg, const char *game
 	state->db.refresh_internal_state();
 
 	state->move_select_state.init_buttons(state);
+	state->delete_info_state.init_buttons(state);
 
 	state->session_select_state.generate_state_previews(state);
+
+	const struct option_info option_delete_session_info = {
+		.option_type = OPTION_TYPE_BTN,
+		.label = "Delete sessions",
+	};
+	g_callbacks->add_game_option(OPTION_ID_DELETE_SESSIONS, &option_delete_session_info);
+
 
 	return state;
 }
@@ -927,7 +1048,25 @@ bool MoveSelectState::handle_touch_evt(history_browse_state *state, std::string 
 static void handle_msg_received(void *L, const char *msg_src, int msg_src_len, const char *msg, int len) {}
 static void handle_btn_clicked(void *L, const char *btn_id) {}
 static void handle_popup_btn_clicked(void *L, const char *popup_id, int btn_idx, const struct popup_state *popup_state) {}
-static void handle_game_option_evt(void *L, enum option_type option_type, const char *option_id, int value) {}
+
+static void handle_game_option_evt(void *L, enum option_type option_type, const char *option_id, int value) {
+	history_browse_state *state = (history_browse_state*)L;
+
+	if (option_type != OPTION_TYPE_BTN) {
+		const char msg[] = "handle_game_option_evt: unhandled option type";
+		g_callbacks->set_status_err(msg, sizeof(msg));
+		return;
+	}
+
+	std::string option_id_str(option_id);
+
+	if (option_id_str == OPTION_ID_DELETE_SESSIONS) {
+		state->window = &state->delete_info_state;
+		const char msg[] = "Switching to delete info window";
+		g_callbacks->set_status_msg(msg, sizeof(msg));
+		update(L, 0);
+	}
+}
 static void start_game(void *L, int session_id, const uint8_t *state, size_t state_len) {}
 static void lua_run_cmd(void *L, const char *str, int string_len) {}
 

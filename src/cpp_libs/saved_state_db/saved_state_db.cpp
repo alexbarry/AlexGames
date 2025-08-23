@@ -55,6 +55,10 @@ uint32_t SavedStateDb::get_new_session_id(void) {
 uint32_t SavedStateDb::get_session_id_tail(void) {
 	return session_tail;
 }
+
+uint32_t SavedStateDb::get_game_session_counts(const char *game_id) {
+	return 0;
+}
 	
 
 void SavedStateDb::save_state(std::string game_id, int session_id, const uint8_t *data, size_t data_len) {

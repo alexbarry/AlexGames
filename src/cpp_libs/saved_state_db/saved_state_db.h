@@ -39,6 +39,28 @@ class SavedStateDb {
 	 * are present.
 	 */
 	uint32_t get_session_id_tail(void);
+
+	// TODO eventually I want to delete all but the last 10 games per each game_id.
+	// I don't want to necessarily traverse the entire saved state tree each time.
+	//
+	// I suppose I need to update some "session_counts" per game ID and store them in persistent storage.
+	// These may take a long time to compute, but would only need to be computed once.
+	//
+	//
+	//
+	// Debug menu:
+	// show session counts per game ID,
+	// prompt user to delete all but last N session counts of each game ID? maybe combine all
+	// show latest dates?
+
+	/**
+	 * Get number of `game_id` sessions stored in saved state DB.
+	 *
+	 * Should be cached so the first read may be slow if it is not already
+	 * computed, but subsequent reads should be fast.
+	 */
+	uint32_t get_game_session_counts(const char *game_id);
+
 	void save_state(std::string game_id, int session_id, const uint8_t *data, size_t data_len);
 
 
