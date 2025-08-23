@@ -2,6 +2,9 @@
 # to avoid duplicating so many dependencies
 FROM nginx:latest AS base
 
+ARG ALEXGAMES_BUILD_TYPE_LABEL
+ENV ALEXGAMES_BUILD_TYPE_LABEL=${ALEXGAMES_BUILD_TYPE_LABEL}
+
 # Install OS dependencies
 # TODO double check that all of these are actually needed
 # zip: used to zip some lua files as an example game to be uploaded

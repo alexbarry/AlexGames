@@ -3,6 +3,8 @@ set -e
 set -u
 set -x
 
+: "${ALEXGAMES_BUILD_TYPE_LABEL:=}"
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "${DIR}"
 
@@ -11,7 +13,7 @@ mkdir -p out
 cd out
 #. ~/repo/emsdk/emsdk_env.sh
 #alias emcmake=~/repo/emsdk/upstream/emscripten/emcmake
-emcmake cmake ../ 
+emcmake cmake -DBUILD_TYPE_LABEL="${ALEXGAMES_BUILD_TYPE_LABEL}" ../
 cmake --build . $@
 
 # Rather than leave everything in this directory, I think it make sense

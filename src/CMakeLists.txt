@@ -1,8 +1,12 @@
 set(SRC_DIR ../src)
 
-execute_process(COMMAND git log --pretty=format:'%h' -n 1
-                OUTPUT_VARIABLE GIT_HEAD_HASH)
-
+set(BUILD_TYPE_LABEL "" CACHE STRING "Specifies the type of build")
+string(TIMESTAMP BUILD_DATETIME "%Y-%m-%d %H:%M:%S%z")
+execute_process(COMMAND git rev-parse --short HEAD
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                OUTPUT_VARIABLE GIT_HEAD_HASH
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 set(OUT_DIR_NAME alexgames_core)
 
 # contains definitions of computer specific paths, like
@@ -323,6 +327,10 @@ if (ENABLE_RUST_GAMES)
 list(APPEND libs "alexgames_rust")
 target_include_directories(alexgames_core PUBLIC rust_games/)
 endif()
+
+target_compile_definitions(alexgames_core INTERFACE
+	ALEXGAMES_BUILD_INFO="Built on ${BUILD_DATETIME}, version ${GIT_HEAD_HASH}, label \\\"${BUILD_TYPE_LABEL}\\\""
+)
 
 message("Including libs: ${libs}")
 if( WIN32 )

@@ -2,9 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
 
 jobs:
 
@@ -20,28 +18,55 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: ${{ github.ref }}
+
+    - name: Fetch all branches
+      run: git fetch --all
 
     - name: Setup docker buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Build AlexGames docker image (get build dependencies)
+    - name: Build main AlexGames docker image (get build dependencies)
       run: |
+        git checkout main
         docker build -t alexgames_build_wasm \
+            --build-arg ALEXGAMES_BUILD_TYPE_LABEL=github-pages-main \
             -f docker/http_server/Dockerfile.build_wasm \
             .
 
-    - name: Build AlexGames static HTML via docker
+    - name: Build main AlexGames static HTML via docker
       run: |
         docker run --rm \
             -v $(pwd):/app \
             alexgames_build_wasm
 
-    - name: Copy AlexGames static HTML to hosting path
+    - name: Copy main AlexGames static HTML to hosting path
       run: |
         mkdir -p public && \
         cp -r build/wasm/out/http_out/* ./public
 
-    - name: Deploy built HTML to GitHub Pages
+    - name: Build dev AlexGames docker image (get build dependencies)
+      run: |
+        git checkout dev
+        docker build -t alexgames_build_wasm \
+            --build-arg ALEXGAMES_BUILD_TYPE_LABEL=github-pages-dev \
+            -f docker/http_server/Dockerfile.build_wasm \
+            .
+
+    - name: Build dev AlexGames static HTML via docker
+      run: |
+        docker run --rm \
+            -v $(pwd):/app \
+            alexgames_build_wasm
+
+    - name: Copy dev AlexGames static HTML to hosting path
+      run: |
+        mkdir -p public/dev && \
+        cp -r build/wasm/out/http_out/* ./public/dev/
+
+    - name: Deploy main and dev built HTML to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
