@@ -40,7 +40,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpjbkty844.js
+// include: /tmp/tmpvhicdnw7.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -245,21 +245,21 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
 
   })();
 
-// end include: /tmp/tmpjbkty844.js
-// include: /tmp/tmpl9ad07fk.js
+// end include: /tmp/tmpvhicdnw7.js
+// include: /tmp/tmp3c77wqsc.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpl9ad07fk.js
-// include: /tmp/tmphw36wtk7.js
+  // end include: /tmp/tmp3c77wqsc.js
+// include: /tmp/tmp8jro_kee.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmphw36wtk7.js
+  // end include: /tmp/tmp8jro_kee.js
 
 
 var arguments_ = [];
@@ -5616,7 +5616,7 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
 var ASM_CONSTS = {
-  1196869: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  1197599: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
@@ -5643,6 +5643,7 @@ function js_disable_evt(evt_id_ptr,evt_id_len) { let evt_id = UTF8ToString(evt_i
 function js_get_time_ms() { return alexgames_get_time_ms(); }
 function js_store_data(L,key_ptr,val_ptr,val_len) { let key_str = UTF8ToString(key_ptr); if (window.localStorage == null) { console.error("Can not store key ", key_str, ", localStorage is null"); return; } let val_js_str = ""; for (let i=0; i<val_len; i++) { let signed_byte = getValue(val_ptr + i, 'i8'); if (signed_byte < 0) { unsigned_byte = 256 + signed_byte; } else { unsigned_byte = signed_byte; } val_js_str += String.fromCharCode(unsigned_byte); } window.localStorage[key_str] = val_js_str; }
 function js_read_stored_data(L,key_ptr,buff_out,buff_max) { let key_str = UTF8ToString(key_ptr); if (window.localStorage == null) { console.error("window.localStorage == null, can not load stored_data key ", key_str); return -1; } let val = window.localStorage[key_str]; let rc; if (val === undefined) { rc = -1; } else { if (buff_out == 0) { return 1; } for (let i=0; i<val.length; i++) { if (i >= buff_max) { console.error("tried to read stored data > buff_max", val.length, buff_max); break; } setValue(buff_out + i, val.charCodeAt(i), 'i8'); rc = i+1; } } return rc; }
+function js_delete_stored_data(L,key) { if (window.localStorage == null) { console.error("window.localStorage == null"); return false; } let key_str = UTF8ToString(key_ptr); window.localStorage.removeItem(key); return true; }
 function js_draw_extra_canvas(canvas_id_ptr,y,x,width,height) { let canvas_id_str = UTF8ToString(canvas_id_ptr); draw_extra_canvas(gfx, canvas_id_str, y, x, width, height); }
 function js_new_extra_canvas(canvas_id) { let canvas_id_str = UTF8ToString(canvas_id); new_extra_canvas(gfx, canvas_id_str); }
 function js_set_active_canvas(canvas_id) { let canvas_id_str = UTF8ToString(canvas_id); set_active_canvas(gfx, canvas_id_str); }
@@ -5936,6 +5937,8 @@ var wasmImports = {
   js_create_btn,
   /** @export */
   js_delete_extra_canvases,
+  /** @export */
+  js_delete_stored_data,
   /** @export */
   js_delete_timer,
   /** @export */
