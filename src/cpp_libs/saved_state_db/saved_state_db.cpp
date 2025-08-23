@@ -214,6 +214,12 @@ std::string SavedStateDb::get_session_game_id(int session_id) {
 	return std::string(buff);
 }
 
+std::string SavedStateDb::get_session_date(int session_id) {
+	char buff[1024];
+	read_stored_string(get_key_last_updated(session_id).c_str(), buff, sizeof(buff));
+	return std::string(buff);
+}
+
 void SavedStateDb::error(std::string msg) {
 	std::cerr << msg << std::endl;
 	callbacks->set_status_err(msg.c_str(), msg.size());

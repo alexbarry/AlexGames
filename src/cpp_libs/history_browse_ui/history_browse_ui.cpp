@@ -703,6 +703,18 @@ void DeleteInfoState::update(void *L_arg, int dt_ms) {
 			           TEXT_ALIGN_LEFT);
 		text_pos_y += state->text_size + padding;
 	}
+	{
+		std::string session_date = state->db.get_session_date(tail);
+		char str_buff[128];
+		snprintf(str_buff, sizeof(str_buff), "Date of tail session %d: %s", tail, session_date.c_str());
+		std::string str(str_buff);
+		draw_text_nice(str, state->text_colour,
+			           text_pos_y,
+			           0,
+			           state->text_size,
+			           TEXT_ALIGN_LEFT);
+		text_pos_y += state->text_size + padding;
+	}
 	this->button_helper.draw_buttons(g_callbacks);
 }
 

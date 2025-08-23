@@ -72,6 +72,7 @@ class SavedStateDb {
                          uint32_t *move_id_out);
 	uint32_t get_last_move_id(int session_id);
 	std::string get_session_game_id(int session_id);
+	std::string get_session_date(int session_id);
 
 	bool has_saved_state_offset(int session_id, int move_id_offset);
 	int adjust_saved_state_offset(int session_id, int move_id_offset, uint8_t *state_out, size_t max_state_len);
