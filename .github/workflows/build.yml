@@ -1,0 +1,39 @@
+name: Docker Build (WASM)
+
+on:
+  pull_request:
+    types:
+        - opened
+        - synchronize
+        - reopened
+
+jobs:
+
+
+  deploy:
+    runs-on: ubuntu-22.04
+
+    permissions:
+      contents: write
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup docker buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build main AlexGames docker image (get build dependencies)
+      run: |
+        docker build -t alexgames_build_wasm \
+            --build-arg ALEXGAMES_BUILD_TYPE_LABEL=github-pages-main-build-only \
+            -f docker/http_server/Dockerfile.build_wasm \
+            .
+
+    - name: Build main AlexGames static HTML via docker
+      run: |
+        docker run --rm \
+            --build-arg ALEXGAMES_BUILD_TYPE_LABEL=github-pages-main-build-only \
+            -v $(pwd):/app \
+            alexgames_build_wasm
