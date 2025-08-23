@@ -484,13 +484,13 @@ EM_JS(size_t, js_read_stored_data, (void *L, const char *key_ptr, uint8_t *buff_
 	return rc;
 });
 
-EM_JS(bool, js_delete_stored_data, (void *L, const char *key), {
+EM_JS(bool, js_delete_stored_data, (void *L, const char *key_ptr), {
 	if (window.localStorage == null) {
 		console.error("window.localStorage == null");
 		return false;
 	}
 
-	let key_str = UTF8ToString(key_ptr);
+	let key = UTF8ToString(key_ptr);
 
 	window.localStorage.removeItem(key);
 	return true;
