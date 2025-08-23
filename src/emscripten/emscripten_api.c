@@ -657,7 +657,7 @@ const struct game_api_callbacks api_callbacks = {
 };
 
 static void print_ver_info() {
-	printf("AlexGames version %s, git hash = %s\n", PROJECT_VERSION, GIT_HEAD_HASH);
+	printf("AlexGames version %s, %s\n", PROJECT_VERSION, ALEXGAMES_BUILD_INFO);
 }
 
 // Entry point from javascript
