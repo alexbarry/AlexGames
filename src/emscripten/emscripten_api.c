@@ -484,6 +484,18 @@ EM_JS(size_t, js_read_stored_data, (void *L, const char *key_ptr, uint8_t *buff_
 	return rc;
 });
 
+EM_JS(bool, js_delete_stored_data, (void *L, const char *key), {
+	if (window.localStorage == null) {
+		console.error("window.localStorage == null");
+		return false;
+	}
+
+	let key_str = UTF8ToString(key_ptr);
+
+	window.localStorage.removeItem(key);
+	return true;
+});
+
 EM_JS(void, js_draw_extra_canvas, (const char *canvas_id_ptr, int y, int x, int width, int height), {
 	let canvas_id_str = UTF8ToString(canvas_id_ptr);
 	draw_extra_canvas(gfx, canvas_id_str, y, x, width, height);
@@ -638,6 +650,7 @@ const struct game_api_callbacks api_callbacks = {
 	.get_time_of_day = js_get_time_of_day,
 	.store_data  = js_store_data,
 	.read_stored_data  = js_read_stored_data,
+	.delete_stored_data = js_delete_stored_data,
 	.get_new_session_id = db_helper_get_new_session_id,
 	.get_last_session_id = db_helper_get_last_session_id,
 	.save_state         = db_helper_save_state,

@@ -270,6 +270,11 @@ struct game_api_callbacks {
 	size_t (*read_stored_data)(void *L, const char *key, uint8_t *value_out, size_t max_val_len);
 
 	/**
+	 * Delete stored data from persistent storage.
+	 */
+	bool (*delete_stored_data)(void *L, const char *key);
+
+	/**
 	 * Gets a new **storage** session ID, usually when the player is starting a new game.
 	 * This lets the game code store the game's state in the database, and
 	 * any new moves in that game will be stored together.
