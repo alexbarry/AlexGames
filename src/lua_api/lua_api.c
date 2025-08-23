@@ -1690,6 +1690,11 @@ static int lua_store_data(lua_State *L) {
 			value[i] = (uint8_t)val;
 			lua_pop(L, 1);
 		}
+	} else {
+		int elem_type = lua_type(L, 2);
+		luaL_error(L, "%s:%d unhandled type %d (%s) passed to store_data",
+				   __func__, __LINE__, elem_type, lua_typename(L, elem_type));
+		return 0;
 	}
 
 	api->store_data(NULL, key, value, value_len);
