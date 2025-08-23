@@ -18,6 +18,12 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: ${{ github.ref }}
+
+    - name: Fetch all branches
+      run: git fetch --all
 
     - name: Setup docker buildx
       uses: docker/setup-buildx-action@v1
