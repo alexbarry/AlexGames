@@ -1,0 +1,676 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<!-- setting maximum-scale=1 to prevent auto zooming in on input fields in safari mobile.
+	     this may be bad if it introduces other side effects.
+	     I still want to allow zooming in on some board games (e.g. 19x19 go) -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<link rel="icon" type="image/png" href="img/favicon.png">
+	<link rel="apple-touch-icon" href="img/favicon.png">
+	<title>AlexGames: Game API documentation</title>
+	<script type="text/javascript" src="js/alexgames_colour_pref.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/style_very_dark.css">
+	<link rel="stylesheet" type="text/css" href="css/style_dark.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="stylesheet" type="text/css" href="css/style_collapsable.css">
+
+	<style>
+
+	html, body {
+		height: 97%;
+	}
+
+	.main {
+		margin:5px auto;
+		max-width:800px;
+		padding: 10px;
+		border-radius:15px;
+		/* height: 100%; */
+	}
+
+	.title {
+		margin:0;
+		text-align:center;
+	}
+
+	.subtitle {
+		margin: 0;
+		text-align:center;
+	}
+	</style>
+</head>
+<body>
+
+<div class="main" style="position:relative">
+
+<div id="header" class="header" style="position:relative">
+<div style="display:block; margin:auto">
+<a href="./">Back to AlexGames main</a>
+<h1 id="title" class="title" style="">AlexGames</h1>
+<h2 id="subtitle" class="subtitle">Game API documentation</h2>
+
+<p>See the below files for the source of truth on these APIs:</p>
+<ul>
+	<li><code>src/lua_api/lua_api.c</code>: Lua wrapper around <code>game_api.h</code>. <span class="collapsable collapsed">Games written in Lua call into the APIs defined in this file. They should simply call the APIs defined in <code>game_api.h</code> (see below)</span></li>
+	<li><code>src/game_api/game_api.h</code>: Main API defintion, for games implemented in Lua or C++. <span class="collapsable collapsed">This is where the APIs should be documented in the code. For anything not clearly documented, the expected behaviour is how it currently works in HTML. Other implementations should try to be as similar to HTML as possible, when reasonable.</span></li>
+	<li><code>src/emscripten/emscripten_api.c</code>: Implementation of <code>game_api.h</code> calling into the HTML client's javascript APIs.</li>
+	<li><code>src/html/js/alexgames_wasm_api.js</code>: HTML/JS implementation of <code>game_api.h</code> APIs.</li>
+</ul>
+
+<h3>Example API sequence</h3>
+
+<a href="https://github.com/alexbarry/AlexGames/blob/main/src/lua_scripts/games/api_demo/game.lua">See an example game here.</a>
+
+<ul>
+	<li><strong>Init</strong>: Game client initializes (on HTML this means downloading images), including network connection to the server for network multiplayer.</li>
+	<li><strong>Load main Lua file</strong>: This initializion includes running all the code in the game's main Lua file (which may include additional Lua files). These files should only define functions, and not actually "do" anything outside of those functions.</li>
+	<li><strong>Call start_game</strong>: The game client calls the game's <a class="api_link" href="#start_game">start_game</a> callback, optionally providing serialized state if the user has provided state from a URL parameter (or is loading this game from the autosave / history browser UI. If the game is being loaded from saved history, a session ID param is also provided. From this callback, the game should initialize its own state if not provided, and may call some or all of the below APIs:
+	<ul>
+		<li>calling the <a class="api_link" href="#enable_evt">enable_evt</a> API. This can enable things like keyboard, detailed touch or mouse input (more than just clicks).</li>
+		<li>calling the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> API. This configures a regular timer to call the <a class="api_link" href="#update">update</a> callback.
+	</ul>
+	</li>
+	<li><strong>Call update</strong>: The game client calls the game's <a class="api_link" href="#update">update</a> callback. From here, the game should:
+	<ul>
+		<li>draw the current game state using the Drawing APIs, such as <a class="api_link" href="#draw_graphic">draw_graphic</a>, <a class="api_link" href="#draw_line">draw_line</a>, <a class="api_link" href="#draw_rect">draw_rect</a>, or <a class="api_link" href="#draw_circle">draw_circle</a>. Games should first call <a class="api_link" href="#draw_clear">draw_clear</a> to first clear the buffer/screen, and then call <a class="api_link" href="#draw_refresh"</a>draw_refresh</a> to commit their drawing to the user's screen.</li>
+		<li>If the game configured a timer via the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> API, then the game should also update its time-based state here (<code>update</code> is called at the frequency passed as an argument to <code>set_update_timer_ms</code>).</li>
+	</ul>
+	</li>
+	<li><strong>Handle user input</strong>: The user may provide input by clicking on the screen with their mouse, or pressing it with their finger on mobile (<a class="api_link" href="#handle_user_clicked">handle_user_clicked</a>), or other forms of input if enabled via <a class="api_link" href="#enable_evt">enable_evt</a>: keyboard input (<a class="api_link" href="#handle_key_evt">handle_key_evt</a>), touch (<a class="api_link" href="#handle_touch_evt">handle_touch_evt</a>), or more granular mouse input (button pressed, released, mouse moved: <a class="api_link" href="#handle_mouse_evt">handle_mouse_evt</a>, <a class="api_link" href="#handle_mousemove">handle_mousemove</a>)
+	<ul>
+		<li>From these callbacks, the game should update its state accordingly, and draw the latest state on the screen.</li>
+	</ul>
+	</li>
+	<li><strong>Network multiplayer</strong>: The game may send messages to other players with <a class="api_link" href="#send_message">send_message</a>, and receive messages from <a class="api_link" href="#handle_msg_received ">handle_msg_received</a>.</li>
+	<li><strong>Autosave state</strong>: The game may store its state with the <a class="api_link" href="#save_state">save_state</a> API. This allows the user to browse through saved states through the history browser in <i>Load autosaved game</i> button in the <i>options</i> menu.</li>
+	<li><strong>Save other game state</strong>: Alternatively, the game can read or write saved data directly with the <a class="api_link" href="#store_data">store_data</a> and <a class="api_link" href="#read_stored_data">read_stored_data</a> APIs.</li>
+	<li><strong>Export game state</strong>: The user may wish to continue playing the game on another device, or share the initial state with a friend to try the same puzzle they just enjoyed. When the user presses the <i>Options</i> button, the <a class="api_link" href="#get_state">get_state</a> and the (if defined) <a class="api_link" href="#get_init_state">get_init_state</a> APIs are called, and both are available as URLs with the binary state data base 64 encoded in the web version. (The serialized state will be passed to <a class="api_link" href="#start_game">start_game</a> callback when the user opens the URL with the serialized state)</li>
+
+</ul>
+
+<h3>API and callback summary/contents</h3>
+
+<p>Contents <span id="contents_all_toggle_collapsed"></span>:</p>
+<ul id="contents_all_body">
+	<li><strong>Drawing APIs</strong> <span id="drawing_apis_toggle_collapsed"></span></li>
+	<ul id="drawing_apis_body">
+		<li><a class="api_link" href="#draw_graphic">draw_graphic</a></li>
+		<li><a class="api_link" href="#draw_line">draw_line</a></li>
+		<li><a class="api_link" href="#draw_text">draw_text</a></li>
+		<li><a class="api_link" href="#draw_rect">draw_rect</a></li>
+		<li><a class="api_link" href="#draw_circle">draw_circle</a></li>
+		<li><a class="api_link" href="#draw_clear">draw_clear</a>: Clears all drawing on the canvas.</li>
+		<li><a class="api_link" href="#draw_refresh">draw_refresh</a>: Causes previously called draw APIs to be visible by the user. <span class="collapsable collapsed">Admittedly this API doesn't need to be called in HTML, but other clients need it.</span></li>
+	</ul>
+
+	<li><strong>Network Multiplayer APIs</strong> <span id="network_multiplayer_apis_toggle_collapsed"></span></li>
+	<ul id="network_multiplayer_apis_body">
+		<li><a class="api_link" href="#send_message">send_message</a>: Sends a message to all players connected to this session, or to a specified player. Players receive messages via the <a href="#handle_msg_received"><a class="api_link" href="#handle_msg_received">handle_msg_received</a></a> callback. <span class="collapsable collapsed">In HTML this is implemented as websockets, but on other platforms it could be implemented as a raw TCP socket.</span></li>
+	</ul>
+
+	<li><strong>UI APIs</strong> <span id="ui_apis_toggle_collapsed"></span></li>
+	<ul id="ui_apis_body">
+		<li><a class="api_link" href="#create_btn">create_btn</a>: Adds a button to the bottom of the screen, below the canvas. <span class="collapsable collapsed">Note that some games may choose to simply draw rectangles on the canvas and use those as buttons, for more flexibility (e.g. changing parts of the interface). Buttons created here are typically shown throughout the whole game.</span></li>
+		<li><a class="api_link" href="#set_btn_enabled">set_btn_enabled</a></li>
+		<li><a class="api_link" href="#set_btn_visible">set_btn_visible</a></li>
+		<li><a class="api_link" href="#show_popup">show_popup</a>: Shows a popup, optionally containing text, buttons, and/or dropdowns.</li>
+		<li><a class="api_link" href="#hide_popup">hide_popup</a></li>
+		<li><a class="api_link" href="#set_status_msg">set_status_msg</a>: Adds a text log in the interface.</li>
+		<li><a class="api_link" href="#set_status_err">set_status_err</a>: Adds a red text log in the interface. <span class="collapsable collapsed">This can be used if the player provides invalid input (or makes an invalid move in a game), but it's also used for programming errors.</span></li>
+		<li><a class="api_link" href="#prompt_string">prompt_string</a>: Shows the user a popup to allow them to enter text. <span class="collapsable collapsed">This is convenient for games that don't otherwise require keyboard input, especially on mobile.</span></li>
+		<li><a class="api_link" href="#enable_evt">enable_evt</a>: Enables callbacks to receive events such as mouse move/up/down/wheel, touch events, keyboard events.</li>
+		<li><a class="api_link" href="#disable_evt">disable_evt</a></li>
+	</ul>
+
+	<li><strong>Timer APIs</strong> <span id="timer_apis_toggle_collapsed"></span></li>
+	<ul id="timer_apis_body">
+		<li><a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a>: Calls the <a class="api_link" href="#update">update</a> callback at the specified interval, in milliseconds. This allows for real time games, or games with animations.</li>
+	</ul>
+
+
+	<li><strong>Persistent Storage APIs</strong>:  These APIs store data raw binary byte ararys as a key/value pair. <span class="collapsable collapsed">These can be use to save a game's state, but for many games, it's better to use the "saved state" APIs below, where the game allows the user to browse through previous saved states.</span> <span id="persistent_storage_apis_toggle_collapsed"></span></li>
+	<ul id="persistent_storage_apis_body">
+		<li><a class="api_link" href="#store_data">store_data</a></li>
+		<li><a class="api_link" href="#read_stored_data">read_stored_data</a></li>
+	</ul>
+	<li><strong>Persistent saved state APIs</strong>: stores games' states to the "history browser" interface, <span class="collapsable collapsed">where the user can browse through different game sessions, and individual moves within those games. A preview of the game is rendered through the regular <code>update</code> API.</span> <span id="persistent_saved_state_apis_toggle_collapsed"></span></li>
+	<ul id="persistent_saved_state_apis_body">
+		<li><a class="api_link" href="#get_new_session_id">get_new_session_id</a></li>
+		<li><a class="api_link" href="#save_state">save_state</a></li>
+		<li><a class="api_link" href="#get_last_session_id">get_last_session_id</a></li>
+		<li><a class="api_link" href="#has_saved_state_offset">has_saved_state_offset</a></li>
+		<li><a class="api_link" href="#adjust_saved_state_offset">adjust_saved_state_offset</a></li>
+	</ul>
+
+	<li><strong>Miscellaneous APIs</strong> <span id="misc_apis_toggle_collapsed"></span></li>
+	<ul id="misc_apis_body">
+		<li><a class="api_link" href="#get_time_ms">get_time_ms</a></li>
+		<li><a class="api_link" href="#get_time_of_day">get_time_of_day</a>: Gets the current time of day, in <code>yyyy-mm-dd HH:MM:SS</code> format.</li>
+		<li><a class="api_link" href="#get_user_colour_pref">get_user_colour_pref</a>: Gets the user's colour preference, currently either <code>"light"</code> or <code>"dark"</code>.</li>
+	</ul>
+	<!--
+	<li><strong>Extra canvas drawing APIs</strong>: <span class="collapsable collapsed">These are used to draw on a separate canvas/buffer, then allowing for drawing that canvas/buffer at a different position. Currently this is only used for drawing saved games' states in the "history browse" interface. They are only added for performance reasons, presumably it's more efficient to do this than to re-draw every game's state every frame when you scroll. (Instead, the game's state is rendered once, and when you scroll, that "extra canvas"/buffer is simply drawn in a different position.)</span> <span id="extra_canvas_drawing_apis_toggle_collapsed"></span></li>
+	<ul id="extra_canvas_drawing_apis_body" class="collapsed">
+		<li><a class="api_link" href="#new_extra_canvas">new_extra_canvas</a></li>
+		<li><a class="api_link" href="#set_extra_canvas">set_extra_canvas</a></li>
+		<li><a class="api_link" href="#delete_extra_canvases">delete_extra_canvases</a></li>
+		<li><a class="api_link" href="#draw_extra_canvas">draw_extra_canvas</a></li>
+	</ul>
+	-->
+
+	<li><strong>Callbacks</strong> <span id="callbacks_toggle_collapsed"></span></li>
+	<ul id="callbacks_body">
+		<li><strong>Main</strong> <span id="callbacks_main_toggle_collapsed"></span></li>
+		<ul id="callbacks_main_body">
+			<li><a class="api_link" href="#update">update</a>: Called when the screen should be rendered, or at a specific interval if the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> is called. Meant to be the "main loop" of games.</li>
+			<li><a class="api_link" href="#start_game">start_game</a>: Called when the game is started. May pass serialized state if the user is loading a previous game from the history browser, or is opening a URL with serialized state passed as a parameter.</li>
+			<li><a class="api_link" href="#get_state">get_state</a></li>
+			<li><a class="api_link" href="#get_init_state">get_init_state</a></li>
+		</ul>
+		<li><strong>User input</strong> <span id="callbacks_user_input_toggle_collapsed"></span></li>
+		<ul id="callbacks_user_input_body">
+			<li><a class="api_link" href="#handle_user_clicked">handle_user_clicked</a>: <span class="collapsable collapsed">Called when the user clicks (or touches) a point on the screen. Note that this is different from a mouse up/down event. This is the <code>"click"</code> event in HTML, which seems to have some debouncing, so that it's only sent if the user presses and releases at the same spot, rather than clicking and dragging.</span></li>
+			<li><a class="api_link" href="#handle_mousemove">handle_mousemove</a>: <span class="collapsable collapsed">Sent when the user moves the mouse over the canvas. Must be enabled by calling <code>alexgames.enable_evt("mouse_move")</code></span></li>
+			<li><a class="api_link" href="#handle_mouse_evt">handle_mouse_evt</a><span class="collapsable collapsed">Sent when the presses or releases a mouse button. Must be enabled by calling <code>alexgames.enable_evt("mouse_updown")</code></span></li>
+			<li><a class="api_link" href="#handle_wheel_changed">handle_wheel_changed</a></li>
+			<li><a class="api_link" href="#handle_key_evt">handle_key_evt</a></li>
+			<li><a class="api_link" href="#handle_touch_evt">handle_touch_evt</a></li>
+			<li><a class="api_link" href="#handle_btn_clicked">handle_btn_clicked</a></li>
+			<li><a class="api_link" href="#handle_popup_btn_clicked">handle_popup_btn_clicked</a></li>
+		</ul>
+
+		<li><strong>Network Multiplayer callbacks</strong> <span id="callbacks_network_multiplayer_callbacks_toggle_collapsed"></span></li>
+		<ul id="callbacks_network_multiplayer_callbacks_body">
+			<li><a class="api_link" href="#handle_msg_received">handle_msg_received</a>: Called when a player receives a message sent from another player via the <a class="api_link" href="#send_message">send_message</a> API.</li>
+		</ul>
+	</ul>
+</ul>
+
+
+<h3>Drawing APIs</h3>
+
+<h4>Drawing preface</h4>
+
+<h5 id="coords">Points / coordinate system</h5>
+
+<p>Almost all drawing APIs defined below specify the position of the thing you are drawing with <i>y</i> and <i>x</i> coordinates. The top left is <i>0, 0</i> and the bottom right is currently <i>480, 480</i>. That means that <i>y</i> is zero at the top, and 480 at the bottom.</p>
+
+<p>In the future the canvas may support additional sizes, but for now everything is 480 by 480 (scaled) pixels.</p>
+
+<h5 id="hex_colour_str">Hexadecimal colour strings</h5>
+
+<p>All colours are specified as a <strong>hexadecimal colour string</strong>. This starts with a number sign (<code>#</code>), and then is either 3 (rgb), 6 (rrggbb), or 8 (rrggbbaa) characters long. "r" is red, "g" is green, "b" is blue, and "a" is alpha (transparency)</p>
+
+<p>Some examples: <code>#f00</code> is red, <code>#0f0</code> is green, and <code>#00f</code> is blue. Black is <code>#000</code> and white is <code>#fff</code>. Completely transparent is <code>#00000000</code> (8 zeros), where the first 6 characters can be any hex numbers.</p>
+
+<p>On the HTML client they are simply passed to the browser, so if HTML supports more variants then they will work-- but other clients often need to parse these, and I have only supported the above lengths for now. See <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">Wikipedia: Web colours, "Hex triplet" section</a> for more information.</p>
+
+<p>If you have no idea what any of this, then just use a search engine to find "HTML colour picker", where you should find a UI that can generate these hex codes for you. Browser developer tools may have this built in, too.</p>
+
+<h4 id="draw_graphic">draw_graphic</h4>
+<code>alexgames.draw_graphic(img_id, y, x, width, height, params)</code>
+<ul>
+	<li><code>img_id</code>: string identifying the image. See images in the <code>&lt;div class="preload"&gt;</code> of <code>index.html</code>.</li>
+	<li><code>y</code>, <code>x</code>: <i>y</i> and <i>x</i> position to draw the centre of the image. (0,0) is the top left. See <a href="#coords">coordinate system</a> for more information.</li>
+	<li><code>width</code>, <code>height</code>: size to draw the image on the canvas. More info on the canvas specifications in the previous bullet point descriptiong the <i>y</i> and <i>x</i> position.</li>
+	<li><code>params</code> (optional):
+		<ul>
+			<li><code>angle_degrees</code>: angle to rotate image, in degrees.</li>
+			<li><code>flip_y</code>: if true, flips the image across the <i>x</i> axis in the middle.</li>
+			<li><code>flip_x</code>: if true, flips the image across the <i>y</i> axis in the middle.</li>
+		</ul>
+	</li>
+</ul>
+
+<h4 id="draw_line">draw_line</h4>
+<code>alexgames.draw_line(colour, line_size, y1, x1, y2, x2)</code>
+<ul>
+	<li><code>colour</code>: hexademical colour string, starting with a number sign (<code>#</code>) just like HTML. e.g. <code>#000000</code> is black, <code>#ff0000</code> is red, and <code>#00ff0088</code> is green at 50% opacity.</li>
+	<li><code>line_size</code>: width of the line, in scaled pixels.</li>
+	<li><code>y1</code>, <code>x1</code>: start of the line</li>
+	<li><code>y2</code>, <code>x2</code>: end of the line</li>
+</ul>
+
+<h4 id="draw_text">draw_text</h4>
+<code>alexgames.draw_text(text_str, colour, y, x, size, align)</code>
+<ul>
+	<li><code>text_str</code>: String of text to draw.</li>
+	<li><code>colour</code>: Hexadecimal colour string, for more info see the description in the <a href="#draw_line"><code>draw_line</code></a> documentation</li>
+	<li><code>y</code>, <code>x</code>: Position to start drawing the text. This can be the left-most point, centre, or right-most point depending on the <code>align</code> argument.</li>
+	<li><code>size</code>: Font size of the text.</li>
+	<li><code>align</code>: Text alignment. <code>alexgames.TEXT_ALIGN_LEFT</code>, <code>alexgames.TEXT_ALIGN_CENTRE</code>, or <code>alexgames.TEXT_ALIGN_RIGHT</code>.</li>
+</ul>
+
+<h4 id="draw_rect">draw_rect</h4>
+<code>alexgames.draw_rect(fill_colour, y_start, x_start, y_end, x_end)</code>
+<p>Draws a filled rectangle at the specifed position. To draw an outline, see the <code>draw_shapes.draw_rect_outline</code> library, available by loading <code>libs/draw/draw_shapes</code>. (Note that this is simply a helper function that calls the <code>draw_line</code> API four times.)</p>
+<ul>
+	<li><code>fill_colour</code>: Hexadecimal colour string, for more info see the description in the <a href="#draw_line"><code>draw_line</code></a> documentation.</li>
+</ul>
+
+<h4 id="draw_circle">draw_circle</h4>
+<code>alexgames.draw_circle(fill_colour, outline_colour, y, x, radius)</code>
+<p>Draws a circle at the specified position. Note that the fill or outline can be invisible by providing a colour string with 8 bytes specified, e.g. <code>#00000000</code>, the same way that HTML colours work.</p>
+<ul>
+	<li><code>fill_colour</code>: Hexadecimal colour string specifying the colour of the inside of the circle. For more info on hexadecimal colour strings, see the <a class="api_link" href="#draw_line">draw_line</a> documentation.</li>
+	<li><code>outline_colour</code>: Hexadecimal colour string specifying the colour of the line around the edge of the circle. For more info on hexadecimal colour strings, see the <a class="api_link" href="#draw_line">draw_line</a> documentation.</li>
+	<li><code>y</code>, <code>x</code>: <i>y</i> and <i>x</i> position of the circle.
+	<li><code>radius</code>: radius of the circle. This is the distance from the centre to the edge of the circle.</li>
+</ul>
+
+<h4 id="draw_clear">draw_clear</h4>
+<code>alexgames.draw_clear()</code>
+<p>Clears the screen of all drawn content. Generally you'll want to call this every time you start drawing the game state.</p>
+
+<h4 id="draw_refresh">draw_refresh</h4>
+<code>alexgames.draw_refresh()</code>
+<p>Causes any previously draw API calls to take effect (e.g. write the buffer to the screen). On HTML this has no effect since the draw APIs already draw directly onto the screen, but it is needed on some other clients. This should be called when you're done drawing the game state.</p>
+
+<h3>Network APIs and callbacks</h3>
+
+<h4>Network preface</h4>
+
+<h5 id="network_player_identifiers">Network player identifiers</h5>
+
+<p>When a player joins a session, their client should broadcast <code>"player_joined:"</code> to all players. Clients and games should receive this message via the <a class="api_link" href="#handle_msg_received">handle_message_received</a> callback, which indicates the player's identifier as the <code>src</code> parameter.</p>
+
+<p>Generally this is probably the player's IP address and the server port that they are connected to, but it doesn't have to be. (e.g. if AlexGames were integrated within a messaging program, this could simply be the group chat member's username, or even a single integer)</p>
+
+<p>In the future, I would like to add some standard for adding a player chosen name that could be used, but nothing like that is currently implemented.</p>
+
+<h4 id="send_message">send_message</h4>
+<code>alexgames.send_message(dst, msg)</code>
+<p>Sends a message over the network to player <code>dst</code>. If <code>dst</code> is <code>"all"</code> then the message is broadcast to all players.</p>
+<ul>
+	<li><code>dst</code>: Identifier of the player you want to message, or <code>"all"</code> to broadcast to all players. See <a href="#network_player_identifiers">network player identifiers</a> for more information</li>
+	<li><code>msg</code></li>
+</ul>
+
+
+<h4 id="handle_msg_received">handle_msg_received</h4>
+<code>handle_msg_received(src, msg)</code>
+
+<h3>UI APIs</h3>
+
+<h4 id="create_btn">create_btn</h4>
+<code>alexgames.create_btn(btn_id, btn_text, weight)</code>
+
+<p>Creates a button on the UI, probably at the bottom.</p>
+<p>When players press this button, the <a class="api_link" href="#handle_btn_clicked">handle_btn_clicked</a> callback is called.</p>
+
+<ul>
+	<li><code>btn_id</code>: a string identifying this button. This is to identify the button in other API/callbacks, e.g. which button is pressed when the <a class="api_link" href="#handle_btn_clicked">handle_btn_clicked</a> callback is called.</li>
+	<li><code>btn_text</code>: text to display on this button.</li>
+	<li><code>weight</code>: 0 to make this button only occupy as much space as it needs, or an integer greater than 0 to occupy as much space as possible, shared with other buttons based on weight by a factor of <it>this button's weight<it> divided by the <it>sum of total button weights</it>. e.g.: make two buttons with weight 1 and one button with weight 2, and the two weight 1 buttons will each get 25% of the space, and the weight 2 button will get 50% of the space. Similar to HTML Flexbox.</li>
+</ul>
+
+<h4 id="set_btn_enabled">set_btn_enabled</h4>
+<code>alexgames.set_btn_enabled(btn_id, enabled)</code>
+
+<p>Enables or disables the specified button. An enabled button can be pressed, but a disabled button can not be pressed, and appears greyed out.</p>
+
+<h4 id="set_btn_visible">set_btn_visible</h4>
+<code>alexgames.set_btn_visible(btn_id, visible)</code>
+
+<p>Sets whether or not the specified button is visible.</p>
+
+<h4 id="show_popup">show_popup</h4>
+
+<code>alexgames.show_popup(popup_id, popup_info)</code>
+
+<pre>
+popup_info = {
+	
+	title = "Popup title specified here",
+
+	-- Table containing list of different items that are to be displayed in the popup
+	-- One of each possibility is shown below as an example.
+	items = {
+		{ item_type = alexgames.POPUP_ITEM_MSG, msg = "This is text shown to the user." },
+
+		-- This is a button displaying "My Action" that the user can click.
+		-- If the user clicks it, the `handle_popup_btn_clicked` callback is called,
+		-- with the id 1 passed as an argument to identify which button.
+		-- Note that the state of other popup elements (e.g. the dropdown, defined next) is
+		-- is also passed to the game through this callback.
+		{ item_type = alexgames.POPUP_ITEM_BTN, id = 1, text = "My action" },
+
+		-- This displays a dropdown with two choices: "White" and "Black", and the label
+		-- label "Choose a colour".
+		-- Once a button on the popup is pressed, the selected dropdown item is identified
+		-- by an integer starting from 1 (e.g. 1 is the first option, 2 is the 2nd, etc).
+		{
+			item_type = alexgames.POPUP_ITEM_DROPDOWN,
+			id        = 2,
+			label     = "Choose a colour",
+			options   = {
+				"White",
+				"Black",
+			},
+		}
+	}
+}
+</pre>
+
+<p>Displays a popup to the user, with a title, and other optional elements such as text, buttons, and dropdowns.</p>
+
+<p>When a button on the popup is pressed, the <a class="api_link" href="#handle_popup_btn_clicked">handle_popup_btn_clicked</a> callback is called, which also provides the states of dropdowns on the popup.</p>
+
+<h4 id="hide_popup">hide_popup</h4>
+
+<p>Hides any currently visible popups.</p>
+
+<h4 id="set_status_msg">set_status_msg</h4>
+<code>alexgames.set_status_msg(msg)</code>
+
+<p>Displays a string to the user, usually indiciating the result of some action they performed, or some event (e.g. player joined). Previous messages are shown in a scrollable UI element, along with timestamps.</p>
+
+
+<h4 id="set_status_err">set_status_err</h4>
+<code>alexgames.set_status_err(msg)</code>
+
+<p>Same as <a class="api_link" href="#set_status_msg">set_status_msg</a> defined above, but with red text, indicating an error. This is used both for programming errors (usually showing a full Lua stacktrace), or to alert the user that their move was invalid.</p>
+
+<h4 id="prompt_string">prompt_string</h4>
+<code>alexgames.prompt_string(prompt_title, prompt_msg)</code>
+
+<p>Shows a popup to the user with a title and message, and a text box for them to enter a string. This is useful for games that occasionally need text input, but are not centred around providing text input. (e.g. a word game should have their own UI with a keyboard or similar, but a game where you can enter your name should use this).</p>
+
+<p>This likely isn't a great experience for games played with a mouse and keyboard, but it is essential on mobile-- I don't know how else you could bring up the soft keyboard on phones.</p>
+
+<h4 id="enable_evt">enable_evt</h4>
+<code>alexgames.enable_evt(evt_type)</code>
+
+<p>Enables the event specified by <code>evt_type</code>, which is one of the following strings:</p>
+<ul>
+	<li><code>"mouse_move"</code>: Causes the <a class="api_link" href="#handle_mousemove">handle_mousemove</a> callback to be called whenever the user moves their mouse over the game screen.</li>
+	<li><code>"mouse_updown"</code>: Causes the <a class="api_link" href="#handle_mouse_evt">handle_mouse_evt</a> callback to be called whenever the user clicks or releases their primary mouse button. This allows for doing actions while the user is holding the mouse down, rather than only be notified of a single click.</li>
+	<li><code>"mouse_alt_updown"</code>: Causes the <a class="api_link" href="#handle_mouse_evt">handle_mouse_evt</a> callback to be called whenever the user clicks or releases their secondary mouse button, or the third mouse button (usually a wheel). </li>
+	<li><code>"wheel"</code>: Causes the <a class="api_link" href="#handle_wheel_changed">handle_wheel_changed</a> callback to be called whenever the user's mouse wheel changes. Generally this should be used for scrolling or zooming.</li>
+	<li><code>"touch"</code>: Causes the <a class="api_link" href="#handle_touch_evt">handle_touch_evt</a> callback to be called whenever the user touches the game canvas. See the callback definition for more information.</li>
+	<li><code>"key"</code>: Causes the <a class="api_link" href="#handle_key_evt">handle_key_evt</a> callback to be called whenever the user presses or releases keys on their keyboard.</li>
+</ul>
+
+
+<h3>Timer APIs</h3>
+
+<h4 id="set_update_timer_ms">set_update_timer_ms</h4>
+
+<code>alexgames.set_update_timer_ms(update_time_period_ms)</code>
+
+<p>When called, causes <a class="api_link" href="#update">update</a> to be called every <code>update_time_period_ms</code> milliseconds.</p>
+
+<h3>Persistent Storage APIs</h3>
+
+<p>These APIs allow you to store bytearrays with string keys persistently, they should be readable after the user refreshes the page or closes the browser or tab.</p>
+
+<p>These APIs are the raw storage APIs that the client implements directly, but many games may be better off using the <a href="#persistent_saved_state">Persistent Saved State</a> APIs discussed later. Those APIs allow for simply calling a "save_state" API whenever the user makes a move, and a separate UI is offered for the user to view all their different saved games' states together, and cycle through the previous moves.</p>
+
+<h4 id="store_data">store_data</h4>
+<code>alexgames.store_data(key, value)</code>
+
+<p>Stores the bytearray <code>value</code> to persistent storage, under string <code>key</code>. On HTML this uses <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage">Window: localStorage</a>. This may be getting cleared after some period of inactivity on iOS. I'd like to mitigate that but I haven't looked into it yet.
+
+<h4 id="read_stored_data">read_stored_data</h4>
+<code>alexgames.read_stored_data(key)</code>
+
+<h3 id="persistent_saved_state">Persistent Saved State APIs</h3>
+
+<p>These APIs are meant to be used for games to save the state every time the user makes a move. The game client provides a separate UI for the user to browse previous games' states and cycle through their moves.
+
+<h4 id="get_new_session_id">get_new_session_id</h4>
+<code>alexgames.get_new_session_id()</code>
+
+<p>Returns a new saved state ID. This is meant to be called when the user starts a new game, then the ID should be used whenever calling the <a class="api_link" href="#save_state">save_state</a> API, so that states from the same game can be grouped together.</p>
+
+<h4 id="save_state">save_state</h4>
+<code>alexgames.save_state(session_id, state)</code>
+
+<p>Saves the <code>state</code> argument to persistent storage in a history database. This history database can be viewed by the user by pressing the <i>"Options"</i> button and then pressing the <i>"Load autosaved game"</i> button.</p>
+
+<p>Calling <code>save_state</code> multiple times will store multiple copies of the state in the history database.
+<ul>
+	<li><code>session_id</code>: Identifier for this game session. This should be the value returned by <a class="api_link" href="#get_new_session_id">get_new_session_id</a> called at the beginning of a new game.</li>
+	<li><code>state</code>: A byte array of game state.</li>
+</ul>
+
+
+<h4 id="get_last_session_id">get_last_session_id</h4>
+<code>alexgames.get_last_session_id()</code>
+
+<p>Returns the last session ID for your current game. Returns <code>nil</code> if no previous session ID is present for this game.</p>
+
+<p>The only expected use case for this API is when the game is first started, you can check if this is set, and then call <a class="api_link">adjust_saved_state_offset(session_id, 0)</a> to load the previously saved state.</p>
+
+<h4 id="has_saved_state_offset">has_saved_state_offset</h4>
+<code>alexgames.has_saved_state_offset(session_id, move_id_offset)</code>
+
+<p>Returns <code>true</code> if a saved state is defined at the session ID, and (current move ID plus <code>move_id_offset</code>), returns <code>false</code> otherwise.</p>
+
+<p>The only expected use case for this API is for <i>Undo</i> and <i>Redo</i> buttons. This can be checked each time the screen is updated, to decide whether or not to enable (allow to be pressed) the Undo/Redo buttons.</p>
+
+<h4 id="adjust_saved_state_offset">adjust_saved_state_offset</h4>
+<code>alexgames.adjust_saved_state_offset(session_id, move_id_offset)</code>
+
+<p>Returns the saved state for the session ID and (current move ID plus <code>move_id_offset</code>), and increments the move ID by <code>mode_id_offset</code>.</p>
+
+<p>This API is expected to be used for two cases:</p>
+<ul>
+	<li><i>Undo</i> and <i>Redo</i> buttons: when the user presses one of thes buttons, call this API to get the saved state, and update the move ID.</li>
+	<li>When a game is started, if no saved state is passed as a parameter, if <a class="api_link">get_last_session_id</a> returns a non-nil value, then call this API with a <code>move_id_offset</code> of <code>0</code> to get the last saved state.</li>
+</ul>
+
+<h3>Miscellaneous APIs</h3>
+
+<h4 id="get_time_ms">get_time_ms</h4>
+<code>alexgames.get_time_ms()</code>
+
+<p>Returns the current time in milliseconds.</p>
+
+<h4 id="get_time_of_day">get_time_of_day</h4>
+<code>alexgames.get_time_of_day()</code>
+
+<p>Returns the current date and time in <code>yyyy-mm-dd HH:MM:SS</code> format, in the device's local timezone.</p>
+
+<p>This is intended to be used to show the user when their last move was.</p>
+
+<h4 id="get_user_colour_pref">get_user_colour_pref</h4>
+<code>alexgames.get_user_colour_pref()</code>
+
+<p>Returns the user's colour preference, either <code>"light"</code>, <code>"dark"</code>, or <code>"very_dark"</code>.</p>
+
+<p>I'd like to make this easier to use in the future, perhaps returning a list of colour preferences, so that games can only handle light and dark and not need to handle "very_dark" and every possible future value.</p>
+
+<h3>Main Callbacks</h3>
+
+<h4 id="update">update</h4>
+<code>update()</code>
+
+<p>Called when the screen should be rendered, or at a specific interval if the <a class="api_link" href="#set_update_timer_ms">set_update_timer_ms</a> is called. Meant to be the "main loop" of games.</p>
+
+<h4 id="start_game">start_game</h4>
+<code>start_game(session_id, serialized_state)</code>
+
+<p>Called when the game is first started. If <code>serialized_state</code> is <code>nil</code>, the game should initialize new state. If <code>serialized_state</code> is not <code>nil</code>, the game should deserialize it and use that as the game state. The game should also store the <code>session_id</code>, as that is used as a key when writing to the saved state database via the <a class="api_link" href="#save_state">save_state</a> API.</p>
+
+<p>This happens in three cases:</p>
+<ol>
+	<li>the user opens a URL with serialized state as a parameter,</li>
+	<li>the user loads a previously saved game from the history browser, or</li>
+	<li>the user is browsing previously saved games from the history browser-- this API is called to generate the previews.</li>
+</ol>
+
+<h4 id="get_state">get_state</h4>
+<code>get_state()</code>
+
+<p>Called when the user opens the <i>Options</i> menu, so the state can base 64 encoded and provided as a URL to share with another user or device.</p>
+<p>Should return the <strong>current</strong> state as a byte array (not base 64 encoded-- the game engine handles that).</p>
+
+<h4 id="get_init_state">get_init_state</h4>
+<code>get_init_state()</code>
+
+<p>Called when the user opens the <i>Options</i> menu, so the state can base 64 encoded and provided as a URL to share with another user or device.</p>
+<p>Should return the <strong>initial</strong> state as a byte array (not base 64 encoded-- the game engine handles that).</p>
+<p>Games don't need to implement this unless it makes sense for their game (e.g. if a puzzle is randomly generated)</p>
+
+<h4 id="handle_user_clicked">handle_user_clicked</h4>
+<code>handle_user_clicked(pos_y, pos_x)</code>
+
+<p>Called when the user clicks (or touches, with their finger) on the screen.</p>
+
+<p>This is different from a mouse (or touch) down or up event, since it should only be called if the user presses down and releases without moving too much.</p> 
+
+<ul>
+	<li><code>pos_y, pos_x</code>: See <a class="api_link" href="#coords">coordinates</a> for more information.</li>
+</ul>
+
+<h4 id="handle_mouse_evt">handle_mouse_evt</h4>
+<code>handle_mouse_evt(evt_id, pos_y, pos_x, buttons)</code>
+
+<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("mouse_updown")</a>. This will send events for the primary (usually left) mouse button. To receive events for the secondary (usually right) mouse button and third (usually the wheel) mouse button, enable <i>alternate</i> button mouse events by also calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("mouse_alt_updown")</a> (you should still enable <code>mouse_updown</code> events). This will also disable the context menu that normally shows up when pressing the alternate (usually right) mouse button.</p>
+<p>If enabled, this callback is called whenever the user presses or releases their mouse over the game screen.</p>
+
+<ul>
+	<li><code>evt_id</code>: one of:
+	<ul>
+		<li><code>alexgames.MOUSE_EVT_UP</code>, <code>alexgames.MOUSE_EVT_DOWN</code>: <strong>primary mouse button released or pressed</strong>. Primary usually means the left mouse button, but this can be remapped in software or the mouse itself (e.g. for some left handed users)</li>
+		<li><code>alexgames.MOUSE_EVT_LEAVE</code>: user's mouse has <strong>moved off screen</strong>. When it returns, different mouse buttons may be pressed.</li>
+		<li><code>alexgames.MOUSE_EVT_ALT_DOWN</code>, <code>alexgames.MOUSE_EVT_ALT_UP</code>: <strong>secondary mouse button released or pressed</strong>. Secondary usually means the right mouse button, but this can be changed (e.g. for some left handed users)</li>
+		<li><code>alexgames.MOUSE_EVT_ALT2_DOWN</code>, <code>alexgames.MOUSE_EVT_ALT2_UP</code>: <strong>third mouse button released or pressed</strong>. This is usually the middle mouse button (which is likely a wheel).</li>
+	</ul>
+	</li>
+	<li><code>pos_y</code>, <code>pos_x</code>: <i>y</i> and <i>x</i> position of the mouse. See <a class="api_link" href="#coords">coordinates</a> for more information.</li>
+	<li><code>buttons</code>: Indicates which buttons are currently pressed. This is useful if the user moves their mouse off screen, presses or releases a button (which won't fire an event), and then moves the mouse back on screen. Unfortunately it's just a passthrough of <a href="https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons">the HTML MouseEvent#buttons</a> property for now, I should formalize this in a future update.</li>
+</ul>
+
+<h4 id="handle_mousemove">handle_mousemove</h4>
+<code>handle_mousemove(pos_y, pos_x, buttons)</code>
+
+<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("mousemove")</a>.</p>
+<p>If enabled, this callback is called whenever the user moves their mouse over the game screen.</p>
+<ul>
+	<li><code>pos_y, pos_x</code>: <i>y</i> and <i>x</i> coordinates showing where the user's mouse currently is. See <a class="api_link" href="#coords">coordinates</a> for more information.</li>
+	<li><code>buttons</code>: Indicates which buttons are currently pressed. This is useful if the user moves their mouse off screen, presses or releases a button (which won't fire an event), and then moves the mouse back on screen. Unfortunately it's just a passthrough of <a href="https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons">the HTML MouseEvent#buttons</a> property for now, I should formalize this in a future update.</li>
+</ul>
+
+<h4 id="handle_wheel_changed">handle_wheel_changed</h4>
+<code>handle_wheel_changed(delta_y, delta_x)</code>
+
+<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("wheel")</a>.</p>
+<p>Mouse wheel changed. This is generally only used for scrolling or zooming.</p>
+<p>See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/wheel_event">HTML Wheel event</a> for more detail.</p>
+
+<h4 id="handle_key_evt">handle_key_evt</h4>
+<code>handle_key_evt(evt_id, key_code)</code>
+<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("key")</a>.</p>
+<p>The user pressed a button on the keyboard while focused on the game.</p>
+<ul>
+	<li><code>evt_id</code>: either <code>"keydown"</code> for when a key is pressed, or <code>"keyup"</code> for when a key is released. (Same as the HTML key event names).</li>
+	<li><code>key_code</code>: indicates which key was pressed, e.g. <code>"KeyA"</code> for the letter <i>A</i>, <code>"ArrowLeft"</code> for the left arrow key, or <code>"Enter"</code>, or <code>"Space"</code>. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code">KeyboardEvent.code</a> for more detail.</li>
+	<li>Return <code>true</code> if the key is handled by this game, <code>false</code> otherwise.</li>
+</ul>
+<p>Should return <code>true</code> if the key is handled by the game, and <code>false</code> if not. Note that this doesn't mean that the key necessarily was handled, but that the game typically handles it. (e.g. don't return false here if the same key is sent multiple times, as is the case with letter keys. Otherwise, if the user holds the up arrow to move their character up, and you return false on the duplicate events, then the up arrow will be handled by the browser and may result in scrolling.</p>
+<p>Note that some game platforms do not have the same capabilities as browsers. wxWidgets seems to be unable to distinguish between left and right Alt keys.</p>
+<p>Note that some characters that correspond to important browser keyboard shortcuts should not be handled by the game. I have blocked certain ones (Ctrl + R), but concede that some have legitimate uses (e.g. Ctrl L for "navigate to address bar" conflicts with games where you hold control and move with <a href="https://en.wikipedia.org/wiki/Arrow_keys#HJKL_keys">HJKL keys as arrows</a>).</p>
+
+<h4 id="handle_touch_evt">handle_touch_evt</h4>
+<code>handle_touch_evt(evt_id, touches)</code>
+<pre>
+example_touch = {
+	-- identifier to distinguish from other fingers touching the screen.
+	id = 11,
+
+	-- y and x position of the finger
+	y  = 75.123,
+	x  = 99.456,
+}
+</pre>
+
+<p>This callback is only called if enabled by calling <a class="api_link" href="#enable_evt">alexgames.enable_evt("touch")</a>.</p>
+<p>Called when the user touches the screen, either first pressing a finger to the screen, moving the finger, releasing the finger, or moving the finger off screen.</p>
+<p>Note that touches are unlike mouse events in that the user can use multiple fingers to touch the screen at once. So you need to pay attention to the <code>id</code> of each touch event.</p>
+<ul>
+	<li><code>evt_id</code>: either <code>"touchstart"</code>, <code>"touchmove"</code>, <code>"touchend"</code>, or <code>"touchcancel"</code>.</li>
+	<li><code>touches</code>: table containing list of touches, see <code>example_touch</code> defined above. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Touch">MDN: Touch</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/Touch_events">MDN: Touch events</a> for more detail.</li>
+</ul>
+
+<h4 id="handle_btn_clicked">handle_btn_clicked</h4>
+<code>handle_btn_clicked(btn_id)</code>
+
+<p>User pressed the button indicated by string <code>btn_id</code>. These are buttons created via the <a class="api_link" href="#create_btn">create_btn</a>.</p>
+
+<h4 id="handle_popup_btn_clicked">handle_popup_btn_clicked</h4>
+<code>handle_popup_btn_clicked(popup_id, popup_btn_id)</code>
+
+<p>User pressed a button (identified by integer <code>popup_btn_id</code>) on a popup (identified by string <code>popup_id</code>).</p>
+<ul>
+	<li><code>popup_id</code>: string identifying the popup. This is the popup ID passed to <a class="api_link" href="#show_popup">show_popup</a>.</li>
+	<li><code>popup_btn_id</code>: integer identifying the popup button. This is the popup button ID passed to the <code>popup_info</code> argument of <a class="api_link" href="#show_popup">show_popup</a>.</li>
+</ul>
+
+
+</div>
+</div>
+
+</div>
+
+</div>
+
+<script src="js/collapsable.js"></script>
+<script>
+	init_collapsables();
+	let body_collapsables = [
+		{ toggle_id: "contents_all_toggle_collapsed",                body_id: "contents_all_body"                },
+		{ toggle_id: "drawing_apis_toggle_collapsed",                body_id: "drawing_apis_body"                },
+		{ toggle_id: "network_multiplayer_apis_toggle_collapsed",    body_id: "network_multiplayer_apis_body"    },
+		{ toggle_id: "ui_apis_toggle_collapsed",                     body_id: "ui_apis_body"                     },
+		{ toggle_id: "timer_apis_toggle_collapsed",                  body_id: "timer_apis_body"                  },
+		{ toggle_id: "persistent_storage_apis_toggle_collapsed",     body_id: "persistent_storage_apis_body"     },
+		{ toggle_id: "persistent_saved_state_apis_toggle_collapsed", body_id: "persistent_saved_state_apis_body" },
+		{ toggle_id: "misc_apis_toggle_collapsed",                   body_id: "misc_apis_body"                   },
+		{ toggle_id: "callbacks_toggle_collapsed",                   body_id: "callbacks_body"                   },
+		{ toggle_id: "callbacks_main_toggle_collapsed",              body_id: "callbacks_main_body"              },
+		{ toggle_id: "callbacks_user_input_toggle_collapsed",        body_id: "callbacks_user_input_body"        },
+		//{ toggle_id: "extra_canvas_drawing_apis_toggle_collapsed",   body_id: "extra_canvas_drawing_apis_body"   },
+		{ toggle_id: "callbacks_network_multiplayer_callbacks_toggle_collapsed",   body_id: "callbacks_network_multiplayer_callbacks_body"   },
+	];
+
+	for (let info of body_collapsables) {
+		let toggle = document.getElementById(info.toggle_id);
+		if (!toggle) {
+			console.error("Could not find element", info.toggle_id);
+			continue;
+		}
+		let body_elem = document.getElementById(info.body_id);
+		if (!body_elem) {
+			console.error("Could not find element", info.body_id);
+			continue;
+		}
+		toggle.classList.add("toggle_collapsable_btn");
+		body_elem.classList.add("toggle_collapsable");
+		toggle.addEventListener("click", () => {
+			if (body_elem.classList.contains("collapsed")) {
+				toggle.classList.remove("content_collapsed");
+				body_elem.classList.remove("collapsed");
+			} else {
+				toggle.classList.add("content_collapsed");
+				body_elem.classList.add("collapsed");
+			}
+		});
+
+		if (body_elem.classList.contains("collapsed")) {
+			toggle.classList.add("content_collapsed");
+		}
+	}
+
+
+	let user_colour_pref = get_user_colour_pref();
+	if (user_colour_pref) {
+		set_html_colour_theme(user_colour_pref);
+	}
+
+</script>
+
+</body>
+</html>

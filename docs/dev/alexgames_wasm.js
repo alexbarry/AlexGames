@@ -40,7 +40,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpp7dhfvxs.js
+// include: /tmp/tmp5oofpf_q.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -245,21 +245,21 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
 
   })();
 
-// end include: /tmp/tmpp7dhfvxs.js
-// include: /tmp/tmptb2p2c30.js
+// end include: /tmp/tmp5oofpf_q.js
+// include: /tmp/tmp944o0eop.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmptb2p2c30.js
-// include: /tmp/tmpu9i1_itb.js
+  // end include: /tmp/tmp944o0eop.js
+// include: /tmp/tmp9fpoh58w.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpu9i1_itb.js
+  // end include: /tmp/tmp9fpoh58w.js
 
 
 var arguments_ = [];
@@ -5616,7 +5616,7 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
 var ASM_CONSTS = {
-  1196805: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  1196869: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
