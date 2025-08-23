@@ -498,7 +498,7 @@ void SessionSelectState::generate_state_previews(history_browse_state *state) {
 		g_callbacks->new_extra_canvas(canvas_id.c_str());
 		g_callbacks->set_active_canvas(canvas_id.c_str());
 		
-		uint32_t move_id = state->db.get_next_move_id(session_id);
+		uint32_t move_id = state->db.get_last_move_id(session_id);
 		size_t saved_game_state_len = state->db.read_state(session_id, move_id, saved_game_state, MAX_GAME_STATE_SIZE);
 		printf("Read %zu bytes of state for session_id=%d\n", saved_game_state_len, session_id);
 		if (saved_game_state_len == -1) {
@@ -567,7 +567,7 @@ void SessionSelectState::generate_state_previews(history_browse_state *state) {
 static void move_select_btn_clicked(void *handle, btn_id_t btn_id) {
 	history_browse_state *state = (history_browse_state *)handle;
 
-	const int max_move_id = state->db.get_next_move_id(state->session_id_selected);
+	const int max_move_id = state->db.get_last_move_id(state->session_id_selected);
 
 	switch(btn_id) {
 		case BTN_ID_FIRST: state->move_id_selected = 0;  break;
@@ -899,7 +899,7 @@ enum user_action SessionSelectState::handle_user_pressed(history_browse_state *s
 		return USER_ACTION_NONE;
 	}
 	state->session_id_selected = this->history_preview_entries.at(item_selected)->session_id;
-	state->move_id_selected    = state->db.get_next_move_id(state->session_id_selected);
+	state->move_id_selected    = state->db.get_last_move_id(state->session_id_selected);
 
 	// TODO consider returning an action to switch windows
 	state->window = &state->move_select_state;

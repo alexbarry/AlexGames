@@ -122,7 +122,7 @@ void SavedStateDb::read_state_info(int session_id,
                                    uint32_t *move_id_out) {
 	read_stored_string(get_key_game_id(session_id).c_str(),      game_id_out, max_game_id_out_len);
 	read_stored_string(get_key_last_updated(session_id).c_str(), date_out,    max_date_out_len);
-	*move_id_out = get_next_move_id(session_id);
+	*move_id_out = get_last_move_id(session_id);
 }
 
 bool SavedStateDb::read_uint32(const char *key, uint32_t *out_val, uint32_t default_val) {
@@ -168,7 +168,7 @@ bool SavedStateDb::write_state(int session_id, int move_id, const uint8_t *data,
 	return true;
 }
 
-uint32_t SavedStateDb::get_next_move_id(int session_id) {
+uint32_t SavedStateDb::get_last_move_id(int session_id) {
 	std::string key = get_key_session_move_id(session_id);
 
 	uint32_t move_id = 0;
