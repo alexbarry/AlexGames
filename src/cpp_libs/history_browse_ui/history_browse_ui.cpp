@@ -135,7 +135,7 @@ enum move_select_btn_id {
 };
 
 enum delete_info_btn_id {
-	DELETE_INFO_BTN_ID_DELETE,
+	DELETE_INFO_BTN_ID_DELETE_TAIL,
 	DELETE_INFO_BTN_ID_COMPUTE_GAME_CNTS,
 
 	DELETE_INFO_BTN_COUNT,
@@ -617,10 +617,11 @@ static void delete_info_btn_clicked(void *handle, btn_id_t btn_id) {
 	std::cout << "Button ID " << btn_id << " clicked" << std::endl;
 
 	switch (btn_id) {
-		case DELETE_INFO_BTN_ID_DELETE:
-			// TODO I don't know, attempt to delete last N games as long as total number of games is greater than N?
-			// just a crude workaround to unblock Sabrina
+		case DELETE_INFO_BTN_ID_DELETE_TAIL: {
+			int tail = state->db.get_session_id_tail();
+			state->db.delete_session(tail);
 			break;
+		}
 
 		case DELETE_INFO_BTN_ID_COMPUTE_GAME_CNTS:
 			// TODO here I chould traverse the entire DB from head to tail, computing game counts,
@@ -638,9 +639,9 @@ void DeleteInfoState::init_buttons(history_browse_state *state) {
 	const int button_pos_x = button_padding;
 	const int button_size_x = CANVAS_WIDTH - 2*button_padding;
 	const int button_size_y = state->button_size_y;
-	this->button_helper.new_button(ButtonInfo::fromSize("Delete",
+	this->button_helper.new_button(ButtonInfo::fromSize("Delete session at tail",
 	                               button_pos_y, button_pos_x,
-	                               button_size_y, button_size_x, DELETE_INFO_BTN_ID_DELETE, delete_info_btn_clicked));
+	                               button_size_y, button_size_x, DELETE_INFO_BTN_ID_DELETE_TAIL, delete_info_btn_clicked));
 
 	button_pos_y += state->button_size_y + button_padding;
 
@@ -665,9 +666,35 @@ void DeleteInfoState::update(void *L_arg, int dt_ms) {
 			           TEXT_ALIGN_LEFT);
 		text_pos_y += state->text_size + padding;
 	}
+
+	int tail = state->db.get_session_id_tail();
 	{
 		char str_buff[128];
-		snprintf(str_buff, sizeof(str_buff), "Tail: %d", state->db.get_session_id_tail());
+		snprintf(str_buff, sizeof(str_buff), "Tail: %d", tail);
+		std::string str(str_buff);
+		draw_text_nice(str, state->text_colour,
+			           text_pos_y,
+			           0,
+			           state->text_size,
+			           TEXT_ALIGN_LEFT);
+		text_pos_y += state->text_size + padding;
+	}
+	{
+		int move_count = state->db.get_last_move_id(tail);
+		char str_buff[128];
+		snprintf(str_buff, sizeof(str_buff), "Moves at tail session %d: %d", tail, move_count);
+		std::string str(str_buff);
+		draw_text_nice(str, state->text_colour,
+			           text_pos_y,
+			           0,
+			           state->text_size,
+			           TEXT_ALIGN_LEFT);
+		text_pos_y += state->text_size + padding;
+	}
+	{
+		std::string game_id = state->db.get_session_game_id(tail);
+		char str_buff[128];
+		snprintf(str_buff, sizeof(str_buff), "Game ID of tail session %d: %s", tail, game_id.c_str());
 		std::string str(str_buff);
 		draw_text_nice(str, state->text_colour,
 			           text_pos_y,

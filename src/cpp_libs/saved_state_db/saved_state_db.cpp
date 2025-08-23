@@ -110,6 +110,37 @@ void SavedStateDb::save_state(std::string game_id, int session_id, const uint8_t
 }
 
 
+void SavedStateDb::delete_session(int session_id) {
+	if (session_id != session_tail) {
+		error("delete_session not defined for sessions other than tail");
+		return;
+	}
+
+	if (session_tail == session_head) {
+		error("delete_session: tried to delete past head");
+		return;
+	}
+
+	int move_count = get_last_move_id(session_id);
+	for (int move_id=0; move_id<=move_count; move_id++) {
+			std::string key_move_state = get_key_state(session_id, move_id);
+			callbacks->delete_stored_data(L, key_move_state.c_str());
+	}
+	callbacks->delete_stored_data(L, get_key_session_move_id(session_id).c_str());
+	callbacks->delete_stored_data(L, get_key_last_updated(session_id).c_str());
+	std::string game_id = get_key_game_id(session_id);
+	callbacks->delete_stored_data(L, game_id.c_str());
+
+	if (session_id == get_last_session_id(game_id.c_str())) {
+		// TODO find next session ID for this game?
+		// hmm maybe start from head?
+	}
+
+	this->session_tail += 1;
+	write_uint32(KEY_SESSION_TAIL, this->session_tail);
+}
+
+
 size_t SavedStateDb::read_state(int session_id, int move_id, uint8_t *state_out, size_t max_state_len) {
 	//std::cout << "SavedStateDb::read_state {session_id = " << session_id << ", move_id = " << move_id << "}" << std::endl;
 
@@ -175,6 +206,12 @@ uint32_t SavedStateDb::get_last_move_id(int session_id) {
 	read_uint32(key.c_str(), &move_id, 0);
 	
 	return move_id;
+}
+
+std::string SavedStateDb::get_session_game_id(int session_id) {
+	char buff[1024];
+	read_stored_string(get_key_game_id(session_id).c_str(), buff, sizeof(buff));
+	return std::string(buff);
 }
 
 void SavedStateDb::error(std::string msg) {

@@ -62,6 +62,7 @@ class SavedStateDb {
 	uint32_t get_game_session_counts(const char *game_id);
 
 	void save_state(std::string game_id, int session_id, const uint8_t *data, size_t data_len);
+	void delete_session(int session_id);
 
 
 	size_t read_state(int session_id, int move_id, uint8_t *state_out, size_t max_state_len);
@@ -70,6 +71,7 @@ class SavedStateDb {
                          char *date_out,     size_t max_date_out_len,
                          uint32_t *move_id_out);
 	uint32_t get_last_move_id(int session_id);
+	std::string get_session_game_id(int session_id);
 
 	bool has_saved_state_offset(int session_id, int move_id_offset);
 	int adjust_saved_state_offset(int session_id, int move_id_offset, uint8_t *state_out, size_t max_state_len);
