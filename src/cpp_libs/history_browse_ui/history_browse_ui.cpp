@@ -56,6 +56,11 @@
 //
 // TODO add a button on the HTML page to bring up the history browse UI
 
+enum user_action {
+	USER_ACTION_NONE,
+	USER_ACTION_LOAD_GAME,
+};
+
 static void* init_lib(const struct game_api_callbacks *api_arg, const char *game_str, int game_str_len);
 static void destroy_game(void *L);
 static void update(void *L, int dt_ms);
@@ -63,6 +68,7 @@ static void handle_user_string_input(void *L, char *user_line, int str_len, bool
 static void handle_user_clicked(void *L, int pos_y, int pos_x);
 static void handle_mousemove(void *L, int pos_y, int pos_x, int buttons);
 static void handle_mouse_evt(void *L, int mouse_evt_id, int pos_y, int pos_x, int buttons);
+static void handle_user_action(void *L, enum user_action action);
 static bool handle_key_evt(void *L, const char *evt_id, const char *key_code);
 static void handle_wheel_changed(void *L, int delta_y, int delta_x);
 static void handle_touch_evt(void *L,
@@ -162,11 +168,6 @@ class HistoryPreviewEntry {
 	uint32_t session_id;
 };
 
-
-enum user_action {
-	USER_ACTION_NONE,
-	USER_ACTION_LOAD_GAME,
-};
 
 class history_browse_state;
 
@@ -727,7 +728,15 @@ enum user_action DeleteInfoState::handle_user_pressed(history_browse_state *stat
 
 bool DeleteInfoState::handle_touch_evt(history_browse_state *state, std::string evt_id_str,
                                        void *changed_touches, int changed_touches_len) {
+	TouchPress press_info = this->touch_press_handler.handle_touch_evt(evt_id_str,
+	                                                                   (struct touch_info*)changed_touches,
+	                                                                   changed_touches_len);
+	if (press_info.pressed) {
+		enum user_action action = handle_user_pressed(state, press_info.y, press_info.x);
+		handle_user_action((void*)state, action);
+	}
 	return false;
+
 }
 
 static bool is_dark_mode(const struct game_api_callbacks *callbacks) {
