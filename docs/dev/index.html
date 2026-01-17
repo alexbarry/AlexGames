@@ -2,8 +2,8 @@
 <html manifest="cache.manifest">
 <head>
 	<meta charset="utf-8"/>
-	<meta name="description" content="Collection of simple Lua and Rust games that can be played in your browser. Includes solitaire, word games, chess, go, checkers. Supports local or websocket multiplayer."/>
-	<meta name="keywords" content="games, simple, board games, lua, multiplayer, solitaire, chess, go, checkers"/>
+	<meta name="description" content="Collection of simple Lua and Rust games that can be played in your browser. Includes solitaire, word games, chess, go, checkers, free cell. Supports local or websocket multiplayer."/>
+	<meta name="keywords" content="games, simple, board games, lua, multiplayer, solitaire, chess, go, checkers, free cell"/>
 	<meta name="author" content="Alex Barry"/>
 	<!-- setting maximum-scale=1 to prevent auto zooming in on input fields in safari mobile.
 	     this may be bad if it introduces other side effects.
@@ -383,7 +383,7 @@ TODO add session ID to options, maybe show other players that are connected
 
 <div id="game_row_solitaire" class="game_row">
 <div class="game_wrapper"><img class="game_icon" src="img/game_icons/solitaire.png"/></div>
-<h2 class="game_title">Solitaire</h2>
+<h2 class="game_title">Solitaire (Klondike)</h2>
 <div class="description">
 <p>Single player.</p>
 <p>Win by putting all of the cards in order from lowest to highest, and grouped by suit. Cards can be placed on the game board from highest to lowest, with alternating suit colours.</p>
@@ -427,6 +427,17 @@ TODO add session ID to options, maybe show other players that are connected
 <p>Swap gems to make lines of three or more.</p>
 </div>
 </div>
+
+<div id="game_row_free_cell" class="game_row">
+<h2 class="game_title">Free Cell</h2>
+<div class="game_wrapper"><img class="game_icon" src="img/game_icons/free_cell.png"/></div>
+<div class="description">
+<p>Single player.</p>
+<p>Win by putting all of the cards in order from lowest to highest, and grouped by suit. Cards can be rearranged on the game board from highest to lowest, with alternating suit colours. Unlike (Klondike) solitaire, cards can also be placed in the top left free "cells", or on empty spaces in the play area (not just kings!).</p>
+<p class="aside">This game is my new favourite, I didn't play it while growing up like many of the others, but I heard it referred to as the <strong>"thinker's solitaire</strong> and like Tower of Hanoi, and I was hooked. I had to learn the game and implement my own version within a few days.</p>
+</div>
+</div>
+
 
 
 <div id="game_row_go" class="game_row">
@@ -480,7 +491,7 @@ TODO add session ID to options, maybe show other players that are connected
 <h2 class="game_title">Fluid Mix</h2>
 <div class="description">
 <p>Single player.</p>
-<p>Sort/rearrange layers of liquids in vials, with the goal of ending up with each vial containing only a single type of liquid.</p>
+<p>Sort/rearrange layers of liquids in vials, with the goal of ending up with each vial containing only a single type of liquid. Similar to "Tower of Hanoi".</p>
 </div>
 </div>
 
@@ -571,6 +582,7 @@ let game_choice_row_infos = [
 	{ row_id: "game_row_checkers",     game_id: "checkers" },
 	{ row_id: "game_row_solitaire",    game_id: "solitaire" },
 	{ row_id: "game_row_gem_match",    game_id: "gem_match" },
+	{ row_id: "game_row_free_cell",    game_id: "free_cell" },
 	{ row_id: "game_row_reversi",      game_id: "reversi" },
 	{ row_id: "game_row_minesweeper",  game_id: "minesweeper" },
 	{ row_id: "game_row_endless_runner",  game_id: "endless_runner" },
