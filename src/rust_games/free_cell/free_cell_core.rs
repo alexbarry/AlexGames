@@ -29,6 +29,7 @@ pub enum Status {
 	InvalidMove,
 	CellOccupied,
 	InvalidGoalMove,
+	MoveConsumedNeededCell,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -187,15 +188,20 @@ impl State {
 						return Status::InvalidMove;
 					}
 				}
+				let free_cell_count = new_state.free_cell_count();
 				let dst_col = &mut new_state.play_area[dst_col_idx];
-				if dst_col.last().is_none_or(|dst_card| cards::can_place_on_play_area(&cards[0], &dst_card)) {
-					dst_col.append(&mut cards);
-					self.set_cards(&new_state);
-					return Status::Success;
+
+				if !dst_col.last().is_none_or(|dst_card| cards::can_place_on_play_area(&cards[0], &dst_card)) {
+					return Status::InvalidMove;
 				}
 
-				// TODO
-				return Status::InvalidMove;
+				if dst_col.last().is_none() && free_cell_count == cards.len() as i32 - 1 {
+					return Status::MoveConsumedNeededCell;
+				}
+
+				dst_col.append(&mut cards);
+				self.set_cards(&new_state);
+				return Status::Success;
 			},
 		}
 	}

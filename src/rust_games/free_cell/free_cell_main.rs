@@ -30,6 +30,16 @@ pub struct AlexGamesFreeCell {
 
 }
 
+fn status_to_err_msg(status: free_cell_core::Status) -> Option<String> {
+	match status {
+		free_cell_core::Status::Success
+		|free_cell_core::Status::InvalidMove
+		|free_cell_core::Status::CellOccupied
+		|free_cell_core::Status::InvalidGoalMove => None,
+		free_cell_core::Status::MoveConsumedNeededCell => Some("Not enough free cells to move this many cards to this cell".to_string()),
+	}
+}
+
 impl AlexGamesFreeCell {
 
 	fn draw_state(&self) {
@@ -159,6 +169,10 @@ impl AlexGamesApi for AlexGamesFreeCell {
 
 					if move_status == free_cell_core::Status::Success {
 						self.save_state();
+					} else {
+						if let Some(msg) = status_to_err_msg(move_status) {
+							self.callbacks.set_status_err(&msg);
+						}
 					}
 				}
 				self.draw_state.picked_up_card = None;
