@@ -291,3 +291,8 @@ pre {
 	flex: 1;
 	margin: 5px;
 }
+
+.aside {
+	font-style: italic;
+	color: #333;
+}

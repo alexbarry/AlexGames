@@ -9,11 +9,12 @@ Try the web version here: https://alexbarry.github.io/AlexGames
      height="80">](https://f-droid.org/packages/net.alexbarry.alexgames/)
 
 Some games incude:
-* [Solitaire](src/lua_scripts/games/solitaire) (Lua)
+* [Solitaire (Klondike)](src/lua_scripts/games/solitaire) (Lua)
 * ["Word Mastermind"](src/lua_scripts/games/word_mastermind) (Lua): Guess 5 letter words, finding out if you guessed the right letter, or the right letter in the right position.
 * [Chess](src/lua_scripts/games/chess) (Lua)
 * ["Crossword Letters"](src/lua_scripts/games/crossword_letters) (Lua): Try to make as many words as you can with the letters provided, with a crossword as a hint.
 * ["Gem Match"](src/rust_games/gem_match) (Rust): Swap gems to make lines of three or more of the same kind.
+* [Free Cell](src/rust_games/free_cell) (Rust)
 * [Go/Weiqi/Baduk](src/lua_scripts/games/go) (Lua)
 * [Reversi](src/rust_games/reversi) (Rust)
 * [Checkers/Draughts](src/lua_scripts/games/checkers) (Lua)
