@@ -1,3 +1,9 @@
+/**
+ * Libraries for games using or drawing playing cards.
+ *
+ * TODO:
+ * * add a better way to define or select a set of card dimensions, and use that throughout, rather than hardcoding them
+ */
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
