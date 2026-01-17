@@ -151,6 +151,7 @@ pub struct CCallbacksPtr {
     pub store_data: Option<unsafe extern "C" fn(*mut c_void, *const c_char, *const u8, size_t)>,
     pub read_stored_data:
         Option<unsafe extern "C" fn(*mut c_void, *const c_char, *mut u8, size_t) -> size_t>,
+    pub delete_stored_data: Option<unsafe extern "C" fn(*mut c_void, *const c_char) -> bool>,
     pub get_new_session_id: Option<unsafe extern "C" fn() -> c_int>,
     pub get_last_session_id: Option<unsafe extern "C" fn(*const c_char) -> c_int>,
 
