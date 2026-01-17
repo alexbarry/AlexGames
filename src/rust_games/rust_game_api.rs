@@ -18,7 +18,7 @@ pub type TimeMs = c_ulong;
 pub const CANVAS_WIDTH: i32 = 480;
 pub const CANVAS_HEIGHT: i32 = 480;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum MouseEvt {
     Up,
     Down,
@@ -43,6 +43,15 @@ pub struct TouchInfo {
     pub x: f64,
 }
 
+#[derive(Copy, Clone, Debug)]
+pub struct DrawGraphicParams {
+	angle_degrees: i32,
+	flip_y: bool,
+	flip_x: bool,
+	brightness_percent: i32, // WIP, not implemented on some browsers
+	invert: bool, // WIP, not implemented on some browsers
+}
+
 pub enum PopupItem<'a> {
 	Message { text: &'a str },
 	Button { id: i32, text: &'a str },
@@ -58,7 +67,7 @@ pub struct PopupState {
 	// TODO
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum OptionType {
 	Button = 1,
 	Toggle = 2,
@@ -308,6 +317,21 @@ impl CCallbacksPtr {
             println!("draw_circle is null");
         }
     }
+
+	pub fn draw_graphic(&self, img_id: &str, y: i32, x: i32, width: i32, height: i32, params: Option<DrawGraphicParams>) {
+		let img_id_cstr = CString::new(img_id).expect("CString::new failed");
+		let params_ptr = if params.is_none() {
+			0 as *mut c_void
+		} else {
+			// TODO add draw graphic params
+			panic!("DrawGraphicParams not handled yet");
+		};
+		if let Some(draw_graphic) = self.draw_graphic {
+			unsafe {
+				(draw_graphic)(img_id_cstr.as_ptr(), y, x, width, height, params_ptr);
+			}
+		}
+	}
 
     pub fn draw_line(&self, line_colour: &str, line_size: i32, y1: i32, x1: i32, y2: i32, x2: i32) {
         let line_colour_cstr = CString::new(line_colour).expect("CString::new failed");

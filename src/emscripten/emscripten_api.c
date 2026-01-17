@@ -229,6 +229,10 @@ EM_JS(void, js_draw_graphic_raw, (const char *img_id_ptr, int y, int x, int widt
 });
 
 void js_draw_graphic(const char *img_id_ptr, int y, int x, int width, int height, const struct draw_graphic_params *params) {
+	const struct draw_graphic_params default_params = default_draw_graphic_params();
+	if (params == NULL) {
+		params = &default_params;
+	}
 	js_draw_graphic_raw(img_id_ptr, y, x, width, height, params->angle_degrees, params->flip_y, params->flip_x, params->brightness_percent,
 	                    params->invert);
 }
