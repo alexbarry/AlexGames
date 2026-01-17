@@ -159,8 +159,10 @@
 	}
 	
 	.game_title {
-		background-color:#ccc;
+		background-color:#ccce;
 		position:absolute;
+		padding: 3px;
+		padding-left: 0;
 		top:0;
 	}
 
