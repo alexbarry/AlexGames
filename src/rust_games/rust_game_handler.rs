@@ -303,6 +303,8 @@ pub extern "C" fn start_rust_game_rust(
 pub extern "C" fn rust_game_api_destroy_game(handle: *mut c_void) {
     let api = handle_void_ptr_to_trait_ref(handle);
 
+    api.callbacks().destroy_all();
+
     // free the pointers
     unsafe {
         let _ = Box::from_raw(handle);

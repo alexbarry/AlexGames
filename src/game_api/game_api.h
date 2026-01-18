@@ -401,6 +401,11 @@ struct game_api {
 	 */
 	void* (*init_lua_api)(const struct game_api_callbacks *api_arg, const char *game_str, int game_str_len);
 
+	/**
+	 * Called when a new game is selected.
+	 *
+	 * Must free all memory allocated for the game, and call `callbacks.destroy_all()`.
+	 */
 	void (*destroy_game)(void *L);
 
 	

@@ -177,6 +177,9 @@ pub struct CCallbacksPtr {
     //get_user_colour_pref: Option<unsafe extern "C" fn(*mut c_char, size_t) -> size_t>, // TODO
     pub get_user_colour_pref: Option<unsafe extern "C" fn(*mut u8, size_t) -> size_t>,
 
+    pub is_multiplayer_session_id_needed: Option<unsafe extern "C" fn() -> bool>,
+    pub get_multiplayer_session_id: Option<unsafe extern "C" fn(*mut c_char, size_t) -> size_t>,
+
     pub is_feature_supported: Option<unsafe extern "C" fn(*const c_char, size_t) -> CBool>,
 
     pub destroy_all: Option<unsafe extern "C" fn()>,
@@ -600,6 +603,16 @@ impl CCallbacksPtr {
             println!("get_user_colour_pref is null");
         }
         return String::from("light");
+    }
+
+    pub fn destroy_all(&self) {
+        if let Some(destroy_all) = self.destroy_all {
+            unsafe {
+                (destroy_all)();
+            }
+        } else {
+            println!("destroy_all not set");
+        }
     }
 
     pub fn update_timer_ms(&self, dt_ms: c_int) -> c_int {

@@ -5,7 +5,6 @@
  * TODO:
  * * add some sort of a "you win" acknowledgement and ideally animation like fireworks
  * * add autocomplete
- * * fix bug on mobile where the buttons get initialized twice sometimes, if the browser was suspended and then resumed (I think)
  *
  */
 use crate::rust_game_api;
