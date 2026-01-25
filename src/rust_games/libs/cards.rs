@@ -1,14 +1,16 @@
 /**
  * Libraries for games using or drawing playing cards.
- *
- * TODO:
- * * add a better way to define or select a set of card dimensions, and use that throughout, rather than hardcoding them
  */
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
 pub const SUIT_COUNT: usize = 4;
 pub const RANK_COUNT: usize = 13;
+
+pub const TEXT_SUIT_SPADES: &'static str = "\u{2660}";
+pub const TEXT_SUIT_HEARTS: &'static str = "\u{2665}";
+pub const TEXT_SUIT_DIAMONDS: &'static str = "\u{2666}";
+pub const TEXT_SUIT_CLUBS: &'static str = "\u{2663}";
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Rank {
@@ -35,6 +37,17 @@ pub enum Suit {
     Hearts,
 }
 
+impl Suit {
+	pub fn to_unicode_symbol(&self) -> &'static str {
+		match self {
+			Suit::Clubs => TEXT_SUIT_CLUBS,
+			Suit::Spades => TEXT_SUIT_SPADES,
+			Suit::Diamonds => TEXT_SUIT_DIAMONDS,
+			Suit::Hearts => TEXT_SUIT_HEARTS,
+		}
+	}
+}
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Card {
     pub rank: Rank,
@@ -46,26 +59,90 @@ use crate::rust_game_api::{CCallbacksPtr, TextAlign};
 use crate::libs::draw::draw_rect_outline;
 use crate::libs::point::Pt;
 
-const CARD_BG: &str = "#ffffff";
-const CARD_OUTLINE: &str = "#000000";
-const CARD_FG_RED: &str = "#ff0000";
-const CARD_FG_BLACK: &str = "#000000";
-const CARD_OUTLINE_HIGHLIGHT: &str = "#ffcc0088";
+#[derive(Copy, Clone, Debug)]
+pub struct CardDrawColours {
+	pub bg: &'static str,
+	pub outline: &'static str,
+	pub fg_red: &'static str,
+	pub fg_black: &'static str,
+	pub outline_highlight: &'static str,
 
-const OUTLINE_THICKNESS: i32 = 1;
-const OUTLINE_THICKNESS_HIGHLIGHT: i32 = 8;
-const TEXT_SIZE_LARGE: i32 = 32;
-const TEXT_SIZE_SMALL: i32 = 16;
-const LARGE_TEXT_PADDING: i32 = 5;
+	pub empty_space_outline: &'static str,
+	pub empty_space_fill: &'static str,
 
-// TODO make a good way for games to set their own card size, and not have to pass it in every time they draw a card?
-//pub const CARD_SIZE: Pt = Pt { y: 70, x: 45 };
-const CARD_WIDTH: i32 = 56;
-pub const CARD_SIZE: Pt = Pt {
-    y: CARD_WIDTH * 7 / 5,
-    x: CARD_WIDTH,
+	pub overlay_colour: Option<&'static str>,
+}
+
+pub const DEFAULT_CARD_COLOURS_LIGHT: CardDrawColours = CardDrawColours {
+	bg: "#ffffff",
+	outline: "#000000",
+	fg_red: "#ff0000",
+	fg_black: "#000000",
+	outline_highlight: "#ffcc0088",
+
+	empty_space_fill: "#00000044",
+	empty_space_outline: "#00000011",
+
+	overlay_colour: None,
 };
-const SUIT_SIZE_SMALL: Pt = Pt { y: 25, x: 20 };
+
+pub const DEFAULT_CARD_COLOURS_DARK: CardDrawColours = CardDrawColours {
+	bg: "#ffffff",
+	outline: "#000000",
+	fg_red: "#ff0000",
+	fg_black: "#000000",
+	outline_highlight: "#ffcc0088",
+
+	empty_space_fill: "#00000044",
+	empty_space_outline: "#00000011",
+
+	overlay_colour: Some("#00000088"),
+};
+
+
+#[derive(Copy, Clone, Debug)]
+pub struct CardDrawSize {
+	pub width: i32,
+	pub height: i32,
+	pub suit_width: i32,
+	pub suit_height: i32,
+	pub text_size_large: i32,
+	pub text_size_small: i32,
+	pub large_text_padding: i32,
+	pub padding: i32,
+	pub highlight_padding: i32,
+
+	pub outline_thickness: i32,
+	pub outline_thickness_highlight: i32,
+}
+
+/** 
+ * Cards that are just wide enough that 8 of them can fit on a 480 pixel wide canvas,
+ * with a bit of padding between them.
+ */
+pub const CARD_SIZE_8_WIDE: CardDrawSize = CardDrawSize {
+	width: 56,
+	height: 56 * 7 / 5,
+	suit_width: 20,
+	suit_height: 25,
+	text_size_large: 32,
+	text_size_small: 16,
+	large_text_padding: 5,
+    padding: 3,
+	highlight_padding: 4,
+
+	outline_thickness: 1,
+	outline_thickness_highlight: 8,
+};
+
+#[derive(Copy, Clone, Debug)]
+pub struct CardDraw {
+	pub size: CardDrawSize,
+	pub colours: Option<&'static CardDrawColours>,
+}
+
+
+// const SUIT_SIZE_SMALL: Pt = Pt { y: 25, x: 20 };
 
 fn num_to_rank(num: i32) -> Rank {
     match num {
@@ -88,7 +165,7 @@ fn num_to_rank(num: i32) -> Rank {
     }
 }
 
-fn rank_to_num(rank: Rank) -> i32 {
+pub fn rank_to_num(rank: Rank) -> i32 {
     match rank {
         Rank::ValAce => 1,
         Rank::Val2 => 2,
@@ -106,7 +183,7 @@ fn rank_to_num(rank: Rank) -> i32 {
     }
 }
 
-fn num_to_suit(num: i32) -> Suit {
+pub fn num_to_suit(num: i32) -> Suit {
     match num {
         0 => Suit::Clubs,
         1 => Suit::Spades,
@@ -118,7 +195,7 @@ fn num_to_suit(num: i32) -> Suit {
     }
 }
 
-fn suit_to_num(suit: Suit) -> i32 {
+pub fn suit_to_num(suit: Suit) -> i32 {
     match suit {
         Suit::Clubs => 0,
         Suit::Spades => 1,
@@ -198,95 +275,128 @@ fn suit_is_red(suit: Suit) -> bool {
     }
 }
 
-pub fn draw_card(callbacks: &CCallbacksPtr, card: &Card, pt: &Pt, highlight: bool) {
-    draw_card_internal(callbacks, Some(card), false, pt, highlight);
+impl CardDraw {
+
+pub fn draw_card(&self, callbacks: &CCallbacksPtr, card: &Card, pt: &Pt, highlight: bool) {
+    self.draw_card_internal(callbacks, Some(card), false, pt, highlight);
 }
-pub fn draw_card_facedown(callbacks: &CCallbacksPtr, pt: &Pt) {
-    draw_card_internal(callbacks, None, true, pt, false);
+pub fn draw_card_facedown(&self, callbacks: &CCallbacksPtr, pt: &Pt) {
+    self.draw_card_internal(callbacks, None, true, pt, false);
 }
 
-pub fn draw_card_space(callbacks: &CCallbacksPtr, pt: &Pt) {
-    draw_card_internal(callbacks, None, false, pt, false);
+pub fn draw_card_space(&self, callbacks: &CCallbacksPtr, pt: &Pt) {
+    self.draw_card_internal(callbacks, None, false, pt, false);
+}
+
+pub fn card_centre(&self, pt: &Pt) -> Pt {
+	pt.add(Pt {
+		y: self.size.height/2,
+		x: self.size.width/2,
+	})
+}
+
+pub fn draw_card_space_text(&self, callbacks: &CCallbacksPtr, pt: &Pt, text: &str, text_colour: &str, text_size: i32) {
+	let pt = pt.add(Pt {
+		y: self.size.height/2 + text_size/2,
+		x: self.size.width/2,
+	});
+	callbacks.draw_text(text, text_colour, pt.y, pt.x, text_size, TextAlign::Middle);
 }
 
 // TODO replace the card and face_down params with an enum or something
 fn draw_card_internal(
+	&self,
     callbacks: &CCallbacksPtr,
     card: Option<&Card>,
     face_down: bool,
     pt: &Pt,
     highlight: bool,
 ) {
+	//let card_size = &CARD_SIZE_8_WIDE;
+	//let card_colours = &DEFAULT_CARD_COLOURS_LIGHT;
+	let card_size = &self.size;
+	let card_colours = if let Some(colours) = self.colours {
+		colours
+	} else {
+		&DEFAULT_CARD_COLOURS_LIGHT
+	};
     let y1 = pt.y;
     let x1 = pt.x;
-    let y2 = pt.y + CARD_SIZE.y;
-    let x2 = pt.x + CARD_SIZE.x;
+    let y2 = pt.y + card_size.height;
+    let x2 = pt.x + card_size.width;
 
     //if let Some(card) = card {
     if !face_down && card.is_some() {
         let card = card.unwrap();
 
-        callbacks.draw_rect(CARD_BG, y1, x1, y2, x2);
+        callbacks.draw_rect(card_colours.bg, y1, x1, y2, x2);
         let text = rank_to_text(card.rank);
         let txt_colour = if suit_is_red(card.suit) {
-            CARD_FG_RED
+            card_colours.fg_red
         } else {
-            CARD_FG_BLACK
+            card_colours.fg_black
         };
 
-        let padding = 3;
+        let padding = card_size.padding;
         callbacks.draw_text(
             &text,
             &txt_colour,
-            pt.y + padding + TEXT_SIZE_SMALL,
+            pt.y + padding + card_size.text_size_small,
             pt.x + padding,
-            TEXT_SIZE_SMALL,
+            card_size.text_size_small,
             TextAlign::Left,
         );
         let suit_img_id = suit_to_img_id(card.suit);
         callbacks.draw_graphic(
             &suit_img_id,
-            y1 + padding + SUIT_SIZE_SMALL.y / 2,
-            x2 - padding - SUIT_SIZE_SMALL.x / 2,
-            SUIT_SIZE_SMALL.x,
-            SUIT_SIZE_SMALL.y,
+            y1 + padding + card_size.suit_height / 2,
+            x2 - padding - card_size.suit_width / 2,
+            card_size.suit_width,
+            card_size.suit_height,
             None,
         );
         callbacks.draw_text(
             &text,
             &txt_colour,
-            y2 - padding - LARGE_TEXT_PADDING,
-            x1 + CARD_SIZE.x / 2,
-            TEXT_SIZE_LARGE,
+            y2 - padding - card_size.large_text_padding,
+            x1 + card_size.width / 2,
+            card_size.text_size_large,
             TextAlign::Middle,
         );
-        draw_rect_outline(callbacks, &CARD_OUTLINE, OUTLINE_THICKNESS, y1, x1, y2, x2);
+        draw_rect_outline(callbacks, &card_colours.outline, card_size.outline_thickness, y1, x1, y2, x2);
+
+		if let Some(overlay_colour) = card_colours.overlay_colour {
+			callbacks.draw_rect(
+				overlay_colour,
+				y1, x1,
+				y2, x2);
+		}
         if highlight {
             //draw_rect_outline(callbacks, &CARD_OUTLINE_HIGHLIGHT, OUTLINE_THICKNESS_HIGHLIGHT, y1, x1, y2, x2);
-            let highlight_padding = 4;
             callbacks.draw_graphic(
                 IMG_ID_CARD_HIGHLIGHT,
-                pt.y + CARD_SIZE.y / 2,
-                pt.x + CARD_SIZE.x / 2,
-                CARD_SIZE.x + 2 * highlight_padding,
-                CARD_SIZE.y + 2 * highlight_padding,
+                pt.y + card_size.height / 2,
+                pt.x + card_size.width / 2,
+                card_size.width + 2 * card_size.highlight_padding,
+                card_size.height + 2 * card_size.highlight_padding,
                 None,
             );
         }
     } else if face_down {
         callbacks.draw_graphic(
             IMG_ID_CARD_FACEDOWN,
-            pt.y + CARD_SIZE.y / 2,
-            pt.x + CARD_SIZE.x / 2,
-            CARD_SIZE.x,
-            CARD_SIZE.y,
+            pt.y + card_size.height / 2,
+            pt.x + card_size.width / 2,
+            card_size.width,
+            card_size.height,
             None,
         );
-        draw_rect_outline(callbacks, &CARD_OUTLINE, OUTLINE_THICKNESS, y1, x1, y2, x2);
+        draw_rect_outline(callbacks, card_colours.outline, card_size.outline_thickness, y1, x1, y2, x2);
     } else {
-        callbacks.draw_rect(&"#00000044", y1, x1, y2, x2);
-        draw_rect_outline(callbacks, &"#00000011", OUTLINE_THICKNESS, y1, x1, y2, x2);
+        callbacks.draw_rect(card_colours.empty_space_fill, y1, x1, y2, x2);
+        draw_rect_outline(callbacks, card_colours.empty_space_outline, card_size.outline_thickness, y1, x1, y2, x2);
     }
+}
 }
 
 pub fn new_deck() -> Vec<Card> {

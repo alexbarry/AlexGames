@@ -1,10 +1,6 @@
 /**
  * Free Cell
- * author: Alex Barry
- *
- * TODO:
- * * add some sort of a "you win" acknowledgement and ideally animation like fireworks
- * * add autocomplete
+ * author: Alex Barry (github.com/alexbarry)
  *
  */
 use crate::rust_game_api;
@@ -23,13 +19,17 @@ use crate::libs::point::Pt;
 
 const BTN_ID_UNDO: &str = "btn_undo";
 const BTN_ID_REDO: &str = "btn_redo";
+const BTN_ID_AUTOCOMPLETE: &str = "btn_autocomplete";
 
 const OPTION_ID_NEW_GAME: &str = "option_new_game";
+
+const WIN_MSG: &'static str = "Congratulations, you win!";
 
 pub struct AlexGamesFreeCell {
     callbacks: &'static CCallbacksPtr,
 
     game_state: free_cell_core::State,
+	game_won_yet: bool,
     draw_state: DrawState,
 
     session_id: Option<i32>,
@@ -49,8 +49,8 @@ fn status_to_err_msg(status: free_cell_core::Status) -> Option<String> {
 }
 
 impl AlexGamesFreeCell {
-    fn draw_state(&self) {
-        free_cell_draw::draw_state(self.callbacks, &self.game_state, &self.draw_state);
+    fn draw_state(&mut self) {
+        self.draw_state.draw_state(self.callbacks, &self.game_state);
 
         if let Some(session_id) = self.session_id {
             self.callbacks.set_btn_enabled(
@@ -61,6 +61,8 @@ impl AlexGamesFreeCell {
                 BTN_ID_REDO,
                 self.callbacks.has_saved_state_offset(session_id, 1),
             );
+
+        	self.callbacks.set_btn_enabled(BTN_ID_AUTOCOMPLETE, self.game_state.can_autocomplete());
         } else {
             self.callbacks.set_btn_enabled(BTN_ID_UNDO, false);
             self.callbacks.set_btn_enabled(BTN_ID_REDO, false);
@@ -104,8 +106,10 @@ impl AlexGamesApi for AlexGamesFreeCell {
         callbacks.enable_evt("touch");
 
         callbacks.create_btn(BTN_ID_UNDO, "Undo", 1);
+        callbacks.create_btn(BTN_ID_AUTOCOMPLETE, "Autocomplete", 1);
         callbacks.create_btn(BTN_ID_REDO, "Redo", 1);
         callbacks.set_btn_enabled(BTN_ID_UNDO, false);
+        callbacks.set_btn_enabled(BTN_ID_AUTOCOMPLETE, false);
         callbacks.set_btn_enabled(BTN_ID_REDO, false);
 
         callbacks.add_game_option(
@@ -150,6 +154,11 @@ impl AlexGamesApi for AlexGamesFreeCell {
     fn update(&mut self, dt_ms: i32) {
         //self.callbacks.draw_rect(&"#ff0000", 50, 50, 250, 100);
         //free_cell_draw::draw_state(self.callbacks, &self.game_state.expect("game state is none?"));
+		self.draw_state.update_anims(self.callbacks, dt_ms);
+		if self.game_state.game_won() && !self.game_won_yet && !self.draw_state.autocomplete_in_progress() {
+			self.game_won_yet = true;
+			self.callbacks.set_status_msg(WIN_MSG);
+		}
         self.draw_state();
     }
     fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32) {}
@@ -193,9 +202,29 @@ impl AlexGamesApi for AlexGamesFreeCell {
                     let src = src.unwrap();
                     let dst = dst.unwrap();
 
-                    let move_status = game_state.apply_move(src, dst);
+					let auto_move = if src == dst {
+						let src_pos = self.draw_state.picked_up_card_pos.unwrap();
+						if mouse_pos.sub(src_pos).mag() < 5 {
+							true
+						} else {
+							false
+						}
+					} else {
+						false
+					};
+
+                    let move_status = if !auto_move {
+						game_state.apply_move(src, dst)
+					} else {
+						game_state.auto_move(src)
+					};
 
                     if move_status == free_cell_core::Status::Success {
+						if game_state.game_won() && !self.game_won_yet {
+							self.game_won_yet = true;
+							self.callbacks.set_status_msg(WIN_MSG);
+							self.draw_state.start_win_animation(self.callbacks);
+						}
                         self.save_state();
                     } else {
                         if let Some(msg) = status_to_err_msg(move_status) {
@@ -265,6 +294,18 @@ impl AlexGamesApi for AlexGamesFreeCell {
         match btn_id {
             BTN_ID_UNDO => self.set_state_offset(-1),
             BTN_ID_REDO => self.set_state_offset(1),
+			BTN_ID_AUTOCOMPLETE => {
+				let autocomplete_moves = self.game_state.get_autocomplete_moves();
+				self.draw_state.anim_moves(self.callbacks, &self.game_state, &autocomplete_moves);
+				println!("Got {} autocomplete moves: {}", autocomplete_moves.len(), autocomplete_moves.iter().map(|m| format!("{:?}", m)).collect::<Vec<_>>().join(", "));
+				
+				for (src, dst) in autocomplete_moves.iter() {
+					let status = self.game_state.apply_move(*src, *dst);
+					assert!(status == free_cell_core::Status::Success);
+				}
+
+				self.save_state();
+			},
             _ => {
                 panic!("Unhandled button ID {}", btn_id);
             }
@@ -275,8 +316,11 @@ impl AlexGamesApi for AlexGamesFreeCell {
         match option_id {
             OPTION_ID_NEW_GAME => {
                 assert_eq!(option_type, OptionType::Button);
+				self.callbacks.set_status_msg(&format!("Starting new game"));
                 self.session_id = Some(self.callbacks.get_new_session_id());
                 self.game_state.new_game();
+				self.draw_state.reset_state();
+				self.game_won_yet = true;
                 self.save_state();
                 self.draw_state();
             }
@@ -295,6 +339,7 @@ pub fn init_free_cell(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi
     let mut game = AlexGamesFreeCell {
         callbacks: callbacks,
         game_state: free_cell_core::State::new(),
+		game_won_yet: false,
         draw_state: DrawState::new(),
         session_id: None,
 

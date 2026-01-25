@@ -7,7 +7,7 @@ pub const BOARD_CELL_COUNT: usize = 4;
 pub const GOAL_COLUMN_COUNT: usize = cards::SUIT_COUNT;
 pub const PLAY_AREA_COLUMN_COUNT: usize = 8;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum CardPos {
     Cells(usize),
     Goals(usize),
@@ -206,4 +206,96 @@ impl State {
             }
         }
     }
+
+	fn get_auto_move_dst(&self, src: CardPos) -> Option<CardPos> {
+		let (_, mut cards) = self.remove_card(src);
+		let card = if cards.len() == 1 {
+			cards[0]
+		} else {
+			return None;
+		};
+
+		for (goal_idx, goal_stack) in self.goals.iter().enumerate() {
+			if cards::can_place_on_goal(card, &goal_stack) {
+				return Some(CardPos::Goals(goal_idx));
+			}
+		}
+		return None;
+	}
+
+	pub fn auto_move(&mut self, src: CardPos) -> Status {
+		if let Some(dst) = self.get_auto_move_dst(src) {
+			return self.apply_move(src, dst);
+		} else {
+			return Status::InvalidMove;
+		}
+	}
+
+	pub fn can_autocomplete(&self) -> bool {
+        for (col_idx, play_col) in self.play_area.iter().enumerate() {
+        	if self.play_area_cards_in_order_until(col_idx) != 0 {
+				return false;
+			}
+		}
+        if self.play_area.iter().all(|col| col.len() == 0) {
+			return false;
+		}
+		return true;
+	}
+
+	pub fn get_autocomplete_moves(&self) -> Vec<(CardPos, CardPos)> {
+		let mut test_state = self.clone();
+		let mut moves: Vec<(CardPos, CardPos)> = Vec::new();
+
+		let mut activity = true;
+		while activity {
+			activity = false;
+			for cell_idx in 0..test_state.cells.len() {
+				let src = CardPos::Cells(cell_idx);
+				let card = if let Some(card) = self.cells[cell_idx] {
+					card
+				} else {
+					continue;
+				};
+				for goal_idx in 0..test_state.goals.len() {
+					let goal_stack = &test_state.goals[goal_idx];
+					if cards::can_place_on_goal(card, &goal_stack) {
+						let dst = CardPos::Goals(goal_idx);
+						let status = test_state.apply_move(src, dst);
+						assert!(status == Status::Success);
+						moves.push((src, dst));
+						activity = true;
+						break;
+					}
+				};
+			}
+			for col_idx in 0..test_state.play_area.len() {
+				let col = &test_state.play_area[col_idx];
+				if col.len() == 0 { continue; }
+				let src = CardPos::PlayArea(col_idx, test_state.play_area[col_idx].len()-1);
+				let card = col.last().unwrap();
+				for (goal_idx, goal_stack) in test_state.goals.iter().enumerate() {
+					if cards::can_place_on_goal(*card, &goal_stack) {
+						let dst = CardPos::Goals(goal_idx);
+						let status = test_state.apply_move(src, dst);
+						assert!(status == Status::Success);
+						moves.push((src, dst));
+						activity = true;
+						break;
+					}
+				}
+			}
+		}
+
+		return moves;
+	}
+
+	pub fn game_won(&self) -> bool {
+		for goal_stack in self.goals.iter() {
+			if goal_stack.len() != 13 {
+				return false;
+			}
+		}
+		return true;
+	}
 }
