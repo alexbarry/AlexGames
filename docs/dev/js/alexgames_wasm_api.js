@@ -242,6 +242,7 @@ function draw_clear(gfx) {
 }
 
 function create_btn(gfx, btn_lua_id, name, weight) {
+	console.debug('[ui] create_btn', btn_lua_id);
 	let button_row = document.getElementById("game_button_row");
 
 	let btn = document.createElement("button");
@@ -597,9 +598,13 @@ function update_timer_period_ms(gfx, timer_period_ms) {
 	}
 
 	if (timer_period_ms != 0) {
+		if (gfx.update_timers.size == 0) {
+			gfx.last_timer_fired_ms = undefined;
+		}
 		const handle = setInterval(update_func, timer_period_ms);
 		console.log(`[timer] creating timer with period_ms=${timer_period_ms}, handle=${handle}`)
 		gfx.update_timers.add(handle);
+
 		return handle;
 	}
 }
@@ -653,6 +658,7 @@ function get_multiplayer_session_id() {
 }
 
 function destroy_all(L) {
+	console.debug('[ui] destroy_all');
 	let button_row = document.getElementById("game_button_row");
 	while (button_row.firstChild) {
 		button_row.removeChild(button_row.firstChild);
