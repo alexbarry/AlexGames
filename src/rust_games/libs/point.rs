@@ -12,12 +12,12 @@ impl Pt {
         }
     }
 
-	pub fn sub(&self, arg: Pt) -> Pt {
-		Pt {
-			y: self.y - arg.y,
-			x: self.x - arg.x,
-		}
-	}
+    pub fn sub(&self, arg: Pt) -> Pt {
+        Pt {
+            y: self.y - arg.y,
+            x: self.x - arg.x,
+        }
+    }
 
     pub fn mult(&self, arg: i32) -> Pt {
         Pt {
@@ -33,7 +33,7 @@ impl Pt {
         }
     }
 
-	pub fn mag(&self) -> i32 {
-		(self.x*self.x + self.y*self.y).isqrt()
-	}
+    pub fn mag(&self) -> i32 {
+        (self.x * self.x + self.y * self.y).isqrt()
+    }
 }
