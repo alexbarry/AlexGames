@@ -101,7 +101,8 @@ local function has_liberties(game_state, y, x)
 	return false
 end
 
-local function clear_piece_group(board, y, x)
+local function clear_piece_group(game_state, y, x)
+	local board = game_state.board
 	local this_player = board[y][x]
 	local visited = make_2d_array(#board, #board[1], false)
 	local to_visit = { Point:create{y=y, x=x}}
@@ -175,7 +176,7 @@ function go.player_num_to_char(num)
 end
 
 function go.new_game(size)
-	game_state = {
+	local game_state = {
 		player_turn = 1,
 		y_max = size,
 		x_max = size,
@@ -353,7 +354,7 @@ function go.player_move(game_state, player, y, x)
 		end
 
 		if not has_liberties(game_state, pt2.y, pt2.x) then
-			clear_piece_group(game_state.board, pt2.y, pt2.x)
+			clear_piece_group(game_state, pt2.y, pt2.x)
 		end
 		::next_dir::
 	end
