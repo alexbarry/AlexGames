@@ -11,7 +11,7 @@ local alexgames = require("alexgames");
 -- e.g. either 9x9, 13x13, or 19x19
 local go_game_size = 19
 local local_multiplayer = nil
-local session_id = alexgames.get_new_session_id()
+local session_id = nil
 local state = go.new_game(go_game_size)
 
 -- state was received either from another player or
@@ -270,6 +270,7 @@ function handle_popup_btn_clicked(popup_id, btn_idx)
 		local desired_game_size = POPUP_GAME_SIZE_SEL_BTNS_TO_SIZE[btn_idx+1]
 		alexgames.hide_popup()
 		alexgames.set_status_msg(string.format("Setting board size to %s", desired_game_size))
+		session_id = alexgames.get_new_session_id()
 		set_state(go.new_game(desired_game_size))
 		go_ui.set_board_piece_size(desired_game_size)
 		print(string.format("state.board: %s", state.board))
