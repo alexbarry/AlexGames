@@ -3,6 +3,7 @@ mod rust_game_api;
 mod free_cell;
 mod gem_match;
 mod libs;
+mod morse;
 mod reversi;
 mod trivia;
 
@@ -13,6 +14,7 @@ use std::slice;
 use libc::{c_int, c_void, size_t};
 
 use free_cell::free_cell_main;
+use morse::morse_main;
 use gem_match::gem_match_main;
 use reversi::reversi_main;
 use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, OptionType, PopupState, TouchInfo, KeyEvt};
@@ -45,6 +47,7 @@ fn get_rust_game_init_func(
         "gem_match" => Some(gem_match_main::init_gem_match),
         "trivia" => Some(trivia_main::init_trivia),
         "free_cell" => Some(free_cell_main::init_free_cell),
+        "morse" => Some(morse_main::init_morse),
         _ => None,
     };
 }
@@ -89,6 +92,7 @@ fn handle_void_ptr_to_trait_ref(handle: *mut c_void) -> &'static mut dyn AlexGam
         "gem_match" => handle.api as *mut gem_match_main::AlexGamesGemMatch,
         "trivia" => handle.api as *mut trivia_main::AlexGamesTrivia,
         "free_cell" => handle.api as *mut free_cell_main::AlexGamesFreeCell,
+        "morse" => handle.api as *mut morse_main::AlexGamesMorse,
         _ => panic!("unhandled game_id passed to handle_void_ptr_to_trait_ref"),
     };
 
