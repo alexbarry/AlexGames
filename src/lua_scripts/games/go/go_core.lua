@@ -171,6 +171,19 @@ function go.print_board(board)
 	end
 end
 
+function go.print_state(state, name)
+	print(string.format('state (name: "%s"): {'), name)
+	print('    y_max = %s', state.y_max)
+	print('    x_max = %s', state.x_max)
+	print('    last_move_y = %s', state.last_move_y)
+	print('    board:')
+	go.print_board(state.board)
+	print('    prev_board:')
+	go.print_board(state.prev_board)
+	print('}')
+	print(string.format('--------- (end state (name "%s"))', name))
+end
+
 function go.player_num_to_char(num)
 	return val_to_char[num]
 end
@@ -186,6 +199,16 @@ function go.new_game(size)
 		last_move_x = nil,
 	}
 	return game_state
+end
+
+function go.states_eq(state1, state2)
+	return (state1.player_turn == state2.player_turn and
+	        state1.y_max == state2.y_max and
+	        state1.x_max == state2.x_max and
+	        state1.last_move_y == state2.last_move_y and
+	        state1.last_move_x == state2.last_move_x and
+	        boards_eq(state1.board, state2.board) and
+	        boards_eq(state1.prev_board, state2.prev_board))
 end
 
 function if_nil_rt_zero(val)
@@ -289,8 +312,12 @@ function go.err_code_to_str(code)
 end
 
 
-local function boards_eq(board1, board2)
-	if board2 == nil and board1 ~= nil then
+function boards_eq(board1, board2)
+	if board1 == nil and board2 == nil then
+		return true
+	elseif board1 ~= nil and board2 ~= nil then
+		-- pass through
+	else
 		return false
 	end
 	for y=1,#board1 do

@@ -121,7 +121,20 @@ function get_user_input()
 end
 
 local function save_state()
-	alexgames.save_state(session_id, go.serialize_state(state))
+	local serialized_state = go.serialize_state(state)
+	--[[
+	-- TODO maybe add some configurable debug param for all games?
+	if true then
+		alexgames.set_status_msg(string.format("Saving state with session_id %s", session_id))
+		local deserialized_state = go.deserialize_state(serialized_state)
+		if not go.states_eq(state, deserialized_state) then
+			go.print_state(state, 'current state')
+			go.print_state(state, 'current state serialized + deserialized')
+			error("state and serialized + deserialized state do not match!")
+		end
+	end
+	--]]
+	alexgames.save_state(session_id, serialized_state)
 end
 
 function get_state()
