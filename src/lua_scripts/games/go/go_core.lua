@@ -228,7 +228,7 @@ end
 function go.deserialize_state(data)
 	local state = {}
 	if #data < 3 then
-		print(string.format("Bad serialized state received, less than 3 bytes: %d", #data))
+		error(string.format("Bad serialized state received, less than 3 bytes: %d", #data))
 		return nil
 	end
 	print(string.format("len data = %d, data[1] = %q, data[2] = %q, data[3] = %q", #data, data:sub(1,1), data:sub(2,2), data:sub(3,3)))
@@ -240,7 +240,7 @@ function go.deserialize_state(data)
 	local prev_bytes = 5
 	if #data ~= prev_bytes + state.y_max * state.x_max + 1 and
 	   #data ~= prev_bytes + state.y_max * state.x_max * 2  then
-		print(string.format("Bad serialized state, recvd %d bytes, y_max = %d, x_max = %d",
+		error(string.format("Bad serialized state, recvd %d bytes, y_max = %d, x_max = %d",
 		                    #data, state.y_max, state.x_max))
 		return nil
 	end
