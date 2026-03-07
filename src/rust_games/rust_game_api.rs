@@ -43,6 +43,12 @@ pub struct TouchInfo {
     pub x: f64,
 }
 
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum KeyEvt {
+	Down,
+	Up,
+}
+
 #[derive(Copy, Clone, Debug)]
 pub struct DrawGraphicParams {
     angle_degrees: i32,
@@ -723,6 +729,11 @@ pub trait AlexGamesApi {
             "handle_touch_evt unimplemented, evt_id={:#?}, touches={:#?}",
             evt_id, touches
         );
+    }
+
+    fn handle_key_evt(&mut self, evt_id: KeyEvt, key_code: &str) -> bool {
+        println!("handle_key_evt unimplemented, evt_id={:#?}, key_code=\"{}\"", evt_id, key_code);
+        return false;
     }
 
     fn handle_popup_btn_clicked(

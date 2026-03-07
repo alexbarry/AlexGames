@@ -15,7 +15,7 @@ use libc::{c_int, c_void, size_t};
 use free_cell::free_cell_main;
 use gem_match::gem_match_main;
 use reversi::reversi_main;
-use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, OptionType, PopupState, TouchInfo};
+use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, OptionType, PopupState, TouchInfo, KeyEvt};
 use trivia::trivia_main;
 
 // A pointer to this struct is returned to C, and then passed back
@@ -167,6 +167,25 @@ pub extern "C" fn rust_game_api_handle_touch_evt(
         });
     }
     handle.handle_touch_evt(&evt_id, touches);
+}
+
+#[no_mangle]
+pub extern "C" fn rust_game_api_handle_key_evt(
+    handle: *mut c_void,
+    evt_id_cstr: *const u8,
+    key_code_cstr: *const u8,
+) -> bool {
+    let handle = handle_void_ptr_to_trait_ref(handle);
+    let evt_id = c_str_to_str(evt_id_cstr, None);
+	let evt_id = match evt_id.as_str() {
+		"keydown" => KeyEvt::Down,
+		"keyup" => KeyEvt::Up,
+		_ => {
+			panic!("Unexpected key event {:?}", evt_id);
+		},
+	};
+    let key_code_str = c_str_to_str(key_code_cstr, None);
+    return handle.handle_key_evt(evt_id, &key_code_str);
 }
 
 #[no_mangle]
