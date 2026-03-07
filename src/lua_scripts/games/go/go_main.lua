@@ -2,6 +2,9 @@ local two_player = require("libs/multiplayer/two_player")
 local utils      = require("libs/utils")
 local show_buttons_popup = require("libs/ui/show_buttons_popup")
 
+-- TODO:
+--  * right now, when creating a new game in multiplayer, if the other player selects their piece before the host selects the game size, it defaults to 19x19. I think either player can just press "new game", but still.
+
 local go      = require("games/go/go_core")
 local go_ui   = require("games/go/go_ui")
 local go_ctrl = require("games/go/go_ctrl")
@@ -400,7 +403,15 @@ function handle_game_option_evt(option_id)
 		-- where the function is called
 		state_init = false
 		state_loaded = false
-		prompt_game_size()
+
+		-- If the user has not chosen local/network multiplayer yet, then
+		-- that should be selected before choosing board size.
+		-- And that will ask for the game size to be selected after.
+		if local_multiplayer == nil then
+			two_player_init()
+		else
+			prompt_game_size()
+		end
 	else
 		error(string.format("Unhandled option_id %s", option_id))
 	end
