@@ -101,6 +101,14 @@ list(APPEND EXPORTED_FUNCTIONS_WASM
         \"_free\" \
         ]")
 
+list(APPEND EXPORTED_RUNTIME_METHODS
+	"[ \
+		\"ccall\", \
+		\"cwrap\", \
+		\"setValue\", \
+		\"UTF8ToString\" \
+	]")
+
 
 # On Linux, I get an error when trying to preload files
 # that are in parent directories (LUA_SCRIPT_SRC). So copy the scripts into
@@ -113,7 +121,7 @@ execute_process(COMMAND cp -r "${LUA_SCRIPT_SRC}/." "${LUA_SCRIPT_PRELOAD_OUT}/"
 list(APPEND EMCC_LINK_OPTS "-Wall")
 list(APPEND EMCC_LINK_OPTS "-s DISABLE_EXCEPTION_CATCHING=0")
 list(APPEND EMCC_LINK_OPTS "-s EXPORTED_FUNCTIONS='${EXPORTED_FUNCTIONS_WASM}'")
-list(APPEND EMCC_LINK_OPTS "-s EXPORTED_RUNTIME_METHODS='[\"ccall\", \"cwrap\", \"setValue\", \"UTF8ToString\"]'")
+list(APPEND EMCC_LINK_OPTS "-s EXPORTED_RUNTIME_METHODS='${EXPORTED_RUNTIME_METHODS}'")
 list(APPEND EMCC_LINK_OPTS "-s NO_EXIT_RUNTIME=1")
 # NOTE: if you see this failure:
 #     Error: Embedding "preload/lua_scripts" which is below the current directory "build/wasm/out".
