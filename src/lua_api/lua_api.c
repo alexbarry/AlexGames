@@ -16,6 +16,7 @@
 
 #include "utils/str_eq_literal.h"
 #include "lua_api_utils.h"
+#include "alexgames_config.h"
 
 static const bool include_file_line_before_lua_prints = false;
 
@@ -549,10 +550,13 @@ void *init_lua_game(const struct game_api_callbacks *api_callbacks_arg, const ch
 		alex_log("[init] preload_path = \"%s\"\n", preload_path);
 	}
 	// TODO include the game's dirname() directory here
+	alex_log("[lua_init] Old package.path: \"%s\"\n", current_path);
+	alex_log("[lua_init] Including lua_script_dir into package.path: \"%s\"\n", lua_script_dir);
+	alex_log("[lua_init] ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS=\"%s\"\n", ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS);
 	int new_path_len = snprintf(new_path, sizeof(new_path),
-	                            "%s;%s/?.lua;%s/?.lua;%s/?.lua;%s/?.lua",
-	                            current_path, lua_script_dir, preload_path,
-	                            LUA_UPLOAD_DIR, GAME_UPLOAD_PATH);
+	                            "%s;%s/?.lua%s",
+	                            current_path, lua_script_dir,
+	                            ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS);
 	if (new_path_len >= sizeof(new_path)) {
 		alex_log_err("Lua package.path too big, max size %d, actual %d\n", sizeof(new_path), new_path_len);
 		const char path_too_big_err[] = "Lua package.path too big";
@@ -560,8 +564,7 @@ void *init_lua_game(const struct game_api_callbacks *api_callbacks_arg, const ch
 		return NULL;
 	}
 	lua_pop(L, 1);
-	alex_log("[lua_init] Including preload path: \"%s\"\n", preload_path);
-	alex_log("[lua_init] Including upload  path: \"%s\"\n", GAME_UPLOAD_PATH);
+	alex_log("[lua_init] New package.path is: \"%s\"\n", new_path);
 
 	lua_pushstring(L, new_path);
 	lua_setfield(L, -2, "path");
