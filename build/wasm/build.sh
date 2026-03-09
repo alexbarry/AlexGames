@@ -39,6 +39,19 @@ cp -r ../../../img/* ${HTTP_OUT}/img/
 # CMake outputs that I want to be accessible on the HTTP server
 cp -r *.js *.wasm *.data ${HTTP_OUT}/
 
+
+mkdir -p node_out
+cd node_out
+npm init -y
+
+npm install \
+	esbuild \
+
+cp ../../../../src/html/js/main.js ./
+# Note that specifying the ../../....  path as a param to npx esbuild for main.js
+# caused some errors
+npx esbuild main.js --bundle --outfile=../${HTTP_OUT}/bundle.js --global-name=AlexGamesBundle
+
 mkdir -p ${HTTP_OUT}/icon
 cp ../../../img/logo.png ${HTTP_OUT}/icon/logo.png
 
