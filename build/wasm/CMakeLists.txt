@@ -12,6 +12,12 @@ set(HTML_OUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/out/")
 
 set(ENABLE_MEM_SANITIZER 0)
 
+set(ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS_BUILD_SPECIFIC_PREPEND
+	# Files edited by the user via the in-browser Lua editor, stored in IndexedDB.
+	# Must be before preload, so they take precedence over the uneditable preload files.
+	"/alexgames_persistent/?.lua"
+)
+
 set(ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS_BUILD_SPECIFIC_APPEND
 	# Files uploaded by user from zip bundle.
 	# TODO I assume these double slahes can be removed, and I think it can start with a slash
@@ -108,12 +114,16 @@ list(APPEND EXPORTED_FUNCTIONS_WASM
         \"_free\" \
         ]")
 
+list(APPEND EMCC_LINK_OPTS "-lidbfs.js")
 list(APPEND EXPORTED_RUNTIME_METHODS
 	"[ \
 		\"ccall\", \
 		\"cwrap\", \
 		\"setValue\", \
-		\"UTF8ToString\" \
+		\"UTF8ToString\", \
+		\"IDBFS\", \
+		\"FS_readFile\", \
+		\"FS\" \
 	]")
 
 

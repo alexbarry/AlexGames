@@ -46,6 +46,16 @@ npm init -y
 
 npm install \
 	esbuild \
+	codemirror \
+# TODO: include specific modules to reduce build size
+#	@codemirror/basic-setup \
+#	@codemirror/view \
+
+#	@codemirror/commands \
+#	@codemirror/state \
+#	@codemirror/lang-javascript
+
+#	@codemirror/lang-lua
 
 cp ../../../../src/html/js/main.js ./
 # Note that specifying the ../../....  path as a param to npx esbuild for main.js
