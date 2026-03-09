@@ -12,6 +12,12 @@ set(HTML_OUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/out/")
 
 set(ENABLE_MEM_SANITIZER 0)
 
+set(ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS_BUILD_SPECIFIC_APPEND
+	# Files uploaded by user from zip bundle.
+	# TODO I assume these double slahes can be removed, and I think it can start with a slash
+	"upload//?.lua"
+	"/upload/game1/?.lua"
+)
 
 
 set(ENABLE_RUST_GAMES "ON")
