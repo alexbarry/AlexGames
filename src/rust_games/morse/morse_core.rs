@@ -1,4 +1,6 @@
 
+use crate::rust_game_api::TimeMs;
+
 
 #[derive(PartialEq, Clone)]
 pub enum MorseChar {
@@ -9,16 +11,16 @@ pub enum MorseChar {
 }
 
 pub struct State {
-	btn_down_time_ms: Option<u32>,
-	btn_up_time_ms: Option<u32>,
+	btn_down_time_ms: Option<TimeMs>,
+	btn_up_time_ms: Option<TimeMs>,
 	morse_chars: Vec<MorseChar>,
 
 
 	tentative_morse_char: Option<MorseChar>,
 
-	dit_time_ms: u32,
-	new_char_time_ms: u32,
-	new_word_time_ms: u32,
+	dit_time_ms: TimeMs,
+	new_char_time_ms: TimeMs,
+	new_word_time_ms: TimeMs,
 }
 
 const MORSE_TBL: [ (&'static str, &'static str) ; 26 + 10 + 5 ] = [
@@ -99,7 +101,7 @@ impl State {
 		}
 	}
 
-	pub fn btn_down(&mut self, time_ms: u32) {
+	pub fn btn_down(&mut self, time_ms: TimeMs) {
 		if let Some(btn_up_time_ms) = self.btn_up_time_ms {
 			let time_diff = time_ms - btn_up_time_ms;
 			if time_diff < self.new_char_time_ms {
@@ -115,7 +117,7 @@ impl State {
 		self.tentative_morse_char = Some(MorseChar::Short);
 	}
 
-	pub fn btn_up(&mut self, time_ms: u32) {
+	pub fn btn_up(&mut self, time_ms: TimeMs) {
 		if self.btn_down_time_ms.is_none() {
 			return;
 		}
@@ -138,7 +140,7 @@ impl State {
 		self.btn_down_time_ms.is_some()
 	}
 
-	pub fn time_passed(&mut self, time_ms: u32) {
+	pub fn time_passed(&mut self, time_ms: TimeMs) {
 		if let Some(btn_down_time_ms) = self.btn_down_time_ms {
 			let time_diff = time_ms - btn_down_time_ms;
 			self.tentative_morse_char = if time_diff < self.dit_time_ms {
