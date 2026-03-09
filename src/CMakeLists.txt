@@ -13,7 +13,6 @@ set(OUT_DIR_NAME alexgames_core)
 # lua source code (stored outside this repo)
 include(../local_env.cmake)
 
-configure_file("${SRC_DIR}/alexgames_config.h.in" ./alexgames_config.h)
 
 set(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(LIBZIP_DIR "${PROJECT_ROOT}/third_party/libzip/")
@@ -22,6 +21,27 @@ set(SQLITE_DIR "${PROJECT_ROOT}/third_party/sqlite/")
 
 set(LUA_DL_DIR "${PROJECT_ROOT}/third_party/lua/")
 set(WORDLIST_DL_DIR "${PROJECT_ROOT}/third_party/wordlist/")
+
+# For the in-browser Lua editor, it stores files in IndexedDB at this location
+# Must start with a semi colon if not empty.
+set(ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS
+	# Files included from repo in src/lua_scripts
+	# TODO I assume these double slahes can be removed, and I think it can start with a slash
+	"preload//?.lua"
+
+	# Files uploaded by user from zip bundle.
+	# TODO I assume these double slahes can be removed, and I think it can start with a slash
+	"upload//?.lua"
+	"/upload/game1/?.lua"
+)
+
+if(ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS)
+	# If ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS is not empty, it must begin with a semicolon.
+	# To do that, we can add an empty string at the beginning.
+	list(PREPEND ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS "")
+endif()
+
+configure_file("${SRC_DIR}/alexgames_config.h.in" ./alexgames_config.h)
 
 # NOTE: this variable should be set in the build specific cmake files, e.g.
 # build/wasm/CMakeLists.txt . It should point to the target architecture's

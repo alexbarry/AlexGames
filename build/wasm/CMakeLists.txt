@@ -12,23 +12,6 @@ set(HTML_OUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/out/")
 
 set(ENABLE_MEM_SANITIZER 0)
 
-# For the in-browser Lua editor, it stores files in IndexedDB at this location
-# Must start with a semi colon if not empty.
-set(ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS
-
-	# If ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS is not empty, it must begin with a semicolon.
-	# To do that, we can add an empty string at the beginning.
-	""
-
-	# Files included from repo in src/lua_scripts
-	# TODO I assume these double slahes can be removed, and I think it can start with a slash
-	"preload//?.lua"
-
-	# Files uploaded by user from zip bundle.
-	# TODO I assume these double slahes can be removed, and I think it can start with a slash
-	"upload//?.lua"
-	"/upload/game1/?.lua"
-)
 
 
 set(ENABLE_RUST_GAMES "ON")
