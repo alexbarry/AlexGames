@@ -28,12 +28,14 @@ set(ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS
 	# Files included from repo in src/lua_scripts
 	# TODO I assume these double slahes can be removed, and I think it can start with a slash
 	"preload//?.lua"
-
-	# Files uploaded by user from zip bundle.
-	# TODO I assume these double slahes can be removed, and I think it can start with a slash
-	"upload//?.lua"
-	"/upload/game1/?.lua"
 )
+
+if (ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS_BUILD_SPECIFIC_PREPEND)
+	list(PREPEND ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS  ${ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS_BUILD_SPECIFIC_PREPEND})
+endif()
+if (ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS_BUILD_SPECIFIC_APPEND)
+	list(PREPEND ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS  ${ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS_BUILD_SPECIFIC_APPEND})
+endif()
 
 if(ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS)
 	# If ALEXGAMES_LUA_PACKAGE_PATH_ADDITIONS is not empty, it must begin with a semicolon.
