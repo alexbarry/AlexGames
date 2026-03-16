@@ -6,7 +6,8 @@ from __future__ import division
 import asyncio
 import datetime
 import collections
-import websockets
+from websockets.asyncio.server import serve
+import websockets.exceptions
 import random
 import ssl
 import string
@@ -97,7 +98,7 @@ async def client_left(websocket, session_id, client_name):
 		await send_msg(ws, "ctrl", 'player_left:%s' % client_name)
                 # TODO catch websockets.exceptions.ConnectionClosedError here?
 
-async def client_handler(websocket, path):
+async def client_handler(websocket):
 	global total_connections
 	our_name = get_ws_name(websocket)
 	log('Received connection from %r' % our_name)
@@ -204,12 +205,14 @@ To silence this warning, add the --silence_ssl_warning parameter.
 """)
 
 #port = 55433
-log('Hosting server on port %d' % args.port)
-ws_server = websockets.serve(client_handler, host=None, port=args.port, ssl=ssl_ctx)
-loop = asyncio.get_event_loop()
+
+async def main():
+	log('Hosting server on port %d' % args.port)
+	async with serve(client_handler, host=None, port=args.port, ssl=ssl_ctx) as server:
+		await server.serve_forever()
+
 try:
-	loop.run_until_complete(ws_server)
-	loop.run_forever()
+	asyncio.run(main())
 except KeyboardInterrupt:
 	log("KeyboardInterrupt received, exiting.")
 	if total_connections != 0: log("Note that %d connections will be lost" % total_connections)
