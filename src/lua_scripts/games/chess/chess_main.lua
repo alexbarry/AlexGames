@@ -20,12 +20,30 @@ local two_player = require("libs/multiplayer/two_player")
 
 local g_session_id = alexgames.get_new_session_id()
 local g_state = core.new_game()
+local g_pending_move = nil
 --local player = core.PLAYER_WHITE
 local player = nil
 local local_multiplayer = nil
 local player_name_to_id = {}
 local g_other_player = nil
 local session_id = alexgames.get_new_session_id()
+
+local POPUP_ITEM_ID_QUEEN_BTN  = 0
+local POPUP_ITEM_ID_BISHOP_BTN = 1
+local POPUP_ITEM_ID_ROOK_BTN   = 2
+local POPUP_ITEM_ID_KNIGHT_BTN = 3
+
+local BTN_ID_TO_PAWN_PIECE_PROMO_SEL = {
+	[POPUP_ITEM_ID_QUEEN_BTN]  = core.PIECE_QUEEN,
+	[POPUP_ITEM_ID_BISHOP_BTN] = core.PIECE_BISHOP,
+	[POPUP_ITEM_ID_ROOK_BTN]   = core.PIECE_ROOK,
+	[POPUP_ITEM_ID_KNIGHT_BTN] = core.PIECE_KNIGHT,
+}
+
+local WHITE_QUEEN_EMOJI_UTF8  = "\xE2\x99\x95"
+local WHITE_BISHOP_EMOJI_UTF8 = "\xE2\x99\x97"
+local WHITE_ROOK_EMOJI_UTF8   = "\xE2\x99\x96"
+local WHITE_KNIGHT_EMOJI_UTF8 = "\xE2\x99\x98"
 
 local SELECT_PLAYER_POPUP_ID = "select_player"
 local PLAYER_CHOICE_BTNS = {
@@ -36,6 +54,8 @@ local BTN_MAP = {
     [0] = core.PLAYER_WHITE,
     [1] = core.PLAYER_BLACK,
 }
+
+local POPUP_ID_PAWN_PROMOTION_PIECE_SEL = "popup_pawn_promo_piece_sel"
 
 
 local BTN_ID_UNDO = "btn_undo"
@@ -106,10 +126,36 @@ function handle_rc(rc, is_other_player)
 	end
 end
 
+local function show_pawn_promotion_piece_sel_popup()
+	local msg = "Moved pawn to other end of board. Select a piece to promote pawn to:"
+	alexgames.show_popup(POPUP_ID_PAWN_PROMOTION_PIECE_SEL, {
+		title = "Pawn promotion",
+		items = {
+			{ item_type = alexgames.POPUP_ITEM_TYPE_MSG, msg = msg },
+			{ id = POPUP_ITEM_ID_QUEEN_BTN,  item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_QUEEN_EMOJI_UTF8  .. " Queen"  },
+			{ id = POPUP_ITEM_ID_BISHOP_BTN, item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_BISHOP_EMOJI_UTF8 .. " Bishop" },
+			{ id = POPUP_ITEM_ID_ROOK_BTN,   item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_ROOK_EMOJI_UTF8   .. " Rook"   },
+			{ id = POPUP_ITEM_ID_KNIGHT_BTN, item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_KNIGHT_EMOJI_UTF8 .. " Knight" },
+		},
+	})
+
+	-- TODO need to handle popup btn clicked
+end
+
 function handle_user_clicked(pos_y, pos_x)
 	local coords = draw.draw_coords_to_cell(pos_y, pos_x)
-	local rc = core.player_touch(g_state, get_player(), coords)
+	if core.move_is_valid_pawn_promotion(g_state, get_player(), g_state.selected, coords) then
+		show_pawn_promotion_piece_sel_popup()
+		g_pending_move = coords
+	else
+		move_piece_internal(coords, nil)
+	end
+end
+
+function move_piece_internal(coords, pawn_promo_piece_sel)
+	local rc = core.player_touch(g_state, get_player(), coords, pawn_promo_piece_sel)
 	if not local_multiplayer and rc == core.SUCCESS then
+		-- TODO need to broadcast pawn_promo_piece_sel, at least if set?
 		alexgames.send_message("all", string.format("move:%d,%d,%d", get_player(), coords.y, coords.x))
 	end
 	handle_rc(rc)
@@ -127,6 +173,15 @@ function handle_popup_btn_clicked(popup_id, btn_id, popup_state)
 		else	
 			error(string.format("Unhandled btn_id=\"%s\"", btn_id))
 		end
+	elseif popup_id == POPUP_ID_PAWN_PROMOTION_PIECE_SEL then
+		if g_pending_move == nil then
+			error("Selected piece for pawn promotion, but g_pending_move == nil?")
+		end
+		print(string.format("Upon player selecting piece for pawn promotion, completing move to %d %d", g_pending_move.y, g_pending_move.x))
+		local pawn_piece_promo_sel = BTN_ID_TO_PAWN_PIECE_PROMO_SEL[btn_id]
+		move_piece_internal(g_pending_move, pawn_piece_promo_sel)
+		g_pending_move = nil
+		alexgames.hide_popup()
 	else
 		error(string.format("Unhandled popup_id=\"%s\"", popup_id))
 	end
@@ -161,6 +216,7 @@ function handle_msg_received(src, msg)
         y = tonumber(y)
         x = tonumber(x)
 		local coords = { y = y, x = x }
+		-- TODO need to parse and pass the pawn promo piece_sel
         local rc = core.player_touch(g_state, player_idx, coords)
         handle_rc(rc, --[[is_other_player=]] true)
 
