@@ -641,7 +641,7 @@ function get_rook_pts(player)
 	return pts
 end
 
-local function move_piece(state, src, dst)
+local function move_piece(state, src, dst, pawn_promo_piece_sel)
 	--print(string.format("Moving piece %d %d to %d %d", src.y, src.x, dst.y, dst.x))
 	local piece_id = state.board[src.y][src.x]
 	local piece_type = core.get_piece_type(piece_id)
@@ -652,7 +652,12 @@ local function move_piece(state, src, dst)
 
 	local state_copy = core.copy_state(state)
 	state_copy.board[src.y][src.x] = core.EMPTY_PIECE_ID
-	state_copy.board[dst.y][dst.x] = piece_id
+
+	local new_piece_id = piece_id
+	if pawn_promo_piece_sel ~= nil then
+		new_piece_id = core.get_piece_id(this_player, pawn_promo_piece_sel)
+	end
+	state_copy.board[dst.y][dst.x] = new_piece_id
 	state_copy.selected = nil
 	state_copy.player_turn = get_other_player(state.player_turn)
 	if core.in_check(state_copy, this_player) then
@@ -669,7 +674,7 @@ local function move_piece(state, src, dst)
 	end
 
 	state.board[src.y][src.x] = core.EMPTY_PIECE_ID
-	state.board[dst.y][dst.x] = piece_id
+	state.board[dst.y][dst.x] = new_piece_id
 	state.selected = nil
 	state.player_turn = get_other_player(state.player_turn)
 	state.game_status = core.get_game_status(state)
@@ -714,6 +719,7 @@ function core.get_game_status(state)
 		return core.GAME_STATUS_NORMAL
 	else
 		for _, src_pos in ipairs(get_player_pieces(state, state.player_turn)) do
+			-- TODO need to make get_possib_dsts try every possible pawn promo piece, too?
 			for _, dst_pos in ipairs(core.get_possib_dsts(state, src_pos)) do
 				local state_copy = core.copy_state(state)
 				local rc = move_piece(state_copy, src_pos, dst_pos)
@@ -726,7 +732,39 @@ function core.get_game_status(state)
 	end
 end
 
-function core.player_touch(state, player, coords)
+function core.move_is_valid_pawn_promotion(state, player, selected, dst)
+	if selected == nil or dst == nil then
+		return false
+	end
+
+	if player ~= state.player_turn then
+		return false
+	end
+
+	if not is_valid_move_pos(state, selected, dst) then
+		return false
+	end
+
+	local selected_piece_id = state.board[selected.y][selected.x]
+
+	if core.get_player(selected_piece_id) ~= player then
+		return false
+	end
+
+	if core.get_piece_type(selected_piece_id) == core.PIECE_PAWN then
+		if player == core.PLAYER_BLACK  then
+			return selected.y == core.BOARD_SIZE - 1 and dst.y == core.BOARD_SIZE
+		elseif player == core.PLAYER_WHITE then
+			return selected.y == 2 and dst.y == 1
+		else
+			error(string.format("Unhandled player %s", player))
+		end
+	end
+
+
+end
+
+function core.player_touch(state, player, coords, pawn_promo_piece_sel)
 	if player ~= state.player_turn then
 		return core.NOT_YOUR_TURN
 	end
@@ -761,7 +799,7 @@ function core.player_touch(state, player, coords)
 				return core.SUCCESS
 			else
 				--print(string.format("calling move_piece(src=%s, dst=%s)", pt_to_string(state.selected), pt_to_string(coords)))
-				local rc = move_piece(state, state.selected, coords)
+				local rc = move_piece(state, state.selected, coords, pawn_promo_piece_sel)
 				if rc == core.RC_CANT_MOVE_INTO_CHECK then
 					if core.in_check(state, state.player_turn) then
 						return core.RC_MUST_RESOLVE_CHECK
