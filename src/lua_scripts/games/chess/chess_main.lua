@@ -264,6 +264,27 @@ end
 
 function save_state()
 	local serialized_state = serialize.serialize_state(g_state)
+	-- TODO debug only
+	if true then
+		local deserialized_state = serialize.deserialize_state(serialized_state)
+		local serialized_state2 = serialize.serialize_state(deserialized_state)
+		if not core.states_eq(g_state, deserialized_state) then
+			print("g_state = ")
+			core.print_state(g_state)
+			print('###################################')
+			print('')
+
+			print("deserialized_state = ")
+			core.print_state(deserialized_state)
+			print('###################################')
+			print('')
+
+			error(string.format("serializing and deserializing did not produce the same state table"))
+		end
+		if serialized_state2 ~= serialized_state then
+			error(string.format("serializing, deserialize and re-serializing did not produce the same output"))
+		end
+	end
 	alexgames.save_state(g_session_id, serialized_state)
 end
 

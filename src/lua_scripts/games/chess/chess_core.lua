@@ -31,6 +31,11 @@ core.RC_MUST_RESOLVE_CHECK   = 4
 core.RC_GAME_OVER            = 5
 --core.INVALID_MOVE   = 2
 
+core.POS_ROOK1_BLACK = 11
+core.POS_ROOK2_BLACK = 18
+core.POS_ROOK1_WHITE = 81
+core.POS_ROOK2_WHITE = 88
+
 local ERROR_CODE_MAP = {
 	[core.SUCCESS]        = "Success",
 	[core.NOT_YOUR_PIECE] = "Not your piece",
@@ -83,8 +88,21 @@ function core.new_game()
 	local state = {
 		player_turn = core.PLAYER_WHITE,
 		board = {},
-		selected = nil
+		selected = nil,
+		game_status = core.GAME_STATUS_NORMAL,
+
+		-- TODO could combine these into "castling_possible" for left and right
+		-- for each player. Clear both left and right if king moves.
+		rooks_moved = {},
+		kings_moved = {},
 	}
+
+	state.rooks_moved[core.POS_ROOK1_BLACK] = false
+	state.rooks_moved[core.POS_ROOK2_BLACK] = false
+	state.rooks_moved[core.POS_ROOK1_WHITE] = false
+	state.rooks_moved[core.POS_ROOK2_WHITE] = false
+	state.kings_moved[core.PLAYER_WHITE] = false
+	state.kings_moved[core.PLAYER_BLACK] = false
 
 	for y=1,core.BOARD_SIZE do
 		state.board[y] = {}
@@ -125,13 +143,23 @@ local function copy_coords(pos)
 	return { y = pos.y, x = pos.x }
 end
 
-local function copy_state(state)
+function core.copy_state(state)
 	local new_state = {
 		player_turn = state.player_turn,
 		board       = {},
 		selected    = copy_coords(state.selected),
 		game_status = nil,
+		kings_moved = {},
+		rooks_moved = {},
 	}
+
+	for key, val in pairs(state.kings_moved) do
+		new_state.kings_moved[key] = val
+	end
+
+	for key, val in pairs(state.rooks_moved) do
+		new_state.rooks_moved[key] = val
+	end
 
 	for y=1,core.BOARD_SIZE do
 		new_state.board[y] = {}
@@ -141,6 +169,97 @@ local function copy_state(state)
 	end
 
 	return new_state
+end
+
+local function pts_eq(pt1, pt2)
+	if pt1 == nil and pt2 == nil then
+		return true
+	elseif pt1 == nil or pt2 == nil then
+		return false
+	else
+		return pt1.y == pt2.y and pt1.x == pt2.x
+	end
+end
+
+local function boards_eq(board1, board2)
+	for y=1,core.BOARD_SIZE do
+		for x=1,core.BOARD_SIZE do
+			if board1[y][x] ~= board2[y][x] then
+				return false
+			end
+		end
+	end
+	return true
+end
+
+local function empty_in_between_pts_x(state, pt1, pt2)
+	if pt1.y ~= pt2.y then
+		error(string.format("empty_in_between_pts_x called with pts having different y values: pt1.y = %s, pt2.y = %s", pt1.y, pt2.y))
+	end
+
+	local y = pt1.y
+	local x1 = math.min(pt1.x, pt2.x)
+	local x2 = math.max(pt1.x, pt2.x)
+
+	for x=(x1+1),(x2-1) do
+		if state.board[y][x] ~= core.EMPTY_PIECE_ID then
+			return false
+		end
+	end
+
+	return true
+end
+
+local function can_castle(state, player, rook_pt)
+	local rook_pos_id = get_rooks_moved_pos_id(rook_pt)
+	local king_pt = get_king_pos(player)
+
+	if rook_pos_id == nil then
+		return false
+	end
+
+	local rook_piece = state.board[rook_pt.y][rook_pt.x] 
+	local king_piece = state.board[king_pt.y][king_pt.x] 
+
+	if core.get_player(rook_piece) ~= player or core.get_player(king_piece) ~= player then
+		return false
+	end
+
+	if state.kings_moved[player] or state.rooks_moved[rook_pos_id] then
+		return false
+	end
+
+
+	if  (core.get_piece_type(rook_piece) ~= core.PIECE_ROOK or
+	     core.get_piece_type(king_piece) ~= core.PIECE_KING) then
+		-- This should never be possible, unless the state is saved from the older
+		-- version that didn't track `rooks_moved` and just defaults it to false.
+		-- Otherwise, if the rook/king didn't move, then the piece should be what
+		-- we expect.
+		return false
+	end
+
+	if player ~= state.player_turn then
+		return false
+	end
+
+	return empty_in_between_pts_x(state, king_pt, rook_pt)
+	
+end
+
+function core.states_eq(state1, state2)
+	return (
+		state1.player_turn == state2.player_turn and
+		--pts_eq(state1.selected, state2.selected) and
+		boards_eq(state1.board, state2.board) and
+		--state1.game_status == state2.game_status and
+		state1.kings_moved[core.PLAYER_WHITE] == state2.kings_moved[core.PLAYER_WHITE] and
+		state1.kings_moved[core.PLAYER_BLACK] == state2.kings_moved[core.PLAYER_BLACK] and
+		state1.rooks_moved[core.POS_ROOK1_WHITE] == state2.rooks_moved[core.POS_ROOK1_WHITE] and
+		state1.rooks_moved[core.POS_ROOK2_WHITE] == state2.rooks_moved[core.POS_ROOK2_WHITE] and
+		state1.rooks_moved[core.POS_ROOK1_BLACK] == state2.rooks_moved[core.POS_ROOK1_BLACK] and
+		state1.rooks_moved[core.POS_ROOK2_BLACK] == state2.rooks_moved[core.POS_ROOK2_BLACK]
+	)
 end
 
 function core.get_player_name(player)
@@ -202,6 +321,13 @@ local function piece_id_to_hr_str(piece_id)
 	return get_player_letter(player) .. get_piece_letter(piece_type)
 end
 
+local function pt_to_string(pt)
+	if pt == nil then return "nil"
+	else
+		return string.format("{ y=%d, x=%d }", pt.y, pt.x)
+	end
+end
+
 function core.print_state(state)
 	--          1  2  3  4  5  6  7  8
 	row_sep = '+--+--+--+--+--+--+--+--+'
@@ -219,6 +345,17 @@ function core.print_state(state)
 		end
 		io.write('\n' .. row_sep .. '\n')
 	end
+	io.write(string.format("- player_turn: %s\n", core.get_player_name(state.player_turn)))
+	io.write(string.format("- player_selected: %s\n", pt_to_string(state.selected)))
+	io.write(string.format("- game_status: %s\n", state.game_status))
+	io.write("- pieces moved (for castling):\n")
+	io.write(string.format("    black king:  %s\n", state.kings_moved[core.PLAYER_BLACK]))
+	io.write(string.format("    black rook1: %s\n", state.rooks_moved[core.POS_ROOK1_BLACK]))
+	io.write(string.format("    black rook2: %s\n", state.rooks_moved[core.POS_ROOK2_BLACK]))
+	io.write(string.format("    white king:  %s\n", state.kings_moved[core.PLAYER_WHITE]))
+	io.write(string.format("    white rook1: %s\n", state.rooks_moved[core.POS_ROOK1_WHITE]))
+	io.write(string.format("    white rook2: %s\n", state.rooks_moved[core.POS_ROOK2_WHITE]))
+	io.write("--------------------------------------\n")
 end
 
 local function get_piece_move_cells(piece_type, dy, dx)
@@ -264,12 +401,39 @@ local function get_player_rel_delta_pos(player, src, dst)
 	return { dy = dy, dx = dx }
 end
 
+local function move_is_castle(player, src, dst)
+	--print(string.format("move_is_castle(src=(%d,%d), dst=(%d,%d)", src.y, src.x, dst.y, dst.x))
+	if not pts_eq(src, get_king_pos(player)) then
+		--print(string.format("move_is_castle returning false because ne to king pos %d %d", get_king_pos(player).y, get_king_pos(player).x))
+		return false
+	end
+	return src.y == dst.y and math.abs(src.x - dst.x) == 2
+end
+
+local function get_castle_rook_pt_from_king_dst(player, king_dst)
+	local king_src = get_king_pos(player)
+	--print(string.format("get_castle_rook_pt_from_king_dst(king_dst=(%d,%d), king_src=(%d,%d))", king_dst.y, king_dst.x, king_src.y, king_dst.x))
+	if not move_is_castle(player, king_src, king_dst) then
+		error(string.format("get_castle_rook_pt_from_king_dst called when move is not castle"))
+	end
+	local y = king_dst.y
+	local x
+	if king_dst.x < 5 then
+		x = 1
+	else
+		x = 8
+	end
+
+	return { y = y, x = x }
+end
+
 -- Checks if a move can be made by that kind of piece, and that
 -- no pieces are in the way.
 -- Does not check if the move results in check or checkmate. (i.e.
 -- this can return true for moves that would put your own king in check)
 -- Also doesn't check for castling or en passant
 local function is_valid_move_pos(state, src, dst)
+	-- print(string.format("is_valid_move_pos(src=(%d,%d), dst=(%d,%d))", src.y, src.x, dst.y, dst.x))
 	local src_piece_id = state.board[src.y][src.x]
 	local dst_piece_id = state.board[dst.y][dst.x]
 
@@ -295,6 +459,11 @@ local function is_valid_move_pos(state, src, dst)
 		else
 			return false
 		end
+	elseif src_piece_type == core.PIECE_KING and move_is_castle(src_player, src, dst) then
+		--print(string.format("is_valid_move_pos... calling get_castle_rook_pt_from_king_dst(dst=(%d,%d)", dst.y, dst.x))
+		local rook_pt = get_castle_rook_pt_from_king_dst(src_player, dst)
+		--print("is_valid_move_pos... done calling get_castle_rook_pt_from_king_dst")
+		return can_castle(state, src_player, rook_pt)
 	elseif get_piece_move_cells(src_piece_type, dy, dx) then
 		return dst_piece_id == core.EMPTY_PIECE_ID or dst_player ~= src_player
 	else
@@ -344,6 +513,14 @@ function core.get_possib_dsts(state, src)
 		end
 	end
 
+	if piece_type == core.PIECE_KING then
+		for _, rook_pos in ipairs(get_rook_pts(player)) do
+			if can_castle(state, state.player_turn, rook_pos) then
+				table.insert(possib_dsts, get_king_castle_dst(state.player_turn, rook_pos))
+			end
+		end
+	end
+
 	return possib_dsts
 end
 
@@ -375,14 +552,105 @@ function core.in_check(state, player)
 	return false
 end
 
+function get_rooks_moved_pos_id(pt)
+	if pt.y == 1 and pt.x == 1 then
+		return core.POS_ROOK1_BLACK
+	elseif pt.y == 1 and pt.x == 8 then
+		return core.POS_ROOK2_BLACK
+	elseif pt.y == 8 and pt.x == 1 then
+		return core.POS_ROOK1_WHITE
+	elseif pt.y == 8 and pt.x == 8 then
+		return core.POS_ROOK2_WHITE
+	end
+end
+
+function get_king_pos(player)
+	if player == core.PLAYER_BLACK then
+		return { y = 1, x = 5 }
+	elseif player == core.PLAYER_WHITE then
+		return { y = 8, x = 5 }
+	else
+		error(string.format("Unhandled player %s passed to get_king_pos", player))
+	end
+end
+
+function get_king_castle_dst(player, rook_pos)
+	local king_pos = get_king_pos(player)
+
+	local x = king_pos.x
+	if rook_pos.x < king_pos.x then
+		x = x - 2
+	else
+		x = x + 2
+	end
+
+	return { y = king_pos.y, x = x }
+end
+
+function get_rook_pos(player, rook_id)
+	local y, x
+
+	if rook_id == 1 then
+		x = 1
+	elseif rook_id == 2 then
+		x = 8
+	else
+		error(string.format("Invalid rook_id %s, expected 1 or 2", rook_id))
+	end
+
+	if player == core.PLAYER_BLACK then
+		y = 1
+	elseif player == core.PLAYER_WHITE then
+		y = 8
+	else
+		error(string.format("Unhandled player %s", player))
+	end
+
+	return { y = y, x = x }
+end
+
+local function get_rook_pt_from_castle_dst(player, dst)
+	local king_pos = get_king_pos(player)
+	local rook_id
+	if dst.x < king_pos.x then
+		rook_id = 1
+	else
+		rook_id = 2
+	end
+
+	return get_rook_pos(player, rook_id)
+end
+
+local function get_rook_dst_from_castling(player, rook_pt)
+	local king_pos = get_king_pos(player)
+	local x
+	if rook_pt.x < king_pos.x then
+		x = king_pos.x - 1
+	else
+		x = king_pos.x + 1
+	end
+
+	return { y = king_pos.y, x = x }
+end
+
+function get_rook_pts(player)
+	local pts = {}
+	for i=1,2 do
+		table.insert(pts, get_rook_pos(player, i))
+	end
+	return pts
+end
+
 local function move_piece(state, src, dst)
+	--print(string.format("Moving piece %d %d to %d %d", src.y, src.x, dst.y, dst.x))
 	local piece_id = state.board[src.y][src.x]
+	local piece_type = core.get_piece_type(piece_id)
 	local this_player = core.get_player(piece_id)
 	if piece_id == core.EMPTY_PIECE_ID then
 		return core.SUCCESS
 	end
 
-	local state_copy = copy_state(state)
+	local state_copy = core.copy_state(state)
 	state_copy.board[src.y][src.x] = core.EMPTY_PIECE_ID
 	state_copy.board[dst.y][dst.x] = piece_id
 	state_copy.selected = nil
@@ -391,11 +659,34 @@ local function move_piece(state, src, dst)
 		return core.RC_CANT_MOVE_INTO_CHECK
 	end
 
+	local rooks_moved_pos_id = get_rooks_moved_pos_id(src)
+	if rooks_moved_pos_id ~= nil then
+		state.rooks_moved[rooks_moved_pos_id] = true
+	end
+
+	if piece_type == core.PIECE_KING then
+		state.kings_moved[this_player] = true
+	end
+
 	state.board[src.y][src.x] = core.EMPTY_PIECE_ID
 	state.board[dst.y][dst.x] = piece_id
 	state.selected = nil
 	state.player_turn = get_other_player(state.player_turn)
 	state.game_status = core.get_game_status(state)
+
+	if piece_type == core.PIECE_KING and move_is_castle(this_player, src, dst) then
+		--print("Applying castling move...")
+		local rook_pos = get_rook_pt_from_castle_dst(this_player, dst)
+		local new_rook_pos = get_rook_dst_from_castling(this_player, dst)
+		local this_player_rook = state.board[rook_pos.y][rook_pos.x]
+		assert(core.get_player(this_player_rook) == this_player)
+		assert(core.get_piece_type(this_player_rook) == core.PIECE_ROOK)
+		assert(state.board[new_rook_pos.y][new_rook_pos.x] == core.EMPTY_PIECE_ID)
+		state.board[rook_pos.y][rook_pos.x] = core.EMPTY_PIECE_ID
+		state.board[new_rook_pos.y][new_rook_pos.x] = this_player_rook
+		state.rooks_moved[get_rooks_moved_pos_id(rook_pos)] = true
+	end
+
 	if state.game_status == core.GAME_STATUS_CHECKMATE then
 		return core.RC_GAME_OVER
 	end
@@ -424,7 +715,7 @@ function core.get_game_status(state)
 	else
 		for _, src_pos in ipairs(get_player_pieces(state, state.player_turn)) do
 			for _, dst_pos in ipairs(core.get_possib_dsts(state, src_pos)) do
-				local state_copy = copy_state(state)
+				local state_copy = core.copy_state(state)
 				local rc = move_piece(state_copy, src_pos, dst_pos)
 				if rc == core.SUCCESS then
 					return core.GAME_STATUS_CHECK
@@ -450,6 +741,7 @@ function core.player_touch(state, player, coords)
 			return core.SUCCESS
 		end
 	else
+		--print(string.format("player_touch(coords=(%d,%d)); selected=%s", coords.y, coords.x, pt_to_string(state.selected)))
 		if coords == nil or coords_eq(coords, state.selected) then
 			state.selected = nil
 			return core.SUCCESS
@@ -468,6 +760,7 @@ function core.player_touch(state, player, coords)
 				end
 				return core.SUCCESS
 			else
+				--print(string.format("calling move_piece(src=%s, dst=%s)", pt_to_string(state.selected), pt_to_string(coords)))
 				local rc = move_piece(state, state.selected, coords)
 				if rc == core.RC_CANT_MOVE_INTO_CHECK then
 					if core.in_check(state, state.player_turn) then
