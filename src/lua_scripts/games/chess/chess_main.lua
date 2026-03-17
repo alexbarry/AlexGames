@@ -2,12 +2,8 @@
 -- Author: Alex Barry (github.com/alexbarry)
 --[[
 TODO:
-* implement logic for check and checkmate
-* prevent player from moving into check
-* implement serializing state so state can be saved or network games can be played
-* implement castling
-* implement pawn en-passant capturing?? (I didn't even know about this rule)
-* implement history (undo/redo)
+* add indicator of previous move
+* log moves to text box, both in proper chess notation, and something easier to read (e.g. piece moved from src to dst, capturing other_piece)
 --]]
 local alexgames = require("alexgames")
 
