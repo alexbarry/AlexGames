@@ -138,8 +138,6 @@ local function show_pawn_promotion_piece_sel_popup()
 			{ id = POPUP_ITEM_ID_KNIGHT_BTN, item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_KNIGHT_EMOJI_UTF8 .. " Knight" },
 		},
 	})
-
-	-- TODO need to handle popup btn clicked
 end
 
 function handle_user_clicked(pos_y, pos_x)
@@ -155,8 +153,11 @@ end
 function move_piece_internal(coords, pawn_promo_piece_sel)
 	local rc = core.player_touch(g_state, get_player(), coords, pawn_promo_piece_sel)
 	if not local_multiplayer and rc == core.SUCCESS then
-		-- TODO need to broadcast pawn_promo_piece_sel, at least if set?
-		alexgames.send_message("all", string.format("move:%d,%d,%d", get_player(), coords.y, coords.x))
+		local msg_suffix = ''
+		if pawn_promo_piece_sel ~= nil then
+			msg_suffix = string.format(',%d', pawn_promo_piece_sel)
+		end
+		alexgames.send_message("all", string.format("move:%d,%d,%d%s", get_player(), coords.y, coords.x, msg_suffix))
 	end
 	handle_rc(rc)
 	--core.print_state(g_state)
@@ -206,18 +207,22 @@ function handle_msg_received(src, msg)
     local header, payload = m()
 
     if header == "move" then
-        local m2 = payload:gmatch("(%d+),(%d+),(%d+)")
+        local m2 = payload:gmatch("(%d+),(%d+),(%d+),?(%d*)")
         if m2 == nil then
             error("Invalid \"move\" msg from " .. src)
             return
         end
-        local player_idx, y, x = m2()
+        local player_idx, y, x, pawn_promo_piece_sel = m2()
         player_idx = tonumber(player_idx)
         y = tonumber(y)
         x = tonumber(x)
-		local coords = { y = y, x = x }
-		-- TODO need to parse and pass the pawn promo piece_sel
-        local rc = core.player_touch(g_state, player_idx, coords)
+        if #pawn_promo_piece_sel then
+            pawn_promo_piece_sel = tonumber(pawn_promo_piece_sel)
+        else
+            pawn_promo_piece_sel = nil
+        end
+        local coords = { y = y, x = x }
+        local rc = core.player_touch(g_state, player_idx, coords, pawn_promo_piece_sel)
         handle_rc(rc, --[[is_other_player=]] true)
 
         if rc ~= core.SUCCESS then

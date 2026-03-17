@@ -719,7 +719,11 @@ function core.get_game_status(state)
 		return core.GAME_STATUS_NORMAL
 	else
 		for _, src_pos in ipairs(get_player_pieces(state, state.player_turn)) do
-			-- TODO need to make get_possib_dsts try every possible pawn promo piece, too?
+			-- Do I need to make get_possib_dsts try every possible pawn promo piece, too?
+			-- I don't think so, this just tests if you can move out of check, and aren't
+			-- stuck in checkmate. I don't think that it ever makes a difference what you promote the pawn
+			-- to, as far as preventing the king from being captured on the next move. A pawn
+			-- blocks an opposing piece the same as any other.
 			for _, dst_pos in ipairs(core.get_possib_dsts(state, src_pos)) do
 				local state_copy = core.copy_state(state)
 				local rc = move_piece(state_copy, src_pos, dst_pos)
