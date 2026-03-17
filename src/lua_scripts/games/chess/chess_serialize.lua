@@ -6,8 +6,9 @@ local serialize_lib = require("libs/serialize/serialize")
 
 serialize.VERSION_1 = 1
 serialize.VERSION_2 = 2
+serialize.VERSION_3 = 3
 
-serialize.CURRENT_VERSION = serialize.VERSION_2
+serialize.CURRENT_VERSION = serialize.VERSION_3
 
 function serialize.deserialize_state(byte_str)
 	local bytes = serialize_lib.bytestr_to_byteary(byte_str)
@@ -21,6 +22,7 @@ function serialize.deserialize_state(byte_str)
 	local state = {}
 	state.rooks_moved = {}
 	state.kings_moved = {}
+	state.pawn_moved_two_squares = 0
 
 	if version == serialize.VERSION_1 then
 		state.rooks_moved[core.POS_ROOK1_BLACK] = false
@@ -30,14 +32,18 @@ function serialize.deserialize_state(byte_str)
 		state.kings_moved[core.PLAYER_WHITE]    = false
 		state.kings_moved[core.PLAYER_BLACK]    = false
 
-	elseif version == serialize.VERSION_2 then
-	local pieces_moved_bitfield = serialize_lib.deserialize_byte(bytes)
+	elseif version == serialize.VERSION_2 or version == serialize.VERSION_3 then
+		local pieces_moved_bitfield = serialize_lib.deserialize_byte(bytes)
 		state.rooks_moved[core.POS_ROOK1_BLACK] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 0))
 		state.rooks_moved[core.POS_ROOK2_BLACK] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 1))
 		state.rooks_moved[core.POS_ROOK1_WHITE] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 2))
 		state.rooks_moved[core.POS_ROOK2_WHITE] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 3))
 		state.kings_moved[core.PLAYER_WHITE]    = utils.number_to_boolean(pieces_moved_bitfield & (1 << 4))
 		state.kings_moved[core.PLAYER_BLACK]    = utils.number_to_boolean(pieces_moved_bitfield & (1 << 5))
+
+		if version == serialize.VERSION_3 then
+			state.pawn_moved_two_squares = serialize_lib.deserialize_byte(bytes)
+		end
 	else
 		error(string.format("Unhandled serialized chess state, version %d", version))
 	end
@@ -73,6 +79,8 @@ function serialize.serialize_state(state)
 	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.kings_moved[core.PLAYER_BLACK]) * (1 << 5)
 
 	output = output .. serialize_lib.serialize_byte(pieces_moved_bitfield)
+
+	output = output .. serialize_lib.serialize_byte(state.pawn_moved_two_squares)
 
 	output = output .. serialize_lib.serialize_byte(state.player_turn)
 	for y=1,core.BOARD_SIZE do
