@@ -325,6 +325,7 @@ end
 
 function save_state()
 	local serialized_state = serialize.serialize_state(g_state)
+	--[[
 	-- TODO debug only
 	if true then
 		local deserialized_state = serialize.deserialize_state(serialized_state)
@@ -346,6 +347,7 @@ function save_state()
 			error(string.format("serializing, deserialize and re-serializing did not produce the same output"))
 		end
 	end
+	--]]
 	alexgames.save_state(g_session_id, serialized_state)
 end
 
