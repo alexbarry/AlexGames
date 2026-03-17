@@ -366,6 +366,7 @@ function handle_game_option_evt(option_id)
 		g_session_id = alexgames.get_new_session_id()
 		g_state = core.new_game()
 		save_state()
+		broadcast_state("all")
 		draw_board_internal()
 	end
 end
