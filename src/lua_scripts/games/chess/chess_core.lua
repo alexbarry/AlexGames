@@ -91,6 +91,11 @@ function core.new_game()
 		selected = nil,
 		game_status = core.GAME_STATUS_NORMAL,
 
+		-- Set to the column if the previous player moved
+		-- their pawn two squares. This is used for determining
+		-- if en passant capture is permitted on the next move.
+		pawn_moved_two_squares = 0,
+
 		-- TODO could combine these into "castling_possible" for left and right
 		-- for each player. Clear both left and right if king moves.
 		rooks_moved = {},
@@ -149,6 +154,7 @@ function core.copy_state(state)
 		board       = {},
 		selected    = copy_coords(state.selected),
 		game_status = nil,
+		pawn_moved_two_squares = state.pawn_moved_two_squares,
 		kings_moved = {},
 		rooks_moved = {},
 	}
@@ -253,6 +259,7 @@ function core.states_eq(state1, state2)
 		--pts_eq(state1.selected, state2.selected) and
 		boards_eq(state1.board, state2.board) and
 		--state1.game_status == state2.game_status and
+		state1.pawn_moved_two_squares == state2.pawn_moved_two_squares and
 		state1.kings_moved[core.PLAYER_WHITE] == state2.kings_moved[core.PLAYER_WHITE] and
 		state1.kings_moved[core.PLAYER_BLACK] == state2.kings_moved[core.PLAYER_BLACK] and
 		state1.rooks_moved[core.POS_ROOK1_WHITE] == state2.rooks_moved[core.POS_ROOK1_WHITE] and
@@ -347,6 +354,7 @@ function core.print_state(state)
 	end
 	io.write(string.format("- player_turn: %s\n", core.get_player_name(state.player_turn)))
 	io.write(string.format("- player_selected: %s\n", pt_to_string(state.selected)))
+	io.write(string.format("- pawn_moved_two_squares: %s\n", state.pawn_moved_two_squares))
 	io.write(string.format("- game_status: %s\n", state.game_status))
 	io.write("- pieces moved (for castling):\n")
 	io.write(string.format("    black king:  %s\n", state.kings_moved[core.PLAYER_BLACK]))
@@ -455,7 +463,14 @@ local function is_valid_move_pos(state, src, dst)
 				        state.board[src.y+2*get_player_move_dir(src_player)][src.x] == core.EMPTY_PIECE_ID)
 			end
 		elseif math.abs(dx) == 1 and dy == 1 then
-			return core.get_player(dst_piece_id) == get_other_player(src_player)
+			local this_player = core.get_player(dst_piece_id)
+			if this_player == get_other_player(src_player) then
+				return true
+			elseif can_en_passant_capture(state, src_player, src, dst) then
+				return true
+			else
+				return false
+			end
 		else
 			return false
 		end
@@ -641,6 +656,53 @@ function get_rook_pts(player)
 	return pts
 end
 
+local function get_en_passant_capture_pos(state, player, src, dst)
+	local other_player = get_other_player(player)
+	local other_player_move_dir = get_player_move_dir(other_player)
+	return {
+		y = get_player_pawn_row(other_player) + 2 * other_player_move_dir,
+		x = dst.x
+	}
+end
+
+function can_en_passant_capture(state, player, src, dst)
+	if player ~= state.player_turn then
+		return false
+	end
+
+	local other_player = get_other_player(player)
+	local other_player_move_dir = get_player_move_dir(other_player)
+
+	local en_passant_capture_y = get_player_pawn_row(other_player) + other_player_move_dir
+	local other_player_pawn_y = get_player_pawn_row(other_player) + 2 * other_player_move_dir
+
+	if state.pawn_moved_two_squares ~= dst.x or
+	   dst.y ~= en_passant_capture_y then
+		return false
+	end
+
+	if core.get_piece_type(state.board[other_player_pawn_y][dst.x]) ~= core.PIECE_PAWN then
+		error(string.format("state.pawn_moved_two_squares is set, but could not find pawn at expected spot %d %d", other_player_pawn_y, dst.x))
+	end
+
+	return true
+end
+
+local function move_is_en_passant_capture(state, src, dst)
+	local src_piece_id = state.board[src.y][src.x]
+	local dst_piece_id = state.board[dst.y][dst.x]
+
+	if core.get_piece_type(src_piece_id) ~= core.PIECE_PAWN then
+		return false
+	end
+
+	if math.abs(dst.x - src.x) ~= 1 or dst_piece_id ~= core.EMPTY_PIECE_ID then
+		return false
+	end
+
+	return true
+end
+
 local function move_piece(state, src, dst, pawn_promo_piece_sel)
 	--print(string.format("Moving piece %d %d to %d %d", src.y, src.x, dst.y, dst.x))
 	local piece_id = state.board[src.y][src.x]
@@ -671,6 +733,21 @@ local function move_piece(state, src, dst, pawn_promo_piece_sel)
 
 	if piece_type == core.PIECE_KING then
 		state.kings_moved[this_player] = true
+	end
+
+	if piece_type == core.PIECE_PAWN and math.abs(src.y - dst.y) == 2 then
+		assert(src.x == dst.x)
+		if src.y ~= get_player_pawn_row(this_player) then
+			error(string.format("Moved pawn two squares from row %d?", src.y))
+		end
+		state.pawn_moved_two_squares = src.x
+	else
+		state.pawn_moved_two_squares = 0
+	end
+
+	if move_is_en_passant_capture(state, src, dst) then
+		local to_capture = get_en_passant_capture_pos(state, this_player, src, dst)
+		state.board[to_capture.y][to_capture.x] = core.EMPTY_PIECE_ID
 	end
 
 	state.board[src.y][src.x] = core.EMPTY_PIECE_ID
