@@ -8,11 +8,11 @@ serialize.VERSION_1 = 1
 serialize.VERSION_2 = 2
 serialize.VERSION_3 = 3
 serialize.VERSION_4 = 4
+serialize.VERSION_5 = 5
 
-serialize.CURRENT_VERSION = serialize.VERSION_4
+serialize.CURRENT_VERSION = serialize.VERSION_5
 
-local function deserialize_pt(bytes)
-	local byte = serialize_lib.deserialize_byte(bytes)
+local function byte_to_pt(byte)
 	y = byte & 0xf
 	x = (byte >> 4) & 0xf
 	return {
@@ -21,7 +21,12 @@ local function deserialize_pt(bytes)
 	}
 end
 
-local function serialize_pt(pt)
+local function deserialize_pt(bytes)
+	local byte = serialize_lib.deserialize_byte(bytes)
+	return byte_to_pt(byte)
+end
+
+local function pt_to_byte(pt)
 	local val
 
 	if pt == nil then
@@ -30,7 +35,12 @@ local function serialize_pt(pt)
 		val = (pt.y & 0xf) | ( (pt.x & 0xf) << 4 )
 	end
 
-	return string.char(val)
+	return val
+end
+
+local function serialize_pt(pt)
+	local byte = pt_to_byte(pt)
+	return string.char(byte)
 end
 
 function serialize.deserialize_state(byte_str)
@@ -57,7 +67,8 @@ function serialize.deserialize_state(byte_str)
 
 	elseif (version == serialize.VERSION_2 or
 	        version == serialize.VERSION_3 or
-	        version == serialize.VERSION_4) then
+	        version == serialize.VERSION_4 or
+	        version == serialize.VERSION_5) then
 		local pieces_moved_bitfield = serialize_lib.deserialize_byte(bytes)
 		state.rooks_moved[core.POS_ROOK1_BLACK] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 0))
 		state.rooks_moved[core.POS_ROOK2_BLACK] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 1))
@@ -70,10 +81,11 @@ function serialize.deserialize_state(byte_str)
 			state.pawn_moved_two_squares = serialize_lib.deserialize_byte(bytes)
 		end
 
-		if version == serialize.VERSION_4 then
+		if version >= serialize.VERSION_4 then
 			state.prev_move_src = deserialize_pt(bytes)
 			state.prev_move_dst = deserialize_pt(bytes)
 		end
+
 	else
 		error(string.format("Unhandled serialized chess state, version %d", version))
 	end
@@ -88,6 +100,22 @@ function serialize.deserialize_state(byte_str)
 		end
 	end
 	state.game_status = core.get_game_status(state)
+
+
+	state.moves = {}
+	if version >= serialize.VERSION_5 then
+		local moves_bytes = serialize_lib.deserialize_bytes(bytes)
+		if #moves_bytes % 2 ~= 0 then
+			error(string.format("Encountered %d bytes of moves points, expected even number"))
+		end
+
+		for i=1,#moves_bytes, 2 do
+			local src = byte_to_pt(moves_bytes[i])
+			local dst = byte_to_pt(moves_bytes[i+1])
+
+			table.insert(state.moves, { src = src, dst = dst } )
+		end
+	end
 
 	if #bytes ~= 0 then
 		error(string.format("%d bytes remaining after deserializing", #bytes))
@@ -120,6 +148,15 @@ function serialize.serialize_state(state)
 			output = output .. serialize_lib.serialize_byte(state.board[y][x])
 		end
 	end
+
+	local move_bytes = {}
+	for _, game_move in ipairs(state.moves) do
+		assert(game_move.src ~= nil)
+		table.insert(move_bytes, pt_to_byte(game_move.src))
+		assert(game_move.dst ~= nil)
+		table.insert(move_bytes, pt_to_byte(game_move.dst))
+	end
+	output = output .. serialize_lib.serialize_bytes(move_bytes)
 
 	return output
 end
