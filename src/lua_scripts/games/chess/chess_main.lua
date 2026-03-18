@@ -14,6 +14,8 @@ local serialize = require("games/chess/chess_serialize")
 local utils = require("libs/utils")
 local two_player = require("libs/multiplayer/two_player")
 
+
+local show_labels = true
 local g_session_id = alexgames.get_new_session_id()
 local g_state = core.new_game()
 local g_pending_move = nil
@@ -61,6 +63,9 @@ local POPUP_ID_NEW_GAME          = "game_over"
 local POPUP_ITEM_ID_NEW_GAME_BTN = 1
 
 local OPTION_ID_NEW_GAME = "new_game"
+local OPTION_ID_SHOW_LABELS = "opt_show_labels"
+
+local KEY_CHESS_SHOW_RANK_FILE_LABELS = "chess_show_rank_file_labels"
 
 function get_player()
 	if local_multiplayer then
@@ -87,7 +92,6 @@ local function get_draw_state_params()
 	}
 end
 
-local show_labels = false
 draw.init(480,480, show_labels)
 local function draw_board_internal()
 	--core.print_state(g_state)
@@ -377,9 +381,15 @@ function start_new_game()
 end
 
 
-function handle_game_option_evt(option_id)
+function handle_game_option_evt(option_id, value)
 	if option_id == OPTION_ID_NEW_GAME then
 		start_new_game()
+	elseif option_id == OPTION_ID_SHOW_LABELS then
+		print(string.format("show_labels now %s", value))
+		show_labels = value
+		alexgames.store_data(KEY_CHESS_SHOW_RANK_FILE_LABELS, tostring(show_labels))
+		draw.init(480,480, show_labels)
+		draw_board_internal()
 	end
 end
 
@@ -387,7 +397,24 @@ function get_state()
 	return serialize.serialize_state(g_state)
 end
 
+local function str_to_bool(s)
+	if s == "true" or s == "1" then
+		return true
+	elseif s == "false" or s == "0" then
+		return false
+	else
+		error(string.format("Unhandled string \"%s\" passed to str_to_bool", s))
+	end
+end
+
 function start_game(session_id_arg, state_serialized)
+	local show_labels_stored = alexgames.read_stored_data(KEY_CHESS_SHOW_RANK_FILE_LABELS)
+	if show_labels_stored == nil then
+		-- do nothing
+	else
+		show_labels = str_to_bool(show_labels_stored)
+		draw.init(480,480, show_labels)
+	end
 	local state_loaded = false
 	if state_serialized ~= nil then
 		load_state(session_id_arg, state_serialized)
@@ -406,6 +433,7 @@ function start_game(session_id_arg, state_serialized)
 	alexgames.send_message("all", "get_state:")
 
 	alexgames.add_game_option(OPTION_ID_NEW_GAME, { type = alexgames.OPTION_TYPE_BTN, label = "New Game" })
+	alexgames.add_game_option(OPTION_ID_SHOW_LABELS, { type = alexgames.OPTION_TYPE_TOGGLE, label = "Show rank/file labels", value = show_labels })
 
 	alexgames.create_btn(BTN_ID_UNDO, "Undo", 1)
 	alexgames.create_btn(BTN_ID_REDO, "Redo", 1)
