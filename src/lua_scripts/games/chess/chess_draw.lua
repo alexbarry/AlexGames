@@ -235,6 +235,31 @@ function draw.draw_state(state, params)
 		dst_outline = DST_HIGHLIGHT_OUTLINE_REMOTE
 	end
 
+	if state.prev_move_src ~= nil then
+		local prev_move_highlight_fill
+		local prev_move_highlight_outline
+		if user_colour_pref == "dark" then
+			prev_move_highlight_fill    = "#4001"
+			prev_move_highlight_outline = "#4008"
+		else
+			prev_move_highlight_fill    = "#c002"
+			prev_move_highlight_outline = "#8004"
+		end
+		draw_rect_at_pos(prev_move_highlight_fill, prev_move_highlight_outline, state.prev_move_src.y, state.prev_move_src.x)
+	end
+	if state.prev_move_dst ~= nil then
+		local prev_move_highlight_fill
+		local prev_move_highlight_outline
+		if user_colour_pref == "dark" then
+			prev_move_highlight_fill    = "#4002"
+			prev_move_highlight_outline = "#400"
+		else
+			prev_move_highlight_fill    = "#c004"
+			prev_move_highlight_outline = "#8006"
+		end
+		draw_rect_at_pos(prev_move_highlight_fill, prev_move_highlight_outline, state.prev_move_dst.y, state.prev_move_dst.x)
+	end
+
 	-- If a cell is selected, highlight it
 	if state.selected ~= nil then
 		draw_rect_at_pos(highlight_colour, highlight_outline, state.selected.y, state.selected.x)

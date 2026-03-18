@@ -116,6 +116,9 @@ function core.new_game()
 		-- for each player. Clear both left and right if king moves.
 		rooks_moved = {},
 		kings_moved = {},
+
+		prev_move_src = nil,
+		prev_move_dst = nil,
 	}
 
 	state.rooks_moved[core.POS_ROOK1_BLACK] = false
@@ -173,6 +176,9 @@ function core.copy_state(state)
 		pawn_moved_two_squares = state.pawn_moved_two_squares,
 		kings_moved = {},
 		rooks_moved = {},
+
+		prev_move_src = copy_coords(state.prev_move_src),
+		prev_move_dst = copy_coords(state.prev_move_dst),
 	}
 
 	for key, val in pairs(state.kings_moved) do
@@ -281,7 +287,10 @@ function core.states_eq(state1, state2)
 		state1.rooks_moved[core.POS_ROOK1_WHITE] == state2.rooks_moved[core.POS_ROOK1_WHITE] and
 		state1.rooks_moved[core.POS_ROOK2_WHITE] == state2.rooks_moved[core.POS_ROOK2_WHITE] and
 		state1.rooks_moved[core.POS_ROOK1_BLACK] == state2.rooks_moved[core.POS_ROOK1_BLACK] and
-		state1.rooks_moved[core.POS_ROOK2_BLACK] == state2.rooks_moved[core.POS_ROOK2_BLACK]
+		state1.rooks_moved[core.POS_ROOK2_BLACK] == state2.rooks_moved[core.POS_ROOK2_BLACK] and
+
+		state1.prev_move_src == state2.prev_move_src and
+		state2.prev_move_dst == state2.prev_move_dst
 	)
 end
 
@@ -372,6 +381,7 @@ function core.print_state(state)
 	io.write(string.format("- player_selected: %s\n", pt_to_string(state.selected)))
 	io.write(string.format("- pawn_moved_two_squares: %s\n", state.pawn_moved_two_squares))
 	io.write(string.format("- game_status: %s\n", state.game_status))
+	io.write(string.format("- prev_move: %s -> %s\n", pt_to_string(state.prev_move_src), pt_to_string(state.prev_move_dst)))
 	io.write("- pieces moved (for castling):\n")
 	io.write(string.format("    black king:  %s\n", state.kings_moved[core.PLAYER_BLACK]))
 	io.write(string.format("    black rook1: %s\n", state.rooks_moved[core.POS_ROOK1_BLACK]))
@@ -771,6 +781,9 @@ local function move_piece(state, src, dst, pawn_promo_piece_sel)
 	state.selected = nil
 	state.player_turn = get_other_player(state.player_turn)
 	state.game_status = core.get_game_status(state)
+
+	state.prev_move_src = copy_coords(src)
+	state.prev_move_dst = copy_coords(dst)
 
 	if piece_type == core.PIECE_KING and move_is_castle(this_player, src, dst) then
 		--print("Applying castling move...")
