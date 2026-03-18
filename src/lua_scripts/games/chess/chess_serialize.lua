@@ -7,8 +7,31 @@ local serialize_lib = require("libs/serialize/serialize")
 serialize.VERSION_1 = 1
 serialize.VERSION_2 = 2
 serialize.VERSION_3 = 3
+serialize.VERSION_4 = 4
 
-serialize.CURRENT_VERSION = serialize.VERSION_3
+serialize.CURRENT_VERSION = serialize.VERSION_4
+
+local function deserialize_pt(bytes)
+	local byte = serialize_lib.deserialize_byte(bytes)
+	y = byte & 0xf
+	x = (byte >> 4) & 0xf
+	return {
+		y = y,
+		x = x,
+	}
+end
+
+local function serialize_pt(pt)
+	local val
+
+	if pt == nil then
+		val = 0
+	else
+		val = (pt.y & 0xf) | ( (pt.x & 0xf) << 4 )
+	end
+
+	return string.char(val)
+end
 
 function serialize.deserialize_state(byte_str)
 	local bytes = serialize_lib.bytestr_to_byteary(byte_str)
@@ -32,7 +55,9 @@ function serialize.deserialize_state(byte_str)
 		state.kings_moved[core.PLAYER_WHITE]    = false
 		state.kings_moved[core.PLAYER_BLACK]    = false
 
-	elseif version == serialize.VERSION_2 or version == serialize.VERSION_3 then
+	elseif (version == serialize.VERSION_2 or
+	        version == serialize.VERSION_3 or
+	        version == serialize.VERSION_4) then
 		local pieces_moved_bitfield = serialize_lib.deserialize_byte(bytes)
 		state.rooks_moved[core.POS_ROOK1_BLACK] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 0))
 		state.rooks_moved[core.POS_ROOK2_BLACK] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 1))
@@ -41,8 +66,13 @@ function serialize.deserialize_state(byte_str)
 		state.kings_moved[core.PLAYER_WHITE]    = utils.number_to_boolean(pieces_moved_bitfield & (1 << 4))
 		state.kings_moved[core.PLAYER_BLACK]    = utils.number_to_boolean(pieces_moved_bitfield & (1 << 5))
 
-		if version == serialize.VERSION_3 then
+		if version >= serialize.VERSION_3 then
 			state.pawn_moved_two_squares = serialize_lib.deserialize_byte(bytes)
+		end
+
+		if version == serialize.VERSION_4 then
+			state.prev_move_src = deserialize_pt(bytes)
+			state.prev_move_dst = deserialize_pt(bytes)
 		end
 	else
 		error(string.format("Unhandled serialized chess state, version %d", version))
@@ -81,6 +111,8 @@ function serialize.serialize_state(state)
 	output = output .. serialize_lib.serialize_byte(pieces_moved_bitfield)
 
 	output = output .. serialize_lib.serialize_byte(state.pawn_moved_two_squares)
+	output = output .. serialize_pt(state.prev_move_src)
+	output = output .. serialize_pt(state.prev_move_dst)
 
 	output = output .. serialize_lib.serialize_byte(state.player_turn)
 	for y=1,core.BOARD_SIZE do
