@@ -18,9 +18,12 @@ local show_labels  = nil
 local OUTLINE_WIDTH = 4
 local cell_size    = nil
 local piece_padding = 0
+
+local BORDER_PADDING_NO_LABELS = 20
 local border_padding = 20
 
 local LABEL_COLOUR = '#000000'
+local LABEL_COLOUR_DARK = "#888"
 local LABEL_FONT_SIZE = 12
 -- the number of pixels taken up by the parts of a letter that are drawn below the line, like the "tail" of the letter "g"
 local text_y_buffer = 4
@@ -67,6 +70,8 @@ function draw.init(height, width, show_labels_arg)
 	show_labels = show_labels_arg
 	if not show_labels then
 		border_padding = 0
+	else
+		border_padding = BORDER_PADDING_NO_LABELS
 	end
 
 	cell_size = math.floor((math.min(board_height, board_width) - 2*border_padding) / core.BOARD_SIZE)
@@ -187,6 +192,8 @@ end
 
 
 function draw.draw_state(state, params)
+	local user_colour_pref = alexgames.get_user_colour_pref()
+
 	alexgames.draw_clear()
 	--alexgames.draw_rect('#000000', 0, 0, board_height, board_width)
 	-- Draw checkerboard
@@ -204,10 +211,14 @@ function draw.draw_state(state, params)
 
 	-- Add labels to rows and columns
 	if show_labels then
+		local label_colour = LABEL_COLOUR
+		if user_colour_pref == "dark" then
+			label_colour = LABEL_COLOUR_DARK
+		end
 		for _, y_pos in ipairs({border_padding-text_y_buffer, border_padding + core.BOARD_SIZE*cell_size+LABEL_FONT_SIZE}) do
 			for x=1,core.BOARD_SIZE do
 				local label = get_col_label(x)
-				alexgames.draw_text(label, LABEL_COLOUR,
+				alexgames.draw_text(label, label_colour,
 				                     y_pos,  border_padding + math.floor(cell_size*(x-0.5)),
 				                     LABEL_FONT_SIZE, 0)
 			end
@@ -216,7 +227,7 @@ function draw.draw_state(state, params)
 		for _, x_pos_info in ipairs({{pos = border_padding, align=-1}, {pos = board_width-border_padding, align=1}}) do
 			for y=1,core.BOARD_SIZE do
 				local label = get_row_label(y)
-				alexgames.draw_text(label, LABEL_COLOUR,
+				alexgames.draw_text(label, label_colour,
 				                     border_padding + math.floor(cell_size*(y-0.5)), x_pos_info.pos,
 				                     LABEL_FONT_SIZE, x_pos_info.align)
 			end
