@@ -353,7 +353,7 @@ local function piece_id_to_hr_str(piece_id)
 	return get_player_letter(player) .. get_piece_letter(piece_type)
 end
 
-local function pt_to_string(pt)
+function core.pt_to_string(pt)
 	if pt == nil then return "nil"
 	else
 		return string.format("{ y=%d, x=%d }", pt.y, pt.x)
@@ -378,10 +378,10 @@ function core.print_state(state)
 		io.write('\n' .. row_sep .. '\n')
 	end
 	io.write(string.format("- player_turn: %s\n", core.get_player_name(state.player_turn)))
-	io.write(string.format("- player_selected: %s\n", pt_to_string(state.selected)))
+	io.write(string.format("- player_selected: %s\n", core.pt_to_string(state.selected)))
 	io.write(string.format("- pawn_moved_two_squares: %s\n", state.pawn_moved_two_squares))
 	io.write(string.format("- game_status: %s\n", state.game_status))
-	io.write(string.format("- prev_move: %s -> %s\n", pt_to_string(state.prev_move_src), pt_to_string(state.prev_move_dst)))
+	io.write(string.format("- prev_move: %s -> %s\n", core.pt_to_string(state.prev_move_src), core.pt_to_string(state.prev_move_dst)))
 	io.write("- pieces moved (for castling):\n")
 	io.write(string.format("    black king:  %s\n", state.kings_moved[core.PLAYER_BLACK]))
 	io.write(string.format("    black rook1: %s\n", state.rooks_moved[core.POS_ROOK1_BLACK]))
@@ -904,7 +904,7 @@ function core.player_touch(state, player, coords, pawn_promo_piece_sel)
 			return core.SUCCESS
 		end
 	else
-		--print(string.format("player_touch(coords=(%d,%d)); selected=%s", coords.y, coords.x, pt_to_string(state.selected)))
+		--print(string.format("player_touch(coords=(%d,%d)); selected=%s", coords.y, coords.x, core.pt_to_string(state.selected)))
 		if coords == nil or coords_eq(coords, state.selected) then
 			state.selected = nil
 			return core.SUCCESS
@@ -923,7 +923,7 @@ function core.player_touch(state, player, coords, pawn_promo_piece_sel)
 				end
 				return core.SUCCESS
 			else
-				--print(string.format("calling move_piece(src=%s, dst=%s)", pt_to_string(state.selected), pt_to_string(coords)))
+				--print(string.format("calling move_piece(src=%s, dst=%s)", core.pt_to_string(state.selected), core.pt_to_string(coords)))
 				local rc = move_piece(state, state.selected, coords, pawn_promo_piece_sel)
 				if rc == core.RC_CANT_MOVE_INTO_CHECK then
 					if core.in_check(state, state.player_turn) then
@@ -1147,7 +1147,7 @@ function core.get_simple_move_msg(move_info)
 end
 
 function core.get_move_msg(state, player, src, dst, pawn_promo_piece_sel)
-	print(string.format("get_move_msg(player=%d, src=%s, dst=%s, pawn_promo_piece_sel=%s)", player, pt_to_string(src), pt_to_string(dst), pawn_promo_piece_sel))
+	print(string.format("get_move_msg(player=%d, src=%s, dst=%s, pawn_promo_piece_sel=%s)", player, core.pt_to_string(src), core.pt_to_string(dst), pawn_promo_piece_sel))
 	if src == nil or dst == nil then
 		return
 	end
