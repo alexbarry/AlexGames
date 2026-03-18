@@ -843,6 +843,9 @@ function core.get_game_status(state)
 end
 
 function core.get_game_status_if_move(state, src, dst, pawn_promo_piece_sel)
+	if not is_valid_move_pos(state, src, dst, pawn_promo_piece_sel) then
+		return nil
+	end
 	local new_state = core.copy_state(state)
 	local rc = move_piece(new_state, src, dst, pawn_promo_piece_sel)
 	--[[
