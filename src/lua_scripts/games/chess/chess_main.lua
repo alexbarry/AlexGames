@@ -171,7 +171,7 @@ function handle_popup_btn_clicked(popup_id, btn_id, popup_state)
         -- handled
 	elseif popup_id == POPUP_ID_NEW_GAME then
 		if btn_id == POPUP_ITEM_ID_NEW_GAME_BTN then
-			start_game()
+			start_new_game()
 			alexgames.hide_popup()
 		else	
 			error(string.format("Unhandled btn_id=\"%s\"", btn_id))
@@ -367,13 +367,19 @@ function handle_btn_clicked(btn_id)
 	end
 end
 
+function start_new_game()
+	alexgames.set_status_msg("Starting new game")
+	g_session_id = alexgames.get_new_session_id()
+	g_state = core.new_game()
+	save_state()
+	broadcast_state("all")
+	draw_board_internal()
+end
+
+
 function handle_game_option_evt(option_id)
 	if option_id == OPTION_ID_NEW_GAME then
-		g_session_id = alexgames.get_new_session_id()
-		g_state = core.new_game()
-		save_state()
-		broadcast_state("all")
-		draw_board_internal()
+		start_new_game()
 	end
 end
 
