@@ -119,6 +119,8 @@ function core.new_game()
 
 		prev_move_src = nil,
 		prev_move_dst = nil,
+
+		moves = {},
 	}
 
 	state.rooks_moved[core.POS_ROOK1_BLACK] = false
@@ -179,7 +181,13 @@ function core.copy_state(state)
 
 		prev_move_src = copy_coords(state.prev_move_src),
 		prev_move_dst = copy_coords(state.prev_move_dst),
+
+		moves = {},
 	}
+
+	for _, game_move in ipairs(state.moves) do
+		table.insert(new_state.moves, { src = copy_coords(game_move.src), dst = copy_coords(game_move.dst) })
+	end
 
 	for key, val in pairs(state.kings_moved) do
 		new_state.kings_moved[key] = val
@@ -275,6 +283,7 @@ local function can_castle(state, player, rook_pt)
 	
 end
 
+-- Does not compare list of moves
 function core.states_eq(state1, state2)
 	return (
 		state1.player_turn == state2.player_turn and
@@ -784,6 +793,8 @@ local function move_piece(state, src, dst, pawn_promo_piece_sel)
 
 	state.prev_move_src = copy_coords(src)
 	state.prev_move_dst = copy_coords(dst)
+
+	table.insert(state.moves, { src = src, dst = dst })
 
 	if piece_type == core.PIECE_KING and move_is_castle(this_player, src, dst) then
 		--print("Applying castling move...")
