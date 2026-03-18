@@ -87,7 +87,8 @@ local function get_draw_state_params()
 	}
 end
 
-draw.init(480,480, false)
+local show_labels = false
+draw.init(480,480, show_labels)
 local function draw_board_internal()
 	--core.print_state(g_state)
 	draw.draw_state(g_state, get_draw_state_params())
@@ -147,6 +148,8 @@ function handle_user_clicked(pos_y, pos_x)
 end
 
 function move_piece_internal(coords, pawn_promo_piece_sel)
+	local prev_player = g_state.player_turn
+	local move_msg = core.get_move_msg(g_state, g_state.player_turn, g_state.selected, coords, pawn_promo_piece_sel)
 	local rc = core.player_touch(g_state, get_player(), coords, pawn_promo_piece_sel)
 	if not local_multiplayer and rc == core.SUCCESS then
 		local msg_suffix = ''
@@ -156,6 +159,9 @@ function move_piece_internal(coords, pawn_promo_piece_sel)
 		alexgames.send_message("all", string.format("move:%d,%d,%d%s", get_player(), coords.y, coords.x, msg_suffix))
 	end
 	handle_rc(rc)
+	if prev_player ~= g_state.player_turn then -- TODO or checkmate...
+		alexgames.set_status_msg(move_msg)
+	end
 	--core.print_state(g_state)
 	draw_board_internal()
 end
@@ -218,13 +224,15 @@ function handle_msg_received(src, msg)
             pawn_promo_piece_sel = nil
         end
         local coords = { y = y, x = x }
+        local move_msg = core.get_move_msg(g_state, g_state.player_turn, g_state.selected, coords, pawn_promo_piece_sel)
         local rc = core.player_touch(g_state, player_idx, coords, pawn_promo_piece_sel)
         handle_rc(rc, --[[is_other_player=]] true)
 
         if rc ~= core.SUCCESS then
             alexgames.set_status_err("Other player made an invalid move")
         else
-            alexgames.set_status_msg("Your move")
+            alexgames.set_status_msg(move_msg .. ". Your move")
+            -- alexgames.set_status_msg("Your move")
             draw_board_internal()
             save_state()
         end

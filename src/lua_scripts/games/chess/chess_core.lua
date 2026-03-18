@@ -45,6 +45,15 @@ local ERROR_CODE_MAP = {
 	[core.RC_GAME_OVER]             = "Game over!",
 }
 
+local PIECE_NAME_MAP = {
+	[core.PIECE_PAWN]   = "pawn",
+	[core.PIECE_ROOK]   = "rook",
+	[core.PIECE_KNIGHT] = "knight",
+	[core.PIECE_BISHOP] = "bishop",
+	[core.PIECE_QUEEN]  = "queen",
+	[core.PIECE_KING]   = "king",
+}
+
 function core.get_err_msg(rc)
 	return ERROR_CODE_MAP[rc]
 end
@@ -84,6 +93,13 @@ local function get_player_pawn_row(player)
 	elseif player == core.PLAYER_BLACK then return 2 end
 end
 
+function core.get_piece_name(piece_type)
+	local name = PIECE_NAME_MAP[piece_type]
+	if name == nil then
+		error(string.format("Unhandled piece type %s", piece_type))
+	end
+	return name
+end
 function core.new_game()
 	local state = {
 		player_turn = core.PLAYER_WHITE,
@@ -813,6 +829,18 @@ function core.get_game_status(state)
 	end
 end
 
+function core.get_game_status_if_move(state, src, dst, pawn_promo_piece_sel)
+	local new_state = core.copy_state(state)
+	local rc = move_piece(new_state, src, dst, pawn_promo_piece_sel)
+	--[[
+	if rc ~= core.SUCCESS then
+		error(string.format("Unexpected rc %s in get_game_status_if_move", rc))
+	end
+	--]]
+
+	return new_state.game_status
+end
+
 function core.move_is_valid_pawn_promotion(state, player, selected, dst)
 	if selected == nil or dst == nil then
 		return false
@@ -890,6 +918,235 @@ function core.player_touch(state, player, coords, pawn_promo_piece_sel)
 			end
 		end
 	end
+end
+
+local function find_pieces_capable_of_moving_to_dst(state, src, dst)
+	local other_pieces = {}
+
+	local src_piece_id = state.board[src.y][src.x]
+
+	for y=1,core.BOARD_SIZE do
+		for x=1,core.BOARD_SIZE do
+			if y == src.y and x == src.x then
+				goto next_piece
+			end
+
+			if src_piece_id ~= state.board[y][x] then
+				goto next_piece
+			end
+
+			local other_src = { y = y, x = x }
+			if is_valid_move_pos(state, other_src, dst) then
+				table.insert(other_pieces, other_src)
+			end
+
+			::next_piece::
+		end
+	end
+
+	return other_pieces
+end
+
+function core.get_file(x)
+	return string.char(string.byte('a') + x - 1)
+end
+
+function core.get_rank(y)
+	return 8 - y + 1
+end
+
+function core.get_algebraic_piece_str(piece_type)
+	if piece_type == core.PIECE_KING then
+		return "K"
+	elseif piece_type == core.PIECE_QUEEN then
+		return "Q"
+	elseif piece_type == core.PIECE_ROOK then
+		return "R"
+	elseif piece_type == core.PIECE_BISHOP then
+		return "B"
+	elseif piece_type == core.PIECE_KNIGHT then
+		return "N"
+	elseif piece_type == core.PIECE_PAWN then
+		return ""
+	else
+		error(string.format("Unhandled piece_type %s", piece_type))
+	end
+end
+
+function core.pt_to_algebraic_chess_coords(pt)
+	return string.format("%s%d", core.get_file(pt.x), core.get_rank(pt.y))
+end
+
+function core.get_move_info(state, player, src, dst, pawn_promo_piece_sel)
+	local src_piece_id = state.board[src.y][src.x]
+	local dst_piece_id = state.board[dst.y][dst.x]
+	local piece_type = core.get_piece_type(src_piece_id)
+
+	local is_capture = false
+	local is_en_passant_capture = false
+	local captured_piece = nil
+	if (dst_piece_id ~= core.EMPTY_PIECE_ID) then
+		is_capture = true
+		captured_piece = core.get_piece_type(dst_piece_id)
+	elseif move_is_en_passant_capture(state, src, dst) then
+		is_capture = true
+		is_en_passant_capture = true
+		captured_piece = core.PIECE_PAWN
+	end
+
+
+	local move_castle_type = nil
+	if move_is_castle(player, src, dst) then
+		assert(piece_type == core.PIECE_KING)
+		if dst.x < src.x then
+			move_castle_type = 1
+		else
+			move_castle_type = 2
+		end
+	end
+
+	local other_possib_srcs = find_pieces_capable_of_moving_to_dst(state, src, dst)
+	
+	if #other_possib_srcs > 0 then
+		-- TODO remove
+		print("[alex] Found %d other possible same pieces that could move to this destination, must specify some or all of src", #other_possib_srcs)
+	end
+
+	local must_specify_src_y = false
+	local must_specify_src_x = false
+
+	if #other_possib_srcs > 0 then
+		must_specify_src_x = true
+	end
+
+	for _, other_piece in ipairs(other_possib_srcs) do
+		if other_piece.x == src.x then
+			must_specify_src_y = true
+			must_specify_src_x = false
+			break
+		end
+	end
+
+	for _, other_piece in ipairs(other_possib_srcs) do
+		if other_piece.y == src.y then
+			must_specify_src_x = true
+			break
+		end
+	end
+
+	local game_status = core.get_game_status_if_move(state, src, dst, pawn_promo_piece_sel)
+
+	return {
+		src = src,
+		dst = dst,
+		piece_type = piece_type,
+
+		must_specify_src_y = must_specify_src_y,
+		must_specify_src_x = must_specify_src_x,
+
+		is_capture = is_capture,
+		is_en_passant_capture = is_en_passant_capture,
+		captured_piece = captured_piece,
+
+		move_castle_type = move_castle_type,
+		pawn_promo_piece_sel = pawn_promo_piece_sel,
+
+		game_status = game_status,
+	}
+end
+
+function core.get_move_algebraic_chess_notation(move_info)
+	-- TODO I see "dxc4" as move 6 in https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#PGN
+	-- but there was only one pawn that could have made that move. Specify source column anyway?
+
+	local output
+
+	if move_info.move_castle_type == 1 then
+		output = 'O-O-O'
+	elseif move_info.move_castle_type == 2 then
+		output = 'O-O'
+	else
+		output  = core.get_algebraic_piece_str(move_info.piece_type)
+	
+		if move_info.must_specify_src_x then
+			output = output .. core.get_file(move_info.src.x)
+		end
+		if move_info.must_specify_src_y then
+			output = output .. tostring(core.get_rank(move_info.src.y))
+		end
+	
+		if move_info.is_capture then
+			output = output .. 'x'
+		end
+	
+		output = output .. core.pt_to_algebraic_chess_coords(move_info.dst)
+	
+		if move_info.pawn_promo_piece_sel then
+			output = output .. '=' .. core.get_algebraic_piece_str(move_info.pawn_promo_piece_sel)
+		end
+	end
+
+	if move_info.game_status == core.GAME_STATUS_NORMAL then
+		-- pass
+	elseif move_info.game_status == core.GAME_STATUS_CHECK then
+		output = output .. '+'
+	elseif move_info.game_status == core.GAME_STATUS_CHECKMATE then
+		output = output .. '#'
+	end
+
+	return output
+end
+
+function core.get_simple_move_msg(move_info)
+	local msg = string.format('%s from %s to %s',
+		core.get_piece_name(move_info.piece_type),
+		core.pt_to_algebraic_chess_coords(move_info.src),
+		core.pt_to_algebraic_chess_coords(move_info.dst))
+	if move_info.is_capture then
+		msg = msg .. string.format(', capturing %s', core.get_piece_name(move_info.captured_piece))
+	end
+	if move_info.is_en_passant_capture then
+		msg = msg .. (' (en passant)')
+	end
+
+	if move_info.move_castle_type == 1 then
+		msg = msg .. ' (queen side castling)'
+	elseif move_info.move_castle_type == 2 then
+		msg = msg .. ' (king side castling)'
+	end
+
+	if move_info.pawn_promo_piece_sel then
+		msg = msg .. string.format(' , selected pawn promotion to %s', core.get_piece_name(move_info.pawn_promo_piece_sel))
+	end
+
+	if move_info.game_status == core.GAME_STATUS_NORMAL then
+		-- pass
+	elseif move_info.game_status == core.GAME_STATUS_CHECK then
+		msg = msg .. ', resulting in check'
+	elseif move_info.game_status == core.GAME_STATUS_CHECKMATE then
+		msg = msg .. ', resulting in checkmate'
+	end
+
+	return msg
+end
+
+function core.get_move_msg(state, player, src, dst, pawn_promo_piece_sel)
+	print(string.format("get_move_msg(player=%d, src=%s, dst=%s, pawn_promo_piece_sel=%s)", player, pt_to_string(src), pt_to_string(dst), pawn_promo_piece_sel))
+	if src == nil or dst == nil then
+		return
+	end
+
+	local move_info = core.get_move_info(state, player, src, dst, pawn_promo_piece_sel)
+	local algebraic_move_str = core.get_move_algebraic_chess_notation(move_info)
+
+	local msg = string.format("%s makes move %s", core.get_player_name(player), algebraic_move_str)
+
+	-- TODO make this configurable
+	if true then
+		msg = msg .. ' (' .. core.get_simple_move_msg(move_info) .. ')'
+	end
+
+	return msg
 end
 
 return core

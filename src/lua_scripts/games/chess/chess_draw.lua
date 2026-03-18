@@ -151,7 +151,7 @@ local function get_col_label(col)
 end
 
 local function get_row_label(row)
-	return string.format('%d', row)
+	return string.format('%d', 8-row+1)
 end
 
 local function get_piece_brightness(player)
@@ -188,7 +188,7 @@ end
 
 function draw.draw_state(state, params)
 	alexgames.draw_clear()
-	alexgames.draw_rect('#000000', 0, 0, board_height, board_width)
+	--alexgames.draw_rect('#000000', 0, 0, board_height, board_width)
 	-- Draw checkerboard
 	for y=1,core.BOARD_SIZE do
 		for x=1,core.BOARD_SIZE do
