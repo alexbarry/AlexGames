@@ -99,7 +99,6 @@ function serialize.deserialize_state(byte_str)
 			state.board[y][x] = serialize_lib.deserialize_byte(bytes)
 		end
 	end
-	state.game_status = core.get_game_status(state)
 
 
 	state.moves = {}
@@ -116,6 +115,8 @@ function serialize.deserialize_state(byte_str)
 			table.insert(state.moves, { src = src, dst = dst } )
 		end
 	end
+
+	state.game_status = core.get_game_status(state)
 
 	if #bytes ~= 0 then
 		error(string.format("%d bytes remaining after deserializing", #bytes))
