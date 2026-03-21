@@ -84,7 +84,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpzuuukf97.js
+// include: /tmp/tmpp3q2fner.js
 
   if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
   Module['expectedDataFileDownloads']++;
@@ -250,25 +250,25 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/preload/games/31s/31s_core.lua", "start": 0, "end": 12412}, {"filename": "/preload/games/31s/31s_draw.lua", "start": 12412, "end": 20896}, {"filename": "/preload/games/31s/31s_main.lua", "start": 20896, "end": 30790}, {"filename": "/preload/games/api_demo/game.lua", "start": 30790, "end": 38423}, {"filename": "/preload/games/api_demo/game_core.lua", "start": 38423, "end": 40596}, {"filename": "/preload/games/api_demo/game_draw.lua", "start": 40596, "end": 47273}, {"filename": "/preload/games/backgammon/backgammon_core.lua", "start": 47273, "end": 75504}, {"filename": "/preload/games/backgammon/backgammon_draw.lua", "start": 75504, "end": 97848}, {"filename": "/preload/games/backgammon/backgammon_main.lua", "start": 97848, "end": 116742}, {"filename": "/preload/games/backgammon/backgammon_serialize.lua", "start": 116742, "end": 121116}, {"filename": "/preload/games/blue/blue_core.lua", "start": 121116, "end": 124571}, {"filename": "/preload/games/blue/blue_draw.lua", "start": 124571, "end": 151947}, {"filename": "/preload/games/blue/blue_main.lua", "start": 151947, "end": 152946}, {"filename": "/preload/games/blue/blue_ui.lua", "start": 152946, "end": 155846}, {"filename": "/preload/games/bound/bound_core.lua", "start": 155846, "end": 184403}, {"filename": "/preload/games/bound/bound_draw.lua", "start": 184403, "end": 207441}, {"filename": "/preload/games/bound/bound_main.lua", "start": 207441, "end": 219510}, {"filename": "/preload/games/bound/bound_serialize.lua", "start": 219510, "end": 230497}, {"filename": "/preload/games/card_sim/card_generic_core.lua", "start": 230497, "end": 238520}, {"filename": "/preload/games/card_sim/card_generic_draw.lua", "start": 238520, "end": 240727}, {"filename": "/preload/games/card_sim/card_generic_main.lua", "start": 240727, "end": 246880}, {"filename": "/preload/games/card_sim/card_generic_serialize.lua", "start": 246880, "end": 250102}, {"filename": "/preload/games/checkers/checkers_core.lua", "start": 250102, "end": 260109}, {"filename": "/preload/games/checkers/checkers_draw.lua", "start": 260109, "end": 264338}, {"filename": "/preload/games/checkers/checkers_main.lua", "start": 264338, "end": 271666}, {"filename": "/preload/games/checkers/checkers_serialize.lua", "start": 271666, "end": 273820}, {"filename": "/preload/games/chess/chess_core.lua", "start": 273820, "end": 288089}, {"filename": "/preload/games/chess/chess_draw.lua", "start": 288089, "end": 297396}, {"filename": "/preload/games/chess/chess_main.lua", "start": 297396, "end": 307391}, {"filename": "/preload/games/chess/chess_serialize.lua", "start": 307391, "end": 308317}, {"filename": "/preload/games/crib/crib_core.lua", "start": 308317, "end": 344400}, {"filename": "/preload/games/crib/crib_draw.lua", "start": 344400, "end": 359436}, {"filename": "/preload/games/crib/crib_main.lua", "start": 359436, "end": 366006}, {"filename": "/preload/games/crib/crib_serialize.lua", "start": 366006, "end": 371878}, {"filename": "/preload/games/crib/crib_test.lua", "start": 371878, "end": 375715}, {"filename": "/preload/games/crossword_builder/crossword_builder_core.lua", "start": 375715, "end": 390236}, {"filename": "/preload/games/crossword_builder/crossword_builder_draw.lua", "start": 390236, "end": 394540}, {"filename": "/preload/games/crossword_builder/crossword_builder_main.lua", "start": 394540, "end": 398122}, {"filename": "/preload/games/crossword_letters/crossword_letters_core.lua", "start": 398122, "end": 417117}, {"filename": "/preload/games/crossword_letters/crossword_letters_draw.lua", "start": 417117, "end": 428229}, {"filename": "/preload/games/crossword_letters/crossword_letters_gen_puzzles.lua", "start": 428229, "end": 432610}, {"filename": "/preload/games/crossword_letters/crossword_letters_main.lua", "start": 432610, "end": 441547}, {"filename": "/preload/games/crossword_letters/crossword_letters_puzzles.lua", "start": 441547, "end": 566923}, {"filename": "/preload/games/crossword_letters/crossword_letters_serialize.lua", "start": 566923, "end": 570585}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters.py", "start": 570585, "end": 579015}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters2.py", "start": 579015, "end": 592974}, {"filename": "/preload/games/crossword_letters/list_puzzle_words.lua", "start": 592974, "end": 593868}, {"filename": "/preload/games/crossword_letters/list_right_diffs.py", "start": 593868, "end": 594223}, {"filename": "/preload/games/endless_runner/endless_runner_core.lua", "start": 594223, "end": 599423}, {"filename": "/preload/games/endless_runner/endless_runner_draw.lua", "start": 599423, "end": 602353}, {"filename": "/preload/games/endless_runner/endless_runner_main.lua", "start": 602353, "end": 603790}, {"filename": "/preload/games/fluid_mix/fluid_mix_core.lua", "start": 603790, "end": 606033}, {"filename": "/preload/games/fluid_mix/fluid_mix_draw.lua", "start": 606033, "end": 611841}, {"filename": "/preload/games/fluid_mix/fluid_mix_main.lua", "start": 611841, "end": 614837}, {"filename": "/preload/games/fluid_mix/fluid_mix_serialize.lua", "start": 614837, "end": 616992}, {"filename": "/preload/games/go/go_core.lua", "start": 616992, "end": 626415}, {"filename": "/preload/games/go/go_ctrl.lua", "start": 626415, "end": 627165}, {"filename": "/preload/games/go/go_main.lua", "start": 627165, "end": 640355}, {"filename": "/preload/games/go/go_ui.lua", "start": 640355, "end": 643745}, {"filename": "/preload/games/hospital/hospital_core.lua", "start": 643745, "end": 670011}, {"filename": "/preload/games/hospital/hospital_draw.lua", "start": 670011, "end": 692467}, {"filename": "/preload/games/hospital/hospital_main.lua", "start": 692467, "end": 701278}, {"filename": "/preload/games/hospital/hospital_serialize.lua", "start": 701278, "end": 711288}, {"filename": "/preload/games/life/life_core.lua", "start": 711288, "end": 714034}, {"filename": "/preload/games/life/life_draw.lua", "start": 714034, "end": 715024}, {"filename": "/preload/games/life/life_main.lua", "start": 715024, "end": 717197}, {"filename": "/preload/games/minesweeper/minesweeper_core.lua", "start": 717197, "end": 726120}, {"filename": "/preload/games/minesweeper/minesweeper_draw.lua", "start": 726120, "end": 731561}, {"filename": "/preload/games/minesweeper/minesweeper_main.lua", "start": 731561, "end": 744106}, {"filename": "/preload/games/minesweeper/minesweeper_serialize.lua", "start": 744106, "end": 749309}, {"filename": "/preload/games/minesweeper_life/minesweeper_draw.lua", "start": 749309, "end": 754914}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_core.lua", "start": 754914, "end": 770678}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_main.lua", "start": 770678, "end": 789614}, {"filename": "/preload/games/minesweeper_life/minesweeper_serialize.lua", "start": 789614, "end": 794827}, {"filename": "/preload/games/poker_chips/poker_chips_core.lua", "start": 794827, "end": 800198}, {"filename": "/preload/games/poker_chips/poker_chips_main.lua", "start": 800198, "end": 804393}, {"filename": "/preload/games/poker_chips/poker_chips_serialize.lua", "start": 804393, "end": 807008}, {"filename": "/preload/games/poker_chips/poker_chips_ui.lua", "start": 807008, "end": 809381}, {"filename": "/preload/games/poker_chips/ui/bet_input.lua", "start": 809381, "end": 817820}, {"filename": "/preload/games/poker_chips/ui/control.lua", "start": 817820, "end": 821860}, {"filename": "/preload/games/poker_chips/ui/view_others.lua", "start": 821860, "end": 827808}, {"filename": "/preload/games/solitaire/solitaire_core.lua", "start": 827808, "end": 847504}, {"filename": "/preload/games/solitaire/solitaire_draw.lua", "start": 847504, "end": 865846}, {"filename": "/preload/games/solitaire/solitaire_main.lua", "start": 865846, "end": 883128}, {"filename": "/preload/games/solitaire/solitaire_serialize.lua", "start": 883128, "end": 888181}, {"filename": "/preload/games/solitaire/solitaire_solve.lua", "start": 888181, "end": 906162}, {"filename": "/preload/games/spider_swing/spider_swing_core.lua", "start": 906162, "end": 911613}, {"filename": "/preload/games/spider_swing/spider_swing_draw.lua", "start": 911613, "end": 917734}, {"filename": "/preload/games/spider_swing/spider_swing_main.lua", "start": 917734, "end": 920454}, {"filename": "/preload/games/sudoku/sudoku_core.lua", "start": 920454, "end": 930957}, {"filename": "/preload/games/sudoku/sudoku_draw.lua", "start": 930957, "end": 934941}, {"filename": "/preload/games/sudoku/sudoku_main.lua", "start": 934941, "end": 935662}, {"filename": "/preload/games/swarm/swarm_core.lua", "start": 935662, "end": 950011}, {"filename": "/preload/games/swarm/swarm_draw.lua", "start": 950011, "end": 953328}, {"filename": "/preload/games/swarm/swarm_keyboard_input.lua", "start": 953328, "end": 954896}, {"filename": "/preload/games/swarm/swarm_main.lua", "start": 954896, "end": 956940}, {"filename": "/preload/games/test/card_angle_test.lua", "start": 956940, "end": 960160}, {"filename": "/preload/games/test/draw_graphics_test.lua", "start": 960160, "end": 962071}, {"filename": "/preload/games/test/timer_test.lua", "start": 962071, "end": 964226}, {"filename": "/preload/games/thrust/thrust_core.lua", "start": 964226, "end": 975180}, {"filename": "/preload/games/thrust/thrust_draw.lua", "start": 975180, "end": 982231}, {"filename": "/preload/games/thrust/thrust_keyboard_input.lua", "start": 982231, "end": 984096}, {"filename": "/preload/games/thrust/thrust_main.lua", "start": 984096, "end": 986360}, {"filename": "/preload/games/touch_test/touch_test.lua", "start": 986360, "end": 988710}, {"filename": "/preload/games/word_mastermind/word_mastermind_core.lua", "start": 988710, "end": 995450}, {"filename": "/preload/games/word_mastermind/word_mastermind_draw.lua", "start": 995450, "end": 1004971}, {"filename": "/preload/games/word_mastermind/word_mastermind_main.lua", "start": 1004971, "end": 1011085}, {"filename": "/preload/games/word_mastermind/word_mastermind_serialize.lua", "start": 1011085, "end": 1013009}, {"filename": "/preload/games/wu/wu_core.lua", "start": 1013009, "end": 1019133}, {"filename": "/preload/games/wu/wu_ctrl.lua", "start": 1019133, "end": 1019954}, {"filename": "/preload/games/wu/wu_main.lua", "start": 1019954, "end": 1029593}, {"filename": "/preload/libs/cards/card_test.lua", "start": 1029593, "end": 1030387}, {"filename": "/preload/libs/cards/cards.lua", "start": 1030387, "end": 1035794}, {"filename": "/preload/libs/cards/cards_draw.lua", "start": 1035794, "end": 1045363}, {"filename": "/preload/libs/cards/cards_set.lua", "start": 1045363, "end": 1045714}, {"filename": "/preload/libs/combinations.lua", "start": 1045714, "end": 1048006}, {"filename": "/preload/libs/dice/dice.lua", "start": 1048006, "end": 1048265}, {"filename": "/preload/libs/dice/dice_draw.lua", "start": 1048265, "end": 1049700}, {"filename": "/preload/libs/draw/draw_celebration_anim.lua", "start": 1049700, "end": 1059114}, {"filename": "/preload/libs/draw/draw_colours.lua", "start": 1059114, "end": 1059935}, {"filename": "/preload/libs/draw/draw_keyboard.lua", "start": 1059935, "end": 1064744}, {"filename": "/preload/libs/draw/draw_more.lua", "start": 1064744, "end": 1068711}, {"filename": "/preload/libs/draw/draw_shapes.lua", "start": 1068711, "end": 1070336}, {"filename": "/preload/libs/letter_tiles.lua", "start": 1070336, "end": 1093515}, {"filename": "/preload/libs/multiplayer/two_player.lua", "start": 1093515, "end": 1105547}, {"filename": "/preload/libs/multiplayer/wait_for_players.lua", "start": 1105547, "end": 1113003}, {"filename": "/preload/libs/serialize/bit_pack.lua", "start": 1113003, "end": 1116026}, {"filename": "/preload/libs/serialize/serialize.lua", "start": 1116026, "end": 1121467}, {"filename": "/preload/libs/serialize/storage_helpers.lua", "start": 1121467, "end": 1122247}, {"filename": "/preload/libs/shuffle.lua", "start": 1122247, "end": 1122600}, {"filename": "/preload/libs/touch_to_mouse_evts.lua", "start": 1122600, "end": 1123733}, {"filename": "/preload/libs/ui/buttons.lua", "start": 1123733, "end": 1127622}, {"filename": "/preload/libs/ui/show_buttons_popup.lua", "start": 1127622, "end": 1128401}, {"filename": "/preload/libs/ui/soft_numpad.lua", "start": 1128401, "end": 1132394}, {"filename": "/preload/libs/ui/touchpad.lua", "start": 1132394, "end": 1133732}, {"filename": "/preload/libs/utils.lua", "start": 1133732, "end": 1138258}, {"filename": "/preload/libs/words.lua", "start": 1138258, "end": 1141559}], "remote_package_size": 1141559});
+    loadPackage({"files": [{"filename": "/preload/games/31s/31s_core.lua", "start": 0, "end": 12412}, {"filename": "/preload/games/31s/31s_draw.lua", "start": 12412, "end": 20896}, {"filename": "/preload/games/31s/31s_main.lua", "start": 20896, "end": 30790}, {"filename": "/preload/games/api_demo/game.lua", "start": 30790, "end": 38423}, {"filename": "/preload/games/api_demo/game_core.lua", "start": 38423, "end": 40596}, {"filename": "/preload/games/api_demo/game_draw.lua", "start": 40596, "end": 47273}, {"filename": "/preload/games/backgammon/backgammon_core.lua", "start": 47273, "end": 75504}, {"filename": "/preload/games/backgammon/backgammon_draw.lua", "start": 75504, "end": 97848}, {"filename": "/preload/games/backgammon/backgammon_main.lua", "start": 97848, "end": 116742}, {"filename": "/preload/games/backgammon/backgammon_serialize.lua", "start": 116742, "end": 121116}, {"filename": "/preload/games/blue/blue_core.lua", "start": 121116, "end": 124571}, {"filename": "/preload/games/blue/blue_draw.lua", "start": 124571, "end": 151947}, {"filename": "/preload/games/blue/blue_main.lua", "start": 151947, "end": 152946}, {"filename": "/preload/games/blue/blue_ui.lua", "start": 152946, "end": 155846}, {"filename": "/preload/games/bound/bound_core.lua", "start": 155846, "end": 184403}, {"filename": "/preload/games/bound/bound_draw.lua", "start": 184403, "end": 207441}, {"filename": "/preload/games/bound/bound_main.lua", "start": 207441, "end": 219510}, {"filename": "/preload/games/bound/bound_serialize.lua", "start": 219510, "end": 230497}, {"filename": "/preload/games/card_sim/card_generic_core.lua", "start": 230497, "end": 238520}, {"filename": "/preload/games/card_sim/card_generic_draw.lua", "start": 238520, "end": 240727}, {"filename": "/preload/games/card_sim/card_generic_main.lua", "start": 240727, "end": 246880}, {"filename": "/preload/games/card_sim/card_generic_serialize.lua", "start": 246880, "end": 250102}, {"filename": "/preload/games/checkers/checkers_core.lua", "start": 250102, "end": 260109}, {"filename": "/preload/games/checkers/checkers_draw.lua", "start": 260109, "end": 264338}, {"filename": "/preload/games/checkers/checkers_main.lua", "start": 264338, "end": 271666}, {"filename": "/preload/games/checkers/checkers_serialize.lua", "start": 271666, "end": 273820}, {"filename": "/preload/games/chess/chess_core.lua", "start": 273820, "end": 308925}, {"filename": "/preload/games/chess/chess_draw.lua", "start": 308925, "end": 319421}, {"filename": "/preload/games/chess/chess_main.lua", "start": 319421, "end": 334273}, {"filename": "/preload/games/chess/chess_serialize.lua", "start": 334273, "end": 339535}, {"filename": "/preload/games/crib/crib_core.lua", "start": 339535, "end": 375618}, {"filename": "/preload/games/crib/crib_draw.lua", "start": 375618, "end": 390654}, {"filename": "/preload/games/crib/crib_main.lua", "start": 390654, "end": 397224}, {"filename": "/preload/games/crib/crib_serialize.lua", "start": 397224, "end": 403096}, {"filename": "/preload/games/crib/crib_test.lua", "start": 403096, "end": 406933}, {"filename": "/preload/games/crossword_builder/crossword_builder_core.lua", "start": 406933, "end": 421454}, {"filename": "/preload/games/crossword_builder/crossword_builder_draw.lua", "start": 421454, "end": 425758}, {"filename": "/preload/games/crossword_builder/crossword_builder_main.lua", "start": 425758, "end": 429340}, {"filename": "/preload/games/crossword_letters/crossword_letters_core.lua", "start": 429340, "end": 448335}, {"filename": "/preload/games/crossword_letters/crossword_letters_draw.lua", "start": 448335, "end": 459447}, {"filename": "/preload/games/crossword_letters/crossword_letters_gen_puzzles.lua", "start": 459447, "end": 463828}, {"filename": "/preload/games/crossword_letters/crossword_letters_main.lua", "start": 463828, "end": 472765}, {"filename": "/preload/games/crossword_letters/crossword_letters_puzzles.lua", "start": 472765, "end": 598141}, {"filename": "/preload/games/crossword_letters/crossword_letters_serialize.lua", "start": 598141, "end": 601803}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters.py", "start": 601803, "end": 610233}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters2.py", "start": 610233, "end": 624192}, {"filename": "/preload/games/crossword_letters/list_puzzle_words.lua", "start": 624192, "end": 625086}, {"filename": "/preload/games/crossword_letters/list_right_diffs.py", "start": 625086, "end": 625441}, {"filename": "/preload/games/endless_runner/endless_runner_core.lua", "start": 625441, "end": 630641}, {"filename": "/preload/games/endless_runner/endless_runner_draw.lua", "start": 630641, "end": 633571}, {"filename": "/preload/games/endless_runner/endless_runner_main.lua", "start": 633571, "end": 635008}, {"filename": "/preload/games/fluid_mix/fluid_mix_core.lua", "start": 635008, "end": 637251}, {"filename": "/preload/games/fluid_mix/fluid_mix_draw.lua", "start": 637251, "end": 643059}, {"filename": "/preload/games/fluid_mix/fluid_mix_main.lua", "start": 643059, "end": 646055}, {"filename": "/preload/games/fluid_mix/fluid_mix_serialize.lua", "start": 646055, "end": 648210}, {"filename": "/preload/games/go/go_core.lua", "start": 648210, "end": 658553}, {"filename": "/preload/games/go/go_ctrl.lua", "start": 658553, "end": 659303}, {"filename": "/preload/games/go/go_main.lua", "start": 659303, "end": 673533}, {"filename": "/preload/games/go/go_ui.lua", "start": 673533, "end": 676923}, {"filename": "/preload/games/hospital/hospital_core.lua", "start": 676923, "end": 703189}, {"filename": "/preload/games/hospital/hospital_draw.lua", "start": 703189, "end": 725645}, {"filename": "/preload/games/hospital/hospital_main.lua", "start": 725645, "end": 734456}, {"filename": "/preload/games/hospital/hospital_serialize.lua", "start": 734456, "end": 744466}, {"filename": "/preload/games/life/life_core.lua", "start": 744466, "end": 747212}, {"filename": "/preload/games/life/life_draw.lua", "start": 747212, "end": 748202}, {"filename": "/preload/games/life/life_main.lua", "start": 748202, "end": 750375}, {"filename": "/preload/games/minesweeper/minesweeper_core.lua", "start": 750375, "end": 759298}, {"filename": "/preload/games/minesweeper/minesweeper_draw.lua", "start": 759298, "end": 764739}, {"filename": "/preload/games/minesweeper/minesweeper_main.lua", "start": 764739, "end": 777284}, {"filename": "/preload/games/minesweeper/minesweeper_serialize.lua", "start": 777284, "end": 782487}, {"filename": "/preload/games/minesweeper_life/minesweeper_draw.lua", "start": 782487, "end": 788092}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_core.lua", "start": 788092, "end": 803856}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_main.lua", "start": 803856, "end": 822792}, {"filename": "/preload/games/minesweeper_life/minesweeper_serialize.lua", "start": 822792, "end": 828005}, {"filename": "/preload/games/poker_chips/poker_chips_core.lua", "start": 828005, "end": 833376}, {"filename": "/preload/games/poker_chips/poker_chips_main.lua", "start": 833376, "end": 837571}, {"filename": "/preload/games/poker_chips/poker_chips_serialize.lua", "start": 837571, "end": 840186}, {"filename": "/preload/games/poker_chips/poker_chips_ui.lua", "start": 840186, "end": 842559}, {"filename": "/preload/games/poker_chips/ui/bet_input.lua", "start": 842559, "end": 850998}, {"filename": "/preload/games/poker_chips/ui/control.lua", "start": 850998, "end": 855038}, {"filename": "/preload/games/poker_chips/ui/view_others.lua", "start": 855038, "end": 860986}, {"filename": "/preload/games/solitaire/solitaire_core.lua", "start": 860986, "end": 880682}, {"filename": "/preload/games/solitaire/solitaire_draw.lua", "start": 880682, "end": 899024}, {"filename": "/preload/games/solitaire/solitaire_main.lua", "start": 899024, "end": 916306}, {"filename": "/preload/games/solitaire/solitaire_serialize.lua", "start": 916306, "end": 921359}, {"filename": "/preload/games/solitaire/solitaire_solve.lua", "start": 921359, "end": 939340}, {"filename": "/preload/games/spider_swing/spider_swing_core.lua", "start": 939340, "end": 944791}, {"filename": "/preload/games/spider_swing/spider_swing_draw.lua", "start": 944791, "end": 950912}, {"filename": "/preload/games/spider_swing/spider_swing_main.lua", "start": 950912, "end": 953632}, {"filename": "/preload/games/sudoku/sudoku_core.lua", "start": 953632, "end": 964135}, {"filename": "/preload/games/sudoku/sudoku_draw.lua", "start": 964135, "end": 968119}, {"filename": "/preload/games/sudoku/sudoku_main.lua", "start": 968119, "end": 968840}, {"filename": "/preload/games/swarm/swarm_core.lua", "start": 968840, "end": 983189}, {"filename": "/preload/games/swarm/swarm_draw.lua", "start": 983189, "end": 986506}, {"filename": "/preload/games/swarm/swarm_keyboard_input.lua", "start": 986506, "end": 988074}, {"filename": "/preload/games/swarm/swarm_main.lua", "start": 988074, "end": 990118}, {"filename": "/preload/games/test/card_angle_test.lua", "start": 990118, "end": 993338}, {"filename": "/preload/games/test/draw_graphics_test.lua", "start": 993338, "end": 995249}, {"filename": "/preload/games/test/timer_test.lua", "start": 995249, "end": 997404}, {"filename": "/preload/games/thrust/thrust_core.lua", "start": 997404, "end": 1008358}, {"filename": "/preload/games/thrust/thrust_draw.lua", "start": 1008358, "end": 1015409}, {"filename": "/preload/games/thrust/thrust_keyboard_input.lua", "start": 1015409, "end": 1017274}, {"filename": "/preload/games/thrust/thrust_main.lua", "start": 1017274, "end": 1019538}, {"filename": "/preload/games/touch_test/touch_test.lua", "start": 1019538, "end": 1021888}, {"filename": "/preload/games/word_mastermind/word_mastermind_core.lua", "start": 1021888, "end": 1028628}, {"filename": "/preload/games/word_mastermind/word_mastermind_draw.lua", "start": 1028628, "end": 1038149}, {"filename": "/preload/games/word_mastermind/word_mastermind_main.lua", "start": 1038149, "end": 1044263}, {"filename": "/preload/games/word_mastermind/word_mastermind_serialize.lua", "start": 1044263, "end": 1046187}, {"filename": "/preload/games/wu/wu_core.lua", "start": 1046187, "end": 1052311}, {"filename": "/preload/games/wu/wu_ctrl.lua", "start": 1052311, "end": 1053132}, {"filename": "/preload/games/wu/wu_main.lua", "start": 1053132, "end": 1062771}, {"filename": "/preload/libs/cards/card_test.lua", "start": 1062771, "end": 1063565}, {"filename": "/preload/libs/cards/cards.lua", "start": 1063565, "end": 1068972}, {"filename": "/preload/libs/cards/cards_draw.lua", "start": 1068972, "end": 1078541}, {"filename": "/preload/libs/cards/cards_set.lua", "start": 1078541, "end": 1078892}, {"filename": "/preload/libs/combinations.lua", "start": 1078892, "end": 1081184}, {"filename": "/preload/libs/dice/dice.lua", "start": 1081184, "end": 1081443}, {"filename": "/preload/libs/dice/dice_draw.lua", "start": 1081443, "end": 1082878}, {"filename": "/preload/libs/draw/draw_celebration_anim.lua", "start": 1082878, "end": 1092292}, {"filename": "/preload/libs/draw/draw_colours.lua", "start": 1092292, "end": 1093113}, {"filename": "/preload/libs/draw/draw_keyboard.lua", "start": 1093113, "end": 1097922}, {"filename": "/preload/libs/draw/draw_more.lua", "start": 1097922, "end": 1101889}, {"filename": "/preload/libs/draw/draw_shapes.lua", "start": 1101889, "end": 1103514}, {"filename": "/preload/libs/letter_tiles.lua", "start": 1103514, "end": 1126693}, {"filename": "/preload/libs/multiplayer/two_player.lua", "start": 1126693, "end": 1138725}, {"filename": "/preload/libs/multiplayer/wait_for_players.lua", "start": 1138725, "end": 1146181}, {"filename": "/preload/libs/serialize/bit_pack.lua", "start": 1146181, "end": 1149204}, {"filename": "/preload/libs/serialize/serialize.lua", "start": 1149204, "end": 1154645}, {"filename": "/preload/libs/serialize/storage_helpers.lua", "start": 1154645, "end": 1155425}, {"filename": "/preload/libs/shuffle.lua", "start": 1155425, "end": 1155778}, {"filename": "/preload/libs/touch_to_mouse_evts.lua", "start": 1155778, "end": 1156911}, {"filename": "/preload/libs/ui/buttons.lua", "start": 1156911, "end": 1160800}, {"filename": "/preload/libs/ui/show_buttons_popup.lua", "start": 1160800, "end": 1161579}, {"filename": "/preload/libs/ui/soft_numpad.lua", "start": 1161579, "end": 1165572}, {"filename": "/preload/libs/ui/touchpad.lua", "start": 1165572, "end": 1166910}, {"filename": "/preload/libs/utils.lua", "start": 1166910, "end": 1171436}, {"filename": "/preload/libs/words.lua", "start": 1171436, "end": 1174737}], "remote_package_size": 1174737});
 
   })();
 
-// end include: /tmp/tmpzuuukf97.js
-// include: /tmp/tmp5buowpkw.js
+// end include: /tmp/tmpp3q2fner.js
+// include: /tmp/tmpnc8rndwk.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmp5buowpkw.js
-// include: /tmp/tmpyo2uv4l6.js
+  // end include: /tmp/tmpnc8rndwk.js
+// include: /tmp/tmp47i5lx5c.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpyo2uv4l6.js
+  // end include: /tmp/tmp47i5lx5c.js
 
 
 var arguments_ = [];
@@ -1707,11 +1707,14 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         } else if (FS.isFile(node.mode)) {
           node.node_ops = MEMFS.ops_table.file.node;
           node.stream_ops = MEMFS.ops_table.file.stream;
-          node.usedBytes = 0; // The actual number of bytes used in the typed array, as opposed to contents.length which gives the whole capacity.
-          // When the byte data of the file is populated, this will point to either a typed array, or a normal JS array. Typed arrays are preferred
-          // for performance, and used by default. However, typed arrays are not resizable like normal JS arrays are, so there is a small disk size
-          // penalty involved for appending file writes that continuously grow a file similar to std::vector capacity vs used -scheme.
-          node.contents = null; 
+          // The actual number of bytes used in the typed array, as opposed to
+          // contents.length which gives the whole capacity.
+          node.usedBytes = 0;
+          // The byte data of the file is stored in a typed array.
+          // Note: typed arrays are not resizable like normal JS arrays are, so
+          // there is a small penalty involved for appending file writes that
+          // continuously grow a file similar to std::vector capacity vs used.
+          node.contents = MEMFS.emptyFileContents ??= new Uint8Array(0);
         } else if (FS.isLink(node.mode)) {
           node.node_ops = MEMFS.ops_table.link.node;
           node.stream_ops = MEMFS.ops_table.link.stream;
@@ -1728,36 +1731,30 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         return node;
       },
   getFileDataAsTypedArray(node) {
-        if (!node.contents) return new Uint8Array(0);
-        if (node.contents.subarray) return node.contents.subarray(0, node.usedBytes); // Make sure to not return excess unused bytes.
-        return new Uint8Array(node.contents);
+        assert(FS.isFile(node.mode), 'getFileDataAsTypedArray called on non-file');
+        return node.contents.subarray(0, node.usedBytes); // Make sure to not return excess unused bytes.
       },
   expandFileStorage(node, newCapacity) {
-        var prevCapacity = node.contents ? node.contents.length : 0;
+        var prevCapacity = node.contents.length;
         if (prevCapacity >= newCapacity) return; // No need to expand, the storage was already large enough.
-        // Don't expand strictly to the given requested limit if it's only a very small increase, but instead geometrically grow capacity.
-        // For small filesizes (<1MB), perform size*2 geometric increase, but for large sizes, do a much more conservative size*1.125 increase to
-        // avoid overshooting the allocation cap by a very large margin.
+        // Don't expand strictly to the given requested limit if it's only a very
+        // small increase, but instead geometrically grow capacity.
+        // For small filesizes (<1MB), perform size*2 geometric increase, but for
+        // large sizes, do a much more conservative size*1.125 increase to avoid
+        // overshooting the allocation cap by a very large margin.
         var CAPACITY_DOUBLING_MAX = 1024 * 1024;
         newCapacity = Math.max(newCapacity, (prevCapacity * (prevCapacity < CAPACITY_DOUBLING_MAX ? 2.0 : 1.125)) >>> 0);
-        if (prevCapacity != 0) newCapacity = Math.max(newCapacity, 256); // At minimum allocate 256b for each file when expanding.
-        var oldContents = node.contents;
+        if (prevCapacity) newCapacity = Math.max(newCapacity, 256); // At minimum allocate 256b for each file when expanding.
+        var oldContents = MEMFS.getFileDataAsTypedArray(node);
         node.contents = new Uint8Array(newCapacity); // Allocate new storage.
-        if (node.usedBytes > 0) node.contents.set(oldContents.subarray(0, node.usedBytes), 0); // Copy old data over to the new storage.
+        node.contents.set(oldContents);
       },
   resizeFileStorage(node, newSize) {
         if (node.usedBytes == newSize) return;
-        if (newSize == 0) {
-          node.contents = null; // Fully decommit when requesting a resize to zero.
-          node.usedBytes = 0;
-        } else {
-          var oldContents = node.contents;
-          node.contents = new Uint8Array(newSize); // Allocate new storage.
-          if (oldContents) {
-            node.contents.set(oldContents.subarray(0, Math.min(newSize, node.usedBytes))); // Copy old data over to the new storage.
-          }
-          node.usedBytes = newSize;
-        }
+        var oldContents = node.contents;
+        node.contents = new Uint8Array(newSize); // Allocate new storage.
+        node.contents.set(oldContents.subarray(0, Math.min(newSize, node.usedBytes))); // Copy old data over to the new storage.
+        node.usedBytes = newSize;
       },
   node_ops:{
   getattr(node) {
@@ -1857,16 +1854,11 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
           if (position >= stream.node.usedBytes) return 0;
           var size = Math.min(stream.node.usedBytes - position, length);
           assert(size >= 0);
-          if (size > 8 && contents.subarray) { // non-trivial, and typed array
-            buffer.set(contents.subarray(position, position + size), offset);
-          } else {
-            for (var i = 0; i < size; i++) buffer[offset + i] = contents[position + i];
-          }
+          buffer.set(contents.subarray(position, position + size), offset);
           return size;
         },
   write(stream, buffer, offset, length, position, canOwn) {
-          // The data buffer should be a typed array view
-          assert(!(buffer instanceof ArrayBuffer));
+          assert(buffer.subarray, 'FS.write expects a TypedArray');
           // If the buffer is located in main memory (HEAP), and if
           // memory can grow, we can't hold on to references of the
           // memory buffer, as they may get invalidated. That means we
@@ -1879,33 +1871,19 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
           var node = stream.node;
           node.mtime = node.ctime = Date.now();
   
-          if (buffer.subarray && (!node.contents || node.contents.subarray)) { // This write is from a typed array to a typed array?
-            if (canOwn) {
-              assert(position === 0, 'canOwn must imply no weird position inside the file');
-              node.contents = buffer.subarray(offset, offset + length);
-              node.usedBytes = length;
-              return length;
-            } else if (node.usedBytes === 0 && position === 0) { // If this is a simple first write to an empty file, do a fast set since we don't need to care about old data.
-              node.contents = buffer.slice(offset, offset + length);
-              node.usedBytes = length;
-              return length;
-            } else if (position + length <= node.usedBytes) { // Writing to an already allocated and used subrange of the file?
-              node.contents.set(buffer.subarray(offset, offset + length), position);
-              return length;
-            }
-          }
-  
-          // Appending to an existing file and we need to reallocate, or source data did not come as a typed array.
-          MEMFS.expandFileStorage(node, position+length);
-          if (node.contents.subarray && buffer.subarray) {
+          if (canOwn) {
+            assert(position === 0, 'canOwn must imply no weird position inside the file');
+            node.contents = buffer.subarray(offset, offset + length);
+            node.usedBytes = length;
+          } else if (node.usedBytes === 0 && position === 0) { // If this is a simple first write to an empty file, do a fast set since we don't need to care about old data.
+            node.contents = buffer.slice(offset, offset + length);
+            node.usedBytes = length;
+          } else {
+            MEMFS.expandFileStorage(node, position+length);
             // Use typed array write which is available.
             node.contents.set(buffer.subarray(offset, offset + length), position);
-          } else {
-            for (var i = 0; i < length; i++) {
-             node.contents[position + i] = buffer[offset + i]; // Or fall back to manual write if not.
-            }
+            node.usedBytes = Math.max(node.usedBytes, position + length);
           }
-          node.usedBytes = Math.max(node.usedBytes, position + length);
           return length;
         },
   llseek(stream, offset, whence) {
@@ -1930,7 +1908,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
           var allocated;
           var contents = stream.node.contents;
           // Only make a new copy when MAP_PRIVATE is specified.
-          if (!(flags & 2) && contents && contents.buffer === HEAP8.buffer) {
+          if (!(flags & 2) && contents.buffer === HEAP8.buffer) {
             // We can't emulate MAP_SHARED when the file is not backed by the
             // buffer we're mapping to (e.g. the HEAP buffer).
             allocated = false;
@@ -1964,6 +1942,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   };
   
   var FS_modeStringToFlags = (str) => {
+      if (typeof str != 'string') return str;
       var flagModes = {
         'r': 0,
         'r+': 2,
@@ -1977,6 +1956,16 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         throw new Error(`Unknown file open mode: ${str}`);
       }
       return flags;
+    };
+  
+  var FS_fileDataToTypedArray = (data) => {
+      if (typeof data == 'string') {
+        data = intArrayFromString(data, true);
+      }
+      if (!data.subarray) {
+        data = new Uint8Array(data);
+      }
+      return data;
     };
   
   var FS_getMode = (canRead, canWrite) => {
@@ -2251,8 +2240,6 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   ignorePermissions:true,
   filesystems:null,
   syncFSRequests:0,
-  readFiles:{
-  },
   ErrnoError:class extends Error {
         name = 'ErrnoError';
         // We set the `name` property to be able to identify `FS.ErrnoError`
@@ -2526,9 +2513,11 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         // return 0 if any user, group or owner bits are set.
         if (perms.includes('r') && !(node.mode & 292)) {
           return 2;
-        } else if (perms.includes('w') && !(node.mode & 146)) {
+        }
+        if (perms.includes('w') && !(node.mode & 146)) {
           return 2;
-        } else if (perms.includes('x') && !(node.mode & 73)) {
+        }
+        if (perms.includes('x') && !(node.mode & 73)) {
           return 2;
         }
         return 0;
@@ -2569,10 +2558,8 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
           if (FS.isRoot(node) || FS.getPath(node) === FS.cwd()) {
             return 10;
           }
-        } else {
-          if (FS.isDir(node.mode)) {
-            return 31;
-          }
+        } else if (FS.isDir(node.mode)) {
+          return 31;
         }
         return 0;
       },
@@ -2582,13 +2569,16 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         }
         if (FS.isLink(node.mode)) {
           return 32;
-        } else if (FS.isDir(node.mode)) {
-          if (FS.flagsToPermissionString(flags) !== 'r' // opening for write
-              || (flags & (512 | 64))) { // TODO: check for O_SEARCH? (== search for dir only)
+        }
+        var mode = FS.flagsToPermissionString(flags);
+        if (FS.isDir(node.mode)) {
+          // opening for write
+          // TODO: check for O_SEARCH? (== search for dir only)
+          if (mode !== 'r' || (flags & (512 | 64))) {
             return 31;
           }
         }
-        return FS.nodePermissions(node, FS.flagsToPermissionString(flags));
+        return FS.nodePermissions(node, mode);
       },
   checkOpExists(op, err) {
         if (!op) {
@@ -3164,7 +3154,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         if (path === "") {
           throw new FS.ErrnoError(44);
         }
-        flags = typeof flags == 'string' ? FS_modeStringToFlags(flags) : flags;
+        flags = FS_modeStringToFlags(flags);
         if ((flags & 64)) {
           mode = (mode & 4095) | 32768;
         } else {
@@ -3251,11 +3241,6 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         if (created) {
           FS.chmod(node, mode & 0o777);
         }
-        if (Module['logReadFiles'] && !(flags & 1)) {
-          if (!(path in FS.readFiles)) {
-            FS.readFiles[path] = 1;
-          }
-        }
         return stream;
       },
   close(stream) {
@@ -3320,6 +3305,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       },
   write(stream, buffer, offset, length, position, canOwn) {
         assert(offset >= 0);
+        assert(buffer.subarray, 'FS.write expects a TypedArray');
         if (length < 0 || position < 0) {
           throw new FS.ErrnoError(28);
         }
@@ -3405,14 +3391,8 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   writeFile(path, data, opts = {}) {
         opts.flags = opts.flags || 577;
         var stream = FS.open(path, opts.flags, opts.mode);
-        if (typeof data == 'string') {
-          data = new Uint8Array(intArrayFromString(data, true));
-        }
-        if (ArrayBuffer.isView(data)) {
-          FS.write(stream, data, 0, data.byteLength, undefined, opts.canOwn);
-        } else {
-          abort('Unsupported data type');
-        }
+        data = FS_fileDataToTypedArray(data);
+        FS.write(stream, data, 0, data.byteLength, undefined, opts.canOwn);
         FS.close(stream);
       },
   cwd:() => FS.currentPath,
@@ -3637,11 +3617,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         var mode = FS_getMode(canRead, canWrite);
         var node = FS.create(path, mode);
         if (data) {
-          if (typeof data == 'string') {
-            var arr = new Array(data.length);
-            for (var i = 0, len = data.length; i < len; ++i) arr[i] = data.charCodeAt(i);
-            data = arr;
-          }
+          data = FS_fileDataToTypedArray(data);
           // make sure we can write to the file
           FS.chmod(node, mode | 146);
           var stream = FS.open(node, 577);
@@ -3875,24 +3851,6 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         };
         node.stream_ops = stream_ops;
         return node;
-      },
-  absolutePath() {
-        abort('FS.absolutePath has been removed; use PATH_FS.resolve instead');
-      },
-  createFolder() {
-        abort('FS.createFolder has been removed; use FS.mkdir instead');
-      },
-  createLink() {
-        abort('FS.createLink has been removed; use FS.symlink instead');
-      },
-  joinPath() {
-        abort('FS.joinPath has been removed; use PATH.join instead');
-      },
-  mmapAlloc() {
-        abort('FS.mmapAlloc has been replaced by the top level function mmapAlloc');
-      },
-  standardizePath() {
-        abort('FS.standardizePath has been removed; use PATH.normalize instead');
       },
   };
   
@@ -5434,6 +5392,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'FS_createPreloadedFile',
   'FS_modeStringToFlags',
   'FS_getMode',
+  'FS_fileDataToTypedArray',
   'FS_stdin_getChar_buffer',
   'FS_stdin_getChar',
   'FS_readFile',
@@ -5449,7 +5408,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'FS_ignorePermissions',
   'FS_filesystems',
   'FS_syncFSRequests',
-  'FS_readFiles',
   'FS_lookupPath',
   'FS_getPath',
   'FS_hashName',
@@ -5542,12 +5500,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'FS_analyzePath',
   'FS_createFile',
   'FS_forceLoadFile',
-  'FS_absolutePath',
-  'FS_createFolder',
-  'FS_createLink',
-  'FS_joinPath',
-  'FS_mmapAlloc',
-  'FS_standardizePath',
   'MEMFS',
   'TTY',
   'PIPEFS',
@@ -5580,9 +5532,15 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
+  ignoredModuleProp('logReadFiles');
+  ignoredModuleProp('loadSplitModule');
+  ignoredModuleProp('onMalloc');
+  ignoredModuleProp('onRealloc');
+  ignoredModuleProp('onFree');
+  ignoredModuleProp('onSbrkGrow');
 }
 var ASM_CONSTS = {
-  1195999: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  1213199: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
