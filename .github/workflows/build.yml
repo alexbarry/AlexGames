@@ -34,6 +34,5 @@ jobs:
     - name: Build main AlexGames static HTML via docker
       run: |
         docker run --rm \
-            --build-arg ALEXGAMES_BUILD_TYPE_LABEL=github-pages-main-build-only \
             -v $(pwd):/app \
             alexgames_build_wasm
