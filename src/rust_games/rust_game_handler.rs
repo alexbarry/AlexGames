@@ -1,7 +1,9 @@
 mod rust_game_api;
 
+mod free_cell;
 mod gem_match;
 mod libs;
+mod morse;
 mod reversi;
 mod trivia;
 
@@ -11,10 +13,12 @@ use std::slice;
 //use libc::{size_t, c_char, c_void};
 use libc::{c_int, c_void, size_t};
 
+use free_cell::free_cell_main;
+use morse::morse_main;
 use gem_match::gem_match_main;
 use reversi::reversi_main;
+use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, OptionType, PopupState, TouchInfo, KeyEvt};
 use trivia::trivia_main;
-use rust_game_api::{AlexGamesApi, CCallbacksPtr, MouseEvt, TouchInfo, PopupState, OptionType};
 
 // A pointer to this struct is returned to C, and then passed back
 // to the rust APIs. A pointer to AlexGamesApi is needed, and also
@@ -42,6 +46,8 @@ fn get_rust_game_init_func(
         "reversi" => Some(reversi_main::init_reversi),
         "gem_match" => Some(gem_match_main::init_gem_match),
         "trivia" => Some(trivia_main::init_trivia),
+        "free_cell" => Some(free_cell_main::init_free_cell),
+        "morse" => Some(morse_main::init_morse),
         _ => None,
     };
 }
@@ -50,14 +56,14 @@ fn find_null_terminator(str_ptr: *const u8, max_bytes: usize) -> Option<usize> {
     let mut str_end_pos: usize = 0;
     for i in 0..=max_bytes {
         let val = unsafe { *str_ptr.add(i) };
-        println!("Checking i={}, val is {:#?}", i, val);
+        // println!("Checking i={}, val is {:#?}", i, val);
         if val == 0 {
             str_end_pos = i;
-            println!("breaking");
+            // println!("breaking");
             break;
         }
         if i == max_bytes {
-            println!("Could not find terminating null in first {} bytes of string passed to handle_btn_clicked", max_bytes);
+            // println!("Could not find terminating null in first {} bytes of string passed to handle_btn_clicked", max_bytes);
             return None;
         }
     }
@@ -85,6 +91,8 @@ fn handle_void_ptr_to_trait_ref(handle: *mut c_void) -> &'static mut dyn AlexGam
         "reversi" => handle.api as *mut reversi_main::AlexGamesReversi,
         "gem_match" => handle.api as *mut gem_match_main::AlexGamesGemMatch,
         "trivia" => handle.api as *mut trivia_main::AlexGamesTrivia,
+        "free_cell" => handle.api as *mut free_cell_main::AlexGamesFreeCell,
+        "morse" => handle.api as *mut morse_main::AlexGamesMorse,
         _ => panic!("unhandled game_id passed to handle_void_ptr_to_trait_ref"),
     };
 
@@ -165,27 +173,55 @@ pub extern "C" fn rust_game_api_handle_touch_evt(
     handle.handle_touch_evt(&evt_id, touches);
 }
 
-
 #[no_mangle]
-pub fn rust_game_api_handle_popup_btn_clicked(handle: *mut c_void, popup_id: *const u8, btn_idx: i32, _popup_state: *const c_void) {
+pub extern "C" fn rust_game_api_handle_key_evt(
+    handle: *mut c_void,
+    evt_id_cstr: *const u8,
+    key_code_cstr: *const u8,
+) -> bool {
     let handle = handle_void_ptr_to_trait_ref(handle);
-	let popup_id = c_str_to_str(popup_id, None);
-	let popup_state = PopupState {}; // TODO add real state here
-	handle.handle_popup_btn_clicked(&popup_id, btn_idx, &popup_state);
+    let evt_id = c_str_to_str(evt_id_cstr, None);
+	let evt_id = match evt_id.as_str() {
+		"keydown" => KeyEvt::Down,
+		"keyup" => KeyEvt::Up,
+		_ => {
+			panic!("Unexpected key event {:?}", evt_id);
+		},
+	};
+    let key_code_str = c_str_to_str(key_code_cstr, None);
+    return handle.handle_key_evt(evt_id, &key_code_str);
 }
 
+#[no_mangle]
+pub fn rust_game_api_handle_popup_btn_clicked(
+    handle: *mut c_void,
+    popup_id: *const u8,
+    btn_idx: i32,
+    _popup_state: *const c_void,
+) {
+    let handle = handle_void_ptr_to_trait_ref(handle);
+    let popup_id = c_str_to_str(popup_id, None);
+    let popup_state = PopupState {}; // TODO add real state here
+    handle.handle_popup_btn_clicked(&popup_id, btn_idx, &popup_state);
+}
 
 #[no_mangle]
-pub fn rust_game_api_handle_game_option_evt(handle: *mut c_void, option_type: i32, option_id: *const u8, value: i32) {
+pub fn rust_game_api_handle_game_option_evt(
+    handle: *mut c_void,
+    option_type: i32,
+    option_id: *const u8,
+    value: i32,
+) {
     let handle = handle_void_ptr_to_trait_ref(handle);
-	let option_type = match option_type {
-		1 => OptionType::Button,
-		2 => OptionType::Toggle,
-		_ => { panic!("unhandled option type"); },
-	};
-	let option_id = c_str_to_str(option_id, None);
-	handle.handle_game_option_evt(&option_id, option_type, value);
-
+    let option_type = match option_type {
+        1 => OptionType::Button,
+        2 => OptionType::Toggle,
+        _ => {
+            panic!("unhandled option type");
+        }
+    };
+    let option_id = c_str_to_str(option_id, None);
+    handle.handle_game_option_evt(&option_id, option_type, value);
 }
 
 #[no_mangle]
@@ -289,6 +325,8 @@ pub extern "C" fn start_rust_game_rust(
 #[no_mangle]
 pub extern "C" fn rust_game_api_destroy_game(handle: *mut c_void) {
     let api = handle_void_ptr_to_trait_ref(handle);
+
+    api.callbacks().destroy_all();
 
     // free the pointers
     unsafe {

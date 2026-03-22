@@ -12,3 +12,5 @@ __pycache__
 .~lock.*.fods#
 
 venv
+
+alexgames_state.db

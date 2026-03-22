@@ -400,6 +400,11 @@ static size_t jni_read_stored_data(void *L, const char *key, uint8_t *value_out,
 	return -1;
 }
 
+static bool jni_delete_stored_data(void *L, const char *key) {
+	// TODO
+	return false;
+}
+
 static void jni_disable_evt(const char *evt_id_str, size_t evt_id_len) {
 
 }
@@ -488,6 +493,7 @@ static const struct game_api_callbacks api = {
 	jni_get_time_of_day,
 	jni_store_data,
 	jni_read_stored_data,
+	jni_delete_stored_data,
 
 	jni_get_new_session_id,
 	jni_get_last_session_id,

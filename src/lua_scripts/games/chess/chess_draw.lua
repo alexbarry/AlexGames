@@ -18,9 +18,12 @@ local show_labels  = nil
 local OUTLINE_WIDTH = 4
 local cell_size    = nil
 local piece_padding = 0
+
+local BORDER_PADDING_NO_LABELS = 20
 local border_padding = 20
 
 local LABEL_COLOUR = '#000000'
+local LABEL_COLOUR_DARK = "#888"
 local LABEL_FONT_SIZE = 12
 -- the number of pixels taken up by the parts of a letter that are drawn below the line, like the "tail" of the letter "g"
 local text_y_buffer = 4
@@ -67,6 +70,8 @@ function draw.init(height, width, show_labels_arg)
 	show_labels = show_labels_arg
 	if not show_labels then
 		border_padding = 0
+	else
+		border_padding = BORDER_PADDING_NO_LABELS
 	end
 
 	cell_size = math.floor((math.min(board_height, board_width) - 2*border_padding) / core.BOARD_SIZE)
@@ -151,7 +156,7 @@ local function get_col_label(col)
 end
 
 local function get_row_label(row)
-	return string.format('%d', row)
+	return string.format('%d', 8-row+1)
 end
 
 local function get_piece_brightness(player)
@@ -187,8 +192,10 @@ end
 
 
 function draw.draw_state(state, params)
+	local user_colour_pref = alexgames.get_user_colour_pref()
+
 	alexgames.draw_clear()
-	alexgames.draw_rect('#000000', 0, 0, board_height, board_width)
+	--alexgames.draw_rect('#000000', 0, 0, board_height, board_width)
 	-- Draw checkerboard
 	for y=1,core.BOARD_SIZE do
 		for x=1,core.BOARD_SIZE do
@@ -204,10 +211,14 @@ function draw.draw_state(state, params)
 
 	-- Add labels to rows and columns
 	if show_labels then
+		local label_colour = LABEL_COLOUR
+		if user_colour_pref == "dark" then
+			label_colour = LABEL_COLOUR_DARK
+		end
 		for _, y_pos in ipairs({border_padding-text_y_buffer, border_padding + core.BOARD_SIZE*cell_size+LABEL_FONT_SIZE}) do
 			for x=1,core.BOARD_SIZE do
 				local label = get_col_label(x)
-				alexgames.draw_text(label, LABEL_COLOUR,
+				alexgames.draw_text(label, label_colour,
 				                     y_pos,  border_padding + math.floor(cell_size*(x-0.5)),
 				                     LABEL_FONT_SIZE, 0)
 			end
@@ -216,7 +227,7 @@ function draw.draw_state(state, params)
 		for _, x_pos_info in ipairs({{pos = border_padding, align=-1}, {pos = board_width-border_padding, align=1}}) do
 			for y=1,core.BOARD_SIZE do
 				local label = get_row_label(y)
-				alexgames.draw_text(label, LABEL_COLOUR,
+				alexgames.draw_text(label, label_colour,
 				                     border_padding + math.floor(cell_size*(y-0.5)), x_pos_info.pos,
 				                     LABEL_FONT_SIZE, x_pos_info.align)
 			end
@@ -233,6 +244,31 @@ function draw.draw_state(state, params)
 		highlight_outline = PIECE_SEL_HIGHLIGHT_OUTLINE_REMOTE
 		dst_highlight = DST_HIGHLIGHT_COLOUR_REMOTE
 		dst_outline = DST_HIGHLIGHT_OUTLINE_REMOTE
+	end
+
+	if state.prev_move_src ~= nil then
+		local prev_move_highlight_fill
+		local prev_move_highlight_outline
+		if user_colour_pref == "dark" then
+			prev_move_highlight_fill    = "#4001"
+			prev_move_highlight_outline = "#4008"
+		else
+			prev_move_highlight_fill    = "#c002"
+			prev_move_highlight_outline = "#8004"
+		end
+		draw_rect_at_pos(prev_move_highlight_fill, prev_move_highlight_outline, state.prev_move_src.y, state.prev_move_src.x)
+	end
+	if state.prev_move_dst ~= nil then
+		local prev_move_highlight_fill
+		local prev_move_highlight_outline
+		if user_colour_pref == "dark" then
+			prev_move_highlight_fill    = "#4002"
+			prev_move_highlight_outline = "#400"
+		else
+			prev_move_highlight_fill    = "#c004"
+			prev_move_highlight_outline = "#8006"
+		end
+		draw_rect_at_pos(prev_move_highlight_fill, prev_move_highlight_outline, state.prev_move_dst.y, state.prev_move_dst.x)
 	end
 
 	-- If a cell is selected, highlight it

@@ -242,6 +242,7 @@ function draw_clear(gfx) {
 }
 
 function create_btn(gfx, btn_lua_id, name, weight) {
+	console.debug('[ui] create_btn', btn_lua_id);
 	let button_row = document.getElementById("game_button_row");
 
 	let btn = document.createElement("button");
@@ -657,6 +658,7 @@ function get_multiplayer_session_id() {
 }
 
 function destroy_all(L) {
+	console.debug('[ui] destroy_all');
 	let button_row = document.getElementById("game_button_row");
 	while (button_row.firstChild) {
 		button_row.removeChild(button_row.firstChild);

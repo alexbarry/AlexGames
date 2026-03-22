@@ -2,12 +2,8 @@
 -- Author: Alex Barry (github.com/alexbarry)
 --[[
 TODO:
-* implement logic for check and checkmate
-* prevent player from moving into check
-* implement serializing state so state can be saved or network games can be played
-* implement castling
-* implement pawn en-passant capturing?? (I didn't even know about this rule)
-* implement history (undo/redo)
+* add indicator of previous move
+* log moves to text box, both in proper chess notation, and something easier to read (e.g. piece moved from src to dst, capturing other_piece)
 --]]
 local alexgames = require("alexgames")
 
@@ -18,14 +14,34 @@ local serialize = require("games/chess/chess_serialize")
 local utils = require("libs/utils")
 local two_player = require("libs/multiplayer/two_player")
 
+
+local show_labels = true
 local g_session_id = alexgames.get_new_session_id()
 local g_state = core.new_game()
+local g_pending_move = nil
 --local player = core.PLAYER_WHITE
 local player = nil
 local local_multiplayer = nil
 local player_name_to_id = {}
 local g_other_player = nil
 local session_id = alexgames.get_new_session_id()
+
+local POPUP_ITEM_ID_QUEEN_BTN  = 0
+local POPUP_ITEM_ID_BISHOP_BTN = 1
+local POPUP_ITEM_ID_ROOK_BTN   = 2
+local POPUP_ITEM_ID_KNIGHT_BTN = 3
+
+local BTN_ID_TO_PAWN_PIECE_PROMO_SEL = {
+	[POPUP_ITEM_ID_QUEEN_BTN]  = core.PIECE_QUEEN,
+	[POPUP_ITEM_ID_BISHOP_BTN] = core.PIECE_BISHOP,
+	[POPUP_ITEM_ID_ROOK_BTN]   = core.PIECE_ROOK,
+	[POPUP_ITEM_ID_KNIGHT_BTN] = core.PIECE_KNIGHT,
+}
+
+local WHITE_QUEEN_EMOJI_UTF8  = "\xE2\x99\x95"
+local WHITE_BISHOP_EMOJI_UTF8 = "\xE2\x99\x97"
+local WHITE_ROOK_EMOJI_UTF8   = "\xE2\x99\x96"
+local WHITE_KNIGHT_EMOJI_UTF8 = "\xE2\x99\x98"
 
 local SELECT_PLAYER_POPUP_ID = "select_player"
 local PLAYER_CHOICE_BTNS = {
@@ -37,6 +53,8 @@ local BTN_MAP = {
     [1] = core.PLAYER_BLACK,
 }
 
+local POPUP_ID_PAWN_PROMOTION_PIECE_SEL = "popup_pawn_promo_piece_sel"
+
 
 local BTN_ID_UNDO = "btn_undo"
 local BTN_ID_REDO = "btn_redo"
@@ -45,6 +63,9 @@ local POPUP_ID_NEW_GAME          = "game_over"
 local POPUP_ITEM_ID_NEW_GAME_BTN = 1
 
 local OPTION_ID_NEW_GAME = "new_game"
+local OPTION_ID_SHOW_LABELS = "opt_show_labels"
+
+local KEY_CHESS_SHOW_RANK_FILE_LABELS = "chess_show_rank_file_labels"
 
 function get_player()
 	if local_multiplayer then
@@ -71,7 +92,7 @@ local function get_draw_state_params()
 	}
 end
 
-draw.init(480,480, false)
+draw.init(480,480, show_labels)
 local function draw_board_internal()
 	--core.print_state(g_state)
 	draw.draw_state(g_state, get_draw_state_params())
@@ -106,13 +127,45 @@ function handle_rc(rc, is_other_player)
 	end
 end
 
+local function show_pawn_promotion_piece_sel_popup()
+	local msg = "Moved pawn to other end of board. Select a piece to promote pawn to:"
+	alexgames.show_popup(POPUP_ID_PAWN_PROMOTION_PIECE_SEL, {
+		title = "Pawn promotion",
+		items = {
+			{ item_type = alexgames.POPUP_ITEM_TYPE_MSG, msg = msg },
+			{ id = POPUP_ITEM_ID_QUEEN_BTN,  item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_QUEEN_EMOJI_UTF8  .. " Queen"  },
+			{ id = POPUP_ITEM_ID_BISHOP_BTN, item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_BISHOP_EMOJI_UTF8 .. " Bishop" },
+			{ id = POPUP_ITEM_ID_ROOK_BTN,   item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_ROOK_EMOJI_UTF8   .. " Rook"   },
+			{ id = POPUP_ITEM_ID_KNIGHT_BTN, item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_KNIGHT_EMOJI_UTF8 .. " Knight" },
+		},
+	})
+end
+
 function handle_user_clicked(pos_y, pos_x)
 	local coords = draw.draw_coords_to_cell(pos_y, pos_x)
-	local rc = core.player_touch(g_state, get_player(), coords)
+	if core.move_is_valid_pawn_promotion(g_state, get_player(), g_state.selected, coords) then
+		show_pawn_promotion_piece_sel_popup()
+		g_pending_move = coords
+	else
+		move_piece_internal(coords, nil)
+	end
+end
+
+function move_piece_internal(coords, pawn_promo_piece_sel)
+	local prev_player = g_state.player_turn
+	local move_msg = core.get_move_msg(g_state, g_state.player_turn, g_state.selected, coords, pawn_promo_piece_sel)
+	local rc = core.player_touch(g_state, get_player(), coords, pawn_promo_piece_sel)
 	if not local_multiplayer and rc == core.SUCCESS then
-		alexgames.send_message("all", string.format("move:%d,%d,%d", get_player(), coords.y, coords.x))
+		local msg_suffix = ''
+		if pawn_promo_piece_sel ~= nil then
+			msg_suffix = string.format(',%d', pawn_promo_piece_sel)
+		end
+		alexgames.send_message("all", string.format("move:%d,%d,%d%s", get_player(), coords.y, coords.x, msg_suffix))
 	end
 	handle_rc(rc)
+	if prev_player ~= g_state.player_turn then -- TODO or checkmate...
+		alexgames.set_status_msg(move_msg)
+	end
 	--core.print_state(g_state)
 	draw_board_internal()
 end
@@ -122,11 +175,20 @@ function handle_popup_btn_clicked(popup_id, btn_id, popup_state)
         -- handled
 	elseif popup_id == POPUP_ID_NEW_GAME then
 		if btn_id == POPUP_ITEM_ID_NEW_GAME_BTN then
-			start_game()
+			start_new_game()
 			alexgames.hide_popup()
 		else	
 			error(string.format("Unhandled btn_id=\"%s\"", btn_id))
 		end
+	elseif popup_id == POPUP_ID_PAWN_PROMOTION_PIECE_SEL then
+		if g_pending_move == nil then
+			error("Selected piece for pawn promotion, but g_pending_move == nil?")
+		end
+		print(string.format("Upon player selecting piece for pawn promotion, completing move to %d %d", g_pending_move.y, g_pending_move.x))
+		local pawn_piece_promo_sel = BTN_ID_TO_PAWN_PIECE_PROMO_SEL[btn_id]
+		move_piece_internal(g_pending_move, pawn_piece_promo_sel)
+		g_pending_move = nil
+		alexgames.hide_popup()
 	else
 		error(string.format("Unhandled popup_id=\"%s\"", popup_id))
 	end
@@ -151,23 +213,30 @@ function handle_msg_received(src, msg)
     local header, payload = m()
 
     if header == "move" then
-        local m2 = payload:gmatch("(%d+),(%d+),(%d+)")
+        local m2 = payload:gmatch("(%d+),(%d+),(%d+),?(%d*)")
         if m2 == nil then
             error("Invalid \"move\" msg from " .. src)
             return
         end
-        local player_idx, y, x = m2()
+        local player_idx, y, x, pawn_promo_piece_sel = m2()
         player_idx = tonumber(player_idx)
         y = tonumber(y)
         x = tonumber(x)
-		local coords = { y = y, x = x }
-        local rc = core.player_touch(g_state, player_idx, coords)
+        if #pawn_promo_piece_sel then
+            pawn_promo_piece_sel = tonumber(pawn_promo_piece_sel)
+        else
+            pawn_promo_piece_sel = nil
+        end
+        local coords = { y = y, x = x }
+        local move_msg = core.get_move_msg(g_state, g_state.player_turn, g_state.selected, coords, pawn_promo_piece_sel)
+        local rc = core.player_touch(g_state, player_idx, coords, pawn_promo_piece_sel)
         handle_rc(rc, --[[is_other_player=]] true)
 
         if rc ~= core.SUCCESS then
             alexgames.set_status_err("Other player made an invalid move")
         else
-            alexgames.set_status_msg("Your move")
+            alexgames.set_status_msg(move_msg .. ". Your move")
+            -- alexgames.set_status_msg("Your move")
             draw_board_internal()
             save_state()
         end
@@ -264,6 +333,29 @@ end
 
 function save_state()
 	local serialized_state = serialize.serialize_state(g_state)
+	--[[
+	-- TODO debug only
+	if true then
+		local deserialized_state = serialize.deserialize_state(serialized_state)
+		local serialized_state2 = serialize.serialize_state(deserialized_state)
+		if not core.states_eq(g_state, deserialized_state) then
+			print("g_state = ")
+			core.print_state(g_state)
+			print('###################################')
+			print('')
+
+			print("deserialized_state = ")
+			core.print_state(deserialized_state)
+			print('###################################')
+			print('')
+
+			error(string.format("serializing and deserializing did not produce the same state table"))
+		end
+		if serialized_state2 ~= serialized_state then
+			error(string.format("serializing, deserialize and re-serializing did not produce the same output"))
+		end
+	end
+	--]]
 	alexgames.save_state(g_session_id, serialized_state)
 end
 
@@ -279,11 +371,24 @@ function handle_btn_clicked(btn_id)
 	end
 end
 
-function handle_game_option_evt(option_id)
+function start_new_game()
+	alexgames.set_status_msg("Starting new game")
+	g_session_id = alexgames.get_new_session_id()
+	g_state = core.new_game()
+	save_state()
+	broadcast_state("all")
+	draw_board_internal()
+end
+
+
+function handle_game_option_evt(option_id, value)
 	if option_id == OPTION_ID_NEW_GAME then
-		g_session_id = alexgames.get_new_session_id()
-		g_state = core.new_game()
-		save_state()
+		start_new_game()
+	elseif option_id == OPTION_ID_SHOW_LABELS then
+		print(string.format("show_labels now %s", value))
+		show_labels = value
+		alexgames.store_data(KEY_CHESS_SHOW_RANK_FILE_LABELS, tostring(show_labels))
+		draw.init(480,480, show_labels)
 		draw_board_internal()
 	end
 end
@@ -292,7 +397,24 @@ function get_state()
 	return serialize.serialize_state(g_state)
 end
 
+local function str_to_bool(s)
+	if s == "true" or s == "1" then
+		return true
+	elseif s == "false" or s == "0" then
+		return false
+	else
+		error(string.format("Unhandled string \"%s\" passed to str_to_bool", s))
+	end
+end
+
 function start_game(session_id_arg, state_serialized)
+	local show_labels_stored = alexgames.read_stored_data(KEY_CHESS_SHOW_RANK_FILE_LABELS)
+	if show_labels_stored == nil then
+		-- do nothing
+	else
+		show_labels = str_to_bool(show_labels_stored)
+		draw.init(480,480, show_labels)
+	end
 	local state_loaded = false
 	if state_serialized ~= nil then
 		load_state(session_id_arg, state_serialized)
@@ -311,6 +433,7 @@ function start_game(session_id_arg, state_serialized)
 	alexgames.send_message("all", "get_state:")
 
 	alexgames.add_game_option(OPTION_ID_NEW_GAME, { type = alexgames.OPTION_TYPE_BTN, label = "New Game" })
+	alexgames.add_game_option(OPTION_ID_SHOW_LABELS, { type = alexgames.OPTION_TYPE_TOGGLE, label = "Show rank/file labels", value = show_labels })
 
 	alexgames.create_btn(BTN_ID_UNDO, "Undo", 1)
 	alexgames.create_btn(BTN_ID_REDO, "Redo", 1)

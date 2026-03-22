@@ -1,11 +1,95 @@
 local serialize = {}
 
 local core = require("games/chess/chess_core")
+local utils = require("libs/utils")
 local serialize_lib = require("libs/serialize/serialize")
+
+serialize.VERSION_1 = 1
+serialize.VERSION_2 = 2
+serialize.VERSION_3 = 3
+serialize.VERSION_4 = 4
+serialize.VERSION_5 = 5
+
+serialize.CURRENT_VERSION = serialize.VERSION_5
+
+local function byte_to_pt(byte)
+	y = byte & 0xf
+	x = (byte >> 4) & 0xf
+	return {
+		y = y,
+		x = x,
+	}
+end
+
+local function deserialize_pt(bytes)
+	local byte = serialize_lib.deserialize_byte(bytes)
+	return byte_to_pt(byte)
+end
+
+local function pt_to_byte(pt)
+	local val
+
+	if pt == nil then
+		val = 0
+	else
+		val = (pt.y & 0xf) | ( (pt.x & 0xf) << 4 )
+	end
+
+	return val
+end
+
+local function serialize_pt(pt)
+	local byte = pt_to_byte(pt)
+	return string.char(byte)
+end
 
 function serialize.deserialize_state(byte_str)
 	local bytes = serialize_lib.bytestr_to_byteary(byte_str)
+	local version
+	if #bytes == 65 then
+		version = serialize.VERSION_1
+	else
+		version = serialize_lib.deserialize_byte(bytes)
+	end
+
 	local state = {}
+	state.rooks_moved = {}
+	state.kings_moved = {}
+	state.pawn_moved_two_squares = 0
+
+	if version == serialize.VERSION_1 then
+		state.rooks_moved[core.POS_ROOK1_BLACK] = false
+		state.rooks_moved[core.POS_ROOK2_BLACK] = false
+		state.rooks_moved[core.POS_ROOK1_WHITE] = false
+		state.rooks_moved[core.POS_ROOK2_WHITE] = false
+		state.kings_moved[core.PLAYER_WHITE]    = false
+		state.kings_moved[core.PLAYER_BLACK]    = false
+
+	elseif (version == serialize.VERSION_2 or
+	        version == serialize.VERSION_3 or
+	        version == serialize.VERSION_4 or
+	        version == serialize.VERSION_5) then
+		local pieces_moved_bitfield = serialize_lib.deserialize_byte(bytes)
+		state.rooks_moved[core.POS_ROOK1_BLACK] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 0))
+		state.rooks_moved[core.POS_ROOK2_BLACK] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 1))
+		state.rooks_moved[core.POS_ROOK1_WHITE] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 2))
+		state.rooks_moved[core.POS_ROOK2_WHITE] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 3))
+		state.kings_moved[core.PLAYER_WHITE]    = utils.number_to_boolean(pieces_moved_bitfield & (1 << 4))
+		state.kings_moved[core.PLAYER_BLACK]    = utils.number_to_boolean(pieces_moved_bitfield & (1 << 5))
+
+		if version >= serialize.VERSION_3 then
+			state.pawn_moved_two_squares = serialize_lib.deserialize_byte(bytes)
+		end
+
+		if version >= serialize.VERSION_4 then
+			state.prev_move_src = deserialize_pt(bytes)
+			state.prev_move_dst = deserialize_pt(bytes)
+		end
+
+	else
+		error(string.format("Unhandled serialized chess state, version %d", version))
+	end
+
 	state.player_turn = serialize_lib.deserialize_byte(bytes)
 	state.board = {}
 	state.selected = nil
@@ -16,6 +100,24 @@ function serialize.deserialize_state(byte_str)
 		end
 	end
 
+
+	state.moves = {}
+	if version >= serialize.VERSION_5 then
+		local moves_bytes = serialize_lib.deserialize_bytes(bytes)
+		if #moves_bytes % 2 ~= 0 then
+			error(string.format("Encountered %d bytes of moves points, expected even number"))
+		end
+
+		for i=1,#moves_bytes, 2 do
+			local src = byte_to_pt(moves_bytes[i])
+			local dst = byte_to_pt(moves_bytes[i+1])
+
+			table.insert(state.moves, { src = src, dst = dst } )
+		end
+	end
+
+	state.game_status = core.get_game_status(state)
+
 	if #bytes ~= 0 then
 		error(string.format("%d bytes remaining after deserializing", #bytes))
 	end
@@ -25,12 +127,37 @@ end
 
 function serialize.serialize_state(state)
 	local output = ""
+	output = output .. serialize_lib.serialize_byte(serialize.CURRENT_VERSION)
+
+	local pieces_moved_bitfield = 0
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.rooks_moved[core.POS_ROOK1_BLACK]) * (1 << 0)
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.rooks_moved[core.POS_ROOK2_BLACK]) * (1 << 1)
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.rooks_moved[core.POS_ROOK1_WHITE]) * (1 << 2)
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.rooks_moved[core.POS_ROOK2_WHITE]) * (1 << 3)
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.kings_moved[core.PLAYER_WHITE]) * (1 << 4)
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.kings_moved[core.PLAYER_BLACK]) * (1 << 5)
+
+	output = output .. serialize_lib.serialize_byte(pieces_moved_bitfield)
+
+	output = output .. serialize_lib.serialize_byte(state.pawn_moved_two_squares)
+	output = output .. serialize_pt(state.prev_move_src)
+	output = output .. serialize_pt(state.prev_move_dst)
+
 	output = output .. serialize_lib.serialize_byte(state.player_turn)
 	for y=1,core.BOARD_SIZE do
 		for x=1,core.BOARD_SIZE do
 			output = output .. serialize_lib.serialize_byte(state.board[y][x])
 		end
 	end
+
+	local move_bytes = {}
+	for _, game_move in ipairs(state.moves) do
+		assert(game_move.src ~= nil)
+		table.insert(move_bytes, pt_to_byte(game_move.src))
+		assert(game_move.dst ~= nil)
+		table.insert(move_bytes, pt_to_byte(game_move.dst))
+	end
+	output = output .. serialize_lib.serialize_bytes(move_bytes)
 
 	return output
 end

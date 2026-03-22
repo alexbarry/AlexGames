@@ -101,7 +101,8 @@ local function has_liberties(game_state, y, x)
 	return false
 end
 
-local function clear_piece_group(board, y, x)
+local function clear_piece_group(game_state, y, x)
+	local board = game_state.board
 	local this_player = board[y][x]
 	local visited = make_2d_array(#board, #board[1], false)
 	local to_visit = { Point:create{y=y, x=x}}
@@ -170,12 +171,25 @@ function go.print_board(board)
 	end
 end
 
+function go.print_state(state, name)
+	print(string.format('state (name: "%s"): {'), name)
+	print('    y_max = %s', state.y_max)
+	print('    x_max = %s', state.x_max)
+	print('    last_move_y = %s', state.last_move_y)
+	print('    board:')
+	go.print_board(state.board)
+	print('    prev_board:')
+	go.print_board(state.prev_board)
+	print('}')
+	print(string.format('--------- (end state (name "%s"))', name))
+end
+
 function go.player_num_to_char(num)
 	return val_to_char[num]
 end
 
 function go.new_game(size)
-	game_state = {
+	local game_state = {
 		player_turn = 1,
 		y_max = size,
 		x_max = size,
@@ -185,6 +199,16 @@ function go.new_game(size)
 		last_move_x = nil,
 	}
 	return game_state
+end
+
+function go.states_eq(state1, state2)
+	return (state1.player_turn == state2.player_turn and
+	        state1.y_max == state2.y_max and
+	        state1.x_max == state2.x_max and
+	        state1.last_move_y == state2.last_move_y and
+	        state1.last_move_x == state2.last_move_x and
+	        boards_eq(state1.board, state2.board) and
+	        boards_eq(state1.prev_board, state2.prev_board))
 end
 
 function if_nil_rt_zero(val)
@@ -227,7 +251,7 @@ end
 function go.deserialize_state(data)
 	local state = {}
 	if #data < 3 then
-		print(string.format("Bad serialized state received, less than 3 bytes: %d", #data))
+		error(string.format("Bad serialized state received, less than 3 bytes: %d", #data))
 		return nil
 	end
 	print(string.format("len data = %d, data[1] = %q, data[2] = %q, data[3] = %q", #data, data:sub(1,1), data:sub(2,2), data:sub(3,3)))
@@ -239,7 +263,7 @@ function go.deserialize_state(data)
 	local prev_bytes = 5
 	if #data ~= prev_bytes + state.y_max * state.x_max + 1 and
 	   #data ~= prev_bytes + state.y_max * state.x_max * 2  then
-		print(string.format("Bad serialized state, recvd %d bytes, y_max = %d, x_max = %d",
+		error(string.format("Bad serialized state, recvd %d bytes, y_max = %d, x_max = %d",
 		                    #data, state.y_max, state.x_max))
 		return nil
 	end
@@ -288,8 +312,12 @@ function go.err_code_to_str(code)
 end
 
 
-local function boards_eq(board1, board2)
-	if board2 == nil and board1 ~= nil then
+function boards_eq(board1, board2)
+	if board1 == nil and board2 == nil then
+		return true
+	elseif board1 ~= nil and board2 ~= nil then
+		-- pass through
+	else
 		return false
 	end
 	for y=1,#board1 do
@@ -353,7 +381,7 @@ function go.player_move(game_state, player, y, x)
 		end
 
 		if not has_liberties(game_state, pt2.y, pt2.x) then
-			clear_piece_group(game_state.board, pt2.y, pt2.x)
+			clear_piece_group(game_state, pt2.y, pt2.x)
 		end
 		::next_dir::
 	end

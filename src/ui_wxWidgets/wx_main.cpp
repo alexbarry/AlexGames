@@ -81,6 +81,7 @@ static time_ms_t wx_get_time_ms(void);
 static size_t wx_get_time_of_day(char *time_str, size_t max_time_str_len);
 static void wx_store_data(void *L, const char *key, const uint8_t *value, size_t value_len);
 static size_t wx_read_stored_data(void *L, const char *key, uint8_t *value_out, size_t max_val_len);
+static bool wx_delete_stored_data(void *L, const char *key);
 static int wx_get_new_session_id(void);
 static int wx_get_last_session_id(const char *game_id);
 static void wx_save_state(int session_id, const uint8_t *state, size_t state_len);
@@ -194,6 +195,7 @@ static const struct game_api_callbacks api = {
 	wx_get_time_of_day,
 	wx_store_data,
 	wx_read_stored_data,
+	wx_delete_stored_data,
 	wx_get_new_session_id,
 	wx_get_last_session_id,
 	wx_save_state,
@@ -1630,6 +1632,11 @@ static void wx_store_data(void *L, const char *key, const uint8_t *value, size_t
 }
 static size_t wx_read_stored_data(void *L, const char *key, uint8_t *value_out, size_t max_val_len) {
 	return get_value(g_saved_state, key, value_out, max_val_len);
+}
+
+static bool wx_delete_stored_data(void *L, const char *key) {
+	// TODO implement
+	return false;
 }
 
 static int wx_get_new_session_id(void) {

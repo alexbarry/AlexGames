@@ -2,6 +2,9 @@ local two_player = require("libs/multiplayer/two_player")
 local utils      = require("libs/utils")
 local show_buttons_popup = require("libs/ui/show_buttons_popup")
 
+-- TODO:
+--  * right now, when creating a new game in multiplayer, if the other player selects their piece before the host selects the game size, it defaults to 19x19. I think either player can just press "new game", but still.
+
 local go      = require("games/go/go_core")
 local go_ui   = require("games/go/go_ui")
 local go_ctrl = require("games/go/go_ctrl")
@@ -11,7 +14,7 @@ local alexgames = require("alexgames");
 -- e.g. either 9x9, 13x13, or 19x19
 local go_game_size = 19
 local local_multiplayer = nil
-local session_id = alexgames.get_new_session_id()
+local session_id = nil
 local state = go.new_game(go_game_size)
 
 -- state was received either from another player or
@@ -118,7 +121,20 @@ function get_user_input()
 end
 
 local function save_state()
-	alexgames.save_state(session_id, go.serialize_state(state))
+	local serialized_state = go.serialize_state(state)
+	--[[
+	-- TODO maybe add some configurable debug param for all games?
+	if true then
+		alexgames.set_status_msg(string.format("Saving state with session_id %s", session_id))
+		local deserialized_state = go.deserialize_state(serialized_state)
+		if not go.states_eq(state, deserialized_state) then
+			go.print_state(state, 'current state')
+			go.print_state(state, 'current state serialized + deserialized')
+			error("state and serialized + deserialized state do not match!")
+		end
+	end
+	--]]
+	alexgames.save_state(session_id, serialized_state)
 end
 
 function get_state()
@@ -270,6 +286,7 @@ function handle_popup_btn_clicked(popup_id, btn_idx)
 		local desired_game_size = POPUP_GAME_SIZE_SEL_BTNS_TO_SIZE[btn_idx+1]
 		alexgames.hide_popup()
 		alexgames.set_status_msg(string.format("Setting board size to %s", desired_game_size))
+		session_id = alexgames.get_new_session_id()
 		set_state(go.new_game(desired_game_size))
 		go_ui.set_board_piece_size(desired_game_size)
 		print(string.format("state.board: %s", state.board))
@@ -399,7 +416,15 @@ function handle_game_option_evt(option_id)
 		-- where the function is called
 		state_init = false
 		state_loaded = false
-		prompt_game_size()
+
+		-- If the user has not chosen local/network multiplayer yet, then
+		-- that should be selected before choosing board size.
+		-- And that will ask for the game size to be selected after.
+		if local_multiplayer == nil then
+			two_player_init()
+		else
+			prompt_game_size()
+		end
 	else
 		error(string.format("Unhandled option_id %s", option_id))
 	end

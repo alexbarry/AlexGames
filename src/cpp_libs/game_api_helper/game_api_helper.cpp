@@ -49,6 +49,7 @@ static size_t get_time_of_day(char *time_str, size_t max_time_str_len) { return 
 
 static void store_data(void *L, const char *key, const uint8_t *value, size_t value_len) {}
 static size_t read_stored_data(void *L, const char *key, uint8_t *value_out, size_t max_val_len) { return -1; }
+static bool delete_stored_data(void *L, const char *key) { return false; }
 
 
 static int get_new_session_id(void) { return 0; }
@@ -113,6 +114,7 @@ struct game_api_callbacks create_default_callbacks(void) {
 		/* .get_time_of_day        = */ get_time_of_day,
 		/* .store_data             = */ store_data,
 		/* .read_stored_data       = */ read_stored_data,
+		/* .delete_stored_data     = */ delete_stored_data,
 		/* .get_new_session_id     = */ get_new_session_id,
 		/* .get_last_session_id    = */ get_last_session_id,
 		/* .save_state             = */ save_state,
