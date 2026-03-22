@@ -9030,6 +9030,11 @@ core.RC_MUST_RESOLVE_CHECK   = 4
 core.RC_GAME_OVER            = 5
 --core.INVALID_MOVE   = 2
 
+core.POS_ROOK1_BLACK = 11
+core.POS_ROOK2_BLACK = 18
+core.POS_ROOK1_WHITE = 81
+core.POS_ROOK2_WHITE = 88
+
 local ERROR_CODE_MAP = {
 	[core.SUCCESS]        = "Success",
 	[core.NOT_YOUR_PIECE] = "Not your piece",
@@ -9037,6 +9042,15 @@ local ERROR_CODE_MAP = {
 	[core.RC_CANT_MOVE_INTO_CHECK]  = "Can not move into check",
 	[core.RC_MUST_RESOLVE_CHECK]    = "Must move out of check",
 	[core.RC_GAME_OVER]             = "Game over!",
+}
+
+local PIECE_NAME_MAP = {
+	[core.PIECE_PAWN]   = "pawn",
+	[core.PIECE_ROOK]   = "rook",
+	[core.PIECE_KNIGHT] = "knight",
+	[core.PIECE_BISHOP] = "bishop",
+	[core.PIECE_QUEEN]  = "queen",
+	[core.PIECE_KING]   = "king",
 }
 
 function core.get_err_msg(rc)
@@ -9078,12 +9092,42 @@ local function get_player_pawn_row(player)
 	elseif player == core.PLAYER_BLACK then return 2 end
 end
 
+function core.get_piece_name(piece_type)
+	local name = PIECE_NAME_MAP[piece_type]
+	if name == nil then
+		error(string.format("Unhandled piece type %s", piece_type))
+	end
+	return name
+end
 function core.new_game()
 	local state = {
 		player_turn = core.PLAYER_WHITE,
 		board = {},
-		selected = nil
+		selected = nil,
+		game_status = core.GAME_STATUS_NORMAL,
+
+		-- Set to the column if the previous player moved
+		-- their pawn two squares. This is used for determining
+		-- if en passant capture is permitted on the next move.
+		pawn_moved_two_squares = 0,
+
+		-- TODO could combine these into "castling_possible" for left and right
+		-- for each player. Clear both left and right if king moves.
+		rooks_moved = {},
+		kings_moved = {},
+
+		prev_move_src = nil,
+		prev_move_dst = nil,
+
+		moves = {},
 	}
+
+	state.rooks_moved[core.POS_ROOK1_BLACK] = false
+	state.rooks_moved[core.POS_ROOK2_BLACK] = false
+	state.rooks_moved[core.POS_ROOK1_WHITE] = false
+	state.rooks_moved[core.POS_ROOK2_WHITE] = false
+	state.kings_moved[core.PLAYER_WHITE] = false
+	state.kings_moved[core.PLAYER_BLACK] = false
 
 	for y=1,core.BOARD_SIZE do
 		state.board[y] = {}
@@ -9124,13 +9168,33 @@ local function copy_coords(pos)
 	return { y = pos.y, x = pos.x }
 end
 
-local function copy_state(state)
+function core.copy_state(state)
 	local new_state = {
 		player_turn = state.player_turn,
 		board       = {},
 		selected    = copy_coords(state.selected),
 		game_status = nil,
+		pawn_moved_two_squares = state.pawn_moved_two_squares,
+		kings_moved = {},
+		rooks_moved = {},
+
+		prev_move_src = copy_coords(state.prev_move_src),
+		prev_move_dst = copy_coords(state.prev_move_dst),
+
+		moves = {},
 	}
+
+	for _, game_move in ipairs(state.moves) do
+		table.insert(new_state.moves, { src = copy_coords(game_move.src), dst = copy_coords(game_move.dst) })
+	end
+
+	for key, val in pairs(state.kings_moved) do
+		new_state.kings_moved[key] = val
+	end
+
+	for key, val in pairs(state.rooks_moved) do
+		new_state.rooks_moved[key] = val
+	end
 
 	for y=1,core.BOARD_SIZE do
 		new_state.board[y] = {}
@@ -9140,6 +9204,102 @@ local function copy_state(state)
 	end
 
 	return new_state
+end
+
+local function pts_eq(pt1, pt2)
+	if pt1 == nil and pt2 == nil then
+		return true
+	elseif pt1 == nil or pt2 == nil then
+		return false
+	else
+		return pt1.y == pt2.y and pt1.x == pt2.x
+	end
+end
+
+local function boards_eq(board1, board2)
+	for y=1,core.BOARD_SIZE do
+		for x=1,core.BOARD_SIZE do
+			if board1[y][x] ~= board2[y][x] then
+				return false
+			end
+		end
+	end
+	return true
+end
+
+local function empty_in_between_pts_x(state, pt1, pt2)
+	if pt1.y ~= pt2.y then
+		error(string.format("empty_in_between_pts_x called with pts having different y values: pt1.y = %s, pt2.y = %s", pt1.y, pt2.y))
+	end
+
+	local y = pt1.y
+	local x1 = math.min(pt1.x, pt2.x)
+	local x2 = math.max(pt1.x, pt2.x)
+
+	for x=(x1+1),(x2-1) do
+		if state.board[y][x] ~= core.EMPTY_PIECE_ID then
+			return false
+		end
+	end
+
+	return true
+end
+
+local function can_castle(state, player, rook_pt)
+	local rook_pos_id = get_rooks_moved_pos_id(rook_pt)
+	local king_pt = get_king_pos(player)
+
+	if rook_pos_id == nil then
+		return false
+	end
+
+	local rook_piece = state.board[rook_pt.y][rook_pt.x] 
+	local king_piece = state.board[king_pt.y][king_pt.x] 
+
+	if core.get_player(rook_piece) ~= player or core.get_player(king_piece) ~= player then
+		return false
+	end
+
+	if state.kings_moved[player] or state.rooks_moved[rook_pos_id] then
+		return false
+	end
+
+
+	if  (core.get_piece_type(rook_piece) ~= core.PIECE_ROOK or
+	     core.get_piece_type(king_piece) ~= core.PIECE_KING) then
+		-- This should never be possible, unless the state is saved from the older
+		-- version that didn't track `rooks_moved` and just defaults it to false.
+		-- Otherwise, if the rook/king didn't move, then the piece should be what
+		-- we expect.
+		return false
+	end
+
+	if player ~= state.player_turn then
+		return false
+	end
+
+	return empty_in_between_pts_x(state, king_pt, rook_pt)
+	
+end
+
+-- Does not compare list of moves
+function core.states_eq(state1, state2)
+	return (
+		state1.player_turn == state2.player_turn and
+		--pts_eq(state1.selected, state2.selected) and
+		boards_eq(state1.board, state2.board) and
+		--state1.game_status == state2.game_status and
+		state1.pawn_moved_two_squares == state2.pawn_moved_two_squares and
+		state1.kings_moved[core.PLAYER_WHITE] == state2.kings_moved[core.PLAYER_WHITE] and
+		state1.kings_moved[core.PLAYER_BLACK] == state2.kings_moved[core.PLAYER_BLACK] and
+		state1.rooks_moved[core.POS_ROOK1_WHITE] == state2.rooks_moved[core.POS_ROOK1_WHITE] and
+		state1.rooks_moved[core.POS_ROOK2_WHITE] == state2.rooks_moved[core.POS_ROOK2_WHITE] and
+		state1.rooks_moved[core.POS_ROOK1_BLACK] == state2.rooks_moved[core.POS_ROOK1_BLACK] and
+		state1.rooks_moved[core.POS_ROOK2_BLACK] == state2.rooks_moved[core.POS_ROOK2_BLACK] and
+
+		state1.prev_move_src == state2.prev_move_src and
+		state2.prev_move_dst == state2.prev_move_dst
+	)
 end
 
 function core.get_player_name(player)
@@ -9201,6 +9361,13 @@ local function piece_id_to_hr_str(piece_id)
 	return get_player_letter(player) .. get_piece_letter(piece_type)
 end
 
+function core.pt_to_string(pt)
+	if pt == nil then return "nil"
+	else
+		return string.format("{ y=%d, x=%d }", pt.y, pt.x)
+	end
+end
+
 function core.print_state(state)
 	--          1  2  3  4  5  6  7  8
 	row_sep = '+--+--+--+--+--+--+--+--+'
@@ -9218,6 +9385,19 @@ function core.print_state(state)
 		end
 		io.write('\n' .. row_sep .. '\n')
 	end
+	io.write(string.format("- player_turn: %s\n", core.get_player_name(state.player_turn)))
+	io.write(string.format("- player_selected: %s\n", core.pt_to_string(state.selected)))
+	io.write(string.format("- pawn_moved_two_squares: %s\n", state.pawn_moved_two_squares))
+	io.write(string.format("- game_status: %s\n", state.game_status))
+	io.write(string.format("- prev_move: %s -> %s\n", core.pt_to_string(state.prev_move_src), core.pt_to_string(state.prev_move_dst)))
+	io.write("- pieces moved (for castling):\n")
+	io.write(string.format("    black king:  %s\n", state.kings_moved[core.PLAYER_BLACK]))
+	io.write(string.format("    black rook1: %s\n", state.rooks_moved[core.POS_ROOK1_BLACK]))
+	io.write(string.format("    black rook2: %s\n", state.rooks_moved[core.POS_ROOK2_BLACK]))
+	io.write(string.format("    white king:  %s\n", state.kings_moved[core.PLAYER_WHITE]))
+	io.write(string.format("    white rook1: %s\n", state.rooks_moved[core.POS_ROOK1_WHITE]))
+	io.write(string.format("    white rook2: %s\n", state.rooks_moved[core.POS_ROOK2_WHITE]))
+	io.write("--------------------------------------\n")
 end
 
 local function get_piece_move_cells(piece_type, dy, dx)
@@ -9263,12 +9443,39 @@ local function get_player_rel_delta_pos(player, src, dst)
 	return { dy = dy, dx = dx }
 end
 
+local function move_is_castle(player, src, dst)
+	--print(string.format("move_is_castle(src=(%d,%d), dst=(%d,%d)", src.y, src.x, dst.y, dst.x))
+	if not pts_eq(src, get_king_pos(player)) then
+		--print(string.format("move_is_castle returning false because ne to king pos %d %d", get_king_pos(player).y, get_king_pos(player).x))
+		return false
+	end
+	return src.y == dst.y and math.abs(src.x - dst.x) == 2
+end
+
+local function get_castle_rook_pt_from_king_dst(player, king_dst)
+	local king_src = get_king_pos(player)
+	--print(string.format("get_castle_rook_pt_from_king_dst(king_dst=(%d,%d), king_src=(%d,%d))", king_dst.y, king_dst.x, king_src.y, king_dst.x))
+	if not move_is_castle(player, king_src, king_dst) then
+		error(string.format("get_castle_rook_pt_from_king_dst called when move is not castle"))
+	end
+	local y = king_dst.y
+	local x
+	if king_dst.x < 5 then
+		x = 1
+	else
+		x = 8
+	end
+
+	return { y = y, x = x }
+end
+
 -- Checks if a move can be made by that kind of piece, and that
 -- no pieces are in the way.
 -- Does not check if the move results in check or checkmate. (i.e.
 -- this can return true for moves that would put your own king in check)
 -- Also doesn't check for castling or en passant
 local function is_valid_move_pos(state, src, dst)
+	-- print(string.format("is_valid_move_pos(src=(%d,%d), dst=(%d,%d))", src.y, src.x, dst.y, dst.x))
 	local src_piece_id = state.board[src.y][src.x]
 	local dst_piece_id = state.board[dst.y][dst.x]
 
@@ -9290,10 +9497,22 @@ local function is_valid_move_pos(state, src, dst)
 				        state.board[src.y+2*get_player_move_dir(src_player)][src.x] == core.EMPTY_PIECE_ID)
 			end
 		elseif math.abs(dx) == 1 and dy == 1 then
-			return core.get_player(dst_piece_id) == get_other_player(src_player)
+			local this_player = core.get_player(dst_piece_id)
+			if this_player == get_other_player(src_player) then
+				return true
+			elseif can_en_passant_capture(state, src_player, src, dst) then
+				return true
+			else
+				return false
+			end
 		else
 			return false
 		end
+	elseif src_piece_type == core.PIECE_KING and move_is_castle(src_player, src, dst) then
+		--print(string.format("is_valid_move_pos... calling get_castle_rook_pt_from_king_dst(dst=(%d,%d)", dst.y, dst.x))
+		local rook_pt = get_castle_rook_pt_from_king_dst(src_player, dst)
+		--print("is_valid_move_pos... done calling get_castle_rook_pt_from_king_dst")
+		return can_castle(state, src_player, rook_pt)
 	elseif get_piece_move_cells(src_piece_type, dy, dx) then
 		return dst_piece_id == core.EMPTY_PIECE_ID or dst_player ~= src_player
 	else
@@ -9343,6 +9562,14 @@ function core.get_possib_dsts(state, src)
 		end
 	end
 
+	if piece_type == core.PIECE_KING then
+		for _, rook_pos in ipairs(get_rook_pts(player)) do
+			if can_castle(state, state.player_turn, rook_pos) then
+				table.insert(possib_dsts, get_king_castle_dst(state.player_turn, rook_pos))
+			end
+		end
+	end
+
 	return possib_dsts
 end
 
@@ -9374,27 +9601,213 @@ function core.in_check(state, player)
 	return false
 end
 
-local function move_piece(state, src, dst)
+function get_rooks_moved_pos_id(pt)
+	if pt.y == 1 and pt.x == 1 then
+		return core.POS_ROOK1_BLACK
+	elseif pt.y == 1 and pt.x == 8 then
+		return core.POS_ROOK2_BLACK
+	elseif pt.y == 8 and pt.x == 1 then
+		return core.POS_ROOK1_WHITE
+	elseif pt.y == 8 and pt.x == 8 then
+		return core.POS_ROOK2_WHITE
+	end
+end
+
+function get_king_pos(player)
+	if player == core.PLAYER_BLACK then
+		return { y = 1, x = 5 }
+	elseif player == core.PLAYER_WHITE then
+		return { y = 8, x = 5 }
+	else
+		error(string.format("Unhandled player %s passed to get_king_pos", player))
+	end
+end
+
+function get_king_castle_dst(player, rook_pos)
+	local king_pos = get_king_pos(player)
+
+	local x = king_pos.x
+	if rook_pos.x < king_pos.x then
+		x = x - 2
+	else
+		x = x + 2
+	end
+
+	return { y = king_pos.y, x = x }
+end
+
+function get_rook_pos(player, rook_id)
+	local y, x
+
+	if rook_id == 1 then
+		x = 1
+	elseif rook_id == 2 then
+		x = 8
+	else
+		error(string.format("Invalid rook_id %s, expected 1 or 2", rook_id))
+	end
+
+	if player == core.PLAYER_BLACK then
+		y = 1
+	elseif player == core.PLAYER_WHITE then
+		y = 8
+	else
+		error(string.format("Unhandled player %s", player))
+	end
+
+	return { y = y, x = x }
+end
+
+local function get_rook_pt_from_castle_dst(player, dst)
+	local king_pos = get_king_pos(player)
+	local rook_id
+	if dst.x < king_pos.x then
+		rook_id = 1
+	else
+		rook_id = 2
+	end
+
+	return get_rook_pos(player, rook_id)
+end
+
+local function get_rook_dst_from_castling(player, rook_pt)
+	local king_pos = get_king_pos(player)
+	local x
+	if rook_pt.x < king_pos.x then
+		x = king_pos.x - 1
+	else
+		x = king_pos.x + 1
+	end
+
+	return { y = king_pos.y, x = x }
+end
+
+function get_rook_pts(player)
+	local pts = {}
+	for i=1,2 do
+		table.insert(pts, get_rook_pos(player, i))
+	end
+	return pts
+end
+
+local function get_en_passant_capture_pos(state, player, src, dst)
+	local other_player = get_other_player(player)
+	local other_player_move_dir = get_player_move_dir(other_player)
+	return {
+		y = get_player_pawn_row(other_player) + 2 * other_player_move_dir,
+		x = dst.x
+	}
+end
+
+function can_en_passant_capture(state, player, src, dst)
+	if player ~= state.player_turn then
+		return false
+	end
+
+	local other_player = get_other_player(player)
+	local other_player_move_dir = get_player_move_dir(other_player)
+
+	local en_passant_capture_y = get_player_pawn_row(other_player) + other_player_move_dir
+	local other_player_pawn_y = get_player_pawn_row(other_player) + 2 * other_player_move_dir
+
+	if state.pawn_moved_two_squares ~= dst.x or
+	   dst.y ~= en_passant_capture_y then
+		return false
+	end
+
+	if core.get_piece_type(state.board[other_player_pawn_y][dst.x]) ~= core.PIECE_PAWN then
+		error(string.format("state.pawn_moved_two_squares is set, but could not find pawn at expected spot %d %d", other_player_pawn_y, dst.x))
+	end
+
+	return true
+end
+
+local function move_is_en_passant_capture(state, src, dst)
+	local src_piece_id = state.board[src.y][src.x]
+	local dst_piece_id = state.board[dst.y][dst.x]
+
+	if core.get_piece_type(src_piece_id) ~= core.PIECE_PAWN then
+		return false
+	end
+
+	if math.abs(dst.x - src.x) ~= 1 or dst_piece_id ~= core.EMPTY_PIECE_ID then
+		return false
+	end
+
+	return true
+end
+
+local function move_piece(state, src, dst, pawn_promo_piece_sel)
+	--print(string.format("Moving piece %d %d to %d %d", src.y, src.x, dst.y, dst.x))
 	local piece_id = state.board[src.y][src.x]
+	local piece_type = core.get_piece_type(piece_id)
 	local this_player = core.get_player(piece_id)
 	if piece_id == core.EMPTY_PIECE_ID then
 		return core.SUCCESS
 	end
 
-	local state_copy = copy_state(state)
+	local state_copy = core.copy_state(state)
 	state_copy.board[src.y][src.x] = core.EMPTY_PIECE_ID
-	state_copy.board[dst.y][dst.x] = piece_id
+
+	local new_piece_id = piece_id
+	if pawn_promo_piece_sel ~= nil then
+		new_piece_id = core.get_piece_id(this_player, pawn_promo_piece_sel)
+	end
+	state_copy.board[dst.y][dst.x] = new_piece_id
 	state_copy.selected = nil
 	state_copy.player_turn = get_other_player(state.player_turn)
 	if core.in_check(state_copy, this_player) then
 		return core.RC_CANT_MOVE_INTO_CHECK
 	end
 
+	local rooks_moved_pos_id = get_rooks_moved_pos_id(src)
+	if rooks_moved_pos_id ~= nil then
+		state.rooks_moved[rooks_moved_pos_id] = true
+	end
+
+	if piece_type == core.PIECE_KING then
+		state.kings_moved[this_player] = true
+	end
+
+	if piece_type == core.PIECE_PAWN and math.abs(src.y - dst.y) == 2 then
+		assert(src.x == dst.x)
+		if src.y ~= get_player_pawn_row(this_player) then
+			error(string.format("Moved pawn two squares from row %d?", src.y))
+		end
+		state.pawn_moved_two_squares = src.x
+	else
+		state.pawn_moved_two_squares = 0
+	end
+
+	if move_is_en_passant_capture(state, src, dst) then
+		local to_capture = get_en_passant_capture_pos(state, this_player, src, dst)
+		state.board[to_capture.y][to_capture.x] = core.EMPTY_PIECE_ID
+	end
+
 	state.board[src.y][src.x] = core.EMPTY_PIECE_ID
-	state.board[dst.y][dst.x] = piece_id
+	state.board[dst.y][dst.x] = new_piece_id
 	state.selected = nil
 	state.player_turn = get_other_player(state.player_turn)
 	state.game_status = core.get_game_status(state)
+
+	state.prev_move_src = copy_coords(src)
+	state.prev_move_dst = copy_coords(dst)
+
+	table.insert(state.moves, { src = src, dst = dst })
+
+	if piece_type == core.PIECE_KING and move_is_castle(this_player, src, dst) then
+		--print("Applying castling move...")
+		local rook_pos = get_rook_pt_from_castle_dst(this_player, dst)
+		local new_rook_pos = get_rook_dst_from_castling(this_player, dst)
+		local this_player_rook = state.board[rook_pos.y][rook_pos.x]
+		assert(core.get_player(this_player_rook) == this_player)
+		assert(core.get_piece_type(this_player_rook) == core.PIECE_ROOK)
+		assert(state.board[new_rook_pos.y][new_rook_pos.x] == core.EMPTY_PIECE_ID)
+		state.board[rook_pos.y][rook_pos.x] = core.EMPTY_PIECE_ID
+		state.board[new_rook_pos.y][new_rook_pos.x] = this_player_rook
+		state.rooks_moved[get_rooks_moved_pos_id(rook_pos)] = true
+	end
+
 	if state.game_status == core.GAME_STATUS_CHECKMATE then
 		return core.RC_GAME_OVER
 	end
@@ -9422,8 +9835,13 @@ function core.get_game_status(state)
 		return core.GAME_STATUS_NORMAL
 	else
 		for _, src_pos in ipairs(get_player_pieces(state, state.player_turn)) do
+			-- Do I need to make get_possib_dsts try every possible pawn promo piece, too?
+			-- I don't think so, this just tests if you can move out of check, and aren't
+			-- stuck in checkmate. I don't think that it ever makes a difference what you promote the pawn
+			-- to, as far as preventing the king from being captured on the next move. A pawn
+			-- blocks an opposing piece the same as any other.
 			for _, dst_pos in ipairs(core.get_possib_dsts(state, src_pos)) do
-				local state_copy = copy_state(state)
+				local state_copy = core.copy_state(state)
 				local rc = move_piece(state_copy, src_pos, dst_pos)
 				if rc == core.SUCCESS then
 					return core.GAME_STATUS_CHECK
@@ -9434,7 +9852,54 @@ function core.get_game_status(state)
 	end
 end
 
-function core.player_touch(state, player, coords)
+function core.get_game_status_if_move(state, src, dst, pawn_promo_piece_sel)
+	if not is_valid_move_pos(state, src, dst, pawn_promo_piece_sel) then
+		return nil
+	end
+	local new_state = core.copy_state(state)
+	local rc = move_piece(new_state, src, dst, pawn_promo_piece_sel)
+	--[[
+	if rc ~= core.SUCCESS then
+		error(string.format("Unexpected rc %s in get_game_status_if_move", rc))
+	end
+	--]]
+
+	return new_state.game_status
+end
+
+function core.move_is_valid_pawn_promotion(state, player, selected, dst)
+	if selected == nil or dst == nil then
+		return false
+	end
+
+	if player ~= state.player_turn then
+		return false
+	end
+
+	if not is_valid_move_pos(state, selected, dst) then
+		return false
+	end
+
+	local selected_piece_id = state.board[selected.y][selected.x]
+
+	if core.get_player(selected_piece_id) ~= player then
+		return false
+	end
+
+	if core.get_piece_type(selected_piece_id) == core.PIECE_PAWN then
+		if player == core.PLAYER_BLACK  then
+			return selected.y == core.BOARD_SIZE - 1 and dst.y == core.BOARD_SIZE
+		elseif player == core.PLAYER_WHITE then
+			return selected.y == 2 and dst.y == 1
+		else
+			error(string.format("Unhandled player %s", player))
+		end
+	end
+
+
+end
+
+function core.player_touch(state, player, coords, pawn_promo_piece_sel)
 	if player ~= state.player_turn then
 		return core.NOT_YOUR_TURN
 	end
@@ -9449,6 +9914,7 @@ function core.player_touch(state, player, coords)
 			return core.SUCCESS
 		end
 	else
+		--print(string.format("player_touch(coords=(%d,%d)); selected=%s", coords.y, coords.x, core.pt_to_string(state.selected)))
 		if coords == nil or coords_eq(coords, state.selected) then
 			state.selected = nil
 			return core.SUCCESS
@@ -9467,7 +9933,8 @@ function core.player_touch(state, player, coords)
 				end
 				return core.SUCCESS
 			else
-				local rc = move_piece(state, state.selected, coords)
+				--print(string.format("calling move_piece(src=%s, dst=%s)", core.pt_to_string(state.selected), core.pt_to_string(coords)))
+				local rc = move_piece(state, state.selected, coords, pawn_promo_piece_sel)
 				if rc == core.RC_CANT_MOVE_INTO_CHECK then
 					if core.in_check(state, state.player_turn) then
 						return core.RC_MUST_RESOLVE_CHECK
@@ -9477,6 +9944,235 @@ function core.player_touch(state, player, coords)
 			end
 		end
 	end
+end
+
+local function find_pieces_capable_of_moving_to_dst(state, src, dst)
+	local other_pieces = {}
+
+	local src_piece_id = state.board[src.y][src.x]
+
+	for y=1,core.BOARD_SIZE do
+		for x=1,core.BOARD_SIZE do
+			if y == src.y and x == src.x then
+				goto next_piece
+			end
+
+			if src_piece_id ~= state.board[y][x] then
+				goto next_piece
+			end
+
+			local other_src = { y = y, x = x }
+			if is_valid_move_pos(state, other_src, dst) then
+				table.insert(other_pieces, other_src)
+			end
+
+			::next_piece::
+		end
+	end
+
+	return other_pieces
+end
+
+function core.get_file(x)
+	return string.char(string.byte('a') + x - 1)
+end
+
+function core.get_rank(y)
+	return 8 - y + 1
+end
+
+function core.get_algebraic_piece_str(piece_type)
+	if piece_type == core.PIECE_KING then
+		return "K"
+	elseif piece_type == core.PIECE_QUEEN then
+		return "Q"
+	elseif piece_type == core.PIECE_ROOK then
+		return "R"
+	elseif piece_type == core.PIECE_BISHOP then
+		return "B"
+	elseif piece_type == core.PIECE_KNIGHT then
+		return "N"
+	elseif piece_type == core.PIECE_PAWN then
+		return ""
+	else
+		error(string.format("Unhandled piece_type %s", piece_type))
+	end
+end
+
+function core.pt_to_algebraic_chess_coords(pt)
+	return string.format("%s%d", core.get_file(pt.x), core.get_rank(pt.y))
+end
+
+function core.get_move_info(state, player, src, dst, pawn_promo_piece_sel)
+	local src_piece_id = state.board[src.y][src.x]
+	local dst_piece_id = state.board[dst.y][dst.x]
+	local piece_type = core.get_piece_type(src_piece_id)
+
+	local is_capture = false
+	local is_en_passant_capture = false
+	local captured_piece = nil
+	if (dst_piece_id ~= core.EMPTY_PIECE_ID) then
+		is_capture = true
+		captured_piece = core.get_piece_type(dst_piece_id)
+	elseif move_is_en_passant_capture(state, src, dst) then
+		is_capture = true
+		is_en_passant_capture = true
+		captured_piece = core.PIECE_PAWN
+	end
+
+
+	local move_castle_type = nil
+	if move_is_castle(player, src, dst) then
+		assert(piece_type == core.PIECE_KING)
+		if dst.x < src.x then
+			move_castle_type = 1
+		else
+			move_castle_type = 2
+		end
+	end
+
+	local other_possib_srcs = find_pieces_capable_of_moving_to_dst(state, src, dst)
+	
+	if #other_possib_srcs > 0 then
+		-- TODO remove
+		print("[alex] Found %d other possible same pieces that could move to this destination, must specify some or all of src", #other_possib_srcs)
+	end
+
+	local must_specify_src_y = false
+	local must_specify_src_x = false
+
+	if #other_possib_srcs > 0 then
+		must_specify_src_x = true
+	end
+
+	for _, other_piece in ipairs(other_possib_srcs) do
+		if other_piece.x == src.x then
+			must_specify_src_y = true
+			must_specify_src_x = false
+			break
+		end
+	end
+
+	for _, other_piece in ipairs(other_possib_srcs) do
+		if other_piece.y == src.y then
+			must_specify_src_x = true
+			break
+		end
+	end
+
+	local game_status = core.get_game_status_if_move(state, src, dst, pawn_promo_piece_sel)
+
+	return {
+		src = src,
+		dst = dst,
+		piece_type = piece_type,
+
+		must_specify_src_y = must_specify_src_y,
+		must_specify_src_x = must_specify_src_x,
+
+		is_capture = is_capture,
+		is_en_passant_capture = is_en_passant_capture,
+		captured_piece = captured_piece,
+
+		move_castle_type = move_castle_type,
+		pawn_promo_piece_sel = pawn_promo_piece_sel,
+
+		game_status = game_status,
+	}
+end
+
+function core.get_move_algebraic_chess_notation(move_info)
+	-- TODO I see "dxc4" as move 6 in https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#PGN
+	-- but there was only one pawn that could have made that move. Specify source column anyway?
+
+	local output
+
+	if move_info.move_castle_type == 1 then
+		output = 'O-O-O'
+	elseif move_info.move_castle_type == 2 then
+		output = 'O-O'
+	else
+		output  = core.get_algebraic_piece_str(move_info.piece_type)
+	
+		if move_info.must_specify_src_x then
+			output = output .. core.get_file(move_info.src.x)
+		end
+		if move_info.must_specify_src_y then
+			output = output .. tostring(core.get_rank(move_info.src.y))
+		end
+	
+		if move_info.is_capture then
+			output = output .. 'x'
+		end
+	
+		output = output .. core.pt_to_algebraic_chess_coords(move_info.dst)
+	
+		if move_info.pawn_promo_piece_sel then
+			output = output .. '=' .. core.get_algebraic_piece_str(move_info.pawn_promo_piece_sel)
+		end
+	end
+
+	if move_info.game_status == core.GAME_STATUS_NORMAL then
+		-- pass
+	elseif move_info.game_status == core.GAME_STATUS_CHECK then
+		output = output .. '+'
+	elseif move_info.game_status == core.GAME_STATUS_CHECKMATE then
+		output = output .. '#'
+	end
+
+	return output
+end
+
+function core.get_simple_move_msg(move_info)
+	local msg = string.format('%s from %s to %s',
+		core.get_piece_name(move_info.piece_type),
+		core.pt_to_algebraic_chess_coords(move_info.src),
+		core.pt_to_algebraic_chess_coords(move_info.dst))
+	if move_info.is_capture then
+		msg = msg .. string.format(', capturing %s', core.get_piece_name(move_info.captured_piece))
+	end
+	if move_info.is_en_passant_capture then
+		msg = msg .. (' (en passant)')
+	end
+
+	if move_info.move_castle_type == 1 then
+		msg = msg .. ' (queen side castling)'
+	elseif move_info.move_castle_type == 2 then
+		msg = msg .. ' (king side castling)'
+	end
+
+	if move_info.pawn_promo_piece_sel then
+		msg = msg .. string.format(' , selected pawn promotion to %s', core.get_piece_name(move_info.pawn_promo_piece_sel))
+	end
+
+	if move_info.game_status == core.GAME_STATUS_NORMAL then
+		-- pass
+	elseif move_info.game_status == core.GAME_STATUS_CHECK then
+		msg = msg .. ', resulting in check'
+	elseif move_info.game_status == core.GAME_STATUS_CHECKMATE then
+		msg = msg .. ', resulting in checkmate'
+	end
+
+	return msg
+end
+
+function core.get_move_msg(state, player, src, dst, pawn_promo_piece_sel)
+	print(string.format("get_move_msg(player=%d, src=%s, dst=%s, pawn_promo_piece_sel=%s)", player, core.pt_to_string(src), core.pt_to_string(dst), pawn_promo_piece_sel))
+	if src == nil or dst == nil then
+		return
+	end
+
+	local move_info = core.get_move_info(state, player, src, dst, pawn_promo_piece_sel)
+	local algebraic_move_str = core.get_move_algebraic_chess_notation(move_info)
+
+	local msg = string.format("%s makes move %s", core.get_player_name(player), algebraic_move_str)
+
+	-- TODO make this configurable
+	if true then
+		msg = msg .. ' (' .. core.get_simple_move_msg(move_info) .. ')'
+	end
+
+	return msg
 end
 
 return core
@@ -9500,9 +10196,12 @@ local show_labels  = nil
 local OUTLINE_WIDTH = 4
 local cell_size    = nil
 local piece_padding = 0
+
+local BORDER_PADDING_NO_LABELS = 20
 local border_padding = 20
 
 local LABEL_COLOUR = '#000000'
+local LABEL_COLOUR_DARK = "#888"
 local LABEL_FONT_SIZE = 12
 -- the number of pixels taken up by the parts of a letter that are drawn below the line, like the "tail" of the letter "g"
 local text_y_buffer = 4
@@ -9549,6 +10248,8 @@ function draw.init(height, width, show_labels_arg)
 	show_labels = show_labels_arg
 	if not show_labels then
 		border_padding = 0
+	else
+		border_padding = BORDER_PADDING_NO_LABELS
 	end
 
 	cell_size = math.floor((math.min(board_height, board_width) - 2*border_padding) / core.BOARD_SIZE)
@@ -9633,7 +10334,7 @@ local function get_col_label(col)
 end
 
 local function get_row_label(row)
-	return string.format('%d', row)
+	return string.format('%d', 8-row+1)
 end
 
 local function get_piece_brightness(player)
@@ -9669,8 +10370,10 @@ end
 
 
 function draw.draw_state(state, params)
+	local user_colour_pref = alexgames.get_user_colour_pref()
+
 	alexgames.draw_clear()
-	alexgames.draw_rect('#000000', 0, 0, board_height, board_width)
+	--alexgames.draw_rect('#000000', 0, 0, board_height, board_width)
 	-- Draw checkerboard
 	for y=1,core.BOARD_SIZE do
 		for x=1,core.BOARD_SIZE do
@@ -9686,10 +10389,14 @@ function draw.draw_state(state, params)
 
 	-- Add labels to rows and columns
 	if show_labels then
+		local label_colour = LABEL_COLOUR
+		if user_colour_pref == "dark" then
+			label_colour = LABEL_COLOUR_DARK
+		end
 		for _, y_pos in ipairs({border_padding-text_y_buffer, border_padding + core.BOARD_SIZE*cell_size+LABEL_FONT_SIZE}) do
 			for x=1,core.BOARD_SIZE do
 				local label = get_col_label(x)
-				alexgames.draw_text(label, LABEL_COLOUR,
+				alexgames.draw_text(label, label_colour,
 				                     y_pos,  border_padding + math.floor(cell_size*(x-0.5)),
 				                     LABEL_FONT_SIZE, 0)
 			end
@@ -9698,7 +10405,7 @@ function draw.draw_state(state, params)
 		for _, x_pos_info in ipairs({{pos = border_padding, align=-1}, {pos = board_width-border_padding, align=1}}) do
 			for y=1,core.BOARD_SIZE do
 				local label = get_row_label(y)
-				alexgames.draw_text(label, LABEL_COLOUR,
+				alexgames.draw_text(label, label_colour,
 				                     border_padding + math.floor(cell_size*(y-0.5)), x_pos_info.pos,
 				                     LABEL_FONT_SIZE, x_pos_info.align)
 			end
@@ -9715,6 +10422,31 @@ function draw.draw_state(state, params)
 		highlight_outline = PIECE_SEL_HIGHLIGHT_OUTLINE_REMOTE
 		dst_highlight = DST_HIGHLIGHT_COLOUR_REMOTE
 		dst_outline = DST_HIGHLIGHT_OUTLINE_REMOTE
+	end
+
+	if state.prev_move_src ~= nil then
+		local prev_move_highlight_fill
+		local prev_move_highlight_outline
+		if user_colour_pref == "dark" then
+			prev_move_highlight_fill    = "#4001"
+			prev_move_highlight_outline = "#4008"
+		else
+			prev_move_highlight_fill    = "#c002"
+			prev_move_highlight_outline = "#8004"
+		end
+		draw_rect_at_pos(prev_move_highlight_fill, prev_move_highlight_outline, state.prev_move_src.y, state.prev_move_src.x)
+	end
+	if state.prev_move_dst ~= nil then
+		local prev_move_highlight_fill
+		local prev_move_highlight_outline
+		if user_colour_pref == "dark" then
+			prev_move_highlight_fill    = "#4002"
+			prev_move_highlight_outline = "#400"
+		else
+			prev_move_highlight_fill    = "#c004"
+			prev_move_highlight_outline = "#8006"
+		end
+		draw_rect_at_pos(prev_move_highlight_fill, prev_move_highlight_outline, state.prev_move_dst.y, state.prev_move_dst.x)
 	end
 
 	-- If a cell is selected, highlight it
@@ -9756,12 +10488,8 @@ return draw
 -- Author: Alex Barry (github.com/alexbarry)
 --[[
 TODO:
-* implement logic for check and checkmate
-* prevent player from moving into check
-* implement serializing state so state can be saved or network games can be played
-* implement castling
-* implement pawn en-passant capturing?? (I didn't even know about this rule)
-* implement history (undo/redo)
+* add indicator of previous move
+* log moves to text box, both in proper chess notation, and something easier to read (e.g. piece moved from src to dst, capturing other_piece)
 --]]
 local alexgames = require("alexgames")
 
@@ -9772,14 +10500,34 @@ local serialize = require("games/chess/chess_serialize")
 local utils = require("libs/utils")
 local two_player = require("libs/multiplayer/two_player")
 
+
+local show_labels = true
 local g_session_id = alexgames.get_new_session_id()
 local g_state = core.new_game()
+local g_pending_move = nil
 --local player = core.PLAYER_WHITE
 local player = nil
 local local_multiplayer = nil
 local player_name_to_id = {}
 local g_other_player = nil
 local session_id = alexgames.get_new_session_id()
+
+local POPUP_ITEM_ID_QUEEN_BTN  = 0
+local POPUP_ITEM_ID_BISHOP_BTN = 1
+local POPUP_ITEM_ID_ROOK_BTN   = 2
+local POPUP_ITEM_ID_KNIGHT_BTN = 3
+
+local BTN_ID_TO_PAWN_PIECE_PROMO_SEL = {
+	[POPUP_ITEM_ID_QUEEN_BTN]  = core.PIECE_QUEEN,
+	[POPUP_ITEM_ID_BISHOP_BTN] = core.PIECE_BISHOP,
+	[POPUP_ITEM_ID_ROOK_BTN]   = core.PIECE_ROOK,
+	[POPUP_ITEM_ID_KNIGHT_BTN] = core.PIECE_KNIGHT,
+}
+
+local WHITE_QUEEN_EMOJI_UTF8  = "\xE2\x99\x95"
+local WHITE_BISHOP_EMOJI_UTF8 = "\xE2\x99\x97"
+local WHITE_ROOK_EMOJI_UTF8   = "\xE2\x99\x96"
+local WHITE_KNIGHT_EMOJI_UTF8 = "\xE2\x99\x98"
 
 local SELECT_PLAYER_POPUP_ID = "select_player"
 local PLAYER_CHOICE_BTNS = {
@@ -9791,6 +10539,8 @@ local BTN_MAP = {
     [1] = core.PLAYER_BLACK,
 }
 
+local POPUP_ID_PAWN_PROMOTION_PIECE_SEL = "popup_pawn_promo_piece_sel"
+
 
 local BTN_ID_UNDO = "btn_undo"
 local BTN_ID_REDO = "btn_redo"
@@ -9799,6 +10549,9 @@ local POPUP_ID_NEW_GAME          = "game_over"
 local POPUP_ITEM_ID_NEW_GAME_BTN = 1
 
 local OPTION_ID_NEW_GAME = "new_game"
+local OPTION_ID_SHOW_LABELS = "opt_show_labels"
+
+local KEY_CHESS_SHOW_RANK_FILE_LABELS = "chess_show_rank_file_labels"
 
 function get_player()
 	if local_multiplayer then
@@ -9825,7 +10578,7 @@ local function get_draw_state_params()
 	}
 end
 
-draw.init(480,480, false)
+draw.init(480,480, show_labels)
 local function draw_board_internal()
 	--core.print_state(g_state)
 	draw.draw_state(g_state, get_draw_state_params())
@@ -9860,13 +10613,45 @@ function handle_rc(rc, is_other_player)
 	end
 end
 
+local function show_pawn_promotion_piece_sel_popup()
+	local msg = "Moved pawn to other end of board. Select a piece to promote pawn to:"
+	alexgames.show_popup(POPUP_ID_PAWN_PROMOTION_PIECE_SEL, {
+		title = "Pawn promotion",
+		items = {
+			{ item_type = alexgames.POPUP_ITEM_TYPE_MSG, msg = msg },
+			{ id = POPUP_ITEM_ID_QUEEN_BTN,  item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_QUEEN_EMOJI_UTF8  .. " Queen"  },
+			{ id = POPUP_ITEM_ID_BISHOP_BTN, item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_BISHOP_EMOJI_UTF8 .. " Bishop" },
+			{ id = POPUP_ITEM_ID_ROOK_BTN,   item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_ROOK_EMOJI_UTF8   .. " Rook"   },
+			{ id = POPUP_ITEM_ID_KNIGHT_BTN, item_type = alexgames.POPUP_ITEM_TYPE_BTN, text = WHITE_KNIGHT_EMOJI_UTF8 .. " Knight" },
+		},
+	})
+end
+
 function handle_user_clicked(pos_y, pos_x)
 	local coords = draw.draw_coords_to_cell(pos_y, pos_x)
-	local rc = core.player_touch(g_state, get_player(), coords)
+	if core.move_is_valid_pawn_promotion(g_state, get_player(), g_state.selected, coords) then
+		show_pawn_promotion_piece_sel_popup()
+		g_pending_move = coords
+	else
+		move_piece_internal(coords, nil)
+	end
+end
+
+function move_piece_internal(coords, pawn_promo_piece_sel)
+	local prev_player = g_state.player_turn
+	local move_msg = core.get_move_msg(g_state, g_state.player_turn, g_state.selected, coords, pawn_promo_piece_sel)
+	local rc = core.player_touch(g_state, get_player(), coords, pawn_promo_piece_sel)
 	if not local_multiplayer and rc == core.SUCCESS then
-		alexgames.send_message("all", string.format("move:%d,%d,%d", get_player(), coords.y, coords.x))
+		local msg_suffix = ''
+		if pawn_promo_piece_sel ~= nil then
+			msg_suffix = string.format(',%d', pawn_promo_piece_sel)
+		end
+		alexgames.send_message("all", string.format("move:%d,%d,%d%s", get_player(), coords.y, coords.x, msg_suffix))
 	end
 	handle_rc(rc)
+	if prev_player ~= g_state.player_turn then -- TODO or checkmate...
+		alexgames.set_status_msg(move_msg)
+	end
 	--core.print_state(g_state)
 	draw_board_internal()
 end
@@ -9876,11 +10661,20 @@ function handle_popup_btn_clicked(popup_id, btn_id, popup_state)
         -- handled
 	elseif popup_id == POPUP_ID_NEW_GAME then
 		if btn_id == POPUP_ITEM_ID_NEW_GAME_BTN then
-			start_game()
+			start_new_game()
 			alexgames.hide_popup()
 		else	
 			error(string.format("Unhandled btn_id=\"%s\"", btn_id))
 		end
+	elseif popup_id == POPUP_ID_PAWN_PROMOTION_PIECE_SEL then
+		if g_pending_move == nil then
+			error("Selected piece for pawn promotion, but g_pending_move == nil?")
+		end
+		print(string.format("Upon player selecting piece for pawn promotion, completing move to %d %d", g_pending_move.y, g_pending_move.x))
+		local pawn_piece_promo_sel = BTN_ID_TO_PAWN_PIECE_PROMO_SEL[btn_id]
+		move_piece_internal(g_pending_move, pawn_piece_promo_sel)
+		g_pending_move = nil
+		alexgames.hide_popup()
 	else
 		error(string.format("Unhandled popup_id=\"%s\"", popup_id))
 	end
@@ -9905,23 +10699,30 @@ function handle_msg_received(src, msg)
     local header, payload = m()
 
     if header == "move" then
-        local m2 = payload:gmatch("(%d+),(%d+),(%d+)")
+        local m2 = payload:gmatch("(%d+),(%d+),(%d+),?(%d*)")
         if m2 == nil then
             error("Invalid \"move\" msg from " .. src)
             return
         end
-        local player_idx, y, x = m2()
+        local player_idx, y, x, pawn_promo_piece_sel = m2()
         player_idx = tonumber(player_idx)
         y = tonumber(y)
         x = tonumber(x)
-		local coords = { y = y, x = x }
-        local rc = core.player_touch(g_state, player_idx, coords)
+        if #pawn_promo_piece_sel then
+            pawn_promo_piece_sel = tonumber(pawn_promo_piece_sel)
+        else
+            pawn_promo_piece_sel = nil
+        end
+        local coords = { y = y, x = x }
+        local move_msg = core.get_move_msg(g_state, g_state.player_turn, g_state.selected, coords, pawn_promo_piece_sel)
+        local rc = core.player_touch(g_state, player_idx, coords, pawn_promo_piece_sel)
         handle_rc(rc, --[[is_other_player=]] true)
 
         if rc ~= core.SUCCESS then
             alexgames.set_status_err("Other player made an invalid move")
         else
-            alexgames.set_status_msg("Your move")
+            alexgames.set_status_msg(move_msg .. ". Your move")
+            -- alexgames.set_status_msg("Your move")
             draw_board_internal()
             save_state()
         end
@@ -10018,6 +10819,29 @@ end
 
 function save_state()
 	local serialized_state = serialize.serialize_state(g_state)
+	--[[
+	-- TODO debug only
+	if true then
+		local deserialized_state = serialize.deserialize_state(serialized_state)
+		local serialized_state2 = serialize.serialize_state(deserialized_state)
+		if not core.states_eq(g_state, deserialized_state) then
+			print("g_state = ")
+			core.print_state(g_state)
+			print('###################################')
+			print('')
+
+			print("deserialized_state = ")
+			core.print_state(deserialized_state)
+			print('###################################')
+			print('')
+
+			error(string.format("serializing and deserializing did not produce the same state table"))
+		end
+		if serialized_state2 ~= serialized_state then
+			error(string.format("serializing, deserialize and re-serializing did not produce the same output"))
+		end
+	end
+	--]]
 	alexgames.save_state(g_session_id, serialized_state)
 end
 
@@ -10033,11 +10857,24 @@ function handle_btn_clicked(btn_id)
 	end
 end
 
-function handle_game_option_evt(option_id)
+function start_new_game()
+	alexgames.set_status_msg("Starting new game")
+	g_session_id = alexgames.get_new_session_id()
+	g_state = core.new_game()
+	save_state()
+	broadcast_state("all")
+	draw_board_internal()
+end
+
+
+function handle_game_option_evt(option_id, value)
 	if option_id == OPTION_ID_NEW_GAME then
-		g_session_id = alexgames.get_new_session_id()
-		g_state = core.new_game()
-		save_state()
+		start_new_game()
+	elseif option_id == OPTION_ID_SHOW_LABELS then
+		print(string.format("show_labels now %s", value))
+		show_labels = value
+		alexgames.store_data(KEY_CHESS_SHOW_RANK_FILE_LABELS, tostring(show_labels))
+		draw.init(480,480, show_labels)
 		draw_board_internal()
 	end
 end
@@ -10046,7 +10883,24 @@ function get_state()
 	return serialize.serialize_state(g_state)
 end
 
+local function str_to_bool(s)
+	if s == "true" or s == "1" then
+		return true
+	elseif s == "false" or s == "0" then
+		return false
+	else
+		error(string.format("Unhandled string \"%s\" passed to str_to_bool", s))
+	end
+end
+
 function start_game(session_id_arg, state_serialized)
+	local show_labels_stored = alexgames.read_stored_data(KEY_CHESS_SHOW_RANK_FILE_LABELS)
+	if show_labels_stored == nil then
+		-- do nothing
+	else
+		show_labels = str_to_bool(show_labels_stored)
+		draw.init(480,480, show_labels)
+	end
 	local state_loaded = false
 	if state_serialized ~= nil then
 		load_state(session_id_arg, state_serialized)
@@ -10065,6 +10919,7 @@ function start_game(session_id_arg, state_serialized)
 	alexgames.send_message("all", "get_state:")
 
 	alexgames.add_game_option(OPTION_ID_NEW_GAME, { type = alexgames.OPTION_TYPE_BTN, label = "New Game" })
+	alexgames.add_game_option(OPTION_ID_SHOW_LABELS, { type = alexgames.OPTION_TYPE_TOGGLE, label = "Show rank/file labels", value = show_labels })
 
 	alexgames.create_btn(BTN_ID_UNDO, "Undo", 1)
 	alexgames.create_btn(BTN_ID_REDO, "Redo", 1)
@@ -10079,11 +10934,95 @@ end
 local serialize = {}
 
 local core = require("games/chess/chess_core")
+local utils = require("libs/utils")
 local serialize_lib = require("libs/serialize/serialize")
+
+serialize.VERSION_1 = 1
+serialize.VERSION_2 = 2
+serialize.VERSION_3 = 3
+serialize.VERSION_4 = 4
+serialize.VERSION_5 = 5
+
+serialize.CURRENT_VERSION = serialize.VERSION_5
+
+local function byte_to_pt(byte)
+	y = byte & 0xf
+	x = (byte >> 4) & 0xf
+	return {
+		y = y,
+		x = x,
+	}
+end
+
+local function deserialize_pt(bytes)
+	local byte = serialize_lib.deserialize_byte(bytes)
+	return byte_to_pt(byte)
+end
+
+local function pt_to_byte(pt)
+	local val
+
+	if pt == nil then
+		val = 0
+	else
+		val = (pt.y & 0xf) | ( (pt.x & 0xf) << 4 )
+	end
+
+	return val
+end
+
+local function serialize_pt(pt)
+	local byte = pt_to_byte(pt)
+	return string.char(byte)
+end
 
 function serialize.deserialize_state(byte_str)
 	local bytes = serialize_lib.bytestr_to_byteary(byte_str)
+	local version
+	if #bytes == 65 then
+		version = serialize.VERSION_1
+	else
+		version = serialize_lib.deserialize_byte(bytes)
+	end
+
 	local state = {}
+	state.rooks_moved = {}
+	state.kings_moved = {}
+	state.pawn_moved_two_squares = 0
+
+	if version == serialize.VERSION_1 then
+		state.rooks_moved[core.POS_ROOK1_BLACK] = false
+		state.rooks_moved[core.POS_ROOK2_BLACK] = false
+		state.rooks_moved[core.POS_ROOK1_WHITE] = false
+		state.rooks_moved[core.POS_ROOK2_WHITE] = false
+		state.kings_moved[core.PLAYER_WHITE]    = false
+		state.kings_moved[core.PLAYER_BLACK]    = false
+
+	elseif (version == serialize.VERSION_2 or
+	        version == serialize.VERSION_3 or
+	        version == serialize.VERSION_4 or
+	        version == serialize.VERSION_5) then
+		local pieces_moved_bitfield = serialize_lib.deserialize_byte(bytes)
+		state.rooks_moved[core.POS_ROOK1_BLACK] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 0))
+		state.rooks_moved[core.POS_ROOK2_BLACK] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 1))
+		state.rooks_moved[core.POS_ROOK1_WHITE] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 2))
+		state.rooks_moved[core.POS_ROOK2_WHITE] = utils.number_to_boolean(pieces_moved_bitfield & (1 << 3))
+		state.kings_moved[core.PLAYER_WHITE]    = utils.number_to_boolean(pieces_moved_bitfield & (1 << 4))
+		state.kings_moved[core.PLAYER_BLACK]    = utils.number_to_boolean(pieces_moved_bitfield & (1 << 5))
+
+		if version >= serialize.VERSION_3 then
+			state.pawn_moved_two_squares = serialize_lib.deserialize_byte(bytes)
+		end
+
+		if version >= serialize.VERSION_4 then
+			state.prev_move_src = deserialize_pt(bytes)
+			state.prev_move_dst = deserialize_pt(bytes)
+		end
+
+	else
+		error(string.format("Unhandled serialized chess state, version %d", version))
+	end
+
 	state.player_turn = serialize_lib.deserialize_byte(bytes)
 	state.board = {}
 	state.selected = nil
@@ -10094,6 +11033,24 @@ function serialize.deserialize_state(byte_str)
 		end
 	end
 
+
+	state.moves = {}
+	if version >= serialize.VERSION_5 then
+		local moves_bytes = serialize_lib.deserialize_bytes(bytes)
+		if #moves_bytes % 2 ~= 0 then
+			error(string.format("Encountered %d bytes of moves points, expected even number"))
+		end
+
+		for i=1,#moves_bytes, 2 do
+			local src = byte_to_pt(moves_bytes[i])
+			local dst = byte_to_pt(moves_bytes[i+1])
+
+			table.insert(state.moves, { src = src, dst = dst } )
+		end
+	end
+
+	state.game_status = core.get_game_status(state)
+
 	if #bytes ~= 0 then
 		error(string.format("%d bytes remaining after deserializing", #bytes))
 	end
@@ -10103,12 +11060,37 @@ end
 
 function serialize.serialize_state(state)
 	local output = ""
+	output = output .. serialize_lib.serialize_byte(serialize.CURRENT_VERSION)
+
+	local pieces_moved_bitfield = 0
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.rooks_moved[core.POS_ROOK1_BLACK]) * (1 << 0)
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.rooks_moved[core.POS_ROOK2_BLACK]) * (1 << 1)
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.rooks_moved[core.POS_ROOK1_WHITE]) * (1 << 2)
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.rooks_moved[core.POS_ROOK2_WHITE]) * (1 << 3)
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.kings_moved[core.PLAYER_WHITE]) * (1 << 4)
+	pieces_moved_bitfield = pieces_moved_bitfield | utils.boolean_to_number(state.kings_moved[core.PLAYER_BLACK]) * (1 << 5)
+
+	output = output .. serialize_lib.serialize_byte(pieces_moved_bitfield)
+
+	output = output .. serialize_lib.serialize_byte(state.pawn_moved_two_squares)
+	output = output .. serialize_pt(state.prev_move_src)
+	output = output .. serialize_pt(state.prev_move_dst)
+
 	output = output .. serialize_lib.serialize_byte(state.player_turn)
 	for y=1,core.BOARD_SIZE do
 		for x=1,core.BOARD_SIZE do
 			output = output .. serialize_lib.serialize_byte(state.board[y][x])
 		end
 	end
+
+	local move_bytes = {}
+	for _, game_move in ipairs(state.moves) do
+		assert(game_move.src ~= nil)
+		table.insert(move_bytes, pt_to_byte(game_move.src))
+		assert(game_move.dst ~= nil)
+		table.insert(move_bytes, pt_to_byte(game_move.dst))
+	end
+	output = output .. serialize_lib.serialize_bytes(move_bytes)
 
 	return output
 end
@@ -18887,7 +19869,8 @@ local function has_liberties(game_state, y, x)
 	return false
 end
 
-local function clear_piece_group(board, y, x)
+local function clear_piece_group(game_state, y, x)
+	local board = game_state.board
 	local this_player = board[y][x]
 	local visited = make_2d_array(#board, #board[1], false)
 	local to_visit = { Point:create{y=y, x=x}}
@@ -18956,12 +19939,25 @@ function go.print_board(board)
 	end
 end
 
+function go.print_state(state, name)
+	print(string.format('state (name: "%s"): {'), name)
+	print('    y_max = %s', state.y_max)
+	print('    x_max = %s', state.x_max)
+	print('    last_move_y = %s', state.last_move_y)
+	print('    board:')
+	go.print_board(state.board)
+	print('    prev_board:')
+	go.print_board(state.prev_board)
+	print('}')
+	print(string.format('--------- (end state (name "%s"))', name))
+end
+
 function go.player_num_to_char(num)
 	return val_to_char[num]
 end
 
 function go.new_game(size)
-	game_state = {
+	local game_state = {
 		player_turn = 1,
 		y_max = size,
 		x_max = size,
@@ -18971,6 +19967,16 @@ function go.new_game(size)
 		last_move_x = nil,
 	}
 	return game_state
+end
+
+function go.states_eq(state1, state2)
+	return (state1.player_turn == state2.player_turn and
+	        state1.y_max == state2.y_max and
+	        state1.x_max == state2.x_max and
+	        state1.last_move_y == state2.last_move_y and
+	        state1.last_move_x == state2.last_move_x and
+	        boards_eq(state1.board, state2.board) and
+	        boards_eq(state1.prev_board, state2.prev_board))
 end
 
 function if_nil_rt_zero(val)
@@ -19013,7 +20019,7 @@ end
 function go.deserialize_state(data)
 	local state = {}
 	if #data < 3 then
-		print(string.format("Bad serialized state received, less than 3 bytes: %d", #data))
+		error(string.format("Bad serialized state received, less than 3 bytes: %d", #data))
 		return nil
 	end
 	print(string.format("len data = %d, data[1] = %q, data[2] = %q, data[3] = %q", #data, data:sub(1,1), data:sub(2,2), data:sub(3,3)))
@@ -19025,7 +20031,7 @@ function go.deserialize_state(data)
 	local prev_bytes = 5
 	if #data ~= prev_bytes + state.y_max * state.x_max + 1 and
 	   #data ~= prev_bytes + state.y_max * state.x_max * 2  then
-		print(string.format("Bad serialized state, recvd %d bytes, y_max = %d, x_max = %d",
+		error(string.format("Bad serialized state, recvd %d bytes, y_max = %d, x_max = %d",
 		                    #data, state.y_max, state.x_max))
 		return nil
 	end
@@ -19074,8 +20080,12 @@ function go.err_code_to_str(code)
 end
 
 
-local function boards_eq(board1, board2)
-	if board2 == nil and board1 ~= nil then
+function boards_eq(board1, board2)
+	if board1 == nil and board2 == nil then
+		return true
+	elseif board1 ~= nil and board2 ~= nil then
+		-- pass through
+	else
 		return false
 	end
 	for y=1,#board1 do
@@ -19139,7 +20149,7 @@ function go.player_move(game_state, player, y, x)
 		end
 
 		if not has_liberties(game_state, pt2.y, pt2.x) then
-			clear_piece_group(game_state.board, pt2.y, pt2.x)
+			clear_piece_group(game_state, pt2.y, pt2.x)
 		end
 		::next_dir::
 	end
@@ -19207,6 +20217,9 @@ local two_player = require("libs/multiplayer/two_player")
 local utils      = require("libs/utils")
 local show_buttons_popup = require("libs/ui/show_buttons_popup")
 
+-- TODO:
+--  * right now, when creating a new game in multiplayer, if the other player selects their piece before the host selects the game size, it defaults to 19x19. I think either player can just press "new game", but still.
+
 local go      = require("games/go/go_core")
 local go_ui   = require("games/go/go_ui")
 local go_ctrl = require("games/go/go_ctrl")
@@ -19216,7 +20229,7 @@ local alexgames = require("alexgames");
 -- e.g. either 9x9, 13x13, or 19x19
 local go_game_size = 19
 local local_multiplayer = nil
-local session_id = alexgames.get_new_session_id()
+local session_id = nil
 local state = go.new_game(go_game_size)
 
 -- state was received either from another player or
@@ -19323,7 +20336,20 @@ function get_user_input()
 end
 
 local function save_state()
-	alexgames.save_state(session_id, go.serialize_state(state))
+	local serialized_state = go.serialize_state(state)
+	--[[
+	-- TODO maybe add some configurable debug param for all games?
+	if true then
+		alexgames.set_status_msg(string.format("Saving state with session_id %s", session_id))
+		local deserialized_state = go.deserialize_state(serialized_state)
+		if not go.states_eq(state, deserialized_state) then
+			go.print_state(state, 'current state')
+			go.print_state(state, 'current state serialized + deserialized')
+			error("state and serialized + deserialized state do not match!")
+		end
+	end
+	--]]
+	alexgames.save_state(session_id, serialized_state)
 end
 
 function get_state()
@@ -19475,6 +20501,7 @@ function handle_popup_btn_clicked(popup_id, btn_idx)
 		local desired_game_size = POPUP_GAME_SIZE_SEL_BTNS_TO_SIZE[btn_idx+1]
 		alexgames.hide_popup()
 		alexgames.set_status_msg(string.format("Setting board size to %s", desired_game_size))
+		session_id = alexgames.get_new_session_id()
 		set_state(go.new_game(desired_game_size))
 		go_ui.set_board_piece_size(desired_game_size)
 		print(string.format("state.board: %s", state.board))
@@ -19604,7 +20631,15 @@ function handle_game_option_evt(option_id)
 		-- where the function is called
 		state_init = false
 		state_loaded = false
-		prompt_game_size()
+
+		-- If the user has not chosen local/network multiplayer yet, then
+		-- that should be selected before choosing board size.
+		-- And that will ask for the game size to be selected after.
+		if local_multiplayer == nil then
+			two_player_init()
+		else
+			prompt_game_size()
+		end
 	else
 		error(string.format("Unhandled option_id %s", option_id))
 	end

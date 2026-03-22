@@ -159,8 +159,10 @@
 	}
 	
 	.game_title {
-		background-color:#ccc;
+		background-color:#ccce;
 		position:absolute;
+		padding: 3px;
+		padding-left: 0;
 		top:0;
 	}
 
@@ -290,4 +292,9 @@ pre {
 .button_in_row {
 	flex: 1;
 	margin: 5px;
+}
+
+.aside {
+	font-style: italic;
+	color: #333;
 }
