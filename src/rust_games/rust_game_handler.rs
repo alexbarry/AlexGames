@@ -174,6 +174,21 @@ pub extern "C" fn rust_game_api_handle_touch_evt(
 }
 
 #[no_mangle]
+pub extern "C" fn rust_game_api_handle_gamepad_evt(
+    handle: *mut c_void,
+    evt_id_cstr: *const u8,
+    evt_id_str_len: size_t,
+    gamepad_info_cstr: *const u8,
+    gamepad_info_str_len: size_t,
+) {
+    let handle = handle_void_ptr_to_trait_ref(handle);
+    let evt_id = c_str_to_str(evt_id_cstr, Some(evt_id_str_len as usize));
+    let gamepad_info = c_str_to_str(gamepad_info_cstr, Some(gamepad_info_str_len as usize));
+    handle.handle_gamepad_evt(&evt_id, &gamepad_info);
+}
+
+
+#[no_mangle]
 pub extern "C" fn rust_game_api_handle_key_evt(
     handle: *mut c_void,
     evt_id_cstr: *const u8,

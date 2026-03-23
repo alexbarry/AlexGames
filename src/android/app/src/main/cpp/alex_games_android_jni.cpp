@@ -392,6 +392,11 @@ static void jni_prompt_string(const char *prompt_title, size_t prompt_title_len,
                               const char *prompt_msg,   size_t prompt_msg_len) {
 	// TODO
 }
+
+static size_t jni_get_gamepad_states(const char *states_out, size_t max_states_len) {
+	// TODO
+	return 0;
+}
 static void jni_store_data(void *L, const char *key, const uint8_t *value, size_t value_len) {
 	// TODO
 }
@@ -485,6 +490,7 @@ static const struct game_api_callbacks api = {
 	jni_set_status_err,
 	jni_show_popup,
 	jni_prompt_string,
+	jni_get_gamepad_states,
 	jni_update_timer_ms,
 	jni_delete_timer,
 	jni_enable_evt,

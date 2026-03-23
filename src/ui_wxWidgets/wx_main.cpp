@@ -73,6 +73,7 @@ static void wx_show_popup(void *L, const char *popup_id, size_t popup_id_str_len
                           const struct popup_info *info);
 static void wx_prompt_string(const char *prompt_title, size_t prompt_title_len,
                              const char *prompt_msg, size_t prompt_msg_len);
+static size_t wx_get_gamepad_states(char *state_out, size_t max_state_out_len);
 static int wx_update_timer_ms(int update_period_ms);
 static void wx_delete_timer(int timer_handle);
 static void wx_enable_evt(const char *evt_id_str, size_t evt_id_len);
@@ -187,6 +188,7 @@ static const struct game_api_callbacks api = {
 	wx_set_status_err,
 	wx_show_popup,
 	wx_prompt_string,
+	wx_get_gamepad_states,
 	wx_update_timer_ms,
 	wx_delete_timer,
 	wx_enable_evt,
@@ -1025,6 +1027,11 @@ static void wx_show_popup(void *L,
 static void wx_prompt_string(const char *prompt_title, size_t prompt_title_len,
                              const char *prompt_msg, size_t prompt_msg_len) {
 	NOT_IMPL();
+}
+
+static size_t wx_get_gamepad_states(char *state_out, size_t max_state_out_len) {
+	NOT_IMPL();
+	return 0;
 }
 
 class AlexGamesTimer : public wxTimer {

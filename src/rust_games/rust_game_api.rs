@@ -153,6 +153,8 @@ pub struct CCallbacksPtr {
 
     pub prompt_string: Option<unsafe extern "C" fn(*const c_char, size_t, *const c_char, size_t)>,
 
+    pub get_gamepad_states: Option<unsafe extern "C" fn(*mut c_char, size_t) -> size_t>,
+
     pub update_timer_ms: Option<unsafe extern "C" fn(c_int) -> c_int>,
     pub delete_timer: Option<unsafe extern "C" fn(c_int)>,
 
@@ -621,6 +623,26 @@ impl CCallbacksPtr {
         }
     }
 
+    pub fn get_gamepad_states(&self) -> String {
+		if let Some(get_gamepad_states) = self.get_gamepad_states {
+			let buff_size = 16*1024;
+			let mut buffer: Vec<u8> = Vec::with_capacity(buff_size);
+			let slice = unsafe {
+				let str_len = (get_gamepad_states)(buffer.as_mut_ptr() as *mut i8, buff_size);
+
+				slice::from_raw_parts(buffer.as_ptr(), str_len)
+			};
+			if let Ok(gamepad_state_str) = std::str::from_utf8(slice) {
+				return String::from(gamepad_state_str);
+			} else {
+				println!("Error decoding gamepad_state string");
+			}
+		} else {
+			println!("get_gamepad_states not set");
+		}
+		return String::from("{}");
+	}
+
     pub fn update_timer_ms(&self, dt_ms: c_int) -> c_int {
         if let Some(update_timer_ms) = self.update_timer_ms {
             unsafe {
@@ -732,6 +754,10 @@ pub trait AlexGamesApi {
             evt_id, touches
         );
     }
+
+	fn handle_gamepad_evt(&mut self, evt_id: &str, gamepad_info: &str) {
+		println!("handle_gamepad_evt not implemented");
+	}
 
     fn handle_key_evt(&mut self, evt_id: KeyEvt, key_code: &str) -> bool {
         println!("handle_key_evt unimplemented, evt_id={:#?}, key_code=\"{}\"", evt_id, key_code);

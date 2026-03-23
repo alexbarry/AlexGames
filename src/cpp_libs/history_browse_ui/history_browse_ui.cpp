@@ -96,6 +96,7 @@ static const struct game_api my_game_api = {
 	/* .handle_wheel_changed     = */ handle_wheel_changed,
 	/* .handle_key_evt           = */ handle_key_evt,
 	/* .handle_touch_evt         = */ handle_touch_evt,
+	/* .handle_gamepad_evt       = */ NULL,
 	/* .handle_msg_received      = */ handle_msg_received,
 	/* .handle_btn_clicked       = */ handle_btn_clicked,
 	/* .handle_popup_btn_clicked = */ handle_popup_btn_clicked,

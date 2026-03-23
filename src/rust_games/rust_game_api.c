@@ -14,6 +14,10 @@ extern void rust_game_api_handle_mouse_evt(void *L, int evt_id, int pos_y, int p
 extern void rust_game_api_handle_touch_evt(void *L, 
                                            const char *evt_id_str, int evt_id_str_len, 
                                            void *changed_touches, int changed_touches_len);
+extern void rust_game_api_handle_gamepad_evt(void *L,
+                                             const char *evt_id_str, size_t evt_id_str_len,
+                                             const char *gamepad_info_str, size_t gamepad_info_str_len);
+
 extern bool rust_game_api_handle_key_evt(void *L,
                                          const char *evt_id_str, const char *keycode_str);
 
@@ -56,6 +60,7 @@ const struct game_api * get_rust_api(void) {
 	rust_api.handle_mousemove    = rust_game_api_handle_mousemove;
 	rust_api.handle_mouse_evt    = rust_game_api_handle_mouse_evt;
 	rust_api.handle_touch_evt    = rust_game_api_handle_touch_evt;
+	rust_api.handle_gamepad_evt  = rust_game_api_handle_gamepad_evt;
 	rust_api.handle_key_evt      = rust_game_api_handle_key_evt;
 	rust_api.handle_popup_btn_clicked = rust_game_api_handle_popup_btn_clicked;
 	rust_api.handle_game_option_evt = rust_game_api_handle_game_option_evt;

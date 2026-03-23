@@ -88,6 +88,7 @@ static int lua_set_btn_visible(lua_State *L);
 static int lua_show_popup(lua_State *L);
 static int lua_add_game_option(lua_State *L);
 static int lua_prompt_string(lua_State *L);
+static int lua_get_gamepad_states(lua_State *L);
 static int lua_hide_popup(lua_State *L);
 static int lua_set_status_msg(lua_State *L);
 static int lua_set_status_err(lua_State *L);
@@ -162,6 +163,7 @@ static const struct luaL_Reg lua_c_api[] = {
 	{"show_popup",      lua_show_popup      },
 	{"add_game_option", lua_add_game_option },
 	{"prompt_string",   lua_prompt_string   },
+	{"get_gamepad_states", lua_get_gamepad_states },
 	{"hide_popup",      lua_hide_popup      },
 	{"set_status_msg",  lua_set_status_msg  },
 	{"set_status_err",  lua_set_status_err  },
@@ -899,6 +901,20 @@ static void handle_touch_evt(void *L,
 	LUA_API_EXIT();
 }
 
+static void handle_gamepad_evt(void *L, const char *evt_id, size_t evt_id_len,
+                               const char *gamepad_info, size_t gamepad_info_len) {
+	LUA_API_ENTER();
+	lua_checkstack_or_return(L, 2);
+	lua_push_error_handler(L);
+	lua_getglobal_checktype_or_return(L, "handle_gamepad_evt", LUA_TFUNCTION);
+	lua_pushlstring(L, evt_id, evt_id_len);
+	lua_pushlstring(L, gamepad_info, gamepad_info_len);
+	pcall_handle_error(L, 2, 0);
+	lua_pop_error_handler(L);
+	LUA_API_EXIT();
+}
+
+
 static void handle_msg_received(void *L, const char *msg_src, int msg_src_len, const char *msg, int len) {
 	LUA_API_ENTER();
 	lua_checkstack_or_return(L, 3);
@@ -1103,6 +1119,7 @@ const struct game_api lua_game_api = {
 	.handle_mouse_evt = handle_mouse_evt,
 	.handle_key_evt = handle_key_evt,
 	.handle_touch_evt = handle_touch_evt,
+	.handle_gamepad_evt = handle_gamepad_evt,
 	.handle_msg_received = handle_msg_received,
 	.handle_btn_clicked = handle_btn_clicked,
 	.handle_popup_btn_clicked = handle_popup_btn_clicked,
@@ -1601,6 +1618,16 @@ static int lua_prompt_string(lua_State *L) {
 	                   msg,   msg_len);
 
 	return 0;
+}
+
+static int lua_get_gamepad_states(lua_State *L) {
+	char gamepad_state_str[16*1024];
+	
+	size_t gamepad_state_str_len = api->get_gamepad_states(gamepad_state_str, sizeof(gamepad_state_str));
+
+	lua_pushlstring(L, gamepad_state_str, gamepad_state_str_len);
+
+	return 1;
 }
 
 static int lua_set_timer_update_ms(lua_State *L) {

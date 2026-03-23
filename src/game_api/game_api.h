@@ -233,6 +233,8 @@ struct game_api_callbacks {
 	void (*prompt_string)(const char *prompt_title, size_t prompt_title_len,
 	                      const char *prompt_msg,   size_t prompt_msg_len);
 
+	size_t (*get_gamepad_states)(char *gamepad_states_out, size_t max_gamepad_states_len);
+
 	/**
 	 * Set a timer to call `update` every `update_period_ms` milliseconds.
 	 *
@@ -464,6 +466,10 @@ struct game_api {
 	void (*handle_touch_evt)(void *L,
 	                         const char *evt_id_str, int evt_id_str_len, 
 	                         void *changed_touches, int changed_touches_len);
+
+	void (*handle_gamepad_evt)(void *L,
+	                           const char *evt_id_str, size_t evt_id_str_len,
+	                           const char *gamepad_info, size_t gamepad_info_str_len);
 	
 	void (*handle_msg_received)(void *L, const char *msg_src, int msg_src_len, const char *msg, int len);
 	void (*handle_btn_clicked)(void *L, const char *btn_id);

@@ -42,6 +42,7 @@ static void prompt_string(const char *prompt_title, size_t prompt_title_len,
 static void add_game_option(const char *option_id, const struct option_info *option_info) {}
 static int update_timer_ms(int update_period_ms) { return 0; }
 static void delete_timer(int handle) {}
+static size_t get_gamepad_states(char *gamepad_states_out, size_t max_gamepad_states_len) { return 0; }
 static void enable_evt(const char *evt_id_str, size_t evt_id_len) {}
 static void disable_evt(const char *evt_id_str, size_t evt_id_len) {}
 static time_ms_t get_time_ms(void) { return 0; }
@@ -106,6 +107,7 @@ struct game_api_callbacks create_default_callbacks(void) {
 		/* .set_status_err         = */ set_status_err,
 		/* .show_popup             = */ show_popup,
 		/* .prompt_string          = */ prompt_string,
+		/* .get_gamepad_states     = */ get_gamepad_states,
 		/* .update_timer_ms        = */ update_timer_ms,
 		/* .delete_timer           = */ delete_timer,
 		/* .enable_evt             = */ enable_evt,

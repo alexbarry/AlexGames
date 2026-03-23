@@ -95,6 +95,15 @@ void handle_touch_evt(void *L,
 	                           evt_id_str, evt_id_str_len,
 	                           changed_touches, changed_touches_len);
 }
+
+EMSCRIPTEN_KEEPALIVE
+void handle_gamepad_evt(void *L,
+                        const char *evt_id_str, size_t evt_id_str_len,
+                        const char *gamepad_info_str, size_t gamepad_info_str_len) {
+	game_api->handle_gamepad_evt(L,
+	                             evt_id_str, evt_id_str_len,
+	                             gamepad_info_str, gamepad_info_str_len);
+}
 	
 EMSCRIPTEN_KEEPALIVE
 void handle_msg_received(void *L, const char *msg_src, int msg_src_len, const char *msg, int len) {
@@ -402,6 +411,12 @@ EM_JS(int, js_update_timer_ms, (int timer_period_ms), {
 	return update_timer_period_ms(gfx, timer_period_ms);
 });
 
+EM_JS(size_t, js_get_gamepad_states, (char *gamepad_states_out, size_t max_gamepad_states_str_len), {
+	const gamepad_states_str = get_gamepad_states();
+	write_str(gamepad_states_out, max_gamepad_states_str_len, gamepad_states_str);
+	return gamepad_states_str.length;
+});
+
 EM_JS(void, js_delete_timer, (int handle), {
 	delete_timer(gfx, handle);
 });
@@ -646,6 +661,7 @@ const struct game_api_callbacks api_callbacks = {
 	.show_popup = js_show_popup,
 	.add_game_option = js_add_game_option,
 	.prompt_string = js_prompt_string,
+	.get_gamepad_states = js_get_gamepad_states,
 	.update_timer_ms = js_update_timer_ms,
 	.delete_timer = js_delete_timer,
 	.enable_evt = js_enable_evt,

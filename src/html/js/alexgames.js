@@ -149,6 +149,48 @@
 		canvas.removeEventListener('mousemove', handle_event_mousemove);
 	}
 
+	function enable_event_gamepad() {
+		window.addEventListener("gamepadconnected", (e) => {
+			console.debug("[init] Game pad connected event", e.gamepad);
+			handle_gamepad_evt(gfx.ptr, "gamepad_connected", gamepad_state_to_json_str(e.gamepad));
+		});
+		window.addEventListener("gamepaddisconnected", (e) => {
+			console.debug("[init] Game pad disconnected event", e.gamepad);
+			handle_gamepad_evt(gfx.ptr, "gamepad_disconnected", gamepad_state_to_json_str(e.gamepad));
+		});
+
+	}
+
+	function gamepad_state_to_json_iterable(gamepad) {
+		if (!gamepad) { return undefined; }
+		return {
+			id: gamepad.id,
+			index: gamepad.index,
+			connected: gamepad.connected,
+			buttons: gamepad.buttons.map( (button) => {
+				return {
+					pressed: button.pressed,
+						touched: button.touched,
+						value:   button.value,
+					};
+				}),
+			axes: gamepad.axes,
+			timestamp: gamepad.timestamp,
+		};
+	}
+
+	function gamepad_state_to_json_str(gamepad) {
+		return JSON.stringify(gamepad_state_to_json_iterable(gamepad));
+	}
+
+	function get_gamepad_states() {
+		return JSON.stringify({
+			gamepads: navigator.getGamepads().map( (gamepad) => {
+				return gamepad_state_to_json_iterable(gamepad);
+			}),
+		});
+	}
+
 	function handle_mouse_down(evt) {
 		console.debug("handle_mouse_down", evt);
 		evt.preventDefault();
@@ -378,6 +420,7 @@
 			case "wheel":            enable_event_wheel();            break;
 			case "touch":            enable_event_touch();            break;
 			case "key":              enable_event_keys();             break;
+			case "gamepad":          enable_event_gamepad();          break;
 			default:
 				console.error("Unexpected evt_id in enable_event:", evt_id);
 				break;
