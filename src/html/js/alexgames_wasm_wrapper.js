@@ -144,7 +144,7 @@ function write_str(ptr, ptr_size, str) {
 			return;
 		}
 		
-		console.log("writing value", char_val, "to ptr", ptr + i);
+		// console.log("writing value", char_val, "to ptr", ptr + i);
 		Module.setValue(ptr + i, char_val);
 	}
 }
