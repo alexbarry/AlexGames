@@ -84,7 +84,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmp30iqadto.js
+// include: /tmp/tmpy7253837.js
 
   if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
   Module['expectedDataFileDownloads']++;
@@ -254,21 +254,21 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
 
   })();
 
-// end include: /tmp/tmp30iqadto.js
-// include: /tmp/tmpuo5d4_uo.js
+// end include: /tmp/tmpy7253837.js
+// include: /tmp/tmpdxnw80r_.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpuo5d4_uo.js
-// include: /tmp/tmpdbl5q89b.js
+  // end include: /tmp/tmpdxnw80r_.js
+// include: /tmp/tmprbdhqucf.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpdbl5q89b.js
+  // end include: /tmp/tmprbdhqucf.js
 
 
 var arguments_ = [];
@@ -607,31 +607,6 @@ function unexportedRuntimeSymbol(sym) {
 var readyPromiseResolve, readyPromiseReject;
 
 // Memory management
-var
-/** @type {!Int8Array} */
-  HEAP8,
-/** @type {!Uint8Array} */
-  HEAPU8,
-/** @type {!Int16Array} */
-  HEAP16,
-/** @type {!Uint16Array} */
-  HEAPU16,
-/** @type {!Int32Array} */
-  HEAP32,
-/** @type {!Uint32Array} */
-  HEAPU32,
-/** @type {!Float32Array} */
-  HEAPF32,
-/** @type {!Float64Array} */
-  HEAPF64;
-
-// BigInt64Array type is not correctly defined in closure
-var
-/** not-@type {!BigInt64Array} */
-  HEAP64,
-/* BigUint64Array type is not correctly defined in closure
-/** not-@type {!BigUint64Array} */
-  HEAPU64;
 
 var runtimeInitialized = false;
 
@@ -908,6 +883,36 @@ async function createWasm() {
       }
     }
 
+  /** @type {!Int16Array} */
+  var HEAP16;
+
+  /** @type {!Int32Array} */
+  var HEAP32;
+
+  /** not-@type {!BigInt64Array} */
+  var HEAP64;
+
+  /** @type {!Int8Array} */
+  var HEAP8;
+
+  /** @type {!Float32Array} */
+  var HEAPF32;
+
+  /** @type {!Float64Array} */
+  var HEAPF64;
+
+  /** @type {!Uint16Array} */
+  var HEAPU16;
+
+  /** @type {!Uint32Array} */
+  var HEAPU32;
+
+  /** not-@type {!BigUint64Array} */
+  var HEAPU64;
+
+  /** @type {!Uint8Array} */
+  var HEAPU8;
+
   var callRuntimeCallbacks = (callbacks) => {
       while (callbacks.length > 0) {
         // Pass the module as the first argument.
@@ -943,12 +948,12 @@ async function createWasm() {
 
   var noExitRuntime = true;
 
-  var ptrToString = (ptr) => {
+  function ptrToString(ptr) {
       assert(typeof ptr === 'number', `ptrToString expects a number, got ${typeof ptr}`);
       // Convert to 32-bit unsigned value
       ptr >>>= 0;
       return '0x' + ptr.toString(16).padStart(8, '0');
-    };
+    }
 
   
     /**
@@ -1047,20 +1052,20 @@ async function createWasm() {
   
   var uncaughtExceptionCount = 0;
   
-  var ___cxa_throw = (ptr, type, destructor) => {
-      var info = new ExceptionInfo(ptr);
-      // Initialize ExceptionInfo content after it was allocated in __cxa_allocate_exception.
-      info.init(type, destructor);
-      ___cxa_increment_exception_refcount(ptr);
-      exceptionLast = new CppException(ptr);
-      uncaughtExceptionCount++;
-      throw exceptionLast;
+  
+  var exnToPtr = (exn) => {
+      if (exn instanceof CppException) {
+        return exn.excPtr;
+      }
+      return exn;
     };
-  var __Unwind_RaiseException = (ex) => {
-      err('Warning: _Unwind_RaiseException is not correctly implemented');
-      return ___cxa_throw(ex, 0, 0);
-    };
-
+  
+  
+  
+  
+  
+  var stackAlloc = (sz) => __emscripten_stack_alloc(sz);
+  
   var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
   var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
@@ -1138,6 +1143,44 @@ async function createWasm() {
       assert(typeof ptr == 'number', `UTF8ToString expects a number (got ${typeof ptr})`);
       return ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead, ignoreNul) : '';
     };
+  var getExceptionMessageCommon = (ptr) => {
+      var sp = stackSave();
+      var type_addr_addr = stackAlloc(4);
+      var message_addr_addr = stackAlloc(4);
+      ___get_exception_message(ptr, type_addr_addr, message_addr_addr);
+      var type_addr = HEAPU32[((type_addr_addr)>>2)];
+      var message_addr = HEAPU32[((message_addr_addr)>>2)];
+      var type = UTF8ToString(type_addr);
+      _free(type_addr);
+      var message;
+      if (message_addr) {
+        message = UTF8ToString(message_addr);
+        _free(message_addr);
+      }
+      stackRestore(sp);
+      return [type, message];
+    };
+  var getExceptionMessage = (exn) => getExceptionMessageCommon(exnToPtr(exn));
+  
+  
+  var decrementExceptionRefcount = (exn) => ___cxa_decrement_exception_refcount(exnToPtr(exn));
+  
+  
+  var incrementExceptionRefcount = (exn) => ___cxa_increment_exception_refcount(exnToPtr(exn));
+  var ___cxa_throw = (ptr, type, destructor) => {
+      var info = new ExceptionInfo(ptr);
+      // Initialize ExceptionInfo content after it was allocated in __cxa_allocate_exception.
+      info.init(type, destructor);
+      ___cxa_increment_exception_refcount(ptr);
+      exceptionLast = new CppException(ptr);
+      uncaughtExceptionCount++;
+      throw exceptionLast;
+    };
+  var __Unwind_RaiseException = (ex) => {
+      err('Warning: _Unwind_RaiseException is not correctly implemented');
+      return ___cxa_throw(ex, 0, 0);
+    };
+
   var ___assert_fail = (condition, filename, line, func) =>
       abort(`Assertion failed: ${UTF8ToString(condition)}, at: ` + [filename ? UTF8ToString(filename) : 'unknown filename', line, func ? UTF8ToString(func) : 'unknown function']);
 
@@ -4938,7 +4981,6 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   
   
   
-  var stackAlloc = (sz) => __emscripten_stack_alloc(sz);
   var stringToUTF8OnStack = (str) => {
       var size = lengthBytesUTF8(str) + 1;
       var ret = stackAlloc(size);
@@ -5029,43 +5071,6 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   var FS_createDevice = (...args) => FS.createDevice(...args);
 
 
-
-  var exnToPtr = (exn) => {
-      if (exn instanceof CppException) {
-        return exn.excPtr;
-      }
-      return exn;
-    };
-  
-  var incrementExceptionRefcount = (exn) => ___cxa_increment_exception_refcount(exnToPtr(exn));
-
-  
-  var decrementExceptionRefcount = (exn) => ___cxa_decrement_exception_refcount(exnToPtr(exn));
-
-  
-  
-  
-  
-  
-  
-  var getExceptionMessageCommon = (ptr) => {
-      var sp = stackSave();
-      var type_addr_addr = stackAlloc(4);
-      var message_addr_addr = stackAlloc(4);
-      ___get_exception_message(ptr, type_addr_addr, message_addr_addr);
-      var type_addr = HEAPU32[((type_addr_addr)>>2)];
-      var message_addr = HEAPU32[((message_addr_addr)>>2)];
-      var type = UTF8ToString(type_addr);
-      _free(type_addr);
-      var message;
-      if (message_addr) {
-        message = UTF8ToString(message_addr);
-        _free(message_addr);
-      }
-      stackRestore(sp);
-      return [type, message];
-    };
-  var getExceptionMessage = (exn) => getExceptionMessageCommon(exnToPtr(exn));
 
   FS.createPreloadedFile = FS_createPreloadedFile;
   FS.preloadFile = FS_preloadFile;
@@ -5290,21 +5295,21 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'callMain',
   'abort',
   'wasmExports',
-  'HEAPF32',
-  'HEAPF64',
+  'writeStackCookie',
+  'checkStackCookie',
+  'INT53_MAX',
+  'INT53_MIN',
+  'bigintToI53Checked',
   'HEAP8',
   'HEAPU8',
   'HEAP16',
   'HEAPU16',
   'HEAP32',
   'HEAPU32',
+  'HEAPF32',
+  'HEAPF64',
   'HEAP64',
   'HEAPU64',
-  'writeStackCookie',
-  'checkStackCookie',
-  'INT53_MAX',
-  'INT53_MIN',
-  'bigintToI53Checked',
   'stackSave',
   'stackRestore',
   'stackAlloc',
@@ -5373,6 +5378,9 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'findMatchingCatch',
   'getExceptionMessageCommon',
   'exnToPtr',
+  'incrementExceptionRefcount',
+  'decrementExceptionRefcount',
+  'getExceptionMessage',
   'Browser',
   'requestFullscreen',
   'requestFullScreen',
@@ -5523,9 +5531,6 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 
   // End runtime exports
   // Begin JS library exports
-  Module['incrementExceptionRefcount'] = incrementExceptionRefcount;
-  Module['decrementExceptionRefcount'] = decrementExceptionRefcount;
-  Module['getExceptionMessage'] = getExceptionMessage;
   // End JS library exports
 
 // end include: postlibrary.js
@@ -5540,7 +5545,7 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('onSbrkGrow');
 }
 var ASM_CONSTS = {
-  1213199: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  1213203: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
@@ -5612,7 +5617,6 @@ var _dump_file = Module['_dump_file'] = makeInvalidEarlyAccess('_dump_file');
 var _unzip_file = Module['_unzip_file'] = makeInvalidEarlyAccess('_unzip_file');
 var _init_game_api = Module['_init_game_api'] = makeInvalidEarlyAccess('_init_game_api');
 var _update_dict = Module['_update_dict'] = makeInvalidEarlyAccess('_update_dict');
-var ___cxa_free_exception = makeInvalidEarlyAccess('___cxa_free_exception');
 var _strerror = makeInvalidEarlyAccess('_strerror');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _emscripten_stack_get_end = makeInvalidEarlyAccess('_emscripten_stack_get_end');
@@ -5667,7 +5671,6 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['unzip_file'] != 'undefined', 'missing Wasm export: unzip_file');
   assert(typeof wasmExports['init_game_api'] != 'undefined', 'missing Wasm export: init_game_api');
   assert(typeof wasmExports['update_dict'] != 'undefined', 'missing Wasm export: update_dict');
-  assert(typeof wasmExports['__cxa_free_exception'] != 'undefined', 'missing Wasm export: __cxa_free_exception');
   assert(typeof wasmExports['strerror'] != 'undefined', 'missing Wasm export: strerror');
   assert(typeof wasmExports['fflush'] != 'undefined', 'missing Wasm export: fflush');
   assert(typeof wasmExports['emscripten_stack_get_end'] != 'undefined', 'missing Wasm export: emscripten_stack_get_end');
@@ -5718,7 +5721,6 @@ function assignWasmExports(wasmExports) {
   _unzip_file = Module['_unzip_file'] = createExportWrapper('unzip_file', 3);
   _init_game_api = Module['_init_game_api'] = createExportWrapper('init_game_api', 2);
   _update_dict = Module['_update_dict'] = createExportWrapper('update_dict', 0);
-  ___cxa_free_exception = createExportWrapper('__cxa_free_exception', 1);
   _strerror = createExportWrapper('strerror', 1);
   _fflush = createExportWrapper('fflush', 1);
   _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'];

@@ -101,6 +101,14 @@ function handle_wheel_evt(ptr, delta_y, delta_x) {
 		[ptr, delta_y, delta_x]);
 }
 
+function handle_gamepad_evt(ptr, evt_id, gamepad_info) {
+	gamepad_info = JSON.stringify(gamepad_info); // TODO
+	console.log("passing gamepad info string to handle_gamepad_evt: ", gamepad_info);
+	return Module.ccall("handle_gamepad_evt", null,
+		["number", "string", "number", "string", "number"],
+		[ptr, evt_id, evt_id.length, gamepad_info, gamepad_info.length]);
+}
+
 function handle_key_evt(ptr, evt_id, code) {
 	let val =  Module.ccall("handle_key_evt", ["number"],
 		["number", "string", "string"],
@@ -136,7 +144,7 @@ function write_str(ptr, ptr_size, str) {
 			return;
 		}
 		
-		console.log("writing value", char_val, "to ptr", ptr + i);
+		// console.log("writing value", char_val, "to ptr", ptr + i);
 		Module.setValue(ptr + i, char_val);
 	}
 }

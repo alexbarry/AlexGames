@@ -663,6 +663,14 @@ function destroy_all(L) {
 	while (button_row.firstChild) {
 		button_row.removeChild(button_row.firstChild);
 	}
+
+	for (const child of gfx.game_options.children) {
+		if (child.id != gfx.game_options_none_placeholder.id) {
+			gfx.game_options.removeChild(child);
+		}
+	}
+	gfx.game_options_none_placeholder.style.display = "";
+
 	disable_event_touch();
 	disable_event_mousemove();
 	disable_event_mouse_updown();
