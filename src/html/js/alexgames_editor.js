@@ -277,6 +277,7 @@ document.getElementById("btn_open_editor").addEventListener('click', () => {
 
 What's next:
 
+* add CodeEditor to licenses and acknowledgements
 * lua syntax highlighting
 * handle case where server side files change and are now incompatiable with user's changes. At a minimum, need to show files changed in IndexedDB in options menu, and add an option to delete one/all?
 
