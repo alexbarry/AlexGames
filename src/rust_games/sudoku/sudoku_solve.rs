@@ -105,7 +105,7 @@ fn get_all_empty_pts(state: &State) -> Vec<Pt> {
 		.collect()
 }
 
-fn check_valid_sudodku(state: &State) -> bool {
+fn check_valid_sudoku(state: &State) -> bool {
 	let checks: Vec<(&str, fn(&State, i32) -> Vec<Pt>)>  = vec![
 	//let checks = vec![
 		("row", get_pts_row),
@@ -126,8 +126,8 @@ fn check_valid_sudodku(state: &State) -> bool {
 			for val in vals {
 				*counts.entry(val).or_insert(0) += 1;
 				if *counts.get(&val).unwrap() > 1 {
-					state.print();
-					println!("{} {} contains duplicate values {}", label, i, val);
+					//state.print();
+					//println!("{} {} contains duplicate values {}", label, i, val);
 					return false;
 				}
 			}
@@ -157,7 +157,7 @@ fn get_possible_values(state: &State, pt: &Pt) -> Vec<i8> {
 ///
 /// ```
 /// use alexgames_rust::sudoku::sudoku_core::{self, State, Pt};
-/// use alexgames_rust::sudoku::sudoku_solve::find_moves3;
+/// use alexgames_rust::sudoku::sudoku_solve::find_moves3a;
 /// 
 /// let mut state = State::new(9);
 /// state.board = vec![
@@ -181,7 +181,7 @@ fn get_possible_values(state: &State, pt: &Pt) -> Vec<i8> {
 ///     vec![4,9,0, 5,8,6, 0,0,1],
 ///     vec![0,0,0, 2,9,0, 6,8,4],
 /// ];
-/// assert_eq!(find_moves3(&state), vec![(Pt{y:6, x:4}, 7)]);
+/// assert_eq!(find_moves3a(&state).0, vec![(Pt{y:6, x:4}, 7)]);
 /// 
 /// state.board = vec![
 ///     vec![9,0,0, 0,0,0, 0,0,0],
@@ -196,9 +196,9 @@ fn get_possible_values(state: &State, pt: &Pt) -> Vec<i8> {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 /// ];
-/// assert_eq!(find_moves3(&state), vec![]);
+/// assert_eq!(find_moves3a(&state).0, vec![]);
 /// ```
-pub fn find_moves3(state: &State) -> Vec<(Pt, i8)> {
+pub fn find_moves3a(state: &State) -> (Vec<(Pt, i8)>, HashMap<Pt, Vec<i8>>) {
 	// find all remaining possible values that a cell can be.
 	// Then look for cases where a value must fall within
 	// cells in the same row/col/(maybe box), then remove that
@@ -257,17 +257,7 @@ pub fn find_moves3(state: &State) -> Vec<(Pt, i8)> {
 						.filter(|pt| state.box_id(pt) != box_id);
 				for pt in this_row_pts_in_other_boxes {
 					if let Some(possibs) = possibs.get_mut(&pt) {
-						//let print_dbg = pt == (Pt {y: 6, x: 5});
-						let print_dbg = false;
-						if print_dbg {
-							println!("possibs before: {:?}", possibs);
-						}
 						possibs.retain(|possib_val| possib_val != val);
-						if print_dbg {
-							println!("possibs after removing {}: {:?}", val, possibs);
-							//println!("Found that box {} row {} contains all possib {} in that box.", box_id, y, val);
-							//println!("So therefore {:?} can't contain it! Old possibs are: {:?}", pt, possibs)
-						}
 					}
 				}
 			}
@@ -296,15 +286,6 @@ pub fn find_moves3(state: &State) -> Vec<(Pt, i8)> {
 					.collect();
 
 			let only_this_col = this_col_possibs.difference(&other_cols_possibs);
-			if x == 5 {
-				let this_col_pts_in_other_boxes: Vec<Pt> =
-					get_pts_col(state, x.into())
-						.into_iter()
-						.filter(|pt| state.box_id(pt) != box_id)
-						.collect();
-				println!("col {}: only this col: {:?}, pts to remove possib from {:?}", x, only_this_col, this_col_pts_in_other_boxes);
-
-			}
 
 			for val in only_this_col {
 				let this_col_pts_in_other_boxes =
@@ -313,29 +294,12 @@ pub fn find_moves3(state: &State) -> Vec<(Pt, i8)> {
 						.filter(|pt| state.box_id(pt) != box_id);
 				for pt in this_col_pts_in_other_boxes {
 					if let Some(possibs) = possibs.get_mut(&pt) {
-						//let print_dbg = pt == (Pt {y: 6, x: 5});
-						let print_dbg = false;
-						if print_dbg {
-							println!("possibs before: {:?}", possibs);
-						}
 						possibs.retain(|possib_val| possib_val != val);
-						if print_dbg {
-							println!("possibs after removing {}: {:?}", val, possibs);
-							//println!("Found that box {} col {} contains all possib {} in that box.", box_id, x, val);
-							//println!("So therefore {:?} can't contain it! Old possibs are: {:?}", pt, possibs)
-						}
 					}
 				}
 			}
 		}
-
-		// TODO do x too, same thing
-		//for x in box_start.x..(box_start.x + state.box_size) {
-		//}
 	}
-
-	//println!("possibs after: (6,5) {:?}", possibs[&Pt {y: 6, x: 5}]);
-	//println!("possibs after: (6,4) {:?}", possibs[&Pt {y: 6, x: 4}]);
 
 	// TODO check for if any cell only has one possib,
 	//      or if a box contains only one cell with a particular possib
@@ -353,9 +317,7 @@ pub fn find_moves3(state: &State) -> Vec<(Pt, i8)> {
 							acc
 						});
 		for only_one_possib in counts.iter().filter(|(_, &v)| v == 1).map(|(&k, _)|k) {
-			//println!("Found only_one_possib: {}", only_one_possib);
 			for pt in get_pts_box_from_id(state, box_id.into()) {
-				//println!("checking pt {:?}, {:?}", pt, possibs.get(&pt));
 				if possibs.get(&pt).unwrap_or(&Vec::new()).iter().any(|val| *val == only_one_possib) {
 					game_moves.push( (pt.clone(), only_one_possib));
 				}
@@ -363,7 +325,7 @@ pub fn find_moves3(state: &State) -> Vec<(Pt, i8)> {
 		}
 		// If any count is 1, add the point with that possib to the list
 	}
-	game_moves
+	(game_moves, possibs)
 }
 	
 
@@ -371,6 +333,8 @@ pub fn find_moves3(state: &State) -> Vec<(Pt, i8)> {
 pub struct Stats {
 	guess_count: u32,
 	wrong_guess_count: u32,
+
+	valid_solution_count: Option<i32>,
 }
 
 impl Stats {
@@ -378,6 +342,8 @@ impl Stats {
 		Self {
 			guess_count: 0,
 			wrong_guess_count: 0,
+
+			valid_solution_count: None,
 		}
 	}
 }
@@ -433,7 +399,7 @@ impl Stats {
 /// ];
 /// assert_eq!(find_moves1(&state), vec![(Pt{y: 4, x: 3}, 3)]);
 /// ```
-pub fn find_moves1(state: &State) -> Vec<(Pt, i8)> {
+pub fn find_moves1(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 	let mut game_moves: Vec<(Pt, i8)> = Vec::new();
 	for y in (0..state.size) {
 		for x in (0..state.size) {
@@ -445,7 +411,9 @@ pub fn find_moves1(state: &State) -> Vec<(Pt, i8)> {
 			if existing_vals.len() == state.size - 1 {
 				let remaining_vals: Vec<i8> = (1i8..=(state.size as i8)).filter(|val| !existing_vals.contains(val)).collect();
 				assert!(remaining_vals.len() == 1);
-				println!("y: {}, x: {} can only be one value; {:?} since others are filled in", y, x, remaining_vals);
+				if debug {
+					println!("y: {}, x: {} can only be one value; {:?} since others are filled in", y, x, remaining_vals);
+				}
 				game_moves.push( (pt.clone(), remaining_vals[0]));
 			}
 		}
@@ -476,7 +444,7 @@ pub fn find_moves1(state: &State) -> Vec<(Pt, i8)> {
 /// ];
 /// assert_eq!(find_moves2(&state), vec![(Pt{y: 6, x: 4}, 3)]);
 /// ```
-pub fn find_moves2(state: &State) -> Vec<(Pt, i8)> {
+pub fn find_moves2(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 	let mut game_moves: Vec<(Pt, i8)> = Vec::new();
 	let size = state.size as i8;
 
@@ -492,7 +460,7 @@ pub fn find_moves2(state: &State) -> Vec<(Pt, i8)> {
 	// need to iterate through each of those in this function.
 	for (label, get_pts_func) in checks {
 		for i in 0..size {
-			println!("checking {} {}", label, i);
+			//println!("checking {} {}", label, i);
 			let pts: Vec<Pt> = get_pts_func(&state, i as i32); //.collect();
 			let vals_present: HashSet<i8> = pts.iter().copied()
 				.map(|pt| state.cell_val(pt.y, pt.x))
@@ -503,7 +471,9 @@ pub fn find_moves2(state: &State) -> Vec<(Pt, i8)> {
 				let pts_can_be_val: Vec<Pt> = pts.iter().copied().filter(|pt| pt_can_be_val(&state, pt, val)).collect();
 				if pts_can_be_val.len() == 1 {
 					let pt = pts_can_be_val[0];
-					println!("y: {}, x: {} is only one in this row/col/box that can take value {}", pt.y, pt.x, val);
+					if debug {
+						println!("y: {}, x: {} is only one in this row/col/box that can take value {}", pt.y, pt.x, val);
+					}
 					game_moves.push((pt.clone(), val));
 				}
 			}
@@ -524,7 +494,7 @@ fn find_min_possib_pt(state: &State) -> Option<(Pt, Vec<i8>)> {
 	let size = state.size as i8;
 
 	for pt in get_all_empty_pts(&state) {
-		// TODO should also use logic implemented in find_moves3 to find the best guess
+		// TODO should also use logic implemented in find_moves3a to find the best guess
 		let pts: Vec<Pt> = get_other_pts_in_row_col_box(&state, &pt);
 		let vals_present: HashSet<i8> = pts.iter().copied()
 			.map(|pt| state.cell_val(pt.y, pt.x))
@@ -545,10 +515,26 @@ fn find_min_possib_pt(state: &State) -> Option<(Pt, Vec<i8>)> {
 	}
 }
 
-pub fn solve(state: &State, depth: i32, stats: &mut Stats) -> bool {
-	println!("##############");
-	println!("#### solve (depth: {})", depth);
-	println!("##############");
+pub struct Params {
+	debug: bool,
+	find_all_valid_solutions: bool,
+}
+
+impl Params {
+	pub fn new() -> Self {
+		Self {
+			debug: false,
+			find_all_valid_solutions: false,
+		}
+	}
+}
+
+pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> bool {
+	if params.debug {
+		println!("##############");
+		println!("#### solve (depth: {})", depth);
+		println!("##############");
+	}
 
 	let mut state = state.clone();
 	let mut activity = true;
@@ -561,10 +547,12 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats) -> bool {
 	while activity {
 		activity = false;
 		let mut game_moves: Vec<(Pt, i8)> = Vec::new();
-		state.print();
+		if params.debug {
+			state.print();
+		}
 
 		{
-			let mut game_moves1 = find_moves1(&state);
+			let mut game_moves1 = find_moves1(&state, params.debug);
 			if game_moves1.len() > 0 {
 				game_moves.append(&mut game_moves1);
 				activity = true;
@@ -572,7 +560,7 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats) -> bool {
 		}
 
 		if !activity {
-			let mut game_moves2 = find_moves2(&state);
+			let mut game_moves2 = find_moves2(&state, params.debug);
 			if game_moves2.len() > 0 {
 				game_moves.append(&mut game_moves2);
 				activity = true;
@@ -582,9 +570,9 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats) -> bool {
 
 
 		if !activity {
-			let mut game_moves3 = find_moves3(&state);
+			let mut game_moves3 = find_moves3a(&state).0;
 			if game_moves3.len() > 0 {
-				println!("Found {} game_moves from logic 3", game_moves3.len());
+				//println!("Found {} game_moves from logic 3", game_moves3.len());
 				activity = true;
 				game_moves.append(&mut game_moves3);
 			}
@@ -593,37 +581,57 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats) -> bool {
 		// Guess if none of the above techniques can reveal any more information
 		if !activity {
 			if let Some((min_possibs_pt, min_possibs)) = find_min_possib_pt(&state) {
-				println!("{} Best guess has {:?} possibilities at pt {:?}", " ".repeat(depth as usize), min_possibs, min_possibs_pt);
-
+				if params.debug {
+					println!("{} Best guess has {:?} possibilities at pt {:?}", " ".repeat(depth as usize), min_possibs, min_possibs_pt);
+				}
+				let mut found_valid_solution = false;
 				for possib in min_possibs {
 					let mut new_state = state.clone();
 					for (pt, val) in game_moves.iter() {
 						apply_move(&mut new_state, &pt, &val, depth);
 					}
 					let pt = min_possibs_pt;
-					println!("{} Making guess {} at point {:?}", " ".repeat(depth as usize), possib, pt);
+					if params.debug {
+						println!("{} Making guess {} at point {:?}", " ".repeat(depth as usize), possib, pt);
+					}
 					apply_move(&mut new_state, &pt, &possib, depth + 1);
 
-					let solved = solve(&new_state, depth + 1, stats);
+					let solved = solve(&new_state, depth + 1, stats, params);
 					if solved {
-						println!("{} Guess {} at pt {:?} was correct!", " ".repeat(depth as usize), possib, pt);
+						if params.debug {
+							println!("{} Guess {} at pt {:?} was correct!", " ".repeat(depth as usize), possib, pt);
+						}
 						stats.guess_count += 1;
-						return solved;
+						found_valid_solution = true;
+						if !params.find_all_valid_solutions {
+							return solved;
+						} else {
+							//if depth == 0 {
+								// TODO not sure if this is actually right...
+							//	*stats.valid_solution_count.get_or_insert(0) += 1;
+							//}
+							continue;
+						}
 					} else {
 						stats.wrong_guess_count += 1;
-						println!("{} Guess {} was wrong, trying next guess", " ".repeat(depth as usize), possib);
+						if params.debug {
+							println!("{} Guess {} was wrong, trying next guess", " ".repeat(depth as usize), possib);
+						}
 					}
 				}
+				return found_valid_solution;
 			}
 		}
 
 		for (pt, val) in game_moves.iter() {
+			//assert!(state.cell_val(pt.y, pt.x) == 0 || state.cell_val(pt.y, pt.x) == *val);
+			if state.cell_val(pt.y, pt.x) != 0 && state.cell_val(pt.y, pt.x) != *val {
+				return false;
+			}
 			assert!(state.cell_val(pt.y, pt.x) == 0 || state.cell_val(pt.y, pt.x) == *val);
 			apply_move(&mut state, pt, val, depth);
 
-			// TODO err does this ever happen?
-			assert!(check_valid_sudodku(&state));
-			if !check_valid_sudodku(&state) {
+			if !check_valid_sudoku(&state) {
 				return false;
 			}
 		}
@@ -632,7 +640,11 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats) -> bool {
 	}
 
 
-	state.print();
+	if params.debug {
+		state.print();
+	}
 
-	get_all_empty_pts(&state).len() == 0
+	let solved = get_all_empty_pts(&state).len() == 0;
+
+	solved && check_valid_sudoku(&state)
 }
