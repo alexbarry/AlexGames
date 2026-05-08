@@ -381,6 +381,169 @@ impl Stats {
 		}
 	}
 }
+/// Checks if a cell is the only empty one within a group (box/row/col).
+///
+/// ```
+/// use alexgames_rust::sudoku::sudoku_core::{self, State, Pt};
+/// use alexgames_rust::sudoku::sudoku_solve::find_moves1;
+/// 
+/// let mut state = State::new(9);
+/// state.board = vec![
+///     vec![0,0,0, 1,0,0, 0,0,0],
+///     vec![0,0,0, 2,0,0, 0,0,0],
+///     vec![0,0,0, 3,0,0, 0,0,0],
+///
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 5,0,0, 0,0,0],
+///     vec![0,0,0, 6,0,0, 0,0,0],
+///
+///     vec![0,0,0, 7,0,0, 0,0,0],
+///     vec![0,0,0, 8,0,0, 0,0,0],
+///     vec![0,0,0, 9,0,0, 0,0,0],
+/// ];
+/// assert_eq!(find_moves1(&state), vec![(Pt{y: 3, x: 3}, 4)]);
+///
+/// state.board = vec![
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///
+///     vec![0,0,0, 1,2,3, 0,0,0],
+///     vec![0,0,0, 0,5,6, 0,0,0],
+///     vec![0,0,0, 7,8,4, 0,0,0],
+///
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+/// ];
+/// assert_eq!(find_moves1(&state), vec![(Pt{y: 4, x: 3}, 9)]);
+///
+/// state.board = vec![
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![1,2,4, 0,5,6, 7,8,9],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+/// ];
+/// assert_eq!(find_moves1(&state), vec![(Pt{y: 4, x: 3}, 3)]);
+/// ```
+pub fn find_moves1(state: &State) -> Vec<(Pt, i8)> {
+	let mut game_moves: Vec<(Pt, i8)> = Vec::new();
+	for y in (0..state.size) {
+		for x in (0..state.size) {
+			let pt = Pt { y: y as i32, x: x as i32 };
+			if state.cell_val(pt.y, pt.x) != 0 {
+				continue;
+			}
+			let existing_vals = get_other_vals_in_row_col_box(&state, &pt);
+			if existing_vals.len() == state.size - 1 {
+				let remaining_vals: Vec<i8> = (1i8..=(state.size as i8)).filter(|val| !existing_vals.contains(val)).collect();
+				assert!(remaining_vals.len() == 1);
+				println!("y: {}, x: {} can only be one value; {:?} since others are filled in", y, x, remaining_vals);
+				game_moves.push( (pt.clone(), remaining_vals[0]));
+			}
+		}
+	}
+	game_moves
+}
+
+/// Checks if a cell is the only one within a group (box/row/col)
+/// that can take on a value.
+///
+/// ```
+/// use alexgames_rust::sudoku::sudoku_core::{self, State, Pt};
+/// use alexgames_rust::sudoku::sudoku_solve::find_moves2;
+/// 
+/// let mut state = State::new(9);
+/// state.board = vec![
+///     vec![0,0,0, 3,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///
+///     vec![0,0,0, 0,0,3, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![3,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,3],
+/// ];
+/// assert_eq!(find_moves2(&state), vec![(Pt{y: 6, x: 4}, 3)]);
+/// ```
+pub fn find_moves2(state: &State) -> Vec<(Pt, i8)> {
+	let mut game_moves: Vec<(Pt, i8)> = Vec::new();
+	let size = state.size as i8;
+
+	//let checks = vec![
+	let checks: Vec<(&str, fn(&State, i32) -> Vec<Pt>)>  = vec![
+		( "row", get_pts_row ),
+		( "col", get_pts_col ),
+		( "box", get_pts_box_from_id ),
+	];
+	
+	// TODO I think I made a mess of this at some point.
+	// `pt_can_be_val` iterates through every row/box/col, so I'm not sure if I also
+	// need to iterate through each of those in this function.
+	for (label, get_pts_func) in checks {
+		for i in 0..size {
+			println!("checking {} {}", label, i);
+			let pts: Vec<Pt> = get_pts_func(&state, i as i32); //.collect();
+			let vals_present: HashSet<i8> = pts.iter().copied()
+				.map(|pt| state.cell_val(pt.y, pt.x))
+				.filter(|val| *val != 0)
+				.collect();
+			let remaining_vals = (1..=size).filter(|val| !vals_present.contains(&val));
+			for val in remaining_vals {
+				let pts_can_be_val: Vec<Pt> = pts.iter().copied().filter(|pt| pt_can_be_val(&state, pt, val)).collect();
+				if pts_can_be_val.len() == 1 {
+					let pt = pts_can_be_val[0];
+					println!("y: {}, x: {} is only one in this row/col/box that can take value {}", pt.y, pt.x, val);
+					game_moves.push((pt.clone(), val));
+				}
+			}
+		}
+	}
+
+	game_moves
+		.into_iter()
+		.collect::<HashSet<_>>()
+		.into_iter()
+		.collect::<Vec<_>>()
+}
+
+fn find_min_possib_pt(state: &State) -> Option<(Pt, Vec<i8>)> {
+	let mut min_possibs: Option<Vec<i8>> = None;
+	let mut min_possibs_pt: Option<Pt> = None;
+
+	let size = state.size as i8;
+
+	for pt in get_all_empty_pts(&state) {
+		// TODO should also use logic implemented in find_moves3 to find the best guess
+		let pts: Vec<Pt> = get_other_pts_in_row_col_box(&state, &pt);
+		let vals_present: HashSet<i8> = pts.iter().copied()
+			.map(|pt| state.cell_val(pt.y, pt.x))
+			.filter(|val| *val != 0)
+			.collect();
+		let remaining_vals: Vec<i8> = (1i8..=size).filter(|val| !vals_present.contains(&val)).collect();
+
+		if min_possibs.clone().is_none_or(|val| remaining_vals.len() < val.len()) {
+			min_possibs = Some(remaining_vals);
+			min_possibs_pt = Some(pt);
+		}
+	}
+
+	if min_possibs.is_some() {
+		return Some((min_possibs_pt.unwrap(), min_possibs.unwrap()))
+	} else {
+		return None
+	}
+}
 
 pub fn solve(state: &State, depth: i32, stats: &mut Stats) -> bool {
 	println!("##############");
@@ -393,66 +556,30 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats) -> bool {
 	let apply_move = |state: &mut State, pt: &Pt, val: &i8, depth: i32| {
 		assert!(state.cell_val(pt.y, pt.x) == 0 || state.cell_val(pt.y, pt.x) == *val);
 		state.board[pt.y as usize][pt.x as usize] = *val;
-
-		/*
-		if depth == 0 && !check_sudoku_answer(&state) {
-			state.print();
-			panic!("wrong answer sudoku generated, oops!");
-		}
-		*/
 	};
 
 	while activity {
 		activity = false;
 		let mut game_moves: Vec<(Pt, i8)> = Vec::new();
 		state.print();
-		for y in (0..state.size) {
-			for x in (0..state.size) {
-				let pt = Pt { y: y as i32, x: x as i32 };
-				if state.cell_val(pt.y, pt.x) != 0 {
-					continue;
-				}
-				let existing_vals = get_other_vals_in_row_col_box(&state, &pt);
-				if existing_vals.len() == state.size - 1 {
-					let remaining_vals: Vec<i8> = (1i8..=(state.size as i8)).filter(|val| !existing_vals.contains(val)).collect();
-					assert!(remaining_vals.len() == 1);
-					println!("y: {}, x: {} can only be one value; {:?} since others are filled in", y, x, remaining_vals);
-					game_moves.push( (pt.clone(), remaining_vals[0]));
-					activity = true;
-				}
+
+		{
+			let mut game_moves1 = find_moves1(&state);
+			if game_moves1.len() > 0 {
+				game_moves.append(&mut game_moves1);
+				activity = true;
 			}
 		}
 
 		if !activity {
-			let size = state.size as i8;
-
-			//let checks = vec![
-			let checks: Vec<(&str, fn(&State, i32) -> Vec<Pt>)>  = vec![
-				( "row", get_pts_row ),
-				( "col", get_pts_col ),
-				( "box", get_pts_box_from_id ),
-			];
-			
-			for (label, get_pts_func) in checks {
-				for i in 0..size {
-					let pts: Vec<Pt> = get_pts_func(&state, i as i32); //.collect();
-					let vals_present: HashSet<i8> = pts.iter().copied()
-						.map(|pt| state.cell_val(pt.y, pt.x))
-						.filter(|val| *val != 0)
-						.collect();
-					let remaining_vals = (1..=size).filter(|val| !vals_present.contains(&val));
-					for val in remaining_vals {
-						let pts_can_be_val: Vec<Pt> = pts.iter().copied().filter(|pt| pt_can_be_val(&state, pt, val)).collect();
-						if pts_can_be_val.len() == 1 {
-							let pt = pts_can_be_val[0];
-							println!("y: {}, x: {} is only one in this row/col/box that can take value {}", pt.y, pt.x, val);
-							game_moves.push((pt.clone(), val));
-							activity = true;
-						}
-					}
-				}
+			let mut game_moves2 = find_moves2(&state);
+			if game_moves2.len() > 0 {
+				game_moves.append(&mut game_moves2);
+				activity = true;
 			}
 		}
+
+
 
 		if !activity {
 			let mut game_moves3 = find_moves3(&state);
@@ -465,28 +592,7 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats) -> bool {
 
 		// Guess if none of the above techniques can reveal any more information
 		if !activity {
-			let mut min_possibs: Option<Vec<i8>> = None;
-			let mut min_possibs_pt: Option<Pt> = None;
-
-			let size = state.size as i8;
-
-			for pt in get_all_empty_pts(&state) {
-				let pts: Vec<Pt> = get_other_pts_in_row_col_box(&state, &pt);
-				let vals_present: HashSet<i8> = pts.iter().copied()
-					.map(|pt| state.cell_val(pt.y, pt.x))
-					.filter(|val| *val != 0)
-					.collect();
-				let remaining_vals: Vec<i8> = (1i8..=size).filter(|val| !vals_present.contains(&val)).collect();
-
-				if min_possibs.clone().is_none_or(|val| remaining_vals.len() < val.len()) {
-					min_possibs = Some(remaining_vals);
-					min_possibs_pt = Some(pt);
-				}
-			}
-
-			if min_possibs.is_some() {
-				let min_possibs = min_possibs.unwrap();
-				let min_possibs_pt = min_possibs_pt.unwrap();
+			if let Some((min_possibs_pt, min_possibs)) = find_min_possib_pt(&state) {
 				println!("{} Best guess has {:?} possibilities at pt {:?}", " ".repeat(depth as usize), min_possibs, min_possibs_pt);
 
 				for possib in min_possibs {
@@ -515,9 +621,9 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats) -> bool {
 			assert!(state.cell_val(pt.y, pt.x) == 0 || state.cell_val(pt.y, pt.x) == *val);
 			apply_move(&mut state, pt, val, depth);
 
+			// TODO err does this ever happen?
+			assert!(check_valid_sudodku(&state));
 			if !check_valid_sudodku(&state) {
-				//state.print();
-				//panic!("invalid sudoku generated, oops!");
 				return false;
 			}
 		}
