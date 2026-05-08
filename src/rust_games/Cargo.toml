@@ -13,4 +13,8 @@ lazy_static = "1.4"
 [lib]
 name = "alexgames_rust"
 path = "rust_game_handler.rs"
-crate-type = ["staticlib"]
+crate-type = ["staticlib", "rlib"]
+
+[[bin]]
+name = "alexgames_sudoku"
+path = "sudoku/sudoku_cmd_line_main.rs"

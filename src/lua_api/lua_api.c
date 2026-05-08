@@ -377,7 +377,7 @@ const char *get_lua_game_path(const char *game_id, size_t game_id_len) {
 		return LUA_PRELOAD_DIR "games/hospital/hospital_main.lua";
 	} else if (str_eq_literal(game_id, "bound", game_id_len)) {
 		return LUA_PRELOAD_DIR "games/bound/bound_main.lua";
-	} else if (str_eq_literal(game_id, "sudoku", game_id_len)) {
+	} else if (str_eq_literal(game_id, "sudoku_lua", game_id_len)) {
 		return LUA_PRELOAD_DIR "games/sudoku/sudoku_main.lua";
 	} else if (str_eq_literal(game_id, "backgammon", game_id_len)) {
 		return LUA_PRELOAD_DIR "games/backgammon/backgammon_main.lua";

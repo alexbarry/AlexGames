@@ -1,4 +1,6 @@
-#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
+use serde::{Serialize, Deserialize};
+
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Pt {
     pub x: i32,
     pub y: i32,
