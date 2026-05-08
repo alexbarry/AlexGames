@@ -150,6 +150,13 @@ fn get_possible_values(state: &State, pt: &Pt) -> Vec<i8> {
 }
 
 
+fn find_init_possibs(state: &State) -> HashMap<Pt, Vec<i8>> {
+	get_all_empty_pts(state)
+		.into_iter()
+		.map(|pt| (pt, get_possible_values(state, &pt)))
+		.collect()
+}
+
 
 /// Checks if a cell is the only one within
 /// its group that can take on a value, due to
@@ -159,6 +166,7 @@ fn get_possible_values(state: &State, pt: &Pt) -> Vec<i8> {
 /// use alexgames_rust::sudoku::sudoku_core::{self, State, Pt};
 /// use alexgames_rust::sudoku::sudoku_solve::find_moves3a;
 /// 
+/// let mut activity = false;
 /// let mut state = State::new(9);
 /// state.board = vec![
 ///     vec![0,7,4, 1,5,3, 0,9,6],
@@ -181,7 +189,7 @@ fn get_possible_values(state: &State, pt: &Pt) -> Vec<i8> {
 ///     vec![4,9,0, 5,8,6, 0,0,1],
 ///     vec![0,0,0, 2,9,0, 6,8,4],
 /// ];
-/// assert_eq!(find_moves3a(&state).0, vec![(Pt{y:6, x:4}, 7)]);
+/// assert_eq!(find_moves3a(&state, None, &mut activity), vec![(Pt{y:6, x:4}, 7)]);
 /// 
 /// state.board = vec![
 ///     vec![9,0,0, 0,0,0, 0,0,0],
@@ -196,9 +204,10 @@ fn get_possible_values(state: &State, pt: &Pt) -> Vec<i8> {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 /// ];
-/// assert_eq!(find_moves3a(&state).0, vec![]);
+/// assert_eq!(find_moves3a(&state, None, &mut activity), vec![]);
 /// ```
-pub fn find_moves3a(state: &State) -> (Vec<(Pt, i8)>, HashMap<Pt, Vec<i8>>) {
+pub fn find_moves3a(state: &State, possibs: Option<&mut HashMap<Pt, Vec<i8>>>, activity: &mut bool) -> Vec<(Pt, i8)> {
+	*activity = false;
 	// find all remaining possible values that a cell can be.
 	// Then look for cases where a value must fall within
 	// cells in the same row/col/(maybe box), then remove that
@@ -211,11 +220,11 @@ pub fn find_moves3a(state: &State) -> (Vec<(Pt, i8)>, HashMap<Pt, Vec<i8>>) {
 	//   value may go is within that row/col. Does that generalize
 	//   for other groups?
 
-	let mut possibs: HashMap<Pt, Vec<i8>> =
-		get_all_empty_pts(state)
-			.into_iter()
-			.map(|pt| (pt, get_possible_values(state, &pt)))
-			.collect();
+	let possibs = if possibs.is_none() {
+		&mut find_init_possibs(&state)
+	} else {
+		possibs.unwrap()
+	};
 	let size = state.size as i8;
 
 	//println!("possibs before: (6,4){:?}", possibs[&Pt {y: 6, x: 4}]);
@@ -257,7 +266,11 @@ pub fn find_moves3a(state: &State) -> (Vec<(Pt, i8)>, HashMap<Pt, Vec<i8>>) {
 						.filter(|pt| state.box_id(pt) != box_id);
 				for pt in this_row_pts_in_other_boxes {
 					if let Some(possibs) = possibs.get_mut(&pt) {
+						let old_len = possibs.len();
 						possibs.retain(|possib_val| possib_val != val);
+						if old_len > possibs.len() {
+							*activity = true;
+						}
 					}
 				}
 			}
@@ -300,15 +313,27 @@ pub fn find_moves3a(state: &State) -> (Vec<(Pt, i8)>, HashMap<Pt, Vec<i8>>) {
 			}
 		}
 	}
+	// TODO don't call this here, call outside this function.
+	find_moves2_from_possibs(state, possibs)
+}
 
-	// TODO check for if any cell only has one possib,
-	//      or if a box contains only one cell with a particular possib
+// TODO refactor find_moves2 to use this instead
+fn find_moves2_from_possibs(state: &State, possibs: &HashMap<Pt, Vec<i8>>) -> Vec<(Pt, i8)> {
+	let size = state.size as i8;
 
 	let mut game_moves: Vec<(Pt, i8)> = Vec::new();
 
-	for box_id in 0..size {
+	let checks: Vec<(&str, fn(&State, i32) -> Vec<Pt>)>  = vec![
+	//let checks = vec![
+		("row", get_pts_row),
+		("col", get_pts_col),
+		("box", get_pts_box_from_id),
+	];
+
+	for (label, get_pts_func) in checks {
+	for group_id in 0..size {
 		// Gets count of all possibilities within a box
-		let counts = get_pts_box_from_id(state, box_id.into())
+		let counts = get_pts_func(state, group_id.into())
 		             	.iter()
 						.map(|pt| possibs.get(&pt).unwrap_or(&Vec::new()).clone())
 		             	.flatten()
@@ -317,16 +342,17 @@ pub fn find_moves3a(state: &State) -> (Vec<(Pt, i8)>, HashMap<Pt, Vec<i8>>) {
 							acc
 						});
 		for only_one_possib in counts.iter().filter(|(_, &v)| v == 1).map(|(&k, _)|k) {
-			for pt in get_pts_box_from_id(state, box_id.into()) {
+			for pt in get_pts_func(state, group_id.into()) {
 				if possibs.get(&pt).unwrap_or(&Vec::new()).iter().any(|val| *val == only_one_possib) {
 					game_moves.push( (pt.clone(), only_one_possib));
 				}
 			}
 		}
-		// If any count is 1, add the point with that possib to the list
 	}
-	(game_moves, possibs)
+	}
+	game_moves
 }
+
 	
 
 #[derive(Debug)]
@@ -570,11 +596,22 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> b
 
 
 		if !activity {
-			let mut game_moves3 = find_moves3a(&state).0;
-			if game_moves3.len() > 0 {
-				//println!("Found {} game_moves from logic 3", game_moves3.len());
-				activity = true;
-				game_moves.append(&mut game_moves3);
+			let mut init_possibs = find_init_possibs(&state);
+
+			let mut activity_a = true;
+			let mut activity_b = true;
+			while activity_a || activity_b {
+				//println!("trying findmoves 3a...");
+				activity_a = false;
+				activity_b = false;
+
+				let mut game_moves3a = find_moves3a(&state, Some(&mut init_possibs), &mut activity_a);
+				if game_moves3a.len() > 0 {
+					//println!("Found {} game_moves from logic 3a", game_moves3a.len());
+					activity = true;
+					game_moves.append(&mut game_moves3a);
+				}
+				//println!("activity_a {} activity_b {}", activity_a, activity_b);
 			}
 		}
 
