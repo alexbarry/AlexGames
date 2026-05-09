@@ -313,8 +313,162 @@ pub fn find_moves3a(state: &State, possibs: Option<&mut HashMap<Pt, Vec<i8>>>, a
 			}
 		}
 	}
+	//assert_eq!(find_moves1_from_possibs(possibs).len(), 0);
+	let mut moves1 = find_moves1_from_possibs(possibs);
 	// TODO don't call this here, call outside this function.
+	moves1.append(&mut
 	find_moves2_from_possibs(state, possibs)
+	);
+	moves1
+}
+
+type GetPtsFunc = fn(&State, i32) -> Vec<Pt>;
+
+fn get_counts(state: &State, possibs: &HashMap<Pt, Vec<i8>>, get_pts_func: GetPtsFunc, group_id: i8) -> HashMap<i8, i8> {
+	get_pts_func(state, group_id.into())
+		.iter()
+		.map(|pt| possibs.get(&pt).unwrap_or(&Vec::new()).clone())
+		.flatten()
+	    .fold(HashMap::new(), |mut acc, val| {
+			*acc.entry(val).or_insert(0) += 1;
+			acc
+		})
+}
+
+fn get_row_id(_state: &State, pt: &Pt) -> i8 {
+	pt.y as i8
+}
+fn get_col_id(_state: &State, pt: &Pt) -> i8 {
+	pt.x as i8
+}
+fn get_box_id(state: &State, pt: &Pt) -> i8 {
+	state.box_id(pt) as i8
+}
+
+/// If there are two vals within a group that can only fall within two cells,
+/// then remove all other possibilities from those cells.
+/// This may narrow down the number of possibilities enough to result in a move.
+/// ```
+/// use alexgames_rust::sudoku::sudoku_core::{self, State, Pt};
+/// use alexgames_rust::sudoku::sudoku_solve::update_possibs_3b;
+/// use std::collections::HashMap;
+/// 
+/// let state = State::new(9);
+/// let mut possibs = HashMap::from([
+///     // these two cells within the box are the only ones that can be a 2 or 3
+/// 	(Pt{ y: 1, x: 0}, vec![2,3,4]),
+/// 	(Pt{ y: 1, x: 1}, vec![2,3]),
+/// 	(Pt{ y: 1, x: 3}, vec![3,4]),
+/// 	(Pt{ y: 1, x: 8}, vec![2,8]),
+/// ]);
+/// let expected_possibs = HashMap::from([
+/// 	(Pt{ y: 1, x: 0}, vec![2,3,4]), // TODO removes other possibility (4) from these two cells?
+/// 	(Pt{ y: 1, x: 1}, vec![2,3]),
+/// 	(Pt{ y: 1, x: 3}, vec![4]), // can't be a 3
+/// 	(Pt{ y: 1, x: 8}, vec![8]), // can't be a 2
+/// ]);
+
+/// let activity = update_possibs_3b(&state, &mut possibs, true);
+/// assert_eq!(possibs, expected_possibs);
+/// assert_eq!(activity, true);
+/// ```
+pub fn update_possibs_3b(state: &State, possibs: &mut HashMap<Pt, Vec<i8>>, debug: bool) -> bool {
+	let mut activity = false;
+	let size = state.size as i8;
+
+	let get_pts_funcs: Vec<(&str, fn(&State, i32) -> Vec<Pt>, fn(&State, &Pt) -> i8)>  = vec![
+		("row", get_pts_row, get_row_id),
+		("col", get_pts_col, get_col_id),
+		("box", get_pts_box_from_id, get_box_id),
+	];
+
+	for (label, get_pts_func, _get_group_id_func) in &get_pts_funcs {
+		for group_id in 0..size {
+			//let counts = get_counts(state, possibs, get_pts_func, group_id);
+			//for (val, count) in counts {
+			//}
+
+			// TODO: find 2 values that can only occur in 2 cells, and remove all other possibilities from those cells.
+			// Maybe generalize this to more than 2.
+			// How to compute that?
+			// Either:
+			//  * (skip to next one) find all vals with count 2, check if any of them occur within the same 2 points?
+			//  * get all points that a vals occur within this group, find any that are
+			//    equal? This generalizes to any number of vals/cells.
+			let pts_by_val: HashMap<i8,HashSet<Pt>> = (0..size).map(|val| {
+									(val, get_pts_func(state, group_id.into())
+										.into_iter()
+										.filter(|pt| possibs.get(&pt)
+														.unwrap_or(&Vec::new())
+														.contains(&val))
+										.collect::<HashSet<_>>())
+								})
+								//.filter(|(val, pts)| pts.len() > 0)
+								.collect();
+			if debug {
+				//println!("update_possibs_3b, {} {}: pts_by_val: {:?}", label, group_id, pts_by_val);
+				println!("update_possibs_3b, {} {}: pts_by_val: {:?}", label, group_id, pts_by_val.iter().filter(|(val,pts)| pts.len() > 0).collect::<HashMap<_,_>>());
+			}
+			for (val1, pts1) in pts_by_val.iter() {
+				let val1 = *val1;
+				// TODO generalize this for val3, val4, etc...
+				for val2 in 1i8..val1 {
+					let pts2 = &pts_by_val[&val2];
+					// TODO generalize this for pts2.len() > 2
+					if pts1 == pts2 && pts1.len() == 2 {
+						let pts = pts1;
+						if debug {
+							println!("update_possibs_3b found that {} and {} have same pts", val1, val2);
+							// if they fall in the same row/col within this box, 
+							// then remove the possibilities from the rest of the row/col?
+							// TODO does this generalize?
+						}
+						//assert!(false);
+						for (label2, get_pts_func2, get_group_id_func2) in &get_pts_funcs {
+							if get_pts_func2 == get_pts_func {
+								continue;
+							}
+							// if all the points are within the same group,
+							// then remove these possibilities from the 
+							// others cells within this group.
+							let pts_within_group2 = pts.into_iter().map(|pt|get_group_id_func2(state, pt)).collect::<HashSet<_>>().len() == 1;
+							let group2_id = get_group_id_func2(state, pts.iter().next().unwrap());
+							//println!("update_possibs_3b {} {} within same {}: {} {}", val1, val2, label2, pts_within_group2, group2_id);
+							if pts_within_group2 {
+								for pt in get_pts_func2(state, group2_id.into()) {
+									//println!("checking pt {:?}", pt);
+									if pts.contains(&pt) {
+										//println!("checking pt {:?}; pts.contains(pt!)", pt);
+										continue;
+									}
+									//println!("possibs: {:?}", possibs);
+									//println!("checking pt {:?};, about to call possibs.get_mut()", pt);
+									if let Some(possibs) = possibs.get_mut(&pt) {
+										//println!("checking if {:?} possibs {:?} contain val {} or {}", pt, possibs, val1, val2);
+										if possibs.contains(&val1) {
+											//println!("found that {:?} can not be a {} because there are already 2 other cells ({:?})  with the same 2 possible values, one of them must be it", pt, val1, pts1);
+											possibs.retain(|val| *val != val1);
+											activity = true;
+										}
+										if possibs.contains(&val2) {
+											//println!("found that {:?} can not be a {} because there are already 2 other cells ({:?}) with the same 2 possible values, one of them must be it", pt, val2, pts2);
+											possibs.retain(|val| *val != val2);
+											activity = true;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	activity
+}
+
+fn find_moves1_from_possibs(possibs: &HashMap<Pt, Vec<i8>>) -> Vec<(Pt, i8)> {
+	possibs.iter().filter(|(_, &ref v)| v.len() == 1).map(|(&k, v)| (k, v[0])).collect()
 }
 
 // TODO refactor find_moves2 to use this instead
@@ -323,14 +477,14 @@ fn find_moves2_from_possibs(state: &State, possibs: &HashMap<Pt, Vec<i8>>) -> Ve
 
 	let mut game_moves: Vec<(Pt, i8)> = Vec::new();
 
-	let checks: Vec<(&str, fn(&State, i32) -> Vec<Pt>)>  = vec![
+	let get_pts_funcs: Vec<(&str, fn(&State, i32) -> Vec<Pt>)>  = vec![
 	//let checks = vec![
 		("row", get_pts_row),
 		("col", get_pts_col),
 		("box", get_pts_box_from_id),
 	];
 
-	for (label, get_pts_func) in checks {
+	for (label, get_pts_func) in get_pts_funcs {
 	for group_id in 0..size {
 		// Gets count of all possibilities within a box
 		let counts = get_pts_func(state, group_id.into())
@@ -353,7 +507,7 @@ fn find_moves2_from_possibs(state: &State, possibs: &HashMap<Pt, Vec<i8>>) -> Ve
 	game_moves
 }
 
-	
+
 
 #[derive(Debug)]
 pub struct Stats {
@@ -393,7 +547,7 @@ impl Stats {
 ///     vec![0,0,0, 8,0,0, 0,0,0],
 ///     vec![0,0,0, 9,0,0, 0,0,0],
 /// ];
-/// assert_eq!(find_moves1(&state), vec![(Pt{y: 3, x: 3}, 4)]);
+/// assert_eq!(find_moves1(&state, true), vec![(Pt{y: 3, x: 3}, 4)]);
 ///
 /// state.board = vec![
 ///     vec![0,0,0, 0,0,0, 0,0,0],
@@ -408,7 +562,7 @@ impl Stats {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 /// ];
-/// assert_eq!(find_moves1(&state), vec![(Pt{y: 4, x: 3}, 9)]);
+/// assert_eq!(find_moves1(&state, true), vec![(Pt{y: 4, x: 3}, 9)]);
 ///
 /// state.board = vec![
 ///     vec![0,0,0, 0,0,0, 0,0,0],
@@ -423,7 +577,7 @@ impl Stats {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 /// ];
-/// assert_eq!(find_moves1(&state), vec![(Pt{y: 4, x: 3}, 3)]);
+/// assert_eq!(find_moves1(&state, true), vec![(Pt{y: 4, x: 3}, 3)]);
 /// ```
 pub fn find_moves1(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 	let mut game_moves: Vec<(Pt, i8)> = Vec::new();
@@ -468,7 +622,7 @@ pub fn find_moves1(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 ///     vec![3,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,3],
 /// ];
-/// assert_eq!(find_moves2(&state), vec![(Pt{y: 6, x: 4}, 3)]);
+/// assert_eq!(find_moves2(&state, true), vec![(Pt{y: 6, x: 4}, 3)]);
 /// ```
 pub fn find_moves2(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 	let mut game_moves: Vec<(Pt, i8)> = Vec::new();
@@ -542,8 +696,9 @@ fn find_min_possib_pt(state: &State) -> Option<(Pt, Vec<i8>)> {
 }
 
 pub struct Params {
-	debug: bool,
-	find_all_valid_solutions: bool,
+	pub debug: bool,
+	pub find_all_valid_solutions: bool,
+	pub guessing_allowed: bool,
 }
 
 impl Params {
@@ -551,6 +706,7 @@ impl Params {
 		Self {
 			debug: false,
 			find_all_valid_solutions: false,
+			guessing_allowed: false,
 		}
 	}
 }
@@ -596,7 +752,7 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> b
 
 
 		if !activity {
-			let mut init_possibs = find_init_possibs(&state);
+			let mut possibs = find_init_possibs(&state);
 
 			let mut activity_a = true;
 			let mut activity_b = true;
@@ -605,18 +761,30 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> b
 				activity_a = false;
 				activity_b = false;
 
-				let mut game_moves3a = find_moves3a(&state, Some(&mut init_possibs), &mut activity_a);
+				let mut game_moves3a = find_moves3a(&state, Some(&mut possibs), &mut activity_a);
 				if game_moves3a.len() > 0 {
 					//println!("Found {} game_moves from logic 3a", game_moves3a.len());
-					activity = true;
-					game_moves.append(&mut game_moves3a);
+					//activity = true;
+					//game_moves.append(&mut game_moves3a);
 				}
+
+				activity_b = update_possibs_3b(&state, &mut possibs, params.debug);
 				//println!("activity_a {} activity_b {}", activity_a, activity_b);
+			}
+
+			let mut moves3 = find_moves1_from_possibs(&possibs);
+			moves3.append(&mut
+				find_moves2_from_possibs(&state, &possibs)
+			);
+
+			if moves3.len() > 0 {
+				game_moves.append(&mut moves3);
+				activity = true;
 			}
 		}
 
 		// Guess if none of the above techniques can reveal any more information
-		if !activity {
+		if !activity && params.guessing_allowed {
 			if let Some((min_possibs_pt, min_possibs)) = find_min_possib_pt(&state) {
 				if params.debug {
 					println!("{} Best guess has {:?} possibilities at pt {:?}", " ".repeat(depth as usize), min_possibs, min_possibs_pt);
