@@ -13,6 +13,8 @@ use rand::Rng;
 use rand_core::{SeedableRng};
 use rand_chacha::ChaCha12Rng;
 
+use std::env;
+
 
 fn solve_main() {
 
@@ -37,7 +39,8 @@ fn solve_main() {
 	}
 }
 
-fn generate_main() {
+fn generate_main(args: &Vec<String>) {
+
 	let mut state = State::new(9);
 
 	let mut stats = sudoku_solve::Stats::new();
@@ -47,13 +50,22 @@ fn generate_main() {
 
 	//let mut rng = ChaCha12Rng::from_seed(Default::default());
 	let mut seed = [0; 32];
-	// seed[0] = 2;
+	//seed[0] = 1;
+	if args.len() > 1 {
+		seed[0] = args[1].parse().unwrap();
+	}
 	let mut rng = ChaCha12Rng::from_seed(seed);
 	let solved = sudoku_solve::solve(&state, 0, &mut stats, &params, &mut rng);
 	let solved = solved.expect("could not solve!");
 	//solved.expect("could not solve!").print()
 
 	solved.print();
+
+	let mut seed = [0; 32];
+	if args.len() > 2 {
+		seed[0] = args[2].parse().unwrap();
+	}
+	let mut rng = ChaCha12Rng::from_seed(seed);
 
 	let mut gen_params = sudoku_solve::GenParams::new();
 	//gen_params.debug = true;
@@ -62,6 +74,8 @@ fn generate_main() {
 }
 
 fn main() {
+	let args: Vec<String> = env::args().collect();
+	println!("args: {:?}", args);
 	//solve_main()
-	generate_main()
+	generate_main(&args)
 }
