@@ -39,20 +39,6 @@ impl AlexGamesSudoku {
         self.draw_state.draw_state(self.callbacks, &self.game_state);
     }
 
-    fn get_state(&self) -> Option<Vec<u8>> {
-        match bincode::serialize(&self.game_state) {
-            Ok(state_encoded) => {
-                return Some(state_encoded);
-            }
-            Err(e) => {
-                // TODO use format macro and pass this more useful string to the API
-                println!("Error encoding state: {}", e);
-                self.callbacks.set_status_err("Error encoding state");
-                return None;
-            }
-        }
-	}
-
     fn set_state(&mut self, serialized_state: &Vec<u8>, session_id: i32) {
         println!("set_state");
         let game_state = bincode::deserialize::<sudoku_core::State>(&serialized_state);
@@ -87,6 +73,20 @@ impl AlexGamesApi for AlexGamesSudoku {
     }
     fn init(&mut self, callbacks: &'static CCallbacksPtr) {
     }
+
+    fn get_state(&self) -> Option<Vec<u8>> {
+        match bincode::serialize(&self.game_state) {
+            Ok(state_encoded) => {
+                return Some(state_encoded);
+            }
+            Err(e) => {
+                // TODO use format macro and pass this more useful string to the API
+                println!("Error encoding state: {}", e);
+                self.callbacks.set_status_err("Error encoding state");
+                return None;
+            }
+        }
+	}
 
     fn start_game(&mut self, saved_state: Option<(i32, Vec<u8>)>) {
 		if let Some((session_id, state_serialized)) = saved_state {
