@@ -26,6 +26,8 @@ use crate::sudoku::sudoku_draw::{self, DrawState, ButtonId};
 
 const SUDOKU_SIZE: usize = 9;
 
+const NEW_GAME_OPTION_ID: &'static str = "option_new_game";
+
 pub struct AlexGamesSudoku {
     callbacks: &'static CCallbacksPtr,
 
@@ -64,6 +66,24 @@ impl AlexGamesSudoku {
         let session_id = self.session_id;
         let serialized_state = self.get_state().expect("state is none?");
         self.callbacks.save_state(session_id, serialized_state);
+	}
+
+	fn load_new_game(&mut self) {
+		self.game_state = sudoku_core::State::new(9);
+		self.game_state.board = vec![
+			vec![0,0,0, 0,0,0, 0,4,0],
+			vec![4,0,0, 0,8,9, 6,0,3],
+			vec![3,0,0, 0,1,0, 0,8,0],
+
+			vec![0,0,4, 5,3,0, 0,0,0],
+			vec![0,0,0, 0,0,0, 0,0,2],
+			vec![0,0,5, 2,0,0, 0,7,0],
+
+			vec![9,0,0, 0,0,0, 3,0,0],
+			vec![6,0,0, 0,0,8, 0,0,0],
+			vec![0,8,0, 3,2,0, 7,0,4],
+		];
+		self.draw_state();
 	}
 }
 
@@ -163,6 +183,16 @@ impl AlexGamesApi for AlexGamesSudoku {
 		self.draw_state();
 		self.save_state()
 	}
+
+	fn handle_game_option_evt(&mut self, option_id: &str, option_type: OptionType, value: i32) {
+		match option_id {
+			// TODO show a popup to confirm or something
+			NEW_GAME_OPTION_ID => self.load_new_game(),
+			&_ => {
+				panic!("unhandled option id");
+			}
+		}
+	}
 }
 
 pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
@@ -176,20 +206,14 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
 
 	callbacks.enable_evt("key");
 
-	// TODO need to generate a puzzle
-	game.game_state.board = vec![
-		vec![ 0, 0, 0,  0, 0, 0,  0, 0, 0 ],
-		vec![ 0, 0, 0,  0, 0, 0,  0, 0, 0 ],
-		vec![ 0, 0, 0,  0, 0, 0,  0, 0, 0 ],
+	callbacks.add_game_option(NEW_GAME_OPTION_ID, &OptionInfo {
+		option_type: OptionType::Button,
+		label: "New Game".to_string(),
+		value: 0,
+	});
 
-		vec![ 0, 0, 0,  0, 0, 0,  0, 0, 0 ],
-		vec![ 0, 0, 0,  0, 0, 0,  0, 0, 0 ],
-		vec![ 0, 0, 0,  0, 0, 0,  0, 0, 0 ],
-
-		vec![ 0, 0, 0,  0, 0, 0,  0, 0, 0 ],
-		vec![ 0, 0, 0,  0, 0, 0,  0, 0, 0 ],
-		vec![ 0, 0, 0,  0, 0, 0,  0, 0, 0 ],
-	];
+	// TODO
+	game.load_new_game();
 
     Box::from(game)
 }
