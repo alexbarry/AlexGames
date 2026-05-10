@@ -70,7 +70,8 @@ fn generate_main(args: &Vec<String>) {
 	let mut gen_params = sudoku_solve::GenParams::new();
 	//gen_params.debug = true;
 	let generated_puzzle = sudoku_solve::hide_cells(&solved, &gen_params, &mut rng);
-	generated_puzzle.print()
+	generated_puzzle.print();
+	generated_puzzle.print_as_rust_code(4);
 }
 
 fn main() {
