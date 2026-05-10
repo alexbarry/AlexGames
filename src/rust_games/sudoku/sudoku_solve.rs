@@ -1,6 +1,9 @@
 
 use std::collections::{HashSet, HashMap};
 
+use rand::Rng;
+use rand::prelude::SliceRandom;
+
 use crate::sudoku::sudoku_core::{self, State, Pt};
 
 
@@ -104,6 +107,15 @@ fn get_all_empty_pts(state: &State) -> Vec<Pt> {
 		.filter(|pt| state.cell_val(pt.y, pt.x) == 0)
 		.collect()
 }
+
+fn get_all_pts(state: &State) -> Vec<Pt> {
+	let size = state.size;
+	(0..size).flat_map(|y|
+		(0..size).map(move |x| Pt { y: y as i32, x: x as i32})
+	)
+		.collect()
+}
+
 
 fn check_valid_sudoku(state: &State) -> bool {
 	let checks: Vec<(&str, fn(&State, i32) -> Vec<Pt>)>  = vec![
@@ -710,6 +722,10 @@ pub struct Params {
 	pub debug: bool,
 	pub find_all_valid_solutions: bool,
 	pub guessing_allowed: bool,
+
+	pub find_moves1_enabled: bool,
+	pub find_moves2_enabled: bool,
+	pub find_moves3_enabled: bool,
 }
 
 impl Params {
@@ -718,11 +734,15 @@ impl Params {
 			debug: false,
 			find_all_valid_solutions: false,
 			guessing_allowed: false,
+
+			find_moves1_enabled: true,
+			find_moves2_enabled: true,
+			find_moves3_enabled: true,
 		}
 	}
 }
 
-pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> bool {
+pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params, rng: &mut impl Rng) -> Option<State> {
 	if params.debug {
 		println!("##############");
 		println!("#### solve (depth: {})", depth);
@@ -744,7 +764,7 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> b
 			state.print();
 		}
 
-		{
+		if params.find_moves1_enabled {
 			let mut game_moves1 = find_moves1(&state, params.debug);
 			if game_moves1.len() > 0 {
 				game_moves.append(&mut game_moves1);
@@ -752,7 +772,7 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> b
 			}
 		}
 
-		if !activity {
+		if !activity && params.find_moves2_enabled {
 			let mut game_moves2 = find_moves2(&state, params.debug);
 			if game_moves2.len() > 0 {
 				game_moves.append(&mut game_moves2);
@@ -762,7 +782,7 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> b
 
 
 
-		if !activity {
+		if !activity && params.find_moves3_enabled {
 			let mut possibs = find_init_possibs(&state);
 
 			let mut activity_a = true;
@@ -796,11 +816,14 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> b
 
 		// Guess if none of the above techniques can reveal any more information
 		if !activity && params.guessing_allowed {
-			if let Some((min_possibs_pt, min_possibs)) = find_min_possib_pt(&state) {
+			if let Some((min_possibs_pt, mut min_possibs)) = find_min_possib_pt(&state) {
 				if params.debug {
 					println!("{} Best guess has {:?} possibilities at pt {:?}", " ".repeat(depth as usize), min_possibs, min_possibs_pt);
 				}
 				let mut found_valid_solution = false;
+				let mut first_valid_solution = None;
+				// TODO configurable
+				min_possibs.shuffle(rng);
 				for possib in min_possibs {
 					let mut new_state = state.clone();
 					for (pt, val) in game_moves.iter() {
@@ -812,15 +835,16 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> b
 					}
 					apply_move(&mut new_state, &pt, &possib, depth + 1);
 
-					let solved = solve(&new_state, depth + 1, stats, params);
-					if solved {
+					let solved_state = solve(&new_state, depth + 1, stats, params, rng);
+					if solved_state.is_some() {
 						if params.debug {
 							println!("{} Guess {} at pt {:?} was correct!", " ".repeat(depth as usize), possib, pt);
 						}
 						stats.guess_count += 1;
 						found_valid_solution = true;
+						first_valid_solution = solved_state.clone();
 						if !params.find_all_valid_solutions {
-							return solved;
+							return solved_state;
 						} else {
 							//if depth == 0 {
 								// TODO not sure if this is actually right...
@@ -835,20 +859,20 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> b
 						}
 					}
 				}
-				return found_valid_solution;
+				return first_valid_solution;
 			}
 		}
 
 		for (pt, val) in game_moves.iter() {
 			//assert!(state.cell_val(pt.y, pt.x) == 0 || state.cell_val(pt.y, pt.x) == *val);
 			if state.cell_val(pt.y, pt.x) != 0 && state.cell_val(pt.y, pt.x) != *val {
-				return false;
+				return None;
 			}
 			assert!(state.cell_val(pt.y, pt.x) == 0 || state.cell_val(pt.y, pt.x) == *val);
 			apply_move(&mut state, pt, val, depth);
 
 			if !check_valid_sudoku(&state) {
-				return false;
+				return None;
 			}
 		}
 
@@ -862,5 +886,59 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params) -> b
 
 	let solved = get_all_empty_pts(&state).len() == 0;
 
-	solved && check_valid_sudoku(&state)
+	if solved && check_valid_sudoku(&state) {
+		Some(state)
+	} else {
+		None
+	}
+}
+
+
+pub struct GenParams {
+	pub debug: bool,
+}
+
+impl GenParams {
+	pub fn new() -> Self {
+		Self {
+			debug: false,
+		}
+	}
+}
+
+pub fn hide_cells(state: &State, params: &GenParams, rng: &mut impl Rng) -> State {
+	let mut solve_params = Params::new();
+	let mut stats = Stats::new();
+	solve_params.find_moves1_enabled = true;
+	solve_params.find_moves2_enabled = false;
+	solve_params.find_moves3_enabled = false;
+	solve_params.guessing_allowed = false;
+
+	let orig_state = state;
+	let mut state = state.clone();
+	let mut activity = true;
+	while activity {
+		activity = false;
+		let mut pts = get_all_pts(&state);
+		pts.shuffle(rng);
+		for pt in pts {
+			let old_val = state.board[pt.y as usize][pt.x as usize];
+			if old_val == 0 {
+				continue;
+			}
+
+
+			state.board[pt.y as usize][pt.x as usize] = 0;
+			if solve(&state, 0, &mut stats, &solve_params, rng).is_none() {
+				state.board[pt.y as usize][pt.x as usize] = old_val;
+			} else {
+				activity = true;
+			}
+		}
+	}
+
+	let solved_after_hiding = solve(&state, 0, &mut stats, &solve_params, rng);
+	let solved_after_hiding = solved_after_hiding.expect("could not solve after hiding?");
+	assert_eq!(solved_after_hiding.board, orig_state.board);
+	state
 }
