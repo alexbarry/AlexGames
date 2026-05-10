@@ -601,8 +601,39 @@ impl Stats {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 /// ];
 /// assert_eq!(find_moves1(&state, true), vec![(Pt{y: 4, x: 3}, 3)]);
+///
+/// state.board = vec![
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![1,2,0, 0,5,6, 7,8,9],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+/// ];
+/// assert_eq!(find_moves1(&state, true), vec![]);
+///
+/// state.board = vec![
+///     vec![0,0,0, 3,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///
+///     vec![3,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,3],
+///
+///     vec![0,0,0, 0,0,3, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+/// ];
+/// assert_eq!(find_moves1(&state, true), vec![]);
 /// ```
 pub fn find_moves1(state: &State, debug: bool) -> Vec<(Pt, i8)> {
+	/*
 	let mut game_moves: Vec<(Pt, i8)> = Vec::new();
 	for y in (0..state.size) {
 		for x in (0..state.size) {
@@ -622,6 +653,10 @@ pub fn find_moves1(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 		}
 	}
 	game_moves
+	*/
+
+	let possibs = find_init_possibs(state);
+	find_moves1_from_possibs(&possibs)
 }
 
 /// Checks if a cell is the only one within a group (box/row/col)
@@ -646,8 +681,24 @@ pub fn find_moves1(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 ///     vec![0,0,0, 0,0,0, 0,0,3],
 /// ];
 /// assert_eq!(find_moves2(&state, true), vec![(Pt{y: 6, x: 4}, 3)]);
+///
+/// state.board = vec![
+///     vec![1,2,3, 0,5,6, 7,8,9],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+///     vec![0,0,0, 0,0,0, 0,0,0],
+/// ];
+/// assert_eq!(find_moves2(&state, true), vec![(Pt{y: 0, x: 3}, 4)]);
 /// ```
 pub fn find_moves2(state: &State, debug: bool) -> Vec<(Pt, i8)> {
+/*
 	let mut game_moves: Vec<(Pt, i8)> = Vec::new();
 	let size = state.size as i8;
 
@@ -684,6 +735,14 @@ pub fn find_moves2(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 	}
 
 	game_moves
+		.into_iter()
+		.collect::<HashSet<_>>()
+		.into_iter()
+		.collect::<Vec<_>>()
+	*/
+
+	let possibs = find_init_possibs(state);
+	find_moves2_from_possibs(state, &possibs)
 		.into_iter()
 		.collect::<HashSet<_>>()
 		.into_iter()
