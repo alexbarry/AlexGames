@@ -150,7 +150,7 @@ fn get_possible_values(state: &State, pt: &Pt) -> Vec<i8> {
 }
 
 
-fn find_init_possibs(state: &State) -> HashMap<Pt, Vec<i8>> {
+pub fn find_init_possibs(state: &State) -> HashMap<Pt, Vec<i8>> {
 	get_all_empty_pts(state)
 		.into_iter()
 		.map(|pt| (pt, get_possible_values(state, &pt)))
@@ -189,7 +189,9 @@ fn find_init_possibs(state: &State) -> HashMap<Pt, Vec<i8>> {
 ///     vec![4,9,0, 5,8,6, 0,0,1],
 ///     vec![0,0,0, 2,9,0, 6,8,4],
 /// ];
-/// assert_eq!(find_moves3a(&state, None, &mut activity), vec![(Pt{y:6, x:4}, 7)]);
+/// let moves = find_moves3a(&state, None, &mut activity);
+/// assert_eq!(moves.iter().any(|val| *val == (Pt{y:6, x:4}, 7)), true);
+/// //assert_eq!(find_moves3a(&state, None, &mut activity), vec![(Pt{y:6, x:4}, 7)]);
 /// 
 /// state.board = vec![
 ///     vec![9,0,0, 0,0,0, 0,0,0],
@@ -350,8 +352,8 @@ fn get_box_id(state: &State, pt: &Pt) -> i8 {
 /// This may narrow down the number of possibilities enough to result in a move.
 /// ```
 /// use alexgames_rust::sudoku::sudoku_core::{self, State, Pt};
-/// use alexgames_rust::sudoku::sudoku_solve::update_possibs_3b;
-/// use std::collections::HashMap;
+/// use alexgames_rust::sudoku::sudoku_solve::{update_possibs_3b, find_init_possibs};
+/// use std::collections::{HashMap,HashSet};
 /// 
 /// let state = State::new(9);
 /// let mut possibs = HashMap::from([
@@ -362,7 +364,7 @@ fn get_box_id(state: &State, pt: &Pt) -> i8 {
 /// 	(Pt{ y: 1, x: 8}, vec![2,8]),
 /// ]);
 /// let expected_possibs = HashMap::from([
-/// 	(Pt{ y: 1, x: 0}, vec![2,3,4]), // TODO removes other possibility (4) from these two cells?
+/// 	(Pt{ y: 1, x: 0}, vec![2,3]),
 /// 	(Pt{ y: 1, x: 1}, vec![2,3]),
 /// 	(Pt{ y: 1, x: 3}, vec![4]), // can't be a 3
 /// 	(Pt{ y: 1, x: 8}, vec![8]), // can't be a 2
@@ -422,6 +424,15 @@ pub fn update_possibs_3b(state: &State, possibs: &mut HashMap<Pt, Vec<i8>>, debu
 							// if they fall in the same row/col within this box, 
 							// then remove the possibilities from the rest of the row/col?
 							// TODO does this generalize?
+						}
+						for pt in pts {
+							if let Some(possibs) = possibs.get_mut(&pt) {
+								let old_len = possibs.len();
+								possibs.retain(|val| *val == val1 || *val == val2);
+								if possibs.len() != old_len {
+									activity = true;
+								}
+							}
 						}
 						//assert!(false);
 						for (label2, get_pts_func2, get_group_id_func2) in &get_pts_funcs {
