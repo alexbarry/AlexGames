@@ -52,6 +52,7 @@ fn generate_main(args: &Vec<String>) {
 	let mut rng = ChaCha12Rng::from_seed(seed);
 	*/
 
+	println!("#[rustfmt::skip]");
 	println!("const puzzles: [ [[i8;9];9]; {}] = [", puzzle_count);
 
 

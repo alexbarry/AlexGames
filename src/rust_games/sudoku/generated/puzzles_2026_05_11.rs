@@ -1,3 +1,4 @@
+#[rustfmt::skip]
 const puzzles: [ [[i8;9];9]; 200] = [
     // Puzzle 1 of 200
     [
