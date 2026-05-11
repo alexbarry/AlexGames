@@ -27,7 +27,7 @@ use crate::sudoku::sudoku_serialize;
 
 const SUDOKU_SIZE: usize = 9;
 
-const NEW_GAME_OPTION_ID: &'static str = "option_new_game";
+const ENTER_CUSTOM_GAME_OPTION_ID: &'static str = "option_new_custom_game";
 
 pub struct AlexGamesSudoku {
     callbacks: &'static CCallbacksPtr,
@@ -74,21 +74,9 @@ impl AlexGamesSudoku {
         self.callbacks.save_state(session_id, serialized_state);
 	}
 
-	fn load_new_game(&mut self) {
+	fn enter_custom_game(&mut self) {
 		self.game_state = sudoku_core::State::new(9);
-		self.game_state.board = vec![
-			vec![0,0,0, 0,0,0, 0,4,0],
-			vec![4,0,0, 0,8,9, 6,0,3],
-			vec![3,0,0, 0,1,0, 0,8,0],
-
-			vec![0,0,4, 5,3,0, 0,0,0],
-			vec![0,0,0, 0,0,0, 0,0,2],
-			vec![0,0,5, 2,0,0, 0,7,0],
-
-			vec![9,0,0, 0,0,0, 3,0,0],
-			vec![6,0,0, 0,0,8, 0,0,0],
-			vec![0,8,0, 3,2,0, 7,0,4],
-		];
+		self.game_state.mode = sudoku_core::Mode::EnterStartingVal;
 		self.draw_state();
 	}
 }
@@ -198,6 +186,9 @@ impl AlexGamesApi for AlexGamesSudoku {
 				ButtonId::Val(val) => self.game_state.set_val(val as i8),
 				// TODO maybe this should be state within AlexGamesSudoku rather than core state
 				ButtonId::ToggleNotes => self.game_state.toggle_notes(),
+				ButtonId::DoneEnteringStartingVals => {
+					self.game_state.mode = sudoku_core::Mode::EnterCellVal
+				},
 			}
 		}
 		self.draw_state();
@@ -207,7 +198,7 @@ impl AlexGamesApi for AlexGamesSudoku {
 	fn handle_game_option_evt(&mut self, option_id: &str, option_type: OptionType, value: i32) {
 		match option_id {
 			// TODO show a popup to confirm or something
-			NEW_GAME_OPTION_ID => self.load_new_game(),
+			ENTER_CUSTOM_GAME_OPTION_ID => self.enter_custom_game(),
 			&_ => {
 				panic!("unhandled option id");
 			}
@@ -226,14 +217,13 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
 
 	callbacks.enable_evt("key");
 
-	callbacks.add_game_option(NEW_GAME_OPTION_ID, &OptionInfo {
+	callbacks.add_game_option(ENTER_CUSTOM_GAME_OPTION_ID, &OptionInfo {
 		option_type: OptionType::Button,
-		label: "New Game".to_string(),
+		label: "Enter Custom Game".to_string(),
 		value: 0,
 	});
 
-	// TODO
-	game.load_new_game();
+	game.enter_custom_game();
 
     Box::from(game)
 }

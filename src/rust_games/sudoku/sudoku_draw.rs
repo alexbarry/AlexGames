@@ -17,6 +17,7 @@ pub struct DrawState {
 
 #[derive(PartialEq)]
 pub enum ButtonId {
+	DoneEnteringStartingVals,
 	Erase,
 	Val(i32),
 	ToggleNotes,
@@ -149,7 +150,8 @@ impl DrawState {
 				y_text: CANVAS_HEIGHT - padding,
 				x_text: x_start + ( (btn_width as f32) * (btn_val as f32 + 0.5) ) as i32,
 			}
-		} else if *btn == ButtonId::ToggleNotes {
+		} else if *btn == ButtonId::ToggleNotes ||
+		          *btn == ButtonId::DoneEnteringStartingVals {
 			let y2 = CANVAS_HEIGHT - cell_pos_info.button_buffer/2 + padding;
 			BtnPos {
 				y1: CANVAS_HEIGHT - cell_pos_info.button_buffer + padding,
@@ -192,7 +194,11 @@ impl DrawState {
 	pub fn pos_to_btn(&self, game_state: &State, y_pos: i32, x_pos: i32) -> Option<ButtonId> {
 		let pos_info = self.cell_pos(game_state, 0, 0);
 		if CANVAS_HEIGHT - pos_info.button_buffer < y_pos && y_pos < CANVAS_HEIGHT - pos_info.button_buffer/2 {
-			Some(ButtonId::ToggleNotes)
+			if game_state.mode == Mode::EnterStartingVal {
+				Some(ButtonId::DoneEnteringStartingVals)
+			} else {
+				Some(ButtonId::ToggleNotes)
+			}
 		} else if CANVAS_HEIGHT - pos_info.button_buffer/2 < y_pos {
 			let btn_width = self.val_btn_width(game_state);
 			let val = x_pos/btn_width;
@@ -353,7 +359,11 @@ impl DrawState {
 		let buttons: Vec<_> =
 			vec![
 				ButtonId::Erase,
-				ButtonId::ToggleNotes,
+				if state.mode == Mode::EnterStartingVal {
+					 ButtonId::DoneEnteringStartingVals
+				} else {
+					 ButtonId::ToggleNotes
+				},
 			]
 			.into_iter()
 			.chain(
@@ -371,6 +381,9 @@ impl DrawState {
 				ButtonId::Val(val) => format!("{}", val),
 				ButtonId::ToggleNotes => {
 					format!("Notes: {}", if notes_on { "on" } else { "off" })
+				},
+				ButtonId::DoneEnteringStartingVals => {
+					format!("Finalize Custom Puzzle")
 				},
 			};
 			if btn_val == ButtonId::ToggleNotes && notes_on {

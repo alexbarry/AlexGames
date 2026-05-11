@@ -8,6 +8,9 @@ use std::collections::{HashSet, HashMap};
 
 #[derive(PartialEq, Serialize, Deserialize, Debug, Clone)]
 pub enum Mode {
+	// only used when the user inputs their own puzzle
+	EnterStartingVal,
+
 	EnterCellVal,
 	EnterCellNotes,
 }
@@ -171,6 +174,9 @@ impl State {
 	pub fn set_val(&mut self, val: i8) {
 		if let Some(selected) = self.selected {
 			match self.mode {
+				Mode::EnterStartingVal => {
+					self.board[selected.y as usize][selected.x as usize] = val;
+				},
 				Mode::EnterCellVal => {
 					self.user_input[selected.y as usize][selected.x as usize] = val;
 					self.clear_notes_from_set_val(&selected, val);
@@ -197,6 +203,7 @@ impl State {
 		self.mode = match self.mode {
 			Mode::EnterCellVal   => Mode::EnterCellNotes,
 			Mode::EnterCellNotes => Mode::EnterCellVal,
+			Mode::EnterStartingVal => Mode::EnterStartingVal,
 		};
 	}
 
