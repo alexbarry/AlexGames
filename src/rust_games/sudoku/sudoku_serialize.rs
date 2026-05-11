@@ -141,6 +141,12 @@ pub fn serialize(state: &sudoku_core::State) -> Vec<u8> {
 	serialized_state.push(user_notes_serialized.len().try_into().unwrap());
 	serialized_state.append(&mut user_notes_serialized);
 
+	serialized_state.push(match state.mode {
+		sudoku_core::Mode::EnterStartingVal => 1,
+		sudoku_core::Mode::EnterCellVal => 2,
+		sudoku_core::Mode::EnterCellNotes => 3,
+	});
+
 	serialized_state
 }
 
@@ -208,6 +214,19 @@ pub fn deserialize(mut serialized_state: &[u8]) -> sudoku_core::State {
 		state.user_input_notes[pt.y as usize][pt.x as usize] = val;
 	}
     serialized_state = &serialized_state[user_input_notes_bytes_len..];
+
+	if serialized_state.len() > 0 {
+		let mode_byte = serialized_state[0];
+		let mode = match mode_byte {
+			1 => sudoku_core::Mode::EnterStartingVal,
+			2 => sudoku_core::Mode::EnterCellVal,
+			3 => sudoku_core::Mode::EnterCellNotes,
+			_ => panic!("unexpected mode value {:?}", mode_byte),
+		};
+		
+		state.mode = mode;
+		serialized_state = &serialized_state[1..];
+	}
 
 	assert_eq!(serialized_state.len(), 0);
 

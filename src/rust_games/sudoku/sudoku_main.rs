@@ -84,11 +84,36 @@ impl AlexGamesSudoku {
 		return true;
 	}
 
+	fn state_meaningfully_different(&self, state1: &Vec<u8>, state2: &Vec<u8>) -> bool {
+		let mut state1 = sudoku_serialize::deserialize(state1);
+		let mut state2 = sudoku_serialize::deserialize(state2);
 
-	fn save_state(&self) {
+		if state1.mode != sudoku_core::Mode::EnterStartingVal {
+			state1.mode = sudoku_core::Mode::EnterCellVal;
+		}
+		state1.selected = None;
+		if state2.mode != sudoku_core::Mode::EnterStartingVal {
+			state2.mode = sudoku_core::Mode::EnterCellVal;
+		}
+		state2.selected = None;
+
+		state1 != state2
+	}
+
+
+	fn save_state(&mut self) {
         let session_id = self.session_id;
         let serialized_state = self.get_state().expect("state is none?");
-        self.callbacks.save_state(session_id, serialized_state);
+		let should_save_state = if let Some(prev_state) = &self.prev_state {
+			self.state_meaningfully_different(&serialized_state, &prev_state)
+		} else {
+			true
+		};
+		if should_save_state {
+			// TODO modify callbacks.save_state to take a reference
+			self.callbacks.save_state(session_id, serialized_state.clone());
+			self.prev_state = Some(serialized_state);
+		}
 	}
 
 	fn enter_custom_game(&mut self) {
@@ -131,7 +156,7 @@ impl AlexGamesApi for AlexGamesSudoku {
 				}
 			}
 			test_this_state.selected = None;
-			test_this_state.mode = sudoku_core::Mode::EnterCellVal;
+			//test_this_state.mode = sudoku_core::Mode::EnterCellVal;
 			assert_eq!(test_deserialized, test_this_state);
 		}
 
@@ -250,6 +275,7 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
         game_state: sudoku_core::State::new(SUDOKU_SIZE),
         draw_state: DrawState::new(),
 		session_id: callbacks.get_new_session_id(),
+		prev_state: None,
     };
     game.init(callbacks);
 
