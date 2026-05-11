@@ -213,10 +213,12 @@ impl DrawState {
 
 		let LINE_COLOUR = "#888";
 		let TEXT_COLOUR = if !is_dark_mode { "#000" } else { "#fff" };
+		let TEXT_COLOUR_CONFLICT = "#f00";
 		let TEXT_COLOUR_USER = if !is_dark_mode { "#00a" } else { "#88f" };
 		let SELECTED_BG = if !is_dark_mode { "#0084" } else { "#44cc" };
 		let SELECTED2_BG = if !is_dark_mode { "#0082" } else { "#228c" };
 		let SELECTED3_BG = if !is_dark_mode { "#0081" } else { "#116c" };
+		let CONFLICT_BG = if !is_dark_mode {"#f003" } else { "#f003" };
 		let STARTING_VAL_BG = if !is_dark_mode { "#c8c8c888" } else { "#282828" };
 		let NORMAL_CELL_BG = if !is_dark_mode { "#e8e8e888" } else { "#000" };
 		let same_val_border_colour = if !is_dark_mode { "#000" } else { "#888" };
@@ -247,8 +249,12 @@ impl DrawState {
 		};
 		
 
+		let conflicts = state.get_conflicts();
+
 		for y in 0..game_size {
 			for x in 0..game_size {
+				let pt = Pt {y: y as i32, x: x as i32};
+				let is_conflict = conflicts.contains(&pt);
 				let pos_info = self.cell_pos(state, y, x);
 				let cell = state.val(y, x);
 				let cell_val = match cell {
@@ -268,13 +274,17 @@ impl DrawState {
 					Some(SELECTED2_BG)
 				} else if state.selected.is_some_and(|pt| pt.y == y || pt.x == x || state.box_id(&pt) == state.box_id(&Pt {y: y as i32, x: x as i32})) {
 					Some(SELECTED3_BG)
+				} else if is_conflict {
+					Some(CONFLICT_BG)
 				} else {
 					None
 				};
 				if let Some(bg_colour) = bg_colour {
 					callbacks.draw_rect(&bg_colour, pos_info.y1, pos_info.x1, pos_info.y2, pos_info.x2)
 				}
-				let text_colour = if starting_val {
+				let text_colour = if is_conflict {
+					TEXT_COLOUR_CONFLICT
+				} else if starting_val {
 					TEXT_COLOUR
 				} else {
 					TEXT_COLOUR_USER

@@ -4,6 +4,8 @@ pub use crate::libs::point::Pt;
 
 use serde::{Serialize, Deserialize};
 
+use std::collections::{HashSet, HashMap};
+
 #[derive(PartialEq, Serialize, Deserialize, Debug, Clone)]
 pub enum Mode {
 	EnterCellVal,
@@ -196,6 +198,67 @@ impl State {
 			Mode::EnterCellVal   => Mode::EnterCellNotes,
 			Mode::EnterCellNotes => Mode::EnterCellVal,
 		};
+	}
+
+	//fn get_pts_row(state: &State, y: i32) -> impl Iterator<Item = Pt> {
+	pub fn get_pts_row(&self, y: i8) -> Vec<Pt> {
+		let y = y as i32;
+		let size = self.size as i32;
+		(0..size).map(move |x| Pt { y: y, x: x })
+			.collect()
+	}
+
+	//fn get_pts_col(state: &State, x: i32) -> impl Iterator<Item = Pt> {
+	pub fn get_pts_col(&self, x: i8) -> Vec<Pt> {
+		let x = x as i32;
+		let size = self.size as i32;
+		(0..size).map(move |y| Pt { y: y, x: x })
+			.collect()
+	}
+
+	//fn get_pts_box(state: &State, pt: &Pt) -> impl Iterator<Item = Pt> {
+	pub fn get_pts_box_from_id(&self, box_id: i8) -> Vec<Pt> {
+		let pt = self.box_start_pt_from_id(box_id.into());
+		let box_size = self.box_size as i32;
+		let y = pt.y;
+		let x = pt.x;
+		(0..box_size).flat_map(move |dy| 
+			(0..box_size)
+				.map(move |dx| Pt { y: y + dy, x: x + dx })
+		)
+			.collect()
+	}
+
+	fn all_groups(&self) -> Vec<Vec<Pt>> {
+		let size = self.size as i8;
+		(0..size).map(|group_id| self.get_pts_row(group_id))
+			.chain((0..size).map(|group_id| self.get_pts_col(group_id)))
+			.chain((0..size).map(|group_id| self.get_pts_box_from_id(group_id)))
+			.collect()
+	}
+
+	pub fn get_conflicts(&self) -> HashSet<Pt> {
+		let mut conflicts = HashSet::new();
+
+		for group_pts in self.all_groups() {
+			println!("checking group for conflicts: {:?}", group_pts);
+			let mut counts: HashMap<i8, Vec<Pt>> = HashMap::new();
+			for pt in group_pts {
+				let val = self.cell_val(pt.y, pt.x);
+				if val != 0 {
+					counts.entry(val).or_default().push(pt.clone());
+				}
+			}
+			for (val, pts) in counts {
+				if pts.len() > 1 {
+					for pt in pts {
+						conflicts.insert(pt);
+					}
+				}
+			}
+		}
+
+		conflicts
 	}
 
 	pub fn print(&self) {

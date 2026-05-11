@@ -10,16 +10,12 @@ use crate::sudoku::sudoku_core::{self, State, Pt};
 
 //fn get_pts_row(state: &State, y: i32) -> impl Iterator<Item = Pt> {
 fn get_pts_row(state: &State, y: i32) -> Vec<Pt> {
-	let size = state.size as i32;
-	(0..size).map(move |x| Pt { y: y, x: x })
-		.collect()
+	state.get_pts_row(y.try_into().unwrap())
 }
 
 //fn get_pts_col(state: &State, x: i32) -> impl Iterator<Item = Pt> {
 fn get_pts_col(state: &State, x: i32) -> Vec<Pt> {
-	let size = state.size as i32;
-	(0..size).map(move |y| Pt { y: y, x: x })
-		.collect()
+	state.get_pts_col(x.try_into().unwrap())
 }
 
 //fn get_pts_box(state: &State, pt: &Pt) -> impl Iterator<Item = Pt> {
@@ -37,15 +33,7 @@ fn get_pts_box(state: &State, pt: &Pt) -> Vec<Pt> {
 
 //fn get_pts_box_from_id(state: &State, box_id: i32) -> impl Iterator<Item = Pt> {
 fn get_pts_box_from_id(state: &State, box_id: i32) -> Vec<Pt> {
-	let pt = state.box_start_pt_from_id(box_id);
-	let box_size = state.box_size as i32;
-	let y = pt.y;
-	let x = pt.x;
-	(0..box_size).flat_map(move |dy| 
-		(0..box_size)
-			.map(move |dx| Pt { y: y + dy, x: x + dx })
-	)
-	.collect()
+	state.get_pts_box_from_id(box_id.try_into().unwrap())
 }
 
 //fn get_other_pts_in_row_col_box(state: &State, pt: &Pt) -> impl Iterator<Item = Pt> {
