@@ -23,6 +23,7 @@ use crate::rust_game_api::{
 
 use crate::sudoku::sudoku_core::{self, Pt};
 use crate::sudoku::sudoku_draw::{self, DrawState, ButtonId};
+use crate::sudoku::sudoku_serialize;
 
 const SUDOKU_SIZE: usize = 9;
 
@@ -43,6 +44,7 @@ impl AlexGamesSudoku {
 
     fn set_state(&mut self, serialized_state: &Vec<u8>, session_id: i32) {
         println!("set_state");
+		/*
         let game_state = bincode::deserialize::<sudoku_core::State>(&serialized_state);
         if let Ok(game_state) = game_state {
             println!("Received game state: {:#?}", game_state);
@@ -52,6 +54,10 @@ impl AlexGamesSudoku {
             self.callbacks
                 .set_status_err(&format!("Error decoding state: {:?}", game_state));
         }
+		*/
+
+		self.game_state = sudoku_serialize::deserialize(serialized_state);
+		self.session_id = session_id;
     }
 
 	fn load_state_offset(&mut self, offset: i32) {
@@ -95,6 +101,7 @@ impl AlexGamesApi for AlexGamesSudoku {
     }
 
     fn get_state(&self) -> Option<Vec<u8>> {
+		/*
         match bincode::serialize(&self.game_state) {
             Ok(state_encoded) => {
                 return Some(state_encoded);
@@ -106,6 +113,8 @@ impl AlexGamesApi for AlexGamesSudoku {
                 return None;
             }
         }
+		*/
+		Some(sudoku_serialize::serialize(&self.game_state))
 	}
 
     fn start_game(&mut self, saved_state: Option<(i32, Vec<u8>)>) {
