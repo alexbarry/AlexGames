@@ -27,6 +27,9 @@ use crate::sudoku::sudoku_serialize;
 
 const SUDOKU_SIZE: usize = 9;
 
+const BTN_ID_UNDO: &'static str = "btn_id_undo";
+const BTN_ID_REDO: &'static str = "btn_id_redo";
+
 const ENTER_CUSTOM_GAME_OPTION_ID: &'static str = "option_new_custom_game";
 
 pub struct AlexGamesSudoku {
@@ -35,11 +38,21 @@ pub struct AlexGamesSudoku {
     game_state: sudoku_core::State,
 	session_id: i32,
     draw_state: DrawState,
+
+	prev_state: Option<Vec<u8>>,
 }
 
 impl AlexGamesSudoku {
     fn draw_state(&mut self) {
         self.draw_state.draw_state(self.callbacks, &self.game_state);
+		self.callbacks.set_btn_enabled(
+			BTN_ID_UNDO,
+			self.callbacks.has_saved_state_offset(self.session_id, -1),
+		);
+		self.callbacks.set_btn_enabled(
+			BTN_ID_REDO,
+			self.callbacks.has_saved_state_offset(self.session_id, 1),
+		);
     }
 
     fn set_state(&mut self, serialized_state: &Vec<u8>, session_id: i32) {
@@ -60,11 +73,15 @@ impl AlexGamesSudoku {
 		self.session_id = session_id;
     }
 
-	fn load_state_offset(&mut self, offset: i32) {
+	fn load_state_offset(&mut self, offset: i32) -> bool {
         let session_id = self.session_id;
+		if !self.callbacks.has_saved_state_offset(session_id, offset) {
+			return false;
+		}
         let saved_state = self.callbacks.adjust_saved_state_offset(session_id, offset);
         let saved_state = saved_state.expect("saved state is none from adjust_saved_state_offset?");
         self.set_state(&saved_state, session_id);
+		return true;
 	}
 
 
@@ -140,6 +157,7 @@ impl AlexGamesApi for AlexGamesSudoku {
 				"ArrowDown" | "KeyJ" |
 				"Space" |
 				"Backspace" |
+				"KeyU" | "KeyR" |
 				"Digit1" | "Digit2" | "Digit3" |
 				"Digit4" | "Digit5" | "Digit6" |
 				"Digit7" | "Digit8" | "Digit9" |
@@ -168,6 +186,8 @@ impl AlexGamesApi for AlexGamesSudoku {
 			"Digit7" | "Numpad7" => { self.game_state.set_val(7); true },
 			"Digit8" | "Numpad8" => { self.game_state.set_val(8); true },
 			"Digit9" | "Numpad9" => { self.game_state.set_val(9); true },
+			"KeyU" => { self.load_state_offset(-1) },
+			"KeyR" => { self.load_state_offset(1) },
 			_ => { false },
 		};
 
@@ -201,6 +221,18 @@ impl AlexGamesApi for AlexGamesSudoku {
 		self.save_state()
 	}
 
+    fn handle_btn_clicked(&mut self, btn_id: &str) {
+        match btn_id {
+            BTN_ID_UNDO => self.load_state_offset(-1),
+            BTN_ID_REDO => self.load_state_offset(1),
+            _ => {
+                panic!("Unhandled button ID {}", btn_id);
+            }
+		};
+		self.draw_state();
+	}
+
+
 	fn handle_game_option_evt(&mut self, option_id: &str, option_type: OptionType, value: i32) {
 		match option_id {
 			// TODO show a popup to confirm or something
@@ -222,6 +254,9 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
     game.init(callbacks);
 
 	callbacks.enable_evt("key");
+
+	callbacks.create_btn(BTN_ID_UNDO, "Undo", 1);
+	callbacks.create_btn(BTN_ID_REDO, "Redo", 1);
 
 	callbacks.add_game_option(ENTER_CUSTOM_GAME_OPTION_ID, &OptionInfo {
 		option_type: OptionType::Button,
