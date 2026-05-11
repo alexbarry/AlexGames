@@ -2,3 +2,4 @@
 # towards lines of code in the repo.
 # TODO maybe store these as a text file or something instead.
 src/rust_games/sudoku/generated/** linguist-generated
+src/lua_scripts/games/crossword_letters/crossword_letters_puzzles.lua linguist-generated
