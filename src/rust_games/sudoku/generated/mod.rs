@@ -1,1 +1,1 @@
-mod puzzles_2026_05_11;
+pub mod puzzles_2026_05_11;

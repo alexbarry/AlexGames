@@ -53,7 +53,7 @@ fn generate_main(args: &Vec<String>) {
 	*/
 
 	println!("#[rustfmt::skip]");
-	println!("const puzzles: [ [[i8;9];9]; {}] = [", puzzle_count);
+	println!("pub const puzzles: [ [[i8;9];9]; {}] = [", puzzle_count);
 
 
 	for puzzle_idx in 0..puzzle_count {
