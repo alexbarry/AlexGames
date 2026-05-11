@@ -307,13 +307,15 @@ impl State {
 		let box_size = self.box_size as i32;
 		let game_size = self.size as i32;
 		let indent_str = " ".repeat(indent);
-		println!("{}vec![", indent_str);
+		//println!("{}vec![", indent_str);
+		println!("{}[", indent_str);
 		let indent2_str = " ".repeat(indent + 4);
 		for y in 0..game_size {
 			if y != 0 && y % box_size == 0 {
 				println!("");
 			}
-			print!("{}vec![", indent2_str);
+			//print!("{}vec![", indent2_str);
+			print!("{}[", indent2_str);
 			for x in 0..game_size {
 				if x != 0 && x % box_size == 0 {
 					print!(" ");
@@ -326,5 +328,6 @@ impl State {
 			println!("],");
 		}
 		println!("{}],", indent_str);
+		println!("");
 	}
 }

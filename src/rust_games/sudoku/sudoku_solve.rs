@@ -957,7 +957,7 @@ pub fn hide_cells(state: &State, params: &GenParams, rng: &mut impl Rng) -> Stat
 	let mut solve_params = Params::new();
 	let mut stats = Stats::new();
 	solve_params.find_moves1_enabled = true;
-	solve_params.find_moves2_enabled = false;
+	solve_params.find_moves2_enabled = true;
 	solve_params.find_moves3_enabled = false;
 	solve_params.guessing_allowed = false;
 

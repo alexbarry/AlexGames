@@ -40,43 +40,51 @@ fn solve_main() {
 }
 
 fn generate_main(args: &Vec<String>) {
+	let puzzle_count: usize = args[1].parse().unwrap();
 
-	let mut state = State::new(9);
-
-	let mut stats = sudoku_solve::Stats::new();
-	let mut params = sudoku_solve::Params::new();
-	//params.debug = true;
-	params.guessing_allowed = true;
-
-	//let mut rng = ChaCha12Rng::from_seed(Default::default());
+	let mut rng = ChaCha12Rng::from_seed(Default::default());
+	/*
 	let mut seed = [0; 32];
 	//seed[0] = 1;
 	if args.len() > 1 {
 		seed[0] = args[1].parse().unwrap();
 	}
 	let mut rng = ChaCha12Rng::from_seed(seed);
-	let solved = sudoku_solve::solve(&state, 0, &mut stats, &params, &mut rng);
-	let solved = solved.expect("could not solve!");
-	//solved.expect("could not solve!").print()
+	*/
 
-	solved.print();
+	println!("const puzzles: [ [[i8;9];9]; {}] = [", puzzle_count);
 
-	let mut seed = [0; 32];
-	if args.len() > 2 {
-		seed[0] = args[2].parse().unwrap();
+
+	for puzzle_idx in 0..puzzle_count {
+	
+		let mut state = State::new(9);
+	
+		let mut stats = sudoku_solve::Stats::new();
+		let mut params = sudoku_solve::Params::new();
+		//params.debug = true;
+		params.guessing_allowed = true;
+	
+		let solved = sudoku_solve::solve(&state, 0, &mut stats, &params, &mut rng);
+		let solved = solved.expect("could not solve!");
+		//solved.expect("could not solve!").print()
+	
+		//solved.print();
+	
+		let mut gen_params = sudoku_solve::GenParams::new();
+		//gen_params.debug = true;
+		let generated_puzzle = sudoku_solve::hide_cells(&solved, &gen_params, &mut rng);
+		//generated_puzzle.print();
+		let indent_size = 4;
+		let indent = " ".repeat(indent_size);
+		println!("{}// Puzzle {} of {}", indent, puzzle_idx+1, puzzle_count);
+		generated_puzzle.print_as_rust_code(indent_size);
 	}
-	let mut rng = ChaCha12Rng::from_seed(seed);
-
-	let mut gen_params = sudoku_solve::GenParams::new();
-	//gen_params.debug = true;
-	let generated_puzzle = sudoku_solve::hide_cells(&solved, &gen_params, &mut rng);
-	generated_puzzle.print();
-	generated_puzzle.print_as_rust_code(4);
+	println!("];");
 }
 
 fn main() {
 	let args: Vec<String> = env::args().collect();
-	println!("args: {:?}", args);
+	//println!("args: {:?}", args);
 	//solve_main()
 	generate_main(&args)
 }
