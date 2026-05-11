@@ -1,0 +1,4 @@
+# Ignore generated puzzles data, don't count them
+# towards lines of code in the repo.
+# TODO maybe store these as a text file or something instead.
+src/rust_games/sudoku/generated/** linguist-generated
