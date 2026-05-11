@@ -114,7 +114,17 @@ impl AlexGamesApi for AlexGamesSudoku {
             }
         }
 		*/
-		Some(sudoku_serialize::serialize(&self.game_state))
+
+		let serialized_state = sudoku_serialize::serialize(&self.game_state);
+		if true {
+			let test_deserialized = sudoku_serialize::deserialize(&serialized_state);
+			let mut test_this_state = self.game_state.clone();
+			test_this_state.selected = None;
+			test_this_state.mode = sudoku_core::Mode::EnterCellVal;
+			assert_eq!(test_deserialized, test_this_state);
+		}
+
+		Some(serialized_state)
 	}
 
     fn start_game(&mut self, saved_state: Option<(i32, Vec<u8>)>) {
@@ -169,6 +179,7 @@ impl AlexGamesApi for AlexGamesSudoku {
 
 		if rc {
 			self.draw_state();
+			self.save_state()
 		}
 
 		println!("returning {}", rc);

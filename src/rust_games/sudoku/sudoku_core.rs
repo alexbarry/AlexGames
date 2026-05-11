@@ -13,7 +13,7 @@ pub enum Mode {
 }
 
 // TODO manually implement serialization
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct State {
 	pub board: Vec<Vec<i8>>,
 	pub user_input: Vec<Vec<i8>>,
@@ -241,7 +241,6 @@ impl State {
 		let mut conflicts = HashSet::new();
 
 		for group_pts in self.all_groups() {
-			println!("checking group for conflicts: {:?}", group_pts);
 			let mut counts: HashMap<i8, Vec<Pt>> = HashMap::new();
 			for pt in group_pts {
 				let val = self.cell_val(pt.y, pt.x);

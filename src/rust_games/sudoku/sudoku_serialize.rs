@@ -1,12 +1,91 @@
 
 use crate::sudoku::sudoku_core::{self, State, Pt};
 
+use std::collections::HashSet;
+
 // TODO:
 // * add user input, perhaps in same format as notes?
 // * add notes, probably with pt using 4 bits for y, 4 for x, and 9 for notes
 //   actually should convert pt value to (y*9+x) into 7 bits, then can use extra bit for bit 9 of notes
 
 const VERSION: u8 = 1;
+
+fn pt_id(state: &State, pt: &Pt) -> u8 {
+	let size = state.size as i32;
+	let pt_id = (pt.y * size + pt.x) as u8;
+	assert_eq!(pt, &pt_from_pt_id(state, pt_id));
+	pt_id
+}
+
+fn pt_from_pt_id(state: &State, pt_id: u8) -> Pt {
+	let pt_id = pt_id as i32;
+	let size = state.size as i32;
+	Pt {
+		y: pt_id / size,
+		x: pt_id % size,
+	}
+}
+
+fn serialize_notes(state: &State, pt: &Pt) -> Vec<u8> {
+	let pt_id = pt_id(state, pt);
+	let notes = &state.user_input_notes[pt.y as usize][pt.x as usize];
+
+	assert!(state.size == 9);
+	// store bits 0..8 in a u8, will handle 9 separately
+	let notes_bits_1_to_8 = (0..8).fold(0u8, |acc, bit_idx| {
+		let val = bit_idx + 1;
+		let bit = if notes.contains(&val) { 1 } else { 0 };
+		acc | (bit << bit_idx)
+	});
+	let notes_bit_9 = if notes.contains(&9) { 1 } else { 0 };
+
+	// 7 bits for pt_id (up to 81)
+	// 1 bit for note for val 9
+	//
+	// 8 bits for notes 1-8
+	assert!( (pt_id & 0x80) == 0);
+	let output = vec![ pt_id | (notes_bit_9<<7), notes_bits_1_to_8 ];
+	assert_eq!((*pt, notes.clone()), deserialize_notes(state, &output));
+
+	output
+}
+
+fn deserialize_notes(state: &State, serialized_note: &[u8]) -> (Pt, Vec<i8>) {
+	if serialized_note.len() != 2 {
+		panic!("expected 2 bytes passed to deserialize_notes");
+	}
+
+	assert!(state.size == 9);
+
+	let pt_id = serialized_note[0] & 0x7f;
+	let pt = pt_from_pt_id(state, pt_id);
+	let note_bit_9 = (serialized_note[0] >> 7) & 1;
+
+	let notes_bits_1_to_8 = serialized_note[1];
+	if pt.y == 8 && pt.x == 7 {
+		println!("notes_bits_1_to_8 = {}", notes_bits_1_to_8);
+	}
+	if notes_bits_1_to_8 != 0 {
+		println!("notes_bits_1_to_8 = {}, pt {:?}", notes_bits_1_to_8, pt);
+	}
+	let mut notes: Vec<i8> = (0u8..8).map(|bit_idx| {
+		let val = (bit_idx + 1) as i8;
+		if (notes_bits_1_to_8 & (1<<bit_idx) ) != 0 {
+			val
+		} else {
+			0
+		}
+	})
+	.filter(|val| *val != 0)
+	.collect();
+	notes.sort();
+
+	if note_bit_9 != 0 {
+		notes.push(9);
+	}
+
+	(pt, notes)
+}
 
 pub fn serialize(state: &sudoku_core::State) -> Vec<u8> {
     let mut serialized_state: Vec<u8> = Vec::new();
@@ -30,6 +109,37 @@ pub fn serialize(state: &sudoku_core::State) -> Vec<u8> {
 	assert_eq!(board_serialized.len(), (state.size*state.size).div_ceil(2));
 	serialized_state.append(&mut board_serialized);
 
+	assert!(state.size == 9);
+	let mut user_input_serialized = (0..state.size).flat_map(move |y| {
+		(0..state.size).flat_map(move |x| {
+			let user_input_val = state.user_input[y][x];
+			let pt_id = pt_id(state, &Pt {y: y as i32, x: x as i32});
+			if user_input_val != 0 {
+				return vec![ pt_id , user_input_val as u8 ];
+			} else {
+				return vec![]
+			}
+		})
+	}).collect::<Vec<_>>();
+
+	serialized_state.push(user_input_serialized.len().try_into().unwrap());
+	serialized_state.append(&mut user_input_serialized);
+
+	let mut user_notes_serialized = (0..state.size).flat_map(move |y| {
+		(0..state.size).flat_map(move |x| {
+			let user_input_notes = &state.user_input_notes[y][x];
+			let pt = Pt {y: y as i32, x: x as i32};
+			if user_input_notes.len() > 0 {
+				return serialize_notes(&state, &pt);
+			} else {
+				return vec![]
+			}
+		})
+	}).collect::<Vec<_>>();
+
+	serialized_state.push(user_notes_serialized.len().try_into().unwrap());
+	serialized_state.append(&mut user_notes_serialized);
+
 	serialized_state
 }
 
@@ -45,9 +155,10 @@ pub fn deserialize(mut serialized_state: &[u8]) -> sudoku_core::State {
 	let size = serialized_state[0] as usize;
     serialized_state = &serialized_state[1..];
 
+    let mut state = State::new(size.into());
+
 	let board_len_bytes = (size*size).div_ceil(2);
 
-	assert_eq!(serialized_state.len(), board_len_bytes);
 	let board: Vec<Vec<i8>> = serialized_state[..board_len_bytes]
 					.into_iter()
 					.flat_map(|byte| {
@@ -62,9 +173,42 @@ pub fn deserialize(mut serialized_state: &[u8]) -> sudoku_core::State {
 					.collect();
 	assert_eq!(board.len(), size);
 	assert_eq!(board[0].len(), size);
+    serialized_state = &serialized_state[board_len_bytes..];
 
-    let mut state = State::new(size.into());
 	state.board = board;
+
+	let user_input_bytes_len = serialized_state[0] as usize;
+    serialized_state = &serialized_state[1..];
+
+	let user_input: Vec<(Pt, i8)> = serialized_state[..user_input_bytes_len]
+		//.into_iter()
+		.chunks_exact(2)
+		.map(|input_bytes| {
+			let pt_id = input_bytes[0];
+			let val = input_bytes[1];
+			( pt_from_pt_id(&state, pt_id), val as i8)
+		})
+		.collect();
+	for (pt, val) in user_input {
+		state.user_input[pt.y as usize][pt.x as usize] = val;
+	}
+    serialized_state = &serialized_state[user_input_bytes_len..];
+
+	let user_input_notes_bytes_len = serialized_state[0] as usize;
+    serialized_state = &serialized_state[1..];
+	let user_input_notes: Vec<(Pt, Vec<i8>)> = serialized_state[..user_input_notes_bytes_len]
+		//.into_iter()
+		.chunks_exact(2)
+		.map(|input_bytes| {
+			deserialize_notes(&state, input_bytes)
+		})
+		.collect();
+	for (pt, val) in user_input_notes {
+		state.user_input_notes[pt.y as usize][pt.x as usize] = val;
+	}
+    serialized_state = &serialized_state[user_input_notes_bytes_len..];
+
+	assert_eq!(serialized_state.len(), 0);
 
 	state
 }
