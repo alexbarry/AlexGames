@@ -107,6 +107,12 @@ impl AlexGamesApi for AlexGamesSudoku {
 		if true {
 			let test_deserialized = sudoku_serialize::deserialize(&serialized_state);
 			let mut test_this_state = self.game_state.clone();
+			// TODO store as a hashset or something instead
+			for notes_row in &mut test_this_state.user_input_notes {
+				for mut notes in notes_row {
+					notes.sort();
+				}
+			}
 			test_this_state.selected = None;
 			test_this_state.mode = sudoku_core::Mode::EnterCellVal;
 			assert_eq!(test_deserialized, test_this_state);

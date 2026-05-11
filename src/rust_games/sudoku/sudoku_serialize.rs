@@ -28,7 +28,8 @@ fn pt_from_pt_id(state: &State, pt_id: u8) -> Pt {
 
 fn serialize_notes(state: &State, pt: &Pt) -> Vec<u8> {
 	let pt_id = pt_id(state, pt);
-	let notes = &state.user_input_notes[pt.y as usize][pt.x as usize];
+	let mut notes = state.user_input_notes[pt.y as usize][pt.x as usize].clone();
+	notes.sort();
 
 	assert!(state.size == 9);
 	// store bits 0..8 in a u8, will handle 9 separately
