@@ -132,7 +132,8 @@ impl State {
 		let sel_change = Pt { y: -sel_change.y, x: sel_change.x };
 
 		if self.selected.is_none() {
-			return false;
+			let middle = (self.size/2) as i32;
+			self.selected = Some(Pt { y: middle, x: middle });
 		}
 
 		let old_sel = self.selected.unwrap();
