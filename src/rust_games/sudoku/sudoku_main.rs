@@ -342,6 +342,8 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
     };
     game.init(callbacks);
 
+	callbacks.set_canvas_size(sudoku_draw::CANVAS_WIDTH, sudoku_draw::CANVAS_HEIGHT);
+
 	callbacks.enable_evt("key");
 
 	callbacks.create_btn(BTN_ID_UNDO, "Undo", 1);

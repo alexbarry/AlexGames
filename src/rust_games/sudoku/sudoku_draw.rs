@@ -2,11 +2,14 @@
 use crate::sudoku::sudoku_core::{self, State, CellContents, Mode};
 
 use crate::rust_game_api::{
-    CCallbacksPtr, TextAlign, CANVAS_WIDTH, CANVAS_HEIGHT
+    CCallbacksPtr, TextAlign
 };
 
 use crate::libs::point::Pt;
 use crate::libs::draw;
+
+pub const CANVAS_HEIGHT: i32 = 600;
+pub const CANVAS_WIDTH: i32 = 480;
 
 pub struct DrawState {
 	TEXT_FONT_SIZE: i32,
@@ -58,8 +61,8 @@ struct BtnPos {
 impl DrawState {
 	pub fn new() -> Self {
 		Self {
-			TEXT_FONT_SIZE: 24,
-			TEXT_NOTE_FONT_SIZE: 10,
+			TEXT_FONT_SIZE: 32,
+			TEXT_NOTE_FONT_SIZE: 14,
 			LINE_THICKNESS: 1,
 			LINE_GROUP_THICKNESS: 4,
 		}
@@ -68,15 +71,15 @@ impl DrawState {
 	fn cell_pos(&self, game_state: &State, y: i32, x: i32) -> CellPos {
 		let game_size = game_state.size as i32;
 
-		let button_buffer = 100;
-		let cell_size = (CANVAS_WIDTH.min(CANVAS_HEIGHT) - button_buffer)/game_size;
+		let button_buffer = 120;
+		let cell_size = (CANVAS_WIDTH.min(CANVAS_HEIGHT - button_buffer))/game_size;
 		let padding = (cell_size - self.TEXT_FONT_SIZE)/2;
 
 		let y_start = self.LINE_THICKNESS;
 		let y_end   = CANVAS_HEIGHT - button_buffer;
 
-		let x_start = button_buffer/2;
-		let x_end   = CANVAS_WIDTH - button_buffer/2 - self.LINE_THICKNESS;
+		let x_start = 1;
+		let x_end   = CANVAS_WIDTH - self.LINE_THICKNESS;
 
 		let cell_pos_y = |y| y_start + cell_size * y;
 		let cell_pos_x = |x| x_start + cell_size * x;
@@ -113,8 +116,8 @@ impl DrawState {
 		let box_size = game_state.box_size as i32;
 		let val = val - 1;
 		let cell_size_w_padding = cell_size - 3;
-		let padding_y = 0;
-		let padding_x = 5;
+		let padding_y = -1;
+		let padding_x = 8;
 		Pt {
 			y: val/box_size * cell_size/3 - cell_size/2 + padding_y,
 			x: (val % box_size) * cell_size/3 - cell_size/2 + padding_x,
@@ -123,7 +126,7 @@ impl DrawState {
 
 	fn val_btn_width(&self, game_state: &State) -> i32 {
 		let all_btn_width = CANVAS_WIDTH;
-		all_btn_width / (game_state.size as i32 + 1)
+		all_btn_width / (game_state.size as i32)
 	}
 
 	fn button_pos(&self, game_state: &State, btn: &ButtonId) -> BtnPos {
@@ -132,34 +135,48 @@ impl DrawState {
 		let x_start = 0;
 		let btn_width = self.val_btn_width(game_state);
 		let padding = 5;
+		let line_thickness = 1;
 
-		if matches!(btn, ButtonId::Val(_)) || *btn == ButtonId::Erase {
-			let btn_val = if let ButtonId::Val(val) = btn {
-				*val
-			} else {
-				assert!(*btn == ButtonId::Erase);
-				0
-			};
-	
+		let row1_buttons = self.get_buttons_row1(game_state);
+		let row1_btn_width = CANVAS_WIDTH/(row1_buttons.len() as i32);
+
+		if let ButtonId::Val(btn_val) = *btn {
+			let btn_val = btn_val - 1;
+			let x1 = x_start + btn_width * (btn_val);
+			let mut x2 = x_start + btn_width * (btn_val+1);
+			if btn_val + 1 == game_state.size.try_into().unwrap() {
+				x2 = CANVAS_WIDTH;
+			}
 			BtnPos {
-				y1: CANVAS_HEIGHT - cell_pos_info.button_buffer/2 + padding,
-				y2: CANVAS_HEIGHT,
-				x1: x_start + btn_width * (btn_val),
-				x2: x_start + btn_width * (btn_val+1),
+				y1: CANVAS_HEIGHT - cell_pos_info.button_buffer/2,
+				y2: CANVAS_HEIGHT - line_thickness,
+				x1: x1,
+				x2: x2,
 	
-				y_text: CANVAS_HEIGHT - padding,
+				y_text: CANVAS_HEIGHT - line_thickness - cell_pos_info.button_buffer/4 + self.TEXT_FONT_SIZE/2,
 				x_text: x_start + ( (btn_width as f32) * (btn_val as f32 + 0.5) ) as i32,
 			}
-		} else if *btn == ButtonId::ToggleNotes ||
-		          *btn == ButtonId::DoneEnteringStartingVals {
-			let y2 = CANVAS_HEIGHT - cell_pos_info.button_buffer/2 + padding;
+		} else if *btn == ButtonId::Erase {
+			let y2 = CANVAS_HEIGHT - cell_pos_info.button_buffer/2;
 			BtnPos {
 				y1: CANVAS_HEIGHT - cell_pos_info.button_buffer + padding,
 				y2: y2,
 				x1: x_start,
+				x2: x_start + row1_btn_width,
+				y_text: y2 - self.TEXT_FONT_SIZE/2,
+				x_text: (x_start + CANVAS_WIDTH/2)/2,
+			}
+
+		} else if *btn == ButtonId::ToggleNotes ||
+		          *btn == ButtonId::DoneEnteringStartingVals {
+			let y2 = CANVAS_HEIGHT - cell_pos_info.button_buffer/2;
+			BtnPos {
+				y1: CANVAS_HEIGHT - cell_pos_info.button_buffer + padding,
+				y2: y2,
+				x1: x_start + row1_btn_width,
 				x2: CANVAS_WIDTH,
 				y_text: y2 - self.TEXT_FONT_SIZE/2,
-				x_text: (CANVAS_WIDTH - x_start)/2,
+				x_text: x_start + 3*CANVAS_WIDTH/4,
 			}
 		} else {
 			BtnPos {
@@ -192,24 +209,39 @@ impl DrawState {
 	}
 
 	pub fn pos_to_btn(&self, game_state: &State, y_pos: i32, x_pos: i32) -> Option<ButtonId> {
-		let pos_info = self.cell_pos(game_state, 0, 0);
-		if CANVAS_HEIGHT - pos_info.button_buffer < y_pos && y_pos < CANVAS_HEIGHT - pos_info.button_buffer/2 {
-			if game_state.mode == Mode::EnterStartingVal {
-				Some(ButtonId::DoneEnteringStartingVals)
-			} else {
-				Some(ButtonId::ToggleNotes)
+		for btn_id in self.get_buttons(game_state) {
+			let btn_pos = self.button_pos(game_state, &btn_id);
+			if btn_pos.y1 <= y_pos && y_pos <= btn_pos.y2 &&
+			   btn_pos.x1 <= x_pos && x_pos <= btn_pos.x2 {
+				return Some(btn_id);
 			}
-		} else if CANVAS_HEIGHT - pos_info.button_buffer/2 < y_pos {
-			let btn_width = self.val_btn_width(game_state);
-			let val = x_pos/btn_width;
-			if val == 0 {
-				Some(ButtonId::Erase)
-			} else {
-				Some(ButtonId::Val(val))
-			}
-		} else {
-			None
 		}
+		return None;
+	}
+
+	fn get_buttons(&self, game_state: &State) -> Vec<ButtonId> {
+		let game_size = game_state.size as i32;
+		self.get_buttons_row1(game_state)
+			.into_iter()
+			.chain(
+				self.get_buttons_row2(game_state).into_iter()
+			)
+			.collect()
+	}
+	fn get_buttons_row1(&self, game_state: &State) -> Vec<ButtonId> {
+		vec![
+			ButtonId::Erase,
+			if game_state.mode == Mode::EnterStartingVal {
+				 ButtonId::DoneEnteringStartingVals
+			} else {
+				 ButtonId::ToggleNotes
+			},
+		]
+	}
+	fn get_buttons_row2(&self, game_state: &State) -> Vec<ButtonId> {
+		let game_size = game_state.size as i32;
+		(1..=game_size).map(|val| ButtonId::Val(val))
+			.collect()
 	}
 
     pub fn draw_state(&mut self, callbacks: &'static CCallbacksPtr, mut state: &State) {
@@ -356,28 +388,12 @@ impl DrawState {
 		}
 
 
-		let buttons: Vec<_> =
-			vec![
-				ButtonId::Erase,
-				if state.mode == Mode::EnterStartingVal {
-					 ButtonId::DoneEnteringStartingVals
-				} else {
-					 ButtonId::ToggleNotes
-				},
-			]
-			.into_iter()
-			.chain(
-				(1..=game_size).map(|val| ButtonId::Val(val))
-			)
-			.collect();
-
 		let notes_on = state.mode == Mode::EnterCellNotes;
-		//for btn_val in 0..=game_size {
-		for btn_val in buttons {
+		for btn_val in self.get_buttons(state) {
 			let btn_pos = self.button_pos(state, &btn_val);
 			draw::draw_rect_outline(callbacks, &LINE_COLOUR, self.LINE_THICKNESS, btn_pos.y1, btn_pos.x1, btn_pos.y2, btn_pos.x2);
 			let btn_text = match btn_val {
-				ButtonId::Erase => "x".to_string(),
+				ButtonId::Erase => "Clear".to_string(),
 				ButtonId::Val(val) => format!("{}", val),
 				ButtonId::ToggleNotes => {
 					format!("Notes: {}", if notes_on { "on" } else { "off" })
