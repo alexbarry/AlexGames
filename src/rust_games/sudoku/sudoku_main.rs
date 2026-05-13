@@ -24,13 +24,20 @@ use crate::rust_game_api::{
 use crate::sudoku::sudoku_core::{self, Pt};
 use crate::sudoku::sudoku_draw::{self, DrawState, ButtonId};
 use crate::sudoku::sudoku_serialize;
+use crate::sudoku::generated::puzzles_2026_05_11;
 
 const SUDOKU_SIZE: usize = 9;
 
 const BTN_ID_UNDO: &'static str = "btn_id_undo";
 const BTN_ID_REDO: &'static str = "btn_id_redo";
 
+const OPTION_ID_LOAD_NEXT_PREGEN_PUZZLE: &'static str = "option_load_next_pregenerated_puzzle";
 const ENTER_CUSTOM_GAME_OPTION_ID: &'static str = "option_new_custom_game";
+
+const STORED_DATA_KEY_LAST_LOADED_PUZZLE_IDX: &'static str = "sudoku_last_loaded_puzzle1_idx";
+
+const pregenerated_puzzles: &[[[i8;9];9]] = &puzzles_2026_05_11::puzzles;
+
 
 pub struct AlexGamesSudoku {
     callbacks: &'static CCallbacksPtr,
@@ -121,6 +128,56 @@ impl AlexGamesSudoku {
 		self.game_state.mode = sudoku_core::Mode::EnterStartingVal;
 		self.draw_state();
 	}
+
+	fn get_last_loaded_puzzle_idx(&self) -> Option<i32> {
+		let puzzle_idx = self.callbacks.read_stored_data_str(STORED_DATA_KEY_LAST_LOADED_PUZZLE_IDX);
+		if let Some(puzzle_idx) = puzzle_idx {
+			puzzle_idx.parse().ok()
+		} else {
+			// TODO could traverse generated puzzles and check if current puzzle is stored,
+			// user could have sent a link from another device.
+			None
+		}
+	}
+
+	fn set_last_loaded_puzzle_idx(&mut self, puzzle_idx: usize) {
+		let puzzle_idx = puzzle_idx.to_string();
+		self.callbacks.store_data(STORED_DATA_KEY_LAST_LOADED_PUZZLE_IDX, puzzle_idx.as_bytes());
+	}
+
+	fn load_pregen_puzzle(&mut self, puzzle_idx: usize) {
+		// just in case
+		let puzzle_idx = puzzle_idx % pregenerated_puzzles.len();
+
+		let puzzle = pregenerated_puzzles[puzzle_idx];
+		let mut new_state = sudoku_core::State::new(puzzle.len());
+		for y in 0..puzzle.len() {
+			for x in 0..puzzle[y].len() {
+				new_state.board[y][x] = puzzle[y][x];
+			}
+		}
+		self.game_state = new_state;
+	}
+
+	fn load_next_pregen_puzzle(&mut self) {
+		const _: () = assert!(pregenerated_puzzles.len() >= 200);
+
+		let puzzle_idx = self.get_last_loaded_puzzle_idx().unwrap_or(0) as usize;
+		let puzzle_idx = puzzle_idx + 1;
+
+		if puzzle_idx >= pregenerated_puzzles.len() {
+			self.callbacks.set_status_msg(&format!("NOTE: Already loaded all {} pre-generated puzzles, wrapping around to 0", pregenerated_puzzles.len()));
+		} else {
+			self.callbacks.set_status_msg(&format!("Loading pre-generated puzzle {} of {}.", puzzle_idx + 1, pregenerated_puzzles.len()));
+		}
+		let puzzle_idx = puzzle_idx % pregenerated_puzzles.len();
+
+		self.set_last_loaded_puzzle_idx(puzzle_idx);
+		self.load_pregen_puzzle(puzzle_idx);
+        self.session_id = self.callbacks.get_new_session_id();
+		self.draw_state();
+		self.save_state();
+	}
 }
 
 impl AlexGamesApi for AlexGamesSudoku {
@@ -169,6 +226,11 @@ impl AlexGamesApi for AlexGamesSudoku {
         } else if let Some(session_id) = self.callbacks.get_last_session_id("sudoku") {
 			self.session_id = session_id;
             self.load_state_offset(0);
+		} else {
+			let idx = self.get_last_loaded_puzzle_idx().unwrap_or(0) as usize;
+			self.load_pregen_puzzle(idx);
+			self.session_id = self.callbacks.get_new_session_id();
+			self.save_state();
 		}
     }
 
@@ -262,6 +324,7 @@ impl AlexGamesApi for AlexGamesSudoku {
 		match option_id {
 			// TODO show a popup to confirm or something
 			ENTER_CUSTOM_GAME_OPTION_ID => self.enter_custom_game(),
+			OPTION_ID_LOAD_NEXT_PREGEN_PUZZLE => self.load_next_pregen_puzzle(),
 			&_ => {
 				panic!("unhandled option id");
 			}
@@ -283,6 +346,12 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
 
 	callbacks.create_btn(BTN_ID_UNDO, "Undo", 1);
 	callbacks.create_btn(BTN_ID_REDO, "Redo", 1);
+
+	callbacks.add_game_option(OPTION_ID_LOAD_NEXT_PREGEN_PUZZLE, &OptionInfo {
+		option_type: OptionType::Button,
+		label: "New Game (Load pre-generated puzzle)".to_string(),
+		value: 0,
+	});
 
 	callbacks.add_game_option(ENTER_CUSTOM_GAME_OPTION_ID, &OptionInfo {
 		option_type: OptionType::Button,
