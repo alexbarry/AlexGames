@@ -366,6 +366,8 @@ struct game_api_callbacks {
 	 */
 	size_t (*get_multiplayer_session_id)(char *multiplayer_session_id_out, size_t max_multiplayer_session_id_out_len);
 
+	void (*set_canvas_size)(int width, int height);
+
 	bool (*is_feature_supported)(const char *feature_id, size_t feature_id_len);
 
 	/**

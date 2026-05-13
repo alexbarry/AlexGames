@@ -564,6 +564,12 @@ EM_JS(size_t, js_get_multiplayer_session_id, (char *session_id_out, size_t max_s
 	return session_id_js.length;
 });
 
+EM_JS(void, js_set_canvas_size, (int width, int height), {
+	console.log(`[init] set_canvas_size(width=${width}, height=${height})`);
+	gfx.main_canvas.width = width;
+	gfx.main_canvas.height = height;
+});
+
 EM_JS(bool, js_is_multiplayer_session_id_needed, (), {
 	// For now, all web clients need session IDs. Technically you could have a server that only supports one session,
 	// but I didn't implement anything like that in the multiplayer protocol yet.
@@ -684,6 +690,9 @@ const struct game_api_callbacks api_callbacks = {
 	.get_user_colour_pref  = js_get_user_colour_pref,
 	.is_multiplayer_session_id_needed = js_is_multiplayer_session_id_needed,
 	.get_multiplayer_session_id = js_get_multiplayer_session_id,
+
+	.set_canvas_size       = js_set_canvas_size,
+
 	.is_feature_supported  = js_is_feature_supported,
 
 	.destroy_all           = js_destroy_all,

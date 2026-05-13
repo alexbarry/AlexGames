@@ -188,6 +188,8 @@ pub struct CCallbacksPtr {
     pub is_multiplayer_session_id_needed: Option<unsafe extern "C" fn() -> bool>,
     pub get_multiplayer_session_id: Option<unsafe extern "C" fn(*mut c_char, size_t) -> size_t>,
 
+    pub set_canvas_size: Option<unsafe extern "C" fn(c_int, c_int) -> ()>,
+
     pub is_feature_supported: Option<unsafe extern "C" fn(*const c_char, size_t) -> CBool>,
 
     pub destroy_all: Option<unsafe extern "C" fn()>,
@@ -659,6 +661,16 @@ impl CCallbacksPtr {
         }
         return String::from("light");
     }
+
+	pub fn set_canvas_size(&self, width: i32, height: i32) {
+		if let Some(set_canvas_size) = self.set_canvas_size {
+			unsafe {
+				set_canvas_size(width, height);
+			}
+		} else {
+			println!("set_canvas_size is none");
+		}
+	}
 
     pub fn destroy_all(&self) {
         if let Some(destroy_all) = self.destroy_all {

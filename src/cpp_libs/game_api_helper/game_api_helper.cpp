@@ -78,6 +78,7 @@ static size_t get_multiplayer_session_id(char *colour_pref_out, size_t max_colou
 static bool is_multiplayer_session_id_needed() {
 	return true;
 }
+static void set_canvas_size(int width, int height) {}
 static bool is_feature_supported(const char *feature_id, size_t feature_id_len) {
 	return false;
 }
@@ -129,6 +130,7 @@ struct game_api_callbacks create_default_callbacks(void) {
 		/* .get_user_colour_pref   = */ get_user_colour_pref,
 		/* .is_multiplayer_session_id_needed = */ is_multiplayer_session_id_needed,
 		/* .get_multiplayer_session_id = */ get_multiplayer_session_id,
+		/* .set_canvas_size        = */ set_canvas_size,
 		/* .is_feature_supported   = */ is_feature_supported,
 		/* .destroy_all            = */ destroy_all,
 	};
