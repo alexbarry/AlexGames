@@ -518,6 +518,53 @@ impl CCallbacksPtr {
         }
     }
 
+    pub fn read_stored_data(&self, key: &str) -> Option<Vec<u8>> {
+		let buff_size = 64*1024;
+		if let Some(read_stored_data) = self.read_stored_data {
+			let handle = 0 as *mut c_void;
+			let key_cstr = CString::new(key).expect("CString::new failed");
+
+            let mut buffer: Vec<u8> = Vec::with_capacity(buff_size);
+            let buff_ptr = buffer.as_mut_ptr();
+			unsafe {
+				let size = (read_stored_data)(handle, key_cstr.as_ptr(), buff_ptr, buff_size);
+				println!("reading key {:?}, size={}", key, size);
+				// TODO why did I return -1 for not found, why not size = 0?
+                if size != usize::MAX && size > 0 {
+                    buffer.set_len(size as usize);
+                    return Some(buffer);
+				} else {
+					return None;
+				}
+			}
+		} else {
+			println!("read_stored_data is null");
+			return None;
+		}
+	}
+
+	pub fn read_stored_data_str(&self, key: &str) -> Option<String> {
+		if let Some(bytes) = self.read_stored_data(key) {
+			println!("key {:?} read bytes {:?}", key, bytes);
+			if let Ok(s) = String::from_utf8(bytes) {
+				return Some(s)
+			}
+		}
+		return None
+	}
+
+	pub fn store_data(&self, key: &str, data: &[u8]) {
+		if let Some(store_data) = self.store_data {
+			let handle = 0 as *mut c_void;
+			let key_cstr = CString::new(key).expect("CString::new failed");
+			unsafe {
+				(store_data)(handle, key_cstr.as_ptr(), data.as_ptr(), data.len());
+			}
+		} else {
+			println!("store_data is null");
+		}
+	}
+
     pub fn get_new_session_id(&self) -> i32 {
         if let Some(get_new_session_id) = self.get_new_session_id {
             unsafe {
