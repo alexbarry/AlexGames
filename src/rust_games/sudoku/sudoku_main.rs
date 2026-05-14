@@ -3,13 +3,9 @@
  * author: Alex Barry (github.com/alexbarry)
  *
  * TODO:
- * - clear notes when entering a value?
- * - clear other notes in box/row/etc when entering a value?
- * - better serialization
- * - undo/redo?
- * - solving code
- * - code to try hiding cells until the puzzle meets certain parameters
- * - pre-generate a bunch on desktop, include in code, done!
+ * - indicator showing number of moves available of each type
+ * - hints
+ * - game option to generate custom puzzle?
  *
  */
 use crate::rust_game_api;
