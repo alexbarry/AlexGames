@@ -713,6 +713,18 @@ impl CCallbacksPtr {
         }
     }
 
+    pub fn delete_timer(&self, timer_handle: c_int) {
+        if let Some(delete_timer) = self.delete_timer {
+            unsafe {
+                return (delete_timer)(timer_handle);
+            }
+        } else {
+            println!("delete_timer not set");
+        }
+    }
+
+
+
     pub fn enable_evt(&self, evt_id: &str) {
         if let Some(enable_evt) = self.enable_evt {
             let evt_id_cstr = CString::new(evt_id).expect("CString::new failed");
