@@ -51,6 +51,8 @@ pub struct AlexGamesSudoku {
     draw_state: DrawState,
 
 	prev_state: Option<Vec<u8>>,
+
+	game_won: bool,
 }
 
 impl AlexGamesSudoku {
@@ -128,6 +130,7 @@ impl AlexGamesSudoku {
 	}
 
 	fn enter_custom_game(&mut self) {
+		self.game_won = false;
 		self.game_state = sudoku_core::State::new(9);
 		self.game_state.mode = sudoku_core::Mode::EnterStartingVal;
 		self.save_state();
@@ -164,6 +167,7 @@ impl AlexGamesSudoku {
 			}
 		}
 		self.game_state = new_state;
+		self.game_won = false;
 	}
 
 	fn load_next_pregen_puzzle(&mut self) {
@@ -228,6 +232,9 @@ impl AlexGamesSudoku {
 		println!("val_pressed(val={})", val);
 		let old_sel = self.game_state.selected;
 
+		// If the user presses the same button that is already entered,
+		// clear it. When I "highlighted" the current value, it looks
+		// like a toggle button that can be untoggled.
 		if val != 0 && self.game_state.get_selected_val().is_none_or(|sel_val| sel_val != val as i8) {
 			self.game_state.set_val(val as i8)
 		} else {
@@ -247,6 +254,11 @@ impl AlexGamesSudoku {
 			if mistake_val.is_some() && mistake_val != new_val.as_ref() {
 				self.draw_state.mistakes.remove(&sel);
 			}
+		}
+
+		if !self.game_won && self.game_state.game_won() {
+			self.game_won = true;
+			self.callbacks.set_status_msg(&format!("Congratulations, you win!"));
 		}
 	}
 }
@@ -303,6 +315,7 @@ impl AlexGamesApi for AlexGamesSudoku {
 			self.session_id = self.callbacks.get_new_session_id();
 			self.save_state();
 		}
+		self.game_won = self.game_state.game_won();
     }
 
 	fn handle_key_evt(&mut self, evt_id: KeyEvt, key_code: &str) -> bool {
@@ -413,6 +426,8 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
         draw_state: DrawState::new(),
 		session_id: callbacks.get_new_session_id(),
 		prev_state: None,
+
+		game_won: false,
     };
     game.init(callbacks);
 	game.draw_state.immediately_show_mistakes = Some(game.get_immediately_show_mistakes_val());

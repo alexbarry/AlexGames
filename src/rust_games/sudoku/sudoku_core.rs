@@ -110,6 +110,14 @@ impl State {
 		None
 	}
 
+	pub fn has_empty_cells(&self) -> bool {
+		self.all_pts().into_iter().any(|pt| self.cell_val(pt.y, pt.x) == 0)
+	}
+
+	pub fn game_won(&self) -> bool {
+		!self.has_empty_cells() && self.get_conflicts(true).len() == 0
+	}
+
 	pub fn box_id(&self, pt: &Pt) -> i32 {
 		let box_size = self.box_size as i32;
 		let box_y = pt.y / box_size;
