@@ -12,6 +12,8 @@ pub const CANVAS_HEIGHT: i32 = 600;
 pub const CANVAS_WIDTH: i32 = 480;
 
 pub struct DrawState {
+	pub immediately_show_mistakes: Option<bool>,
+
 	TEXT_FONT_SIZE: i32,
 	TEXT_NOTE_FONT_SIZE: i32,
 	LINE_THICKNESS: i32,
@@ -65,6 +67,8 @@ impl DrawState {
 			TEXT_NOTE_FONT_SIZE: 14,
 			LINE_THICKNESS: 1,
 			LINE_GROUP_THICKNESS: 4,
+
+			immediately_show_mistakes: None,
 		}
 	}
 
@@ -287,7 +291,7 @@ impl DrawState {
 		};
 		
 
-		let conflicts = state.get_conflicts();
+		let conflicts = state.get_conflicts(self.immediately_show_mistakes.unwrap_or(true));
 
 		for y in 0..game_size {
 			for x in 0..game_size {

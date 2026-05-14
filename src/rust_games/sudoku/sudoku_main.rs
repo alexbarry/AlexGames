@@ -33,8 +33,10 @@ const BTN_ID_REDO: &'static str = "btn_id_redo";
 
 const OPTION_ID_LOAD_NEXT_PREGEN_PUZZLE: &'static str = "option_load_next_pregenerated_puzzle";
 const ENTER_CUSTOM_GAME_OPTION_ID: &'static str = "option_new_custom_game";
+const OPTION_ID_IMMEDIATELY_SHOW_MISTAKES: &'static str = "option_immediately_show_mistakes";
 
 const STORED_DATA_KEY_LAST_LOADED_PUZZLE_IDX: &'static str = "sudoku_last_loaded_puzzle1_idx";
+const STORED_DATA_KEY_IMMEDIATELY_REVEAL_MISTAKES: &'static str = "sudoku_immediately_reveal_mistakes";
 
 //const pregenerated_puzzles: &[[[i8;9];9]] = &puzzles_2026_05_11::puzzles;
 const pregenerated_puzzles: &[[[CellInfo;9];9]] = &puzzles_2026_05_11::puzzles;
@@ -181,6 +183,36 @@ impl AlexGamesSudoku {
 		self.draw_state();
 		self.save_state();
 	}
+
+	fn get_immediately_show_mistakes_val_stored(&self) -> Option<bool> {
+		let val_str = self.callbacks.read_stored_data_str(STORED_DATA_KEY_IMMEDIATELY_REVEAL_MISTAKES);
+		if val_str.is_none() {
+			return None
+		}
+		let val: i32 = val_str.unwrap().parse().unwrap();
+
+		assert!(val == 0 || val == 1);
+
+		Some(val != 0)
+	}
+
+	fn set_immediately_show_mistakes_stored(&self, value: bool) {
+		let value = if value { 1 } else { 0 };
+		let value: String = value.to_string();
+		let val_str = self.callbacks.store_data(STORED_DATA_KEY_IMMEDIATELY_REVEAL_MISTAKES, value.as_bytes());
+	}
+
+	fn set_immediately_show_mistakes(&mut self, value: bool) {
+		self.set_immediately_show_mistakes_stored(value);
+		self.draw_state.immediately_show_mistakes = Some(value);
+		self.draw_state();
+	}
+
+
+
+	fn get_immediately_show_mistakes_val(&self) -> bool {
+		self.get_immediately_show_mistakes_val_stored().unwrap_or(true)
+	}
 }
 
 impl AlexGamesApi for AlexGamesSudoku {
@@ -322,12 +354,12 @@ impl AlexGamesApi for AlexGamesSudoku {
 		self.draw_state();
 	}
 
-
 	fn handle_game_option_evt(&mut self, option_id: &str, option_type: OptionType, value: i32) {
 		match option_id {
 			// TODO show a popup to confirm or something
 			ENTER_CUSTOM_GAME_OPTION_ID => self.enter_custom_game(),
 			OPTION_ID_LOAD_NEXT_PREGEN_PUZZLE => self.load_next_pregen_puzzle(),
+			OPTION_ID_IMMEDIATELY_SHOW_MISTAKES => self.set_immediately_show_mistakes(value != 0),
 			&_ => {
 				panic!("unhandled option id");
 			}
@@ -344,6 +376,7 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
 		prev_state: None,
     };
     game.init(callbacks);
+	game.draw_state.immediately_show_mistakes = Some(game.get_immediately_show_mistakes_val());
 
 	callbacks.set_canvas_size(sudoku_draw::CANVAS_WIDTH, sudoku_draw::CANVAS_HEIGHT);
 
@@ -362,6 +395,11 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
 		option_type: OptionType::Button,
 		label: "Enter Custom Game".to_string(),
 		value: 0,
+	});
+	callbacks.add_game_option(OPTION_ID_IMMEDIATELY_SHOW_MISTAKES, &OptionInfo {
+		option_type: OptionType::Toggle,
+		label: "Immediately show mistakes".to_string(),
+		value: if game.draw_state.immediately_show_mistakes.unwrap_or(true) { 1 } else { 0 },
 	});
 
 	game.enter_custom_game();

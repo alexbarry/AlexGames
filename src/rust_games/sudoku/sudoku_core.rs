@@ -254,6 +254,14 @@ impl State {
 			.collect()
 	}
 
+	fn all_pts(&self) -> Vec<Pt> {
+		(0..self.size).flat_map(move |y| 
+			(0..self.size)
+				.map(move |x| Pt { y: y as i32, x: x as i32 })
+		).collect()
+		
+	}
+
 	fn all_groups(&self) -> Vec<Vec<Pt>> {
 		let size = self.size as i8;
 		(0..size).map(|group_id| self.get_pts_row(group_id))
@@ -262,8 +270,20 @@ impl State {
 			.collect()
 	}
 
-	pub fn get_conflicts(&self) -> HashSet<Pt> {
+	pub fn get_conflicts(&self, show_mistakes: bool) -> HashSet<Pt> {
 		let mut conflicts = HashSet::new();
+
+		if show_mistakes {
+			for pt in self.all_pts() {
+				let y = pt.y as usize;
+				let x = pt.x as usize;
+				if !self.board[y][x].revealed && self.user_input[y][x] != 0 && self.board[y][x].val != 0 {
+					if self.board[y][x].val != self.user_input[y][x] {
+						conflicts.insert(pt);
+					}
+				}
+			}
+		}
 
 		for group_pts in self.all_groups() {
 			let mut counts: HashMap<i8, Vec<Pt>> = HashMap::new();
