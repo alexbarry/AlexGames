@@ -15,6 +15,7 @@ pub struct DrawState {
 	pub immediately_show_mistakes: Option<bool>,
 
 	TEXT_FONT_SIZE: i32,
+	TEXT_SMALLER_FONT_SIZE: i32,
 	TEXT_NOTE_FONT_SIZE: i32,
 	LINE_THICKNESS: i32,
 	LINE_GROUP_THICKNESS: i32,
@@ -58,12 +59,14 @@ struct BtnPos {
 
 	y_text: i32,
 	x_text: i32,
+	font_size: i32,
 }
 
 impl DrawState {
 	pub fn new() -> Self {
 		Self {
 			TEXT_FONT_SIZE: 32,
+			TEXT_SMALLER_FONT_SIZE: 16,
 			TEXT_NOTE_FONT_SIZE: 14,
 			LINE_THICKNESS: 1,
 			LINE_GROUP_THICKNESS: 4,
@@ -159,6 +162,7 @@ impl DrawState {
 	
 				y_text: CANVAS_HEIGHT - line_thickness - cell_pos_info.button_buffer/4 + self.TEXT_FONT_SIZE/2,
 				x_text: x_start + ( (btn_width as f32) * (btn_val as f32 + 0.5) ) as i32,
+				font_size: self.TEXT_FONT_SIZE,
 			}
 		} else if *btn == ButtonId::Erase {
 			let y2 = CANVAS_HEIGHT - cell_pos_info.button_buffer/2;
@@ -167,20 +171,23 @@ impl DrawState {
 				y2: y2,
 				x1: x_start,
 				x2: x_start + row1_btn_width,
-				y_text: y2 - self.TEXT_FONT_SIZE/2,
+				y_text: y2 - (cell_pos_info.button_buffer/2 - self.TEXT_FONT_SIZE)/2,
 				x_text: (x_start + CANVAS_WIDTH/2)/2,
+				font_size: self.TEXT_FONT_SIZE,
 			}
 
 		} else if *btn == ButtonId::ToggleNotes ||
 		          *btn == ButtonId::DoneEnteringStartingVals {
 			let y2 = CANVAS_HEIGHT - cell_pos_info.button_buffer/2;
+			let font_size = if *btn == ButtonId::DoneEnteringStartingVals { self.TEXT_SMALLER_FONT_SIZE } else { self.TEXT_FONT_SIZE };
 			BtnPos {
 				y1: CANVAS_HEIGHT - cell_pos_info.button_buffer + padding,
 				y2: y2,
 				x1: x_start + row1_btn_width,
 				x2: CANVAS_WIDTH,
-				y_text: y2 - self.TEXT_FONT_SIZE/2,
+				y_text: y2 - (cell_pos_info.button_buffer/2 - font_size)/2,
 				x_text: x_start + 3*CANVAS_WIDTH/4,
+				font_size: font_size,
 			}
 		} else {
 			BtnPos {
@@ -190,6 +197,7 @@ impl DrawState {
 				x2: 0,
 				y_text: 0,
 				x_text: 0,
+				font_size: self.TEXT_FONT_SIZE,
 			}
 		}
 	}
@@ -409,7 +417,7 @@ impl DrawState {
 			if btn_val == ButtonId::ToggleNotes && notes_on {
 				callbacks.draw_rect(&SELECTED3_BG, btn_pos.y1, btn_pos.x1, btn_pos.y2, btn_pos.x2);
 			}
-			callbacks.draw_text(&btn_text, &TEXT_COLOUR, btn_pos.y_text, btn_pos.x_text, self.TEXT_FONT_SIZE, TextAlign::Middle);
+			callbacks.draw_text(&btn_text, &TEXT_COLOUR, btn_pos.y_text, btn_pos.x_text, btn_pos.font_size, TextAlign::Middle);
 		}
 
 		callbacks.draw_refresh();
