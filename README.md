@@ -14,6 +14,7 @@ Some games incude:
 * [Chess](src/lua_scripts/games/chess) (Lua)
 * ["Crossword Letters"](src/lua_scripts/games/crossword_letters) (Lua): Try to make as many words as you can with the letters provided, with a crossword as a hint.
 * ["Gem Match"](src/rust_games/gem_match) (Rust): Swap gems to make lines of three or more of the same kind.
+* [Sudoku](src/rust_games/sudoku) (Rust)
 * [Free Cell](src/rust_games/free_cell) (Rust)
 * [Go/Weiqi/Baduk](src/lua_scripts/games/go) (Lua)
 * [Reversi](src/rust_games/reversi) (Rust)
