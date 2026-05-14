@@ -1162,7 +1162,7 @@ static void wx_handle_client_connected(const char *client_name, size_t client_na
 MyCanvas::MyCanvas(MyFrame *parent)
         : wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                            wxHSCROLL | wxVSCROLL),
-		  bmp(480, 480) {
+		  bmp(480, 600) {
 }
 
 void MyCanvas::OnPaint(wxPaintEvent &event) {
