@@ -20,8 +20,15 @@ function start_game(ptr) {
 	return rc;
 }
 
+function set_canvas_size(width, height) {
+	console.log(`[init] set_canvas_size(width=${width}, height=${height})`);
+	gfx.main_canvas.width = width;
+	gfx.main_canvas.height = height;
+}
+
 function destroy_game(ptr) {
 	disable_all_events();
+	set_canvas_size(480, 480);
 	let rc = Module.ccall("destroy_game", null,
 		["number"],
 		[ptr]);

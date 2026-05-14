@@ -565,9 +565,7 @@ EM_JS(size_t, js_get_multiplayer_session_id, (char *session_id_out, size_t max_s
 });
 
 EM_JS(void, js_set_canvas_size, (int width, int height), {
-	console.log(`[init] set_canvas_size(width=${width}, height=${height})`);
-	gfx.main_canvas.width = width;
-	gfx.main_canvas.height = height;
+	set_canvas_size(width, height);
 });
 
 EM_JS(bool, js_is_multiplayer_session_id_needed, (), {
