@@ -30,8 +30,8 @@ var createMyModule = (() => {
   // Note: We use a typeof check here instead of optional chaining using
   // globalThis because older browsers might not have globalThis defined.
   var currentNodeVersion = typeof process !== 'undefined' && process.versions?.node ? humanReadableVersionToPacked(process.versions.node) : TARGET_NOT_SUPPORTED;
-  if (currentNodeVersion < 160000) {
-    throw new Error(`This emscripten-generated code requires node v${ packedVersionToHumanReadable(160000) } (detected v${packedVersionToHumanReadable(currentNodeVersion)})`);
+  if (currentNodeVersion < 180300) {
+    throw new Error(`This emscripten-generated code requires node v${ packedVersionToHumanReadable(180300) } (detected v${packedVersionToHumanReadable(currentNodeVersion)})`);
   }
 
   var userAgent = typeof navigator !== 'undefined' && navigator.userAgent;
@@ -84,7 +84,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpbgqi2c0r.js
+// include: /tmp/tmpz_03od_c.js
 
   if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
   Module['expectedDataFileDownloads']++;
@@ -250,25 +250,25 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/preload/games/31s/31s_core.lua", "start": 0, "end": 12412}, {"filename": "/preload/games/31s/31s_draw.lua", "start": 12412, "end": 20896}, {"filename": "/preload/games/31s/31s_main.lua", "start": 20896, "end": 30790}, {"filename": "/preload/games/api_demo/game.lua", "start": 30790, "end": 38423}, {"filename": "/preload/games/api_demo/game_core.lua", "start": 38423, "end": 40596}, {"filename": "/preload/games/api_demo/game_draw.lua", "start": 40596, "end": 47273}, {"filename": "/preload/games/backgammon/backgammon_core.lua", "start": 47273, "end": 75504}, {"filename": "/preload/games/backgammon/backgammon_draw.lua", "start": 75504, "end": 97848}, {"filename": "/preload/games/backgammon/backgammon_main.lua", "start": 97848, "end": 116742}, {"filename": "/preload/games/backgammon/backgammon_serialize.lua", "start": 116742, "end": 121116}, {"filename": "/preload/games/blue/blue_core.lua", "start": 121116, "end": 124571}, {"filename": "/preload/games/blue/blue_draw.lua", "start": 124571, "end": 151947}, {"filename": "/preload/games/blue/blue_main.lua", "start": 151947, "end": 152946}, {"filename": "/preload/games/blue/blue_ui.lua", "start": 152946, "end": 155846}, {"filename": "/preload/games/bound/bound_core.lua", "start": 155846, "end": 184403}, {"filename": "/preload/games/bound/bound_draw.lua", "start": 184403, "end": 207441}, {"filename": "/preload/games/bound/bound_main.lua", "start": 207441, "end": 219510}, {"filename": "/preload/games/bound/bound_serialize.lua", "start": 219510, "end": 230497}, {"filename": "/preload/games/card_sim/card_generic_core.lua", "start": 230497, "end": 238520}, {"filename": "/preload/games/card_sim/card_generic_draw.lua", "start": 238520, "end": 240727}, {"filename": "/preload/games/card_sim/card_generic_main.lua", "start": 240727, "end": 246880}, {"filename": "/preload/games/card_sim/card_generic_serialize.lua", "start": 246880, "end": 250102}, {"filename": "/preload/games/checkers/checkers_core.lua", "start": 250102, "end": 260109}, {"filename": "/preload/games/checkers/checkers_draw.lua", "start": 260109, "end": 264338}, {"filename": "/preload/games/checkers/checkers_main.lua", "start": 264338, "end": 271666}, {"filename": "/preload/games/checkers/checkers_serialize.lua", "start": 271666, "end": 273820}, {"filename": "/preload/games/chess/chess_core.lua", "start": 273820, "end": 308925}, {"filename": "/preload/games/chess/chess_draw.lua", "start": 308925, "end": 319421}, {"filename": "/preload/games/chess/chess_main.lua", "start": 319421, "end": 334273}, {"filename": "/preload/games/chess/chess_serialize.lua", "start": 334273, "end": 339535}, {"filename": "/preload/games/crib/crib_core.lua", "start": 339535, "end": 375618}, {"filename": "/preload/games/crib/crib_draw.lua", "start": 375618, "end": 390654}, {"filename": "/preload/games/crib/crib_main.lua", "start": 390654, "end": 397224}, {"filename": "/preload/games/crib/crib_serialize.lua", "start": 397224, "end": 403096}, {"filename": "/preload/games/crib/crib_test.lua", "start": 403096, "end": 406933}, {"filename": "/preload/games/crossword_builder/crossword_builder_core.lua", "start": 406933, "end": 421454}, {"filename": "/preload/games/crossword_builder/crossword_builder_draw.lua", "start": 421454, "end": 425758}, {"filename": "/preload/games/crossword_builder/crossword_builder_main.lua", "start": 425758, "end": 429340}, {"filename": "/preload/games/crossword_letters/crossword_letters_core.lua", "start": 429340, "end": 448335}, {"filename": "/preload/games/crossword_letters/crossword_letters_draw.lua", "start": 448335, "end": 459447}, {"filename": "/preload/games/crossword_letters/crossword_letters_gen_puzzles.lua", "start": 459447, "end": 463828}, {"filename": "/preload/games/crossword_letters/crossword_letters_main.lua", "start": 463828, "end": 472765}, {"filename": "/preload/games/crossword_letters/crossword_letters_puzzles.lua", "start": 472765, "end": 598141}, {"filename": "/preload/games/crossword_letters/crossword_letters_serialize.lua", "start": 598141, "end": 601803}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters.py", "start": 601803, "end": 610233}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters2.py", "start": 610233, "end": 624192}, {"filename": "/preload/games/crossword_letters/list_puzzle_words.lua", "start": 624192, "end": 625086}, {"filename": "/preload/games/crossword_letters/list_right_diffs.py", "start": 625086, "end": 625441}, {"filename": "/preload/games/endless_runner/endless_runner_core.lua", "start": 625441, "end": 630641}, {"filename": "/preload/games/endless_runner/endless_runner_draw.lua", "start": 630641, "end": 633571}, {"filename": "/preload/games/endless_runner/endless_runner_main.lua", "start": 633571, "end": 635008}, {"filename": "/preload/games/fluid_mix/fluid_mix_core.lua", "start": 635008, "end": 637251}, {"filename": "/preload/games/fluid_mix/fluid_mix_draw.lua", "start": 637251, "end": 643059}, {"filename": "/preload/games/fluid_mix/fluid_mix_main.lua", "start": 643059, "end": 646055}, {"filename": "/preload/games/fluid_mix/fluid_mix_serialize.lua", "start": 646055, "end": 648210}, {"filename": "/preload/games/go/go_core.lua", "start": 648210, "end": 658553}, {"filename": "/preload/games/go/go_ctrl.lua", "start": 658553, "end": 659303}, {"filename": "/preload/games/go/go_main.lua", "start": 659303, "end": 673533}, {"filename": "/preload/games/go/go_ui.lua", "start": 673533, "end": 676923}, {"filename": "/preload/games/hospital/hospital_core.lua", "start": 676923, "end": 703189}, {"filename": "/preload/games/hospital/hospital_draw.lua", "start": 703189, "end": 725645}, {"filename": "/preload/games/hospital/hospital_main.lua", "start": 725645, "end": 734456}, {"filename": "/preload/games/hospital/hospital_serialize.lua", "start": 734456, "end": 744466}, {"filename": "/preload/games/life/life_core.lua", "start": 744466, "end": 747212}, {"filename": "/preload/games/life/life_draw.lua", "start": 747212, "end": 748202}, {"filename": "/preload/games/life/life_main.lua", "start": 748202, "end": 750375}, {"filename": "/preload/games/minesweeper/minesweeper_core.lua", "start": 750375, "end": 759298}, {"filename": "/preload/games/minesweeper/minesweeper_draw.lua", "start": 759298, "end": 764739}, {"filename": "/preload/games/minesweeper/minesweeper_main.lua", "start": 764739, "end": 777284}, {"filename": "/preload/games/minesweeper/minesweeper_serialize.lua", "start": 777284, "end": 782487}, {"filename": "/preload/games/minesweeper_life/minesweeper_draw.lua", "start": 782487, "end": 788092}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_core.lua", "start": 788092, "end": 803856}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_main.lua", "start": 803856, "end": 822792}, {"filename": "/preload/games/minesweeper_life/minesweeper_serialize.lua", "start": 822792, "end": 828005}, {"filename": "/preload/games/poker_chips/poker_chips_core.lua", "start": 828005, "end": 833376}, {"filename": "/preload/games/poker_chips/poker_chips_main.lua", "start": 833376, "end": 837571}, {"filename": "/preload/games/poker_chips/poker_chips_serialize.lua", "start": 837571, "end": 840186}, {"filename": "/preload/games/poker_chips/poker_chips_ui.lua", "start": 840186, "end": 842559}, {"filename": "/preload/games/poker_chips/ui/bet_input.lua", "start": 842559, "end": 850998}, {"filename": "/preload/games/poker_chips/ui/control.lua", "start": 850998, "end": 855038}, {"filename": "/preload/games/poker_chips/ui/view_others.lua", "start": 855038, "end": 860986}, {"filename": "/preload/games/solitaire/solitaire_core.lua", "start": 860986, "end": 880682}, {"filename": "/preload/games/solitaire/solitaire_draw.lua", "start": 880682, "end": 899024}, {"filename": "/preload/games/solitaire/solitaire_main.lua", "start": 899024, "end": 916306}, {"filename": "/preload/games/solitaire/solitaire_serialize.lua", "start": 916306, "end": 921359}, {"filename": "/preload/games/solitaire/solitaire_solve.lua", "start": 921359, "end": 939340}, {"filename": "/preload/games/spider_swing/spider_swing_core.lua", "start": 939340, "end": 944791}, {"filename": "/preload/games/spider_swing/spider_swing_draw.lua", "start": 944791, "end": 950912}, {"filename": "/preload/games/spider_swing/spider_swing_main.lua", "start": 950912, "end": 953632}, {"filename": "/preload/games/sudoku/sudoku_core.lua", "start": 953632, "end": 964135}, {"filename": "/preload/games/sudoku/sudoku_draw.lua", "start": 964135, "end": 968119}, {"filename": "/preload/games/sudoku/sudoku_main.lua", "start": 968119, "end": 968840}, {"filename": "/preload/games/swarm/swarm_core.lua", "start": 968840, "end": 983189}, {"filename": "/preload/games/swarm/swarm_draw.lua", "start": 983189, "end": 986506}, {"filename": "/preload/games/swarm/swarm_keyboard_input.lua", "start": 986506, "end": 988074}, {"filename": "/preload/games/swarm/swarm_main.lua", "start": 988074, "end": 990118}, {"filename": "/preload/games/test/card_angle_test.lua", "start": 990118, "end": 993338}, {"filename": "/preload/games/test/draw_graphics_test.lua", "start": 993338, "end": 995249}, {"filename": "/preload/games/test/timer_test.lua", "start": 995249, "end": 997404}, {"filename": "/preload/games/thrust/thrust_core.lua", "start": 997404, "end": 1008358}, {"filename": "/preload/games/thrust/thrust_draw.lua", "start": 1008358, "end": 1015409}, {"filename": "/preload/games/thrust/thrust_keyboard_input.lua", "start": 1015409, "end": 1017274}, {"filename": "/preload/games/thrust/thrust_main.lua", "start": 1017274, "end": 1019538}, {"filename": "/preload/games/touch_test/touch_test.lua", "start": 1019538, "end": 1021888}, {"filename": "/preload/games/word_mastermind/word_mastermind_core.lua", "start": 1021888, "end": 1028628}, {"filename": "/preload/games/word_mastermind/word_mastermind_draw.lua", "start": 1028628, "end": 1038149}, {"filename": "/preload/games/word_mastermind/word_mastermind_main.lua", "start": 1038149, "end": 1044263}, {"filename": "/preload/games/word_mastermind/word_mastermind_serialize.lua", "start": 1044263, "end": 1046187}, {"filename": "/preload/games/wu/wu_core.lua", "start": 1046187, "end": 1052311}, {"filename": "/preload/games/wu/wu_ctrl.lua", "start": 1052311, "end": 1053132}, {"filename": "/preload/games/wu/wu_main.lua", "start": 1053132, "end": 1062771}, {"filename": "/preload/libs/cards/card_test.lua", "start": 1062771, "end": 1063565}, {"filename": "/preload/libs/cards/cards.lua", "start": 1063565, "end": 1068972}, {"filename": "/preload/libs/cards/cards_draw.lua", "start": 1068972, "end": 1078541}, {"filename": "/preload/libs/cards/cards_set.lua", "start": 1078541, "end": 1078892}, {"filename": "/preload/libs/combinations.lua", "start": 1078892, "end": 1081184}, {"filename": "/preload/libs/dice/dice.lua", "start": 1081184, "end": 1081443}, {"filename": "/preload/libs/dice/dice_draw.lua", "start": 1081443, "end": 1082878}, {"filename": "/preload/libs/draw/draw_celebration_anim.lua", "start": 1082878, "end": 1092292}, {"filename": "/preload/libs/draw/draw_colours.lua", "start": 1092292, "end": 1093113}, {"filename": "/preload/libs/draw/draw_keyboard.lua", "start": 1093113, "end": 1097922}, {"filename": "/preload/libs/draw/draw_more.lua", "start": 1097922, "end": 1101889}, {"filename": "/preload/libs/draw/draw_shapes.lua", "start": 1101889, "end": 1103514}, {"filename": "/preload/libs/letter_tiles.lua", "start": 1103514, "end": 1126693}, {"filename": "/preload/libs/multiplayer/two_player.lua", "start": 1126693, "end": 1138725}, {"filename": "/preload/libs/multiplayer/wait_for_players.lua", "start": 1138725, "end": 1146181}, {"filename": "/preload/libs/serialize/bit_pack.lua", "start": 1146181, "end": 1149204}, {"filename": "/preload/libs/serialize/serialize.lua", "start": 1149204, "end": 1154645}, {"filename": "/preload/libs/serialize/storage_helpers.lua", "start": 1154645, "end": 1155425}, {"filename": "/preload/libs/shuffle.lua", "start": 1155425, "end": 1155778}, {"filename": "/preload/libs/touch_to_mouse_evts.lua", "start": 1155778, "end": 1156911}, {"filename": "/preload/libs/ui/buttons.lua", "start": 1156911, "end": 1160800}, {"filename": "/preload/libs/ui/show_buttons_popup.lua", "start": 1160800, "end": 1161579}, {"filename": "/preload/libs/ui/soft_numpad.lua", "start": 1161579, "end": 1165572}, {"filename": "/preload/libs/ui/touchpad.lua", "start": 1165572, "end": 1166910}, {"filename": "/preload/libs/utils.lua", "start": 1166910, "end": 1171436}, {"filename": "/preload/libs/words.lua", "start": 1171436, "end": 1174737}], "remote_package_size": 1174737});
+    loadPackage({"files": [{"filename": "/preload/games/31s/31s_core.lua", "start": 0, "end": 12412}, {"filename": "/preload/games/31s/31s_draw.lua", "start": 12412, "end": 20896}, {"filename": "/preload/games/31s/31s_main.lua", "start": 20896, "end": 30790}, {"filename": "/preload/games/api_demo/game.lua", "start": 30790, "end": 38423}, {"filename": "/preload/games/api_demo/game_core.lua", "start": 38423, "end": 40596}, {"filename": "/preload/games/api_demo/game_draw.lua", "start": 40596, "end": 47273}, {"filename": "/preload/games/backgammon/backgammon_core.lua", "start": 47273, "end": 75504}, {"filename": "/preload/games/backgammon/backgammon_draw.lua", "start": 75504, "end": 97848}, {"filename": "/preload/games/backgammon/backgammon_main.lua", "start": 97848, "end": 116742}, {"filename": "/preload/games/backgammon/backgammon_serialize.lua", "start": 116742, "end": 121116}, {"filename": "/preload/games/blue/blue_core.lua", "start": 121116, "end": 124571}, {"filename": "/preload/games/blue/blue_draw.lua", "start": 124571, "end": 151947}, {"filename": "/preload/games/blue/blue_main.lua", "start": 151947, "end": 152946}, {"filename": "/preload/games/blue/blue_ui.lua", "start": 152946, "end": 155846}, {"filename": "/preload/games/bound/bound_core.lua", "start": 155846, "end": 184403}, {"filename": "/preload/games/bound/bound_draw.lua", "start": 184403, "end": 207441}, {"filename": "/preload/games/bound/bound_main.lua", "start": 207441, "end": 219510}, {"filename": "/preload/games/bound/bound_serialize.lua", "start": 219510, "end": 230497}, {"filename": "/preload/games/card_sim/card_generic_core.lua", "start": 230497, "end": 238520}, {"filename": "/preload/games/card_sim/card_generic_draw.lua", "start": 238520, "end": 240727}, {"filename": "/preload/games/card_sim/card_generic_main.lua", "start": 240727, "end": 246880}, {"filename": "/preload/games/card_sim/card_generic_serialize.lua", "start": 246880, "end": 250102}, {"filename": "/preload/games/checkers/checkers_core.lua", "start": 250102, "end": 260109}, {"filename": "/preload/games/checkers/checkers_draw.lua", "start": 260109, "end": 264338}, {"filename": "/preload/games/checkers/checkers_main.lua", "start": 264338, "end": 271666}, {"filename": "/preload/games/checkers/checkers_serialize.lua", "start": 271666, "end": 273820}, {"filename": "/preload/games/chess/chess_core.lua", "start": 273820, "end": 308925}, {"filename": "/preload/games/chess/chess_draw.lua", "start": 308925, "end": 319421}, {"filename": "/preload/games/chess/chess_main.lua", "start": 319421, "end": 334273}, {"filename": "/preload/games/chess/chess_serialize.lua", "start": 334273, "end": 339535}, {"filename": "/preload/games/crib/crib_core.lua", "start": 339535, "end": 375618}, {"filename": "/preload/games/crib/crib_draw.lua", "start": 375618, "end": 390654}, {"filename": "/preload/games/crib/crib_main.lua", "start": 390654, "end": 397224}, {"filename": "/preload/games/crib/crib_serialize.lua", "start": 397224, "end": 403096}, {"filename": "/preload/games/crib/crib_test.lua", "start": 403096, "end": 406933}, {"filename": "/preload/games/crossword_builder/crossword_builder_core.lua", "start": 406933, "end": 421454}, {"filename": "/preload/games/crossword_builder/crossword_builder_draw.lua", "start": 421454, "end": 425758}, {"filename": "/preload/games/crossword_builder/crossword_builder_main.lua", "start": 425758, "end": 429340}, {"filename": "/preload/games/crossword_letters/crossword_letters_core.lua", "start": 429340, "end": 448335}, {"filename": "/preload/games/crossword_letters/crossword_letters_draw.lua", "start": 448335, "end": 459447}, {"filename": "/preload/games/crossword_letters/crossword_letters_gen_puzzles.lua", "start": 459447, "end": 463828}, {"filename": "/preload/games/crossword_letters/crossword_letters_main.lua", "start": 463828, "end": 472765}, {"filename": "/preload/games/crossword_letters/crossword_letters_puzzles.lua", "start": 472765, "end": 598141}, {"filename": "/preload/games/crossword_letters/crossword_letters_serialize.lua", "start": 598141, "end": 601803}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters.py", "start": 601803, "end": 610233}, {"filename": "/preload/games/crossword_letters/gen_crossword_letters2.py", "start": 610233, "end": 624192}, {"filename": "/preload/games/crossword_letters/list_puzzle_words.lua", "start": 624192, "end": 625086}, {"filename": "/preload/games/crossword_letters/list_right_diffs.py", "start": 625086, "end": 625441}, {"filename": "/preload/games/endless_runner/endless_runner_core.lua", "start": 625441, "end": 630641}, {"filename": "/preload/games/endless_runner/endless_runner_draw.lua", "start": 630641, "end": 633571}, {"filename": "/preload/games/endless_runner/endless_runner_main.lua", "start": 633571, "end": 635008}, {"filename": "/preload/games/fluid_mix/fluid_mix_core.lua", "start": 635008, "end": 637251}, {"filename": "/preload/games/fluid_mix/fluid_mix_draw.lua", "start": 637251, "end": 643059}, {"filename": "/preload/games/fluid_mix/fluid_mix_main.lua", "start": 643059, "end": 646055}, {"filename": "/preload/games/fluid_mix/fluid_mix_serialize.lua", "start": 646055, "end": 648210}, {"filename": "/preload/games/go/go_core.lua", "start": 648210, "end": 658553}, {"filename": "/preload/games/go/go_ctrl.lua", "start": 658553, "end": 659303}, {"filename": "/preload/games/go/go_main.lua", "start": 659303, "end": 673533}, {"filename": "/preload/games/go/go_ui.lua", "start": 673533, "end": 676923}, {"filename": "/preload/games/hospital/hospital_core.lua", "start": 676923, "end": 703189}, {"filename": "/preload/games/hospital/hospital_draw.lua", "start": 703189, "end": 725645}, {"filename": "/preload/games/hospital/hospital_main.lua", "start": 725645, "end": 734456}, {"filename": "/preload/games/hospital/hospital_serialize.lua", "start": 734456, "end": 744466}, {"filename": "/preload/games/life/life_core.lua", "start": 744466, "end": 747212}, {"filename": "/preload/games/life/life_draw.lua", "start": 747212, "end": 748202}, {"filename": "/preload/games/life/life_main.lua", "start": 748202, "end": 750375}, {"filename": "/preload/games/minesweeper/minesweeper_core.lua", "start": 750375, "end": 759298}, {"filename": "/preload/games/minesweeper/minesweeper_draw.lua", "start": 759298, "end": 764739}, {"filename": "/preload/games/minesweeper/minesweeper_main.lua", "start": 764739, "end": 777284}, {"filename": "/preload/games/minesweeper/minesweeper_serialize.lua", "start": 777284, "end": 782487}, {"filename": "/preload/games/minesweeper_life/minesweeper_draw.lua", "start": 782487, "end": 788092}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_core.lua", "start": 788092, "end": 803856}, {"filename": "/preload/games/minesweeper_life/minesweeper_life_main.lua", "start": 803856, "end": 822792}, {"filename": "/preload/games/minesweeper_life/minesweeper_serialize.lua", "start": 822792, "end": 828005}, {"filename": "/preload/games/poker_chips/poker_chips_core.lua", "start": 828005, "end": 833376}, {"filename": "/preload/games/poker_chips/poker_chips_main.lua", "start": 833376, "end": 837571}, {"filename": "/preload/games/poker_chips/poker_chips_serialize.lua", "start": 837571, "end": 840186}, {"filename": "/preload/games/poker_chips/poker_chips_ui.lua", "start": 840186, "end": 842559}, {"filename": "/preload/games/poker_chips/ui/bet_input.lua", "start": 842559, "end": 850998}, {"filename": "/preload/games/poker_chips/ui/control.lua", "start": 850998, "end": 855038}, {"filename": "/preload/games/poker_chips/ui/view_others.lua", "start": 855038, "end": 860986}, {"filename": "/preload/games/solitaire/solitaire_core.lua", "start": 860986, "end": 880682}, {"filename": "/preload/games/solitaire/solitaire_draw.lua", "start": 880682, "end": 899024}, {"filename": "/preload/games/solitaire/solitaire_main.lua", "start": 899024, "end": 916306}, {"filename": "/preload/games/solitaire/solitaire_serialize.lua", "start": 916306, "end": 921359}, {"filename": "/preload/games/solitaire/solitaire_solve.lua", "start": 921359, "end": 939340}, {"filename": "/preload/games/spider_swing/spider_swing_core.lua", "start": 939340, "end": 944791}, {"filename": "/preload/games/spider_swing/spider_swing_draw.lua", "start": 944791, "end": 950912}, {"filename": "/preload/games/spider_swing/spider_swing_main.lua", "start": 950912, "end": 953632}, {"filename": "/preload/games/sudoku/README.md", "start": 953632, "end": 953758}, {"filename": "/preload/games/sudoku/sudoku_core.lua", "start": 953758, "end": 964261}, {"filename": "/preload/games/sudoku/sudoku_draw.lua", "start": 964261, "end": 968245}, {"filename": "/preload/games/sudoku/sudoku_main.lua", "start": 968245, "end": 968966}, {"filename": "/preload/games/swarm/swarm_core.lua", "start": 968966, "end": 983315}, {"filename": "/preload/games/swarm/swarm_draw.lua", "start": 983315, "end": 986632}, {"filename": "/preload/games/swarm/swarm_keyboard_input.lua", "start": 986632, "end": 988200}, {"filename": "/preload/games/swarm/swarm_main.lua", "start": 988200, "end": 990244}, {"filename": "/preload/games/test/card_angle_test.lua", "start": 990244, "end": 993464}, {"filename": "/preload/games/test/draw_graphics_test.lua", "start": 993464, "end": 995375}, {"filename": "/preload/games/test/timer_test.lua", "start": 995375, "end": 997530}, {"filename": "/preload/games/thrust/thrust_core.lua", "start": 997530, "end": 1008484}, {"filename": "/preload/games/thrust/thrust_draw.lua", "start": 1008484, "end": 1015535}, {"filename": "/preload/games/thrust/thrust_keyboard_input.lua", "start": 1015535, "end": 1017400}, {"filename": "/preload/games/thrust/thrust_main.lua", "start": 1017400, "end": 1019664}, {"filename": "/preload/games/touch_test/touch_test.lua", "start": 1019664, "end": 1022014}, {"filename": "/preload/games/word_mastermind/word_mastermind_core.lua", "start": 1022014, "end": 1028754}, {"filename": "/preload/games/word_mastermind/word_mastermind_draw.lua", "start": 1028754, "end": 1038275}, {"filename": "/preload/games/word_mastermind/word_mastermind_main.lua", "start": 1038275, "end": 1044389}, {"filename": "/preload/games/word_mastermind/word_mastermind_serialize.lua", "start": 1044389, "end": 1046313}, {"filename": "/preload/games/wu/wu_core.lua", "start": 1046313, "end": 1052437}, {"filename": "/preload/games/wu/wu_ctrl.lua", "start": 1052437, "end": 1053258}, {"filename": "/preload/games/wu/wu_main.lua", "start": 1053258, "end": 1062897}, {"filename": "/preload/libs/cards/card_test.lua", "start": 1062897, "end": 1063691}, {"filename": "/preload/libs/cards/cards.lua", "start": 1063691, "end": 1069098}, {"filename": "/preload/libs/cards/cards_draw.lua", "start": 1069098, "end": 1078667}, {"filename": "/preload/libs/cards/cards_set.lua", "start": 1078667, "end": 1079018}, {"filename": "/preload/libs/combinations.lua", "start": 1079018, "end": 1081310}, {"filename": "/preload/libs/dice/dice.lua", "start": 1081310, "end": 1081569}, {"filename": "/preload/libs/dice/dice_draw.lua", "start": 1081569, "end": 1083004}, {"filename": "/preload/libs/draw/draw_celebration_anim.lua", "start": 1083004, "end": 1092418}, {"filename": "/preload/libs/draw/draw_colours.lua", "start": 1092418, "end": 1093239}, {"filename": "/preload/libs/draw/draw_keyboard.lua", "start": 1093239, "end": 1098048}, {"filename": "/preload/libs/draw/draw_more.lua", "start": 1098048, "end": 1102015}, {"filename": "/preload/libs/draw/draw_shapes.lua", "start": 1102015, "end": 1103640}, {"filename": "/preload/libs/letter_tiles.lua", "start": 1103640, "end": 1126819}, {"filename": "/preload/libs/multiplayer/two_player.lua", "start": 1126819, "end": 1138851}, {"filename": "/preload/libs/multiplayer/wait_for_players.lua", "start": 1138851, "end": 1146307}, {"filename": "/preload/libs/serialize/bit_pack.lua", "start": 1146307, "end": 1149330}, {"filename": "/preload/libs/serialize/serialize.lua", "start": 1149330, "end": 1154771}, {"filename": "/preload/libs/serialize/storage_helpers.lua", "start": 1154771, "end": 1155551}, {"filename": "/preload/libs/shuffle.lua", "start": 1155551, "end": 1155904}, {"filename": "/preload/libs/touch_to_mouse_evts.lua", "start": 1155904, "end": 1157037}, {"filename": "/preload/libs/ui/buttons.lua", "start": 1157037, "end": 1160926}, {"filename": "/preload/libs/ui/show_buttons_popup.lua", "start": 1160926, "end": 1161705}, {"filename": "/preload/libs/ui/soft_numpad.lua", "start": 1161705, "end": 1165698}, {"filename": "/preload/libs/ui/touchpad.lua", "start": 1165698, "end": 1167036}, {"filename": "/preload/libs/utils.lua", "start": 1167036, "end": 1171562}, {"filename": "/preload/libs/words.lua", "start": 1171562, "end": 1174863}], "remote_package_size": 1174863});
 
   })();
 
-// end include: /tmp/tmpbgqi2c0r.js
-// include: /tmp/tmph26p4l2p.js
+// end include: /tmp/tmpz_03od_c.js
+// include: /tmp/tmpb0z544tc.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmph26p4l2p.js
-// include: /tmp/tmp03w9nyfm.js
+  // end include: /tmp/tmpb0z544tc.js
+// include: /tmp/tmp6jr98_qy.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmp03w9nyfm.js
+  // end include: /tmp/tmp6jr98_qy.js
 
 
 var arguments_ = [];
@@ -414,7 +414,7 @@ var NODEFS = 'NODEFS is no longer included by default; build with -lnodefs.js';
 // perform assertions in shell.js after we set up out() and err(), as otherwise
 // if an assertion fails it cannot print the message
 
-assert(!ENVIRONMENT_IS_SHELL, 'shell environment detected but not enabled at build time.  Add `shell` to `-sENVIRONMENT` to enable.');
+assert(!ENVIRONMENT_IS_SHELL, 'shell environment detected but not enabled at build time (add `shell` to `-sENVIRONMENT` to enable)');
 
 // end include: shell.js
 
@@ -519,11 +519,12 @@ class CppException extends EmscriptenEH {
   constructor(excPtr) {
     super(excPtr);
     this.excPtr = excPtr;
-    const excInfo = getExceptionMessage(excPtr);
+    const excInfo = getExceptionMessage(this);
     this.name = excInfo[0];
     this.message = excInfo[1];
   }
 }
+
 // end include: runtime_exceptions.js
 // include: runtime_debug.js
 var runtimeDebug = true; // Switch to false at runtime to disable logging at the right times
@@ -680,11 +681,13 @@ function postRun() {
   // End ATPOSTRUNS hooks
 }
 
-/** @param {string|number=} what */
+/**
+ * @param {string|number=} what
+ */
 function abort(what) {
   Module['onAbort']?.(what);
 
-  what = 'Aborted(' + what + ')';
+  what = `Aborted(${what})`;
   // TODO(sbc): Should we remove printing and leave it up to whoever
   // catches the exception?
   err(what);
@@ -1048,17 +1051,10 @@ async function createWasm() {
       }
     }
   
-  var exceptionLast = 0;
-  
   var uncaughtExceptionCount = 0;
   
+  var exceptionLast = null;
   
-  var exnToPtr = (exn) => {
-      if (exn instanceof CppException) {
-        return exn.excPtr;
-      }
-      return exn;
-    };
   
   
   
@@ -1112,7 +1108,7 @@ async function createWasm() {
         if ((u0 & 0xF0) == 0xE0) {
           u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
         } else {
-          if ((u0 & 0xF8) != 0xF0) warnOnce('Invalid UTF-8 leading byte ' + ptrToString(u0) + ' encountered when deserializing a UTF-8 string in wasm memory to a JS string!');
+          if ((u0 & 0xF8) != 0xF0) warnOnce(`Invalid UTF-8 leading byte ${ptrToString(u0)} encountered when deserializing a UTF-8 string in wasm memory to a JS string!`);
           u0 = ((u0 & 7) << 18) | (u1 << 12) | (u2 << 6) | (heapOrArray[idx++] & 63);
         }
   
@@ -1160,13 +1156,11 @@ async function createWasm() {
       stackRestore(sp);
       return [type, message];
     };
-  var getExceptionMessage = (exn) => getExceptionMessageCommon(exnToPtr(exn));
+  var getExceptionMessage = (exn) => getExceptionMessageCommon(exn.excPtr);
   
+  var decrementExceptionRefcount = (exn) => ___cxa_decrement_exception_refcount(exn.excPtr);
   
-  var decrementExceptionRefcount = (exn) => ___cxa_decrement_exception_refcount(exnToPtr(exn));
-  
-  
-  var incrementExceptionRefcount = (exn) => ___cxa_increment_exception_refcount(exnToPtr(exn));
+  var incrementExceptionRefcount = (exn) => ___cxa_increment_exception_refcount(exn.excPtr);
   var ___cxa_throw = (ptr, type, destructor) => {
       var info = new ExceptionInfo(ptr);
       // Initialize ExceptionInfo content after it was allocated in __cxa_allocate_exception.
@@ -1209,7 +1203,7 @@ async function createWasm() {
       var info = exceptionCaught.pop();
   
       ___cxa_decrement_exception_refcount(info.excPtr);
-      exceptionLast = 0; // XXX in decRef?
+      exceptionLast = null; // XXX in decRef?
     };
 
   
@@ -1217,8 +1211,7 @@ async function createWasm() {
   
   var setTempRet0 = (val) => __emscripten_tempret_set(val);
   var findMatchingCatch = (args) => {
-      var thrown =
-        exceptionLast?.excPtr;
+      var thrown = exceptionLast?.excPtr;
       if (!thrown) {
         // just pass through the null ptr
         setTempRet0(0);
@@ -1260,18 +1253,14 @@ async function createWasm() {
   
   
   var ___cxa_rethrow = () => {
-      var info = exceptionCaught.pop();
-      if (!info) {
+      if (!exceptionCaught.length) {
         abort('no exception to throw');
       }
+      var info = exceptionCaught.at(-1);
       var ptr = info.excPtr;
-      if (!info.get_rethrown()) {
-        // Only pop if the corresponding push was through rethrow_primary_exception
-        exceptionCaught.push(info);
-        info.set_rethrown(true);
-        info.set_caught(false);
-        uncaughtExceptionCount++;
-      }
+      info.set_rethrown(true);
+      info.set_caught(false);
+      uncaughtExceptionCount++;
       ___cxa_increment_exception_refcount(ptr);
       exceptionLast = new CppException(ptr);
       throw exceptionLast;
@@ -1355,12 +1344,9 @@ var initRandomFill = () => {
       return (view) => nodeCrypto.randomFillSync(view);
     }
 
-    return (view) => crypto.getRandomValues(view);
+    return (view) => (crypto.getRandomValues(view), 0);
   };
-var randomFill = (view) => {
-    // Lazily init on the first invocation.
-    (randomFill = initRandomFill())(view);
-  };
+var randomFill = (view) => (randomFill = initRandomFill())(view);
 
 
 
@@ -1471,7 +1457,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         heap[outIdx++] = 0x80 | (u & 63);
       } else {
         if (outIdx + 3 >= endIdx) break;
-        if (u > 0x10FFFF) warnOnce('Invalid Unicode code point ' + ptrToString(u) + ' encountered when serializing a JS string to a UTF-8 string in wasm memory! (Valid unicode code points should be in range 0-0x10FFFF).');
+        if (u > 0x10FFFF) warnOnce(`Invalid Unicode code point ${ptrToString(u)} encountered when serializing a JS string to a UTF-8 string in wasm memory! (Valid unicode code points should be in range 0-0x10FFFF).`);
         heap[outIdx++] = 0xF0 | (u >> 18);
         heap[outIdx++] = 0x80 | ((u >> 12) & 63);
         heap[outIdx++] = 0x80 | ((u >> 6) & 63);
@@ -2379,7 +2365,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
           path = FS.cwd() + '/' + path;
         }
   
-        // limit max consecutive symlinks to 40 (SYMLOOP_MAX).
+        // limit max consecutive symlinks to SYMLOOP_MAX.
         linkloop: for (var nlinks = 0; nlinks < 40; nlinks++) {
           // split the absolute path
           var parts = path.split('/').filter((p) => !!p);
@@ -2671,7 +2657,14 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         var arg = setattr ? stream : node;
         setattr ??= node.node_ops.setattr;
         FS.checkOpExists(setattr, 63)
-        setattr(arg, attr);
+        try {
+          setattr(arg, attr);
+        } catch (e) {
+          if (e instanceof RangeError) {
+            throw new FS.ErrnoError(22);
+          }
+          throw e;
+        }
       },
   chrdev_stream_ops:{
   open(stream) {
@@ -3898,6 +3891,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   };
   
   var SYSCALLS = {
+  currentUmask:18,
   calculateAt(dirfd, path, allowEmpty) {
         if (PATH.isAbs(path)) {
           return path;
@@ -3984,23 +3978,29 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   function ___syscall_dup3(fd, newfd, flags) {
   try {
   
+      if (fd === newfd) return -28;
+      if (flags & ~524288) return -28;
       var old = SYSCALLS.getStreamFromFD(fd);
-      assert(!flags);
-      if (old.fd === newfd) return -28;
       // Check newfd is within range of valid open file descriptors.
       if (newfd < 0 || newfd >= FS.MAX_OPEN_FDS) return -8;
       var existing = FS.getStream(newfd);
       if (existing) FS.close(existing);
-      return FS.dupStream(old, newfd).fd;
+      var stream = FS.dupStream(old, newfd);
+      if (flags & 524288) {
+        stream.flags |= 524288;
+      }
+      return stream.fd;
     } catch (e) {
     if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   }
+  
 
   function ___syscall_faccessat(dirfd, path, amode, flags) {
   try {
@@ -4030,6 +4030,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   function ___syscall_fchmod(fd, mode) {
   try {
@@ -4041,6 +4042,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   var syscallGetVarargI = () => {
       assert(SYSCALLS.varargs != undefined);
@@ -4077,7 +4079,8 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
           return stream.flags;
         case 4: {
           var arg = syscallGetVarargI();
-          stream.flags |= arg;
+          var mask = 289792;
+          stream.flags = (stream.flags & ~mask) | (arg & mask);
           return 0;
         }
         case 12: {
@@ -4101,6 +4104,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   function ___syscall_fstat64(fd, buf) {
   try {
@@ -4111,10 +4115,11 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   
   var stringToUTF8 = (str, outPtr, maxBytesToWrite) => {
-      assert(typeof maxBytesToWrite == 'number', 'stringToUTF8(str, outPtr, maxBytesToWrite) is missing the third parameter that specifies the length of the output buffer!');
+      assert(typeof maxBytesToWrite == 'number', 'stringToUTF8 requires a third parameter that specifies the length of the output buffer');
       return stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
     };
   function ___syscall_getcwd(buf, size) {
@@ -4131,6 +4136,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   
   function ___syscall_ioctl(fd, op, varargs) {
@@ -4228,6 +4234,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   function ___syscall_lstat64(path, buf) {
   try {
@@ -4239,12 +4246,14 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   function ___syscall_mkdirat(dirfd, path, mode) {
   try {
   
       path = SYSCALLS.getStr(path);
       path = SYSCALLS.calculateAt(dirfd, path);
+      mode &= ~SYSCALLS.currentUmask;
       FS.mkdir(path, mode, 0);
       return 0;
     } catch (e) {
@@ -4252,6 +4261,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   function ___syscall_newfstatat(dirfd, path, buf, flags) {
   try {
@@ -4268,6 +4278,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   
   function ___syscall_openat(dirfd, path, flags, varargs) {
@@ -4277,12 +4288,16 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       path = SYSCALLS.getStr(path);
       path = SYSCALLS.calculateAt(dirfd, path);
       var mode = varargs ? syscallGetVarargI() : 0;
+      if (flags & 64) {
+        mode &= ~SYSCALLS.currentUmask;
+      }
       return FS.open(path, flags, mode).fd;
     } catch (e) {
     if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
     return -e.errno;
   }
   }
+  
 
   
   
@@ -4306,6 +4321,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   function ___syscall_renameat(olddirfd, oldpath, newdirfd, newpath) {
   try {
@@ -4321,6 +4337,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   function ___syscall_rmdir(path) {
   try {
@@ -4333,6 +4350,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   function ___syscall_stat64(path, buf) {
   try {
@@ -4344,6 +4362,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   function ___syscall_unlinkat(dirfd, path, flags) {
   try {
@@ -4363,6 +4382,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return -e.errno;
   }
   }
+  
 
   var __abort_js = () =>
       abort('native code called abort()');
@@ -4482,6 +4502,9 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
                           HEAP32[(((tmPtr)+(4))>>2)],
                           HEAP32[((tmPtr)>>2)],
                           0);
+      if (isNaN(date.getTime())) {
+        return -1;
+      }
   
       // There's an ambiguous hour when the time goes back; the tm_isdst field is
       // used to disambiguate it.  Date() basically guesses, so we fix it up if it
@@ -4513,12 +4536,8 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       HEAP32[(((tmPtr)+(16))>>2)] = date.getMonth();
       HEAP32[(((tmPtr)+(20))>>2)] = date.getYear();
   
-      var timeMs = date.getTime();
-      if (isNaN(timeMs)) {
-        return -1;
-      }
-      // Return time in microseconds
-      return timeMs / 1000;
+      // Return time in seconds
+      return date.getTime() / 1000;
      })();
   return BigInt(ret);
   };
@@ -4737,7 +4756,6 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   var getEnvStrings = () => {
       if (!getEnvStrings.strings) {
         // Default values.
-        // Browser language detection #8751
         var lang = (globalThis.navigator?.language ?? 'C').replace('-', '_') + '.UTF-8';
         var env = {
           'USER': 'web_user',
@@ -4830,6 +4848,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return e.errno;
   }
   }
+  
 
   function _fd_fdstat_get(fd, pbuf) {
   try {
@@ -4856,6 +4875,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return e.errno;
   }
   }
+  
 
   /** @param {number=} offset */
   var doReadv = (stream, iov, iovcnt, offset) => {
@@ -4887,6 +4907,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return e.errno;
   }
   }
+  
 
   
   function _fd_seek(fd, offset, whence, newOffset) {
@@ -4895,7 +4916,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   
   try {
   
-      if (isNaN(offset)) return 61;
+      if (isNaN(offset)) return 22;
       var stream = SYSCALLS.getStreamFromFD(fd);
       FS.llseek(stream, offset, whence);
       HEAP64[((newOffset)>>3)] = BigInt(stream.position);
@@ -4941,17 +4962,9 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
     return e.errno;
   }
   }
-
-  function _random_get(buffer, size) {
-  try {
   
-      randomFill(HEAPU8.subarray(buffer, buffer + size));
-      return 0;
-    } catch (e) {
-    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
-    return e.errno;
-  }
-  }
+
+  var _random_get = (buffer, size) => randomFill(HEAPU8.subarray(buffer, buffer + size));
 
   var wasmTableMirror = [];
   
@@ -4963,14 +4976,14 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
       }
       /** @suppress {checkTypes} */
-      assert(wasmTable.get(funcPtr) == func, 'JavaScript-side Wasm function table mirror is out of date!');
+      assert(wasmTable.get(funcPtr) == func, 'table mirror is out of date');
       return func;
     };
 
 
   var getCFunc = (ident) => {
       var func = Module['_' + ident]; // closure exported function
-      assert(func, 'Cannot call unknown function ' + ident + ', make sure it is exported');
+      assert(func, `Cannot call unknown function ${ident}, make sure it is exported`);
       return func;
     };
   
@@ -5026,7 +5039,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       var func = getCFunc(ident);
       var cArgs = [];
       var stack = 0;
-      assert(returnType !== 'array', 'Return type should not be "array".');
+      assert(returnType !== 'array', 'return type should not be "array"');
       if (args) {
         for (var i = 0; i < args.length; i++) {
           var converter = toC[argTypes[i]];
@@ -5246,6 +5259,8 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'makePromise',
   'idsToPromises',
   'makePromiseCallback',
+  'incrementUncaughtExceptionCount',
+  'decrementUncaughtExceptionCount',
   'Browser_asyncPrepareDataCounter',
   'arraySum',
   'addDays',
@@ -5377,7 +5392,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'ExceptionInfo',
   'findMatchingCatch',
   'getExceptionMessageCommon',
-  'exnToPtr',
   'incrementExceptionRefcount',
   'decrementExceptionRefcount',
   'getExceptionMessage',
@@ -5545,7 +5559,7 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('onSbrkGrow');
 }
 var ASM_CONSTS = {
-  1213690: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  1259769: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
@@ -5580,6 +5594,7 @@ function js_set_active_canvas(canvas_id) { let canvas_id_str = UTF8ToString(canv
 function js_delete_extra_canvases() { delete_extra_canvases(); }
 function js_get_user_colour_pref(colour_str_out,max_colour_str_out_len) { let colour_pref_str_js = get_user_colour_pref(); let i; for (i=0; i<colour_pref_str_js.length; i++) { if (i >= max_colour_str_out_len) { console.error("User colour pref str buff is not long enough"); return -1; } setValue(colour_str_out + i, colour_pref_str_js.charCodeAt(i), 'i8'); } setValue(colour_str_out + i, 0, 'i8'); return colour_pref_str_js.length; }
 function js_get_multiplayer_session_id(session_id_out,max_session_id_out_len) { let session_id_js = get_multiplayer_session_id(); let i; for (i=0; i<session_id_js.length; i++) { if (i >= max_session_id_out_len) { console.error("Multiplayer ID session str buff is not long enough"); return -1; } setValue(session_id_out + i, session_id_js.charCodeAt(i), 'i8'); } setValue(session_id_out + i, 0, 'i8'); return session_id_js.length; }
+function js_set_canvas_size(width,height) { set_canvas_size(width, height); }
 function js_is_multiplayer_session_id_needed() { return true; }
 function js_is_feature_supported(feature_id,feature_id_len) { return false; }
 function js_get_time_of_day(time_str,max_time_str_len) { let time_str_js = get_time_of_day(); for (let i=0; i<time_str_js.length; i++) { if (i >= max_time_str_len) { console.error("Time string is not long enough"); return -1; } setValue(time_str + i, time_str_js.charCodeAt(i), 'i8'); } return time_str_js.length; }
@@ -5959,6 +5974,8 @@ var wasmImports = {
   js_set_btn_enabled,
   /** @export */
   js_set_btn_visible,
+  /** @export */
+  js_set_canvas_size,
   /** @export */
   js_set_game_handle2,
   /** @export */

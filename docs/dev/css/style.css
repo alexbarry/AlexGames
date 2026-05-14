@@ -232,6 +232,15 @@
 	width:100%;
 }
 
+.options_toggle {
+	height: 48px;
+	display: flex;
+}
+
+.options_toggle > label {
+	align-content: center;
+}
+
 /* Shown when a new game is loaded */
 .status_break_line {
 	border-bottom: 1px dashed #88888866;

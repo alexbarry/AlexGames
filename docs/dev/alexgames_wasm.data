@@ -29948,6 +29948,9 @@ function start_game()
 
 	alexgames.add_game_option(GAME_OPTION_NEW_GAME, { label = "New game", type = alexgames.OPTION_TYPE_BTN })
 end
+This Lua implementation of Sudoku is deprecated for now.
+
+See `src/rust_games/sudoku/` for the Rust implementation of Sudoku.
 local core = {}
 
 local alexgames = require("alexgames")
