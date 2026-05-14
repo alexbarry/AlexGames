@@ -11,8 +11,9 @@ use bitvec::prelude::{BitVec, Lsb0};
 
 const VERSION1: u8 = 1;
 const VERSION2: u8 = 2;
+const VERSION3: u8 = 3;
 
-const CURRENT_VERSION: u8 = VERSION2;
+const CURRENT_VERSION: u8 = VERSION3;
 
 fn pt_id(state: &State, pt: &Pt) -> u8 {
 	let size = state.size as i32;
@@ -161,6 +162,8 @@ pub fn serialize(state: &sudoku_core::State) -> Vec<u8> {
 		sudoku_core::Mode::EnterCellNotes => 3,
 	});
 
+	serialized_state.append(&mut state.time_elapsed_ms.to_le_bytes().to_vec());
+
 	serialized_state
 }
 
@@ -174,6 +177,8 @@ pub fn deserialize(mut serialized_state: &[u8]) -> sudoku_core::State {
 	if version == VERSION1 {
 		// ok
 	} else if version == VERSION2 {
+		// ok
+	} else if version == VERSION3 {
 		// ok
 	} else {
 		panic!("Unhandled version {}", version);
@@ -276,6 +281,14 @@ pub fn deserialize(mut serialized_state: &[u8]) -> sudoku_core::State {
 		
 		state.mode = mode;
 		serialized_state = &serialized_state[1..];
+	}
+
+	if version >= VERSION3 {
+		let time_ms_bytes = &serialized_state[..4];
+		serialized_state = &serialized_state[4..];
+
+		assert_eq!(state.time_elapsed_ms.to_le_bytes().len(), 4);
+		state.time_elapsed_ms = i32::from_le_bytes(time_ms_bytes.try_into().unwrap());
 	}
 
 	assert_eq!(serialized_state.len(), 0);

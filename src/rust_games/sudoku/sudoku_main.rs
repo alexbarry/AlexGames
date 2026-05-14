@@ -53,6 +53,7 @@ pub struct AlexGamesSudoku {
 	prev_state: Option<Vec<u8>>,
 
 	game_won: bool,
+	timer_1s_handle: Option<i32>,
 }
 
 impl AlexGamesSudoku {
@@ -375,6 +376,9 @@ impl AlexGamesApi for AlexGamesSudoku {
 
     fn update(&mut self, dt_ms: i32) {
 		self.draw_state.update_anim_state(dt_ms);
+		if !self.game_won {
+			self.game_state.time_elapsed_ms += dt_ms;
+		}
         self.draw_state();
     }
 
@@ -430,6 +434,8 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
 		prev_state: None,
 
 		game_won: false,
+
+		timer_1s_handle: None,
     };
     game.init(callbacks);
 	game.draw_state.immediately_show_mistakes = Some(game.get_immediately_show_mistakes_val());
@@ -437,6 +443,8 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
 	callbacks.set_canvas_size(sudoku_draw::CANVAS_WIDTH, sudoku_draw::CANVAS_HEIGHT);
 
 	callbacks.enable_evt("key");
+
+	game.timer_1s_handle = Some(callbacks.update_timer_ms(1000));
 
 	callbacks.create_btn(BTN_ID_UNDO, "Undo", 1);
 	callbacks.create_btn(BTN_ID_REDO, "Redo", 1);

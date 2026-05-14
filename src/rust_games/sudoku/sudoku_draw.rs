@@ -11,7 +11,7 @@ use crate::libs::point::Pt;
 use crate::libs::draw;
 pub use crate::libs::celebrations::fireworks::FireworksState;
 
-pub const CANVAS_HEIGHT: i32 = 600;
+pub const CANVAS_HEIGHT: i32 = 620;
 pub const CANVAS_WIDTH: i32 = 480;
 
 pub struct DrawState {
@@ -20,10 +20,12 @@ pub struct DrawState {
 
 
 	fireworks_state: FireworksState,
+	animation_timer_handle: Option<i32>,
 
 	callbacks: &'static CCallbacksPtr,
 	TEXT_FONT_SIZE: i32,
 	TEXT_SMALLER_FONT_SIZE: i32,
+	TEXT_TIMER_FONT_SIZE: i32,
 	TEXT_NOTE_FONT_SIZE: i32,
 	LINE_THICKNESS: i32,
 	LINE_GROUP_THICKNESS: i32,
@@ -70,6 +72,12 @@ struct BtnPos {
 	font_size: i32,
 }
 
+fn format_time_elapsed(time_secs: i32) -> String {
+	let secs = time_secs % 60;
+	let mins = time_secs / 60;
+	format!("{}:{:02}", mins, secs)
+}
+
 impl DrawState {
 	pub fn new(callbacks: &'static CCallbacksPtr) -> Self {
 		Self {
@@ -77,10 +85,13 @@ impl DrawState {
 			mistakes: HashMap::new(),
 			fireworks_state: FireworksState::new(),
 
+			animation_timer_handle: None,
+
 			callbacks: callbacks,
 
 			TEXT_FONT_SIZE: 32,
 			TEXT_SMALLER_FONT_SIZE: 16,
+			TEXT_TIMER_FONT_SIZE: 12,
 			TEXT_NOTE_FONT_SIZE: 14,
 			LINE_THICKNESS: 1,
 			LINE_GROUP_THICKNESS: 4,
@@ -91,26 +102,32 @@ impl DrawState {
         let mut fireworks_complete = self.fireworks_state.update(dt_ms);
 
 		if fireworks_complete {
-            self.callbacks.update_timer_ms(0);
+			if let Some(timer_handle) = self.animation_timer_handle {
+            	self.callbacks.delete_timer(timer_handle);
+				self.animation_timer_handle = None;
+			}
 		}
 	}
 
 	pub fn start_win_animation(&mut self) {
         // TODO only do this in a single place, and not if the timer is already running?
         let FPS = 60;
-        self.callbacks.update_timer_ms(1000 / FPS);
-
+		if self.animation_timer_handle.is_none() {
+        	self.animation_timer_handle = Some(self.callbacks.update_timer_ms(1000 / FPS));
+		}
         self.fireworks_state.start_animation();
 	}
 
 	fn cell_pos(&self, game_state: &State, y: i32, x: i32) -> CellPos {
 		let game_size = game_state.size as i32;
 
+		let timer_space = 20;
+
 		let button_buffer = 120;
 		let cell_size = (CANVAS_WIDTH.min(CANVAS_HEIGHT - button_buffer))/game_size;
 		let padding = (cell_size - self.TEXT_FONT_SIZE)/2;
 
-		let y_start = self.LINE_THICKNESS;
+		let y_start = self.LINE_THICKNESS + timer_space;
 		let y_end   = CANVAS_HEIGHT - button_buffer;
 
 		let x_start = 1;
@@ -474,7 +491,12 @@ impl DrawState {
 			callbacks.draw_text(&btn_text, &text_colour, btn_pos.y_text, btn_pos.x_text, btn_pos.font_size, TextAlign::Middle);
 		}
 
+		let time_str = format_time_elapsed(state.time_elapsed_ms/1000);
+		let padding = 3;
+		callbacks.draw_text(&time_str, TEXT_COLOUR, self.TEXT_TIMER_FONT_SIZE + padding, CANVAS_WIDTH, self.TEXT_TIMER_FONT_SIZE, TextAlign::Right);
+
         self.fireworks_state.draw(callbacks);
+
 
 		callbacks.draw_refresh();
 	}

@@ -43,6 +43,7 @@ pub struct State {
 	pub selected: Option<Pt>,
 
 	pub mode: Mode,
+	pub time_elapsed_ms: i32,
 }
 
 pub enum CellContents {
@@ -62,6 +63,7 @@ impl State {
 
 			selected: None,
 			mode: Mode::EnterCellVal,
+			time_elapsed_ms: 0,
 		}
 	}
 
