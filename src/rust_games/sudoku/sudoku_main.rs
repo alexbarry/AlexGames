@@ -130,6 +130,7 @@ impl AlexGamesSudoku {
 	fn enter_custom_game(&mut self) {
 		self.game_state = sudoku_core::State::new(9);
 		self.game_state.mode = sudoku_core::Mode::EnterStartingVal;
+		self.save_state();
 		self.draw_state();
 	}
 
