@@ -383,8 +383,9 @@ impl AlexGamesApi for AlexGamesSudoku {
 
     fn update(&mut self, dt_ms: i32) {
 		self.draw_state.update_anim_state(dt_ms);
-		if !self.game_won {
+		if !self.game_won && self.game_state.mode == sudoku_core::Mode::EnterCellVal {
 			self.game_state.time_elapsed_ms += dt_ms;
+			// TODO ... I should ammend the previous state entry after doing this.
 		}
         self.draw_state();
     }
