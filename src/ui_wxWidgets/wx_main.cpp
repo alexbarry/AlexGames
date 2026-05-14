@@ -598,6 +598,11 @@ static wxColour colour_str_to_wxColour(const char *colour_str) {
 		return wxColour(hex_char_to_int(colour_str[0])*16, 
 		                hex_char_to_int(colour_str[1])*16, 
 		                hex_char_to_int(colour_str[2])*16);
+	} else if (len == 4) {
+		return wxColour(hex_char_to_int(colour_str[0])*16, 
+		                hex_char_to_int(colour_str[1])*16, 
+		                hex_char_to_int(colour_str[2])*16,
+		                hex_char_to_int(colour_str[3])*16);
 	} else if (len == 6) {
 		return wxColour(hex_char2_to_byte(colour_str[0], colour_str[1]),
 		                hex_char2_to_byte(colour_str[2], colour_str[3]),
