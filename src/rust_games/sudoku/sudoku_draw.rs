@@ -267,6 +267,7 @@ impl DrawState {
 
 		let LINE_COLOUR = "#888";
 		let TEXT_COLOUR = if !is_dark_mode { "#000" } else { "#fff" };
+		let TEXT_COLOUR_DISABLED = if !is_dark_mode { "#8888" } else { "#8888" };
 		let TEXT_COLOUR_CONFLICT = "#f00";
 		let TEXT_COLOUR_USER = if !is_dark_mode { "#00a" } else { "#88f" };
 		let SELECTED_BG = if !is_dark_mode { "#0084" } else { "#44cc" };
@@ -407,24 +408,46 @@ impl DrawState {
 		}
 
 
+		let taken_input_vals = state.get_taken_input_vals();
+		let sel_val = state.get_selected_val(); 
 		let notes_on = state.mode == Mode::EnterCellNotes;
+
 		for btn_val in self.get_buttons(state) {
 			let btn_pos = self.button_pos(state, &btn_val);
 			draw::draw_rect_outline(callbacks, &LINE_COLOUR, self.LINE_THICKNESS, btn_pos.y1, btn_pos.x1, btn_pos.y2, btn_pos.x2);
+			let mut disabled = false;
+			let mut highlighted = false;
 			let btn_text = match btn_val {
 				ButtonId::Erase => "Clear".to_string(),
-				ButtonId::Val(val) => format!("{}", val),
+				ButtonId::Val(val) => {
+					disabled = taken_input_vals.contains(&(val as i8));
+					if let Some(sel_pt) = state.selected {
+						let y = sel_pt.y as usize;
+						let x = sel_pt.x as usize;
+						if state.board[y][x].revealed {
+							disabled = true;
+						}
+					}
+					highlighted = sel_val.is_some_and(|sel_val| sel_val == val as i8);
+					format!("{}", val)
+				},
 				ButtonId::ToggleNotes => {
+					highlighted = notes_on;
 					format!("Notes: {}", if notes_on { "on" } else { "off" })
 				},
 				ButtonId::DoneEnteringStartingVals => {
 					format!("Finalize Custom Puzzle")
 				},
 			};
-			if btn_val == ButtonId::ToggleNotes && notes_on {
+			if highlighted {
 				callbacks.draw_rect(&SELECTED3_BG, btn_pos.y1, btn_pos.x1, btn_pos.y2, btn_pos.x2);
 			}
-			callbacks.draw_text(&btn_text, &TEXT_COLOUR, btn_pos.y_text, btn_pos.x_text, btn_pos.font_size, TextAlign::Middle);
+			let text_colour = if !disabled {
+				TEXT_COLOUR
+			} else {
+				TEXT_COLOUR_DISABLED
+			};
+			callbacks.draw_text(&btn_text, &text_colour, btn_pos.y_text, btn_pos.x_text, btn_pos.font_size, TextAlign::Middle);
 		}
 
 		callbacks.draw_refresh();

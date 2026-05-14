@@ -219,6 +219,36 @@ impl AlexGamesSudoku {
 		self.draw_state.mistakes = mistakes;
 		self.draw_state();
 	}
+
+	fn erase_pressed(&mut self) {
+		self.val_pressed(0);
+	}
+
+	fn val_pressed(&mut self, val: i8) {
+		println!("val_pressed(val={})", val);
+		let old_sel = self.game_state.selected;
+
+		if val != 0 && self.game_state.get_selected_val().is_none_or(|sel_val| sel_val != val as i8) {
+			self.game_state.set_val(val as i8)
+		} else {
+			self.game_state.erase()
+		}
+
+		let new_val = if let Some(sel) = old_sel {
+			Some(self.game_state.user_input[sel.y as usize][sel.x as usize])
+		} else {
+			None
+		};
+
+		println!("old_sel={:?}, new_val={:?}", old_sel, new_val);
+		if let Some(sel) = old_sel {
+			let mistake_val = self.draw_state.mistakes.get(&sel);
+			println!("old_sel={:?}, new_val={:?}, mistake_val={:?}", old_sel, new_val, mistake_val);
+			if mistake_val.is_some() && mistake_val != new_val.as_ref() {
+				self.draw_state.mistakes.remove(&sel);
+			}
+		}
+	}
 }
 
 impl AlexGamesApi for AlexGamesSudoku {
@@ -305,34 +335,22 @@ impl AlexGamesApi for AlexGamesSudoku {
 			"ArrowUp" | "KeyK" => self.game_state.move_sel(&Pt {y:1, x:0}),
 			"ArrowDown" | "KeyJ" => self.game_state.move_sel(&Pt {y:-1, x:0}),
 			"Space" => { self.game_state.toggle_notes(); true },
-			"Backspace" | "KeyX" => { self.game_state.set_val(0); true },
-			"Digit1" | "Numpad1" => { self.game_state.set_val(1); true },
-			"Digit2" | "Numpad2" => { self.game_state.set_val(2); true },
-			"Digit3" | "Numpad3" => { self.game_state.set_val(3); true },
-			"Digit4" | "Numpad4" => { self.game_state.set_val(4); true },
-			"Digit5" | "Numpad5" => { self.game_state.set_val(5); true },
-			"Digit6" | "Numpad6" => { self.game_state.set_val(6); true },
-			"Digit7" | "Numpad7" => { self.game_state.set_val(7); true },
-			"Digit8" | "Numpad8" => { self.game_state.set_val(8); true },
-			"Digit9" | "Numpad9" => { self.game_state.set_val(9); true },
+			"Backspace" | "KeyX" => { self.erase_pressed(); true },
+			"Digit1" | "Numpad1" => { self.val_pressed(1); true },
+			"Digit2" | "Numpad2" => { self.val_pressed(2); true },
+			"Digit3" | "Numpad3" => { self.val_pressed(3); true },
+			"Digit4" | "Numpad4" => { self.val_pressed(4); true },
+			"Digit5" | "Numpad5" => { self.val_pressed(5); true },
+			"Digit6" | "Numpad6" => { self.val_pressed(6); true },
+			"Digit7" | "Numpad7" => { self.val_pressed(7); true },
+			"Digit8" | "Numpad8" => { self.val_pressed(8); true },
+			"Digit9" | "Numpad9" => { self.val_pressed(9); true },
 			"KeyU" => { self.load_state_offset(-1) },
 			"KeyR" => { self.load_state_offset(1) },
 			_ => { false },
 		};
-		let new_val = if let Some(sel) = old_sel {
-			Some(self.game_state.user_input[sel.y as usize][sel.x as usize])
-		} else {
-			None
-		};
 
 		if rc {
-
-			if let Some(sel) = old_sel {
-				let mistake_val = self.draw_state.mistakes.get(&sel);
-				if mistake_val.is_some() && mistake_val != new_val.as_ref() {
-					self.draw_state.mistakes.remove(&sel);
-				}
-			}
 			self.draw_state();
 			self.save_state()
 		}
@@ -344,13 +362,14 @@ impl AlexGamesApi for AlexGamesSudoku {
     fn update(&mut self, dt_ms: i32) {
         self.draw_state();
     }
+
     fn handle_user_clicked(&mut self, pos_y: i32, pos_x: i32) {
 		if let Some(cell) = self.draw_state.pos_to_cell(&self.game_state, pos_y, pos_x) {
 			self.game_state.set_selection(&cell);
 		} else if let Some(btn_id) = self.draw_state.pos_to_btn(&self.game_state, pos_y, pos_x) {
 			match btn_id {
-				ButtonId::Erase => self.game_state.erase(),
-				ButtonId::Val(val) => self.game_state.set_val(val as i8),
+				ButtonId::Erase => self.erase_pressed(),
+				ButtonId::Val(val) => self.val_pressed(val as i8),
 				// TODO maybe this should be state within AlexGamesSudoku rather than core state
 				ButtonId::ToggleNotes => self.game_state.toggle_notes(),
 				ButtonId::DoneEnteringStartingVals => {

@@ -100,6 +100,16 @@ impl State {
 		return false
 	}
 
+	pub fn get_selected_val(&self) -> Option<i8> {
+		if let Some(sel) = self.selected {
+			let val = self.cell_val(sel.y, sel.x);
+			if val != 0 {
+				return Some(val)
+			}
+		}
+		None
+	}
+
 	pub fn box_id(&self, pt: &Pt) -> i32 {
 		let box_size = self.box_size as i32;
 		let box_y = pt.y / box_size;
@@ -268,6 +278,27 @@ impl State {
 			.chain((0..size).map(|group_id| self.get_pts_col(group_id)))
 			.chain((0..size).map(|group_id| self.get_pts_box_from_id(group_id)))
 			.collect()
+	}
+
+	pub fn get_taken_input_vals(&self) -> HashSet<i8> {
+		let mut taken = HashSet::new();
+		if let Some(sel) = self.selected {
+			for pt in self.get_pts_row(sel.y.try_into().unwrap()) {
+				if pt == sel { continue; }
+				taken.insert(self.cell_val(pt.y, pt.x));
+			}
+			for pt in self.get_pts_col(sel.x.try_into().unwrap()) {
+				if pt == sel { continue; }
+				taken.insert(self.cell_val(pt.y, pt.x));
+			}
+			for pt in self.get_pts_box_from_id(self.box_id(&sel).try_into().unwrap()) {
+				if pt == sel { continue; }
+				taken.insert(self.cell_val(pt.y, pt.x));
+			}
+		}
+		taken.remove(&0);
+
+		taken
 	}
 
 	pub fn get_mistakes(&self) -> HashMap<Pt, i8> {
