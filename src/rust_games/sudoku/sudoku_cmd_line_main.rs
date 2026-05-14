@@ -2,7 +2,7 @@
 
 //mod sudoku_core;
 
-use alexgames_rust::sudoku::sudoku_core::{self, Pt, State};
+use alexgames_rust::sudoku::sudoku_core::{self, Pt, State, CellInfo};
 use alexgames_rust::sudoku::sudoku_solve;
 
 const puzzles: [ [ [i8;9]; 9]; 0] = [
@@ -22,7 +22,7 @@ fn solve_main() {
 
 	let mut state = State::new(9);
 	for (puzzle_idx, puzzle) in puzzles.iter().enumerate() {
-		state.board = puzzle.iter().map(|row| row.to_vec()).collect();
+		state.board = puzzle.iter().map(|row| row.into_iter().map(|val| CellInfo { val: *val, revealed: *val != 0}).collect()).collect();
 		//state.print();
 		let mut stats = sudoku_solve::Stats::new();
 		let mut params = sudoku_solve::Params::new();
@@ -39,6 +39,14 @@ fn solve_main() {
 	}
 }
 
+const preamble_val_fn: &'static str = r#"
+use crate::sudoku::sudoku_core::CellInfo;
+
+const fn val(val: i8, revealed_int: i8) -> CellInfo {
+        CellInfo::new(val, revealed_int)
+}
+"#;
+
 fn generate_main(args: &Vec<String>) {
 	let puzzle_count: usize = args[1].parse().unwrap();
 
@@ -52,8 +60,10 @@ fn generate_main(args: &Vec<String>) {
 	let mut rng = ChaCha12Rng::from_seed(seed);
 	*/
 
+	println!("{}", preamble_val_fn);
+
 	println!("#[rustfmt::skip]");
-	println!("pub const puzzles: [ [[i8;9];9]; {}] = [", puzzle_count);
+	println!("pub const puzzles: [ [[CellInfo;9];9]; {}] = [", puzzle_count);
 
 
 	for puzzle_idx in 0..puzzle_count {

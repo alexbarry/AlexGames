@@ -21,7 +21,7 @@ use crate::rust_game_api::{
     CANVAS_HEIGHT, CANVAS_WIDTH, KeyEvt
 };
 
-use crate::sudoku::sudoku_core::{self, Pt};
+use crate::sudoku::sudoku_core::{self, Pt, CellInfo};
 use crate::sudoku::sudoku_draw::{self, DrawState, ButtonId};
 use crate::sudoku::sudoku_serialize;
 use crate::sudoku::generated::puzzles_2026_05_11;
@@ -37,6 +37,7 @@ const ENTER_CUSTOM_GAME_OPTION_ID: &'static str = "option_new_custom_game";
 const STORED_DATA_KEY_LAST_LOADED_PUZZLE_IDX: &'static str = "sudoku_last_loaded_puzzle1_idx";
 
 const pregenerated_puzzles: &[[[i8;9];9]] = &puzzles_2026_05_11::puzzles;
+//const pregenerated_puzzles: &[[[CellInfo;9];9]] = &puzzles_2026_05_11::puzzles;
 
 
 pub struct AlexGamesSudoku {
@@ -153,7 +154,9 @@ impl AlexGamesSudoku {
 		let mut new_state = sudoku_core::State::new(puzzle.len());
 		for y in 0..puzzle.len() {
 			for x in 0..puzzle[y].len() {
-				new_state.board[y][x] = puzzle[y][x];
+				//new_state.board[y][x] = puzzle[y][x].clone();
+				new_state.board[y][x].val = puzzle[y][x];
+				new_state.board[y][x].revealed = puzzle[y][x] != 0;
 			}
 		}
 		self.game_state = new_state;

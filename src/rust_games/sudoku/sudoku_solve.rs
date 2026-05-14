@@ -63,7 +63,7 @@ fn get_other_vals_in_row_col_box(state: &State, pt: &Pt) -> HashSet<i8> {
 /// use alexgames_rust::sudoku::sudoku_solve::pt_can_be_val;
 /// 
 /// let mut state = State::new(9);
-/// state.board = vec![
+/// state.set_cells_from_int_vec(&vec![
 ///     vec![9,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
@@ -75,7 +75,7 @@ fn get_other_vals_in_row_col_box(state: &State, pt: &Pt) -> HashSet<i8> {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
-/// ];
+/// ]);
 /// assert_eq!(pt_can_be_val(&state, &Pt{ y: 3, x: 0}, 9), false);
 /// ```
 pub fn pt_can_be_val(state: &State, pt: &Pt, val: i8) -> bool {
@@ -168,7 +168,7 @@ pub fn find_init_possibs(state: &State) -> HashMap<Pt, Vec<i8>> {
 /// 
 /// let mut activity = false;
 /// let mut state = State::new(9);
-/// state.board = vec![
+/// state.set_cells_from_int_vec(&vec![
 ///     vec![0,7,4, 1,5,3, 0,9,6],
 ///     vec![5,0,0, 4,6,0, 1,0,0],
 ///     vec![0,1,6, 0,2,0, 0,4,5],
@@ -188,12 +188,12 @@ pub fn find_init_possibs(state: &State) -> HashMap<Pt, Vec<i8>> {
 ///     vec![0,6,0, 0,0,0, 5,0,9],
 ///     vec![4,9,0, 5,8,6, 0,0,1],
 ///     vec![0,0,0, 2,9,0, 6,8,4],
-/// ];
+/// ]);
 /// let moves = find_moves3a(&state, None, &mut activity);
 /// assert_eq!(moves.iter().any(|val| *val == (Pt{y:6, x:4}, 7)), true);
 /// //assert_eq!(find_moves3a(&state, None, &mut activity), vec![(Pt{y:6, x:4}, 7)]);
 /// 
-/// state.board = vec![
+/// state.set_cells_from_int_vec(&vec![
 ///     vec![9,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
@@ -205,7 +205,7 @@ pub fn find_init_possibs(state: &State) -> HashMap<Pt, Vec<i8>> {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
-/// ];
+/// ]);
 /// assert_eq!(find_moves3a(&state, None, &mut activity), vec![]);
 /// ```
 pub fn find_moves3a(state: &State, possibs: Option<&mut HashMap<Pt, Vec<i8>>>, activity: &mut bool) -> Vec<(Pt, i8)> {
@@ -545,7 +545,7 @@ impl Stats {
 /// use alexgames_rust::sudoku::sudoku_solve::find_moves1;
 /// 
 /// let mut state = State::new(9);
-/// state.board = vec![
+/// state.set_cells_from_int_vec(&vec![
 ///     vec![0,0,0, 1,0,0, 0,0,0],
 ///     vec![0,0,0, 2,0,0, 0,0,0],
 ///     vec![0,0,0, 3,0,0, 0,0,0],
@@ -557,10 +557,10 @@ impl Stats {
 ///     vec![0,0,0, 7,0,0, 0,0,0],
 ///     vec![0,0,0, 8,0,0, 0,0,0],
 ///     vec![0,0,0, 9,0,0, 0,0,0],
-/// ];
+/// ]);
 /// assert_eq!(find_moves1(&state, true), vec![(Pt{y: 3, x: 3}, 4)]);
 ///
-/// state.board = vec![
+/// state.set_cells_from_int_vec(&vec![
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
@@ -572,10 +572,10 @@ impl Stats {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
-/// ];
+/// ]);
 /// assert_eq!(find_moves1(&state, true), vec![(Pt{y: 4, x: 3}, 9)]);
 ///
-/// state.board = vec![
+/// state.set_cells_from_int_vec(&vec![
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
@@ -587,10 +587,10 @@ impl Stats {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
-/// ];
+/// ]);
 /// assert_eq!(find_moves1(&state, true), vec![(Pt{y: 4, x: 3}, 3)]);
 ///
-/// state.board = vec![
+/// state.set_cells_from_int_vec(&vec![
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
@@ -602,10 +602,10 @@ impl Stats {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
-/// ];
+/// ]);
 /// assert_eq!(find_moves1(&state, true), vec![]);
 ///
-/// state.board = vec![
+/// state.set_cells_from_int_vec(&vec![
 ///     vec![0,0,0, 3,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
@@ -617,7 +617,7 @@ impl Stats {
 ///     vec![0,0,0, 0,0,3, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
-/// ];
+/// ]);
 /// assert_eq!(find_moves1(&state, true), vec![]);
 /// ```
 pub fn find_moves1(state: &State, debug: bool) -> Vec<(Pt, i8)> {
@@ -655,7 +655,7 @@ pub fn find_moves1(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 /// use alexgames_rust::sudoku::sudoku_solve::find_moves2;
 /// 
 /// let mut state = State::new(9);
-/// state.board = vec![
+/// state.set_cells_from_int_vec(&vec![
 ///     vec![0,0,0, 3,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
@@ -667,10 +667,10 @@ pub fn find_moves1(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![3,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,3],
-/// ];
+/// ]);
 /// assert_eq!(find_moves2(&state, true), vec![(Pt{y: 6, x: 4}, 3)]);
 ///
-/// state.board = vec![
+/// state.set_cells_from_int_vec(&vec![
 ///     vec![1,2,3, 0,5,6, 7,8,9],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
@@ -682,7 +682,7 @@ pub fn find_moves1(state: &State, debug: bool) -> Vec<(Pt, i8)> {
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
 ///     vec![0,0,0, 0,0,0, 0,0,0],
-/// ];
+/// ]);
 /// assert_eq!(find_moves2(&state, true), vec![(Pt{y: 0, x: 3}, 4)]);
 /// ```
 pub fn find_moves2(state: &State, debug: bool) -> Vec<(Pt, i8)> {
@@ -801,7 +801,8 @@ pub fn solve(state: &State, depth: i32, stats: &mut Stats, params: &Params, rng:
 
 	let apply_move = |state: &mut State, pt: &Pt, val: &i8, depth: i32| {
 		assert!(state.cell_val(pt.y, pt.x) == 0 || state.cell_val(pt.y, pt.x) == *val);
-		state.board[pt.y as usize][pt.x as usize] = *val;
+		state.board[pt.y as usize][pt.x as usize].val = *val;
+		state.board[pt.y as usize][pt.x as usize].revealed = true;
 	};
 
 	while activity {
@@ -969,15 +970,16 @@ pub fn hide_cells(state: &State, params: &GenParams, rng: &mut impl Rng) -> Stat
 		let mut pts = get_all_pts(&state);
 		pts.shuffle(rng);
 		for pt in pts {
-			let old_val = state.board[pt.y as usize][pt.x as usize];
-			if old_val == 0 {
+			//let old_val = state.board[pt.y as usize][pt.x as usize].val;
+			let val_revealed = state.board[pt.y as usize][pt.x as usize].revealed;
+			if !val_revealed {
 				continue;
 			}
 
 
-			state.board[pt.y as usize][pt.x as usize] = 0;
+			state.board[pt.y as usize][pt.x as usize].revealed = false;
 			if solve(&state, 0, &mut stats, &solve_params, rng).is_none() {
-				state.board[pt.y as usize][pt.x as usize] = old_val;
+				state.board[pt.y as usize][pt.x as usize].revealed = true;
 			} else {
 				activity = true;
 			}

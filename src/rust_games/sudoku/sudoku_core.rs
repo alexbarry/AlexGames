@@ -15,10 +15,26 @@ pub enum Mode {
 	EnterCellNotes,
 }
 
+#[derive(PartialEq, Serialize, Deserialize, Debug, Clone)]
+pub struct CellInfo {
+	pub val: i8,
+	pub revealed: bool,
+}
+
+impl CellInfo {
+	pub const fn new(val: i8, revealed_int: i8) -> Self {
+		assert!(revealed_int == 0 || revealed_int == 1);
+		Self {
+			val: val,
+			revealed: revealed_int != 0,
+		}
+	}
+}
+
 // TODO manually implement serialization
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct State {
-	pub board: Vec<Vec<i8>>,
+	pub board: Vec<Vec<CellInfo>>,
 	pub user_input: Vec<Vec<i8>>,
 	pub user_input_notes: Vec<Vec<Vec<i8>>>,
 	pub size: usize,
@@ -38,7 +54,7 @@ pub enum CellContents {
 impl State {
 	pub fn new(size: usize) -> Self {
 		Self {
-			board: vec![vec![0; size]; size],
+			board: vec![vec![ CellInfo { val: 0, revealed: false}; size]; size],
 			user_input: vec![vec![0; size]; size],
 			user_input_notes: vec![vec![ vec![] ; size]; size],
 			size: size,
@@ -52,11 +68,10 @@ impl State {
 	pub fn val(&self, y: i32, x: i32) -> CellContents {
 		let y = y as usize;
 		let x = x as usize;
-		if self.board[y][x] != 0 {
-			CellContents::StartingVal(self.board[y][x])
+		if self.board[y][x].revealed {
+			CellContents::StartingVal(self.board[y][x].val)
 		} else if self.user_input[y][x] != 0 {
 			CellContents::UserInputVal(self.user_input[y][x])
-		// TODO notes?
 		} else {
 			CellContents::Empty
 		}
@@ -176,7 +191,9 @@ impl State {
 		if let Some(selected) = self.selected {
 			match self.mode {
 				Mode::EnterStartingVal => {
-					self.board[selected.y as usize][selected.x as usize] = val;
+					let cell_info = &mut self.board[selected.y as usize][selected.x as usize];
+					cell_info.val = val;
+					cell_info.revealed = true;
 				},
 				Mode::EnterCellVal => {
 					self.user_input[selected.y as usize][selected.x as usize] = val;
@@ -268,6 +285,18 @@ impl State {
 		conflicts
 	}
 
+	pub fn set_cells_from_int_vec(&mut self, cell_vals: &Vec<Vec<i8>>) {
+		assert_eq!(self.board.len(), cell_vals.len());
+		for y in 0..cell_vals.len() {
+			assert_eq!(self.board[y].len(), cell_vals[y].len());
+			for x in 0..cell_vals[y].len() {
+				let val = cell_vals[y][x];
+				self.board[y][x].val = val;
+				self.board[y][x].revealed = (val != 0);
+			}
+		}
+	}
+
 	pub fn print(&self) {
 		let box_size = self.box_size as i32;
 		let game_size = self.size as i32;
@@ -305,8 +334,8 @@ impl State {
 	}
 
 	pub fn print_as_rust_code(&self, indent: usize) {
-		let box_size = self.box_size as i32;
-		let game_size = self.size as i32;
+		let box_size = self.box_size;
+		let game_size = self.size;
 		let indent_str = " ".repeat(indent);
 		//println!("{}vec![", indent_str);
 		println!("{}[", indent_str);
@@ -319,9 +348,13 @@ impl State {
 			print!("{}[", indent2_str);
 			for x in 0..game_size {
 				if x != 0 && x % box_size == 0 {
-					print!(" ");
+					//print!("{:30}","");
+					print!("  ");
 				}
-				print!("{}", self.cell_val(y,x));
+				//print!("{}", self.cell_val(y,x));
+				let cell_info = &self.board[y][x];
+				//print!("CellInfo::new({},{})", cell_info.val, if cell_info.revealed { 1 } else { 0 });
+				print!("val({},{})", cell_info.val, if cell_info.revealed { 1 } else { 0 });
 				if x < game_size-1 {
 					print!(",");
 				}

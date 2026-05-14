@@ -1,14 +1,18 @@
 
-use crate::sudoku::sudoku_core::{self, State, Pt};
+use crate::sudoku::sudoku_core::{self, State, Pt, CellInfo};
 
 use std::collections::HashSet;
 
-// TODO:
-// * add user input, perhaps in same format as notes?
-// * add notes, probably with pt using 4 bits for y, 4 for x, and 9 for notes
-//   actually should convert pt value to (y*9+x) into 7 bits, then can use extra bit for bit 9 of notes
+use bitvec::prelude::{BitVec, Lsb0};
 
-const VERSION: u8 = 1;
+// TODO:
+// * store "mode" as part of state, at least for storing saved data.
+//   For sharing, this could be dropped to save some bits.
+
+const VERSION1: u8 = 1;
+const VERSION2: u8 = 2;
+
+const CURRENT_VERSION: u8 = VERSION2;
 
 fn pt_id(state: &State, pt: &Pt) -> u8 {
 	let size = state.size as i32;
@@ -91,24 +95,34 @@ fn deserialize_notes(state: &State, serialized_note: &[u8]) -> (Pt, Vec<i8>) {
 pub fn serialize(state: &sudoku_core::State) -> Vec<u8> {
     let mut serialized_state: Vec<u8> = Vec::new();
 
-    serialized_state.push(VERSION);
+    serialized_state.push(CURRENT_VERSION);
     serialized_state.push(state.size.try_into().unwrap());
 
 	assert!(state.size < 16);
 	let mut board_serialized =
 		state.board.iter()
 			.flatten()
+			.map(|cell_info| cell_info.val)
 			.collect::<Vec<_>>()
 			.chunks(2)
 			.map(|chunk| {
 				let a = (chunk[0] & 0xf) as u8;
-				let b = (chunk.get(1).copied().unwrap_or(&0) & 0xf) as u8;
+				let b = (chunk.get(1).copied().unwrap_or(0) & 0xf) as u8;
 	
 				(a << 4) | b
 			})
 			.collect::<Vec<_>>();
 	assert_eq!(board_serialized.len(), (state.size*state.size).div_ceil(2));
 	serialized_state.append(&mut board_serialized);
+
+	let revealed_bitvec_flat: BitVec<u8, Lsb0> = state.board
+		.iter()
+		.flatten()
+		.map(|cell_info| cell_info.revealed)
+		.collect();
+	let mut revealed_bitvec_flat: Vec<u8> = revealed_bitvec_flat.to_vec().into();
+	assert_eq!(revealed_bitvec_flat.len(), bool_u8_ary_size(state.size*state.size));
+	serialized_state.append(&mut revealed_bitvec_flat);
 
 	assert!(state.size == 9);
 	let mut user_input_serialized = (0..state.size).flat_map(move |y| {
@@ -150,13 +164,20 @@ pub fn serialize(state: &sudoku_core::State) -> Vec<u8> {
 	serialized_state
 }
 
+fn bool_u8_ary_size(size: usize) -> usize {
+	size.div_ceil(8)
+}
+
 pub fn deserialize(mut serialized_state: &[u8]) -> sudoku_core::State {
 	let version = serialized_state[0];
-    assert!(
-        version == VERSION,
-        "Unhandled serialized state version {}",
-        version
-    );
+
+	if version == VERSION1 {
+		// ok
+	} else if version == VERSION2 {
+		// ok
+	} else {
+		panic!("Unhandled version {}", version);
+	}
     serialized_state = &serialized_state[1..];
 
 	let size = serialized_state[0] as usize;
@@ -166,7 +187,7 @@ pub fn deserialize(mut serialized_state: &[u8]) -> sudoku_core::State {
 
 	let board_len_bytes = (size*size).div_ceil(2);
 
-	let board: Vec<Vec<i8>> = serialized_state[..board_len_bytes]
+	let board: Vec<Vec<CellInfo>> = serialized_state[..board_len_bytes]
 					.into_iter()
 					.flat_map(|byte| {
 						let val1 = (byte>>4) & 0xf;
@@ -176,13 +197,42 @@ pub fn deserialize(mut serialized_state: &[u8]) -> sudoku_core::State {
 					.take(size*size)
 					.collect::<Vec<_>>()
 					.chunks(size.into())
-					.map(|chunk| chunk.to_vec())
+					.map(|chunk| chunk.into_iter().map(|val| CellInfo { val: *val, revealed: *val != 0}).collect())
 					.collect();
 	assert_eq!(board.len(), size);
 	assert_eq!(board[0].len(), size);
     serialized_state = &serialized_state[board_len_bytes..];
 
 	state.board = board;
+
+	if version >= VERSION2 {
+		let len = bool_u8_ary_size(size*size);
+		let revealed_flat_u8 = &serialized_state[..len];
+		serialized_state = &serialized_state[len..];
+
+		let mut revealed_flat = BitVec::<u8, Lsb0>::from_slice(revealed_flat_u8);
+		revealed_flat.truncate(size*size);
+
+		let revealed: Vec<Vec<bool>> = revealed_flat
+			.chunks(size)
+			.map(|row| row.iter().by_vals().collect())
+			.collect();
+		assert_eq!(state.board.len(), revealed.len());
+		for y in 0..state.board.len() {
+			assert_eq!(state.board[y].len(), revealed[y].len());
+			for x in 0..state.board[y].len() {
+				state.board[y][x].revealed = revealed[y][x];
+			}
+		}
+		
+	} else if version == VERSION1 {
+		/*
+		let revealed = state.board.clone()
+			.into_iter()
+			.map(|row| row.into_iter().map(|cell| cell != 0).collect())
+			.collect();
+		*/
+	}
 
 	let user_input_bytes_len = serialized_state[0] as usize;
     serialized_state = &serialized_state[1..];
