@@ -5,9 +5,6 @@
 use alexgames_rust::sudoku::sudoku_core::{self, Pt, State, CellInfo};
 use alexgames_rust::sudoku::sudoku_solve;
 
-const puzzles: [ [ [i8;9]; 9]; 0] = [
-];
-
 use rand_chacha::rand_core;
 use rand::Rng;
 use rand_core::{SeedableRng};
@@ -17,6 +14,7 @@ use std::env;
 
 
 fn solve_main() {
+/*
 
 	let mut rng = ChaCha12Rng::from_seed(Default::default());
 
@@ -37,6 +35,7 @@ fn solve_main() {
 		//assert!(solved);
 		println!("stats: {:?}", stats);
 	}
+*/
 }
 
 const preamble_val_fn: &'static str = r#"
