@@ -1,6 +1,8 @@
 
 use crate::sudoku::sudoku_core::{self, State, CellContents, Mode};
 
+use std::collections::HashMap;
+
 use crate::rust_game_api::{
     CCallbacksPtr, TextAlign
 };
@@ -13,6 +15,7 @@ pub const CANVAS_WIDTH: i32 = 480;
 
 pub struct DrawState {
 	pub immediately_show_mistakes: Option<bool>,
+	pub mistakes: HashMap<Pt, i8>,
 
 	TEXT_FONT_SIZE: i32,
 	TEXT_SMALLER_FONT_SIZE: i32,
@@ -65,13 +68,14 @@ struct BtnPos {
 impl DrawState {
 	pub fn new() -> Self {
 		Self {
+			immediately_show_mistakes: None,
+			mistakes: HashMap::new(),
+
 			TEXT_FONT_SIZE: 32,
 			TEXT_SMALLER_FONT_SIZE: 16,
 			TEXT_NOTE_FONT_SIZE: 14,
 			LINE_THICKNESS: 1,
 			LINE_GROUP_THICKNESS: 4,
-
-			immediately_show_mistakes: None,
 		}
 	}
 
@@ -299,12 +303,15 @@ impl DrawState {
 		};
 		
 
-		let conflicts = state.get_conflicts(self.immediately_show_mistakes.unwrap_or(true));
+		let mut highlight_err = state.get_conflicts(self.immediately_show_mistakes.unwrap_or(true));
+		for (pt, _) in self.mistakes.clone() {
+			highlight_err.insert(pt);
+		}
 
 		for y in 0..game_size {
 			for x in 0..game_size {
 				let pt = Pt {y: y as i32, x: x as i32};
-				let is_conflict = conflicts.contains(&pt);
+				let highlight_err = highlight_err.contains(&pt);
 				let pos_info = self.cell_pos(state, y, x);
 				let cell = state.val(y, x);
 				let cell_val = match cell {
@@ -324,7 +331,7 @@ impl DrawState {
 					Some(SELECTED2_BG)
 				} else if state.selected.is_some_and(|pt| pt.y == y || pt.x == x || state.box_id(&pt) == state.box_id(&Pt {y: y as i32, x: x as i32})) {
 					Some(SELECTED3_BG)
-				} else if is_conflict {
+				} else if highlight_err {
 					Some(CONFLICT_BG)
 				} else {
 					None
@@ -332,7 +339,7 @@ impl DrawState {
 				if let Some(bg_colour) = bg_colour {
 					callbacks.draw_rect(&bg_colour, pos_info.y1, pos_info.x1, pos_info.y2, pos_info.x2)
 				}
-				let text_colour = if is_conflict {
+				let text_colour = if highlight_err {
 					TEXT_COLOUR_CONFLICT
 				} else if starting_val {
 					TEXT_COLOUR

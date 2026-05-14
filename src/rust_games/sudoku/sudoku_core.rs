@@ -270,6 +270,20 @@ impl State {
 			.collect()
 	}
 
+	pub fn get_mistakes(&self) -> HashMap<Pt, i8> {
+		let mut mistakes = HashMap::new();
+		for pt in self.all_pts() {
+			let y = pt.y as usize;
+			let x = pt.x as usize;
+			if !self.board[y][x].revealed && self.user_input[y][x] != 0 && self.board[y][x].val != 0 {
+				if self.board[y][x].val != self.user_input[y][x] {
+					mistakes.insert(pt, self.board[y][x].val);
+				}
+			}
+		}
+		mistakes
+	}
+
 	pub fn get_conflicts(&self, show_mistakes: bool) -> HashSet<Pt> {
 		let mut conflicts = HashSet::new();
 

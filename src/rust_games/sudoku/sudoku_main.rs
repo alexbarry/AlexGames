@@ -34,6 +34,7 @@ const BTN_ID_REDO: &'static str = "btn_id_redo";
 const OPTION_ID_LOAD_NEXT_PREGEN_PUZZLE: &'static str = "option_load_next_pregenerated_puzzle";
 const ENTER_CUSTOM_GAME_OPTION_ID: &'static str = "option_new_custom_game";
 const OPTION_ID_IMMEDIATELY_SHOW_MISTAKES: &'static str = "option_immediately_show_mistakes";
+const OPTION_ID_CHECK_FOR_MISTAKES: &'static str = "option_check_for_mistakes";
 
 const STORED_DATA_KEY_LAST_LOADED_PUZZLE_IDX: &'static str = "sudoku_last_loaded_puzzle1_idx";
 const STORED_DATA_KEY_IMMEDIATELY_REVEAL_MISTAKES: &'static str = "sudoku_immediately_reveal_mistakes";
@@ -208,10 +209,14 @@ impl AlexGamesSudoku {
 		self.draw_state();
 	}
 
-
-
 	fn get_immediately_show_mistakes_val(&self) -> bool {
 		self.get_immediately_show_mistakes_val_stored().unwrap_or(true)
+	}
+
+	fn check_for_mistakes(&mut self) {
+		let mistakes = self.game_state.get_mistakes();
+		self.draw_state.mistakes = mistakes;
+		self.draw_state();
 	}
 }
 
@@ -291,6 +296,7 @@ impl AlexGamesApi for AlexGamesSudoku {
 			}
 		}
 
+		let old_sel = self.game_state.selected;
 
 		let rc = match key_code {
 			"ArrowLeft" | "KeyH" => self.game_state.move_sel(&Pt {y:0, x:-1}),
@@ -312,8 +318,20 @@ impl AlexGamesApi for AlexGamesSudoku {
 			"KeyR" => { self.load_state_offset(1) },
 			_ => { false },
 		};
+		let new_val = if let Some(sel) = old_sel {
+			Some(self.game_state.user_input[sel.y as usize][sel.x as usize])
+		} else {
+			None
+		};
 
 		if rc {
+
+			if let Some(sel) = old_sel {
+				let mistake_val = self.draw_state.mistakes.get(&sel);
+				if mistake_val.is_some() && mistake_val != new_val.as_ref() {
+					self.draw_state.mistakes.remove(&sel);
+				}
+			}
 			self.draw_state();
 			self.save_state()
 		}
@@ -360,6 +378,7 @@ impl AlexGamesApi for AlexGamesSudoku {
 			ENTER_CUSTOM_GAME_OPTION_ID => self.enter_custom_game(),
 			OPTION_ID_LOAD_NEXT_PREGEN_PUZZLE => self.load_next_pregen_puzzle(),
 			OPTION_ID_IMMEDIATELY_SHOW_MISTAKES => self.set_immediately_show_mistakes(value != 0),
+			OPTION_ID_CHECK_FOR_MISTAKES => self.check_for_mistakes(),
 			&_ => {
 				panic!("unhandled option id");
 			}
@@ -400,6 +419,12 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
 		option_type: OptionType::Toggle,
 		label: "Immediately show mistakes".to_string(),
 		value: if game.draw_state.immediately_show_mistakes.unwrap_or(true) { 1 } else { 0 },
+	});
+
+	callbacks.add_game_option(OPTION_ID_CHECK_FOR_MISTAKES, &OptionInfo {
+		option_type: OptionType::Button,
+		label: "Check for mistakes".to_string(),
+		value: 0,
 	});
 
 	game.enter_custom_game();
