@@ -9,6 +9,7 @@ use crate::rust_game_api::{
 
 use crate::libs::point::Pt;
 use crate::libs::draw;
+pub use crate::libs::celebrations::fireworks::FireworksState;
 
 pub const CANVAS_HEIGHT: i32 = 600;
 pub const CANVAS_WIDTH: i32 = 480;
@@ -17,6 +18,10 @@ pub struct DrawState {
 	pub immediately_show_mistakes: Option<bool>,
 	pub mistakes: HashMap<Pt, i8>,
 
+
+	fireworks_state: FireworksState,
+
+	callbacks: &'static CCallbacksPtr,
 	TEXT_FONT_SIZE: i32,
 	TEXT_SMALLER_FONT_SIZE: i32,
 	TEXT_NOTE_FONT_SIZE: i32,
@@ -66,10 +71,13 @@ struct BtnPos {
 }
 
 impl DrawState {
-	pub fn new() -> Self {
+	pub fn new(callbacks: &'static CCallbacksPtr) -> Self {
 		Self {
 			immediately_show_mistakes: None,
 			mistakes: HashMap::new(),
+			fireworks_state: FireworksState::new(),
+
+			callbacks: callbacks,
 
 			TEXT_FONT_SIZE: 32,
 			TEXT_SMALLER_FONT_SIZE: 16,
@@ -77,6 +85,22 @@ impl DrawState {
 			LINE_THICKNESS: 1,
 			LINE_GROUP_THICKNESS: 4,
 		}
+	}
+
+	pub fn update_anim_state(&mut self, dt_ms: i32) {
+        let mut fireworks_complete = self.fireworks_state.update(dt_ms);
+
+		if fireworks_complete {
+            self.callbacks.update_timer_ms(0);
+		}
+	}
+
+	pub fn start_win_animation(&mut self) {
+        // TODO only do this in a single place, and not if the timer is already running?
+        let FPS = 60;
+        self.callbacks.update_timer_ms(1000 / FPS);
+
+        self.fireworks_state.start_animation();
 	}
 
 	fn cell_pos(&self, game_state: &State, y: i32, x: i32) -> CellPos {
@@ -449,6 +473,8 @@ impl DrawState {
 			};
 			callbacks.draw_text(&btn_text, &text_colour, btn_pos.y_text, btn_pos.x_text, btn_pos.font_size, TextAlign::Middle);
 		}
+
+        self.fireworks_state.draw(callbacks);
 
 		callbacks.draw_refresh();
 	}

@@ -258,6 +258,7 @@ impl AlexGamesSudoku {
 
 		if !self.game_won && self.game_state.game_won() {
 			self.game_won = true;
+			self.draw_state.start_win_animation();
 			self.callbacks.set_status_msg(&format!("Congratulations, you win!"));
 		}
 	}
@@ -373,6 +374,7 @@ impl AlexGamesApi for AlexGamesSudoku {
 	}
 
     fn update(&mut self, dt_ms: i32) {
+		self.draw_state.update_anim_state(dt_ms);
         self.draw_state();
     }
 
@@ -423,7 +425,7 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
     let mut game = AlexGamesSudoku {
         callbacks: callbacks,
         game_state: sudoku_core::State::new(SUDOKU_SIZE),
-        draw_state: DrawState::new(),
+        draw_state: DrawState::new(callbacks),
 		session_id: callbacks.get_new_session_id(),
 		prev_state: None,
 
