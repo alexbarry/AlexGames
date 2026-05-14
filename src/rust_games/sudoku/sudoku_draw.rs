@@ -75,7 +75,20 @@ struct BtnPos {
 fn format_time_elapsed(time_secs: i32) -> String {
 	let secs = time_secs % 60;
 	let mins = time_secs / 60;
-	format!("{}:{:02}", mins, secs)
+	let hours = mins / 60;
+	let mins = mins - hours * 60;
+
+	let mins_str = if hours == 0 {
+		format!("{}", mins)
+	}  else {
+		format!("{:02}", mins)
+	};
+	let hours_str = if hours > 0 {
+		format!("{}:", hours)
+	} else {
+		"".to_string()
+	};
+	format!("{}{}:{:02}", hours_str, mins_str, secs)
 }
 
 impl DrawState {
