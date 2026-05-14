@@ -428,7 +428,6 @@ pub fn init_sudoku(callbacks: &'static CCallbacksPtr) -> Box<dyn AlexGamesApi> {
 		value: 0,
 	});
 
-	game.enter_custom_game();
 
     Box::from(game)
 }
