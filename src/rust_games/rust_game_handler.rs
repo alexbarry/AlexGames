@@ -306,6 +306,39 @@ pub extern "C" fn rust_game_api_get_state(
 }
 
 #[no_mangle]
+pub extern "C" fn rust_game_api_get_init_state(
+    handle: *mut c_void,
+    state_out: *mut u8,
+    state_out_max_len: size_t,
+) -> size_t {
+    let handle = handle_void_ptr_to_trait_ref(handle);
+    println!("rust_game_api_get_init_state");
+    let state = handle.get_init_state();
+
+    if !state.is_some() {
+        return 0;
+    }
+    let state = state.expect("state should be some at this point");
+
+    if state.len() > state_out_max_len {
+        handle.callbacks().set_status_err(&format!(
+            "get_init_state: state is {} bytes long but buffer is only {}",
+            state_out_max_len,
+            state.len()
+        ));
+        // TODO can I return -1 here? I don't know if I even checked for this case
+        // before.
+        return 0;
+    }
+
+    unsafe {
+        ptr::copy_nonoverlapping(state.as_ptr(), state_out, state.len());
+    }
+
+    return state.len();
+}
+
+#[no_mangle]
 pub extern "C" fn rust_game_supported(game_str_ptr: *const u8, game_str_len: usize) -> bool {
     let game_id = c_str_to_str(game_str_ptr, Some(game_str_len));
 

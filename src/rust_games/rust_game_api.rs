@@ -840,4 +840,10 @@ pub trait AlexGamesApi {
         println!("get_state not implemented");
         None
     }
+
+    fn get_init_state(&self) -> Option<Vec<u8>> {
+        println!("get_init_state not implemented");
+        None
+    }
+
 }
