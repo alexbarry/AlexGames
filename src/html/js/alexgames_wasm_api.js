@@ -398,6 +398,7 @@ function add_game_option(gfx, option_id, option_info) {
 			label_elem.innerText = option_info.label;
 			label_elem.setAttribute('for', checkbox_elem.id);
 			elem = document.createElement("div");
+			elem.classList.add("options_toggle");
 			elem.appendChild(checkbox_elem);
 			elem.appendChild(label_elem);
 			gfx.option_elems_to_id.set(option_id, elem);
