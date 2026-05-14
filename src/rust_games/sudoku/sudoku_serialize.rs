@@ -162,7 +162,11 @@ pub fn serialize(state: &sudoku_core::State) -> Vec<u8> {
 		sudoku_core::Mode::EnterCellNotes => 3,
 	});
 
-	serialized_state.append(&mut state.time_elapsed_ms.to_le_bytes().to_vec());
+
+	// Last 4 bytes are optionally time_elapsed.
+	if state.time_elapsed_ms > 0 {
+		serialized_state.append(&mut state.time_elapsed_ms.to_le_bytes().to_vec());
+	}
 
 	serialized_state
 }
@@ -283,7 +287,9 @@ pub fn deserialize(mut serialized_state: &[u8]) -> sudoku_core::State {
 		serialized_state = &serialized_state[1..];
 	}
 
-	if version >= VERSION3 {
+	// time_elapsed is optional, and is purposely omitted if zero
+	// (this is useful for sharing initial state)
+	if serialized_state.len() >= 4 {
 		let time_ms_bytes = &serialized_state[..4];
 		serialized_state = &serialized_state[4..];
 
