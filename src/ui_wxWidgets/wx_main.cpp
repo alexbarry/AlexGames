@@ -97,6 +97,7 @@ static void wx_delete_extra_canvases(void);
 static size_t wx_get_user_colour_pref(char *colour_pref_out, size_t max_colour_pref_out_len);
 static bool wx_is_multiplayer_session_id_needed();
 static size_t wx_get_multiplayer_session_id(char *sess_id_out, size_t sess_id_out_max_len);
+static void wx_set_canvas_size(int width, int height);
 static bool wx_is_feature_supported(const char *feature_id, size_t feature_id_len);
 
 
@@ -210,6 +211,7 @@ static const struct game_api_callbacks api = {
 	wx_get_user_colour_pref,
 	wx_is_multiplayer_session_id_needed,
 	wx_get_multiplayer_session_id,
+	wx_set_canvas_size,
 	wx_is_feature_supported,
 	wx_destroy_all,
 };
@@ -1698,6 +1700,10 @@ static bool wx_is_multiplayer_session_id_needed() {
 static size_t wx_get_multiplayer_session_id(char *sess_id_out, size_t sess_id_out_max_len) {
 	size_t bytes_written = snprintf(sess_id_out, sess_id_out_max_len, "not needed on this client!");
 	return bytes_written;
+}
+
+static void wx_set_canvas_size(int width, int height) {
+	NOT_IMPL();
 }
 
 

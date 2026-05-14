@@ -458,6 +458,9 @@ static bool jni_is_feature_supported(const char *feature_id, size_t feature_id_l
 	return false;
 }
 
+static void jni_set_canvas_size(int width, int height) {
+}
+
 static void jni_destroy_all(void) {
 	// TODO
 }
@@ -516,6 +519,8 @@ static const struct game_api_callbacks api = {
 
 	jni_is_multiplayer_session_needed,
 	jni_get_multiplayer_session_id,
+
+	jni_set_canvas_size,
 
 	jni_is_feature_supported,
 	jni_destroy_all
