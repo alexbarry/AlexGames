@@ -305,6 +305,13 @@ impl AlexGamesApi for AlexGamesSudoku {
 		Some(serialized_state)
 	}
 
+    fn get_init_state(&self) -> Option<Vec<u8>> {
+		let init_state = self.game_state.init();
+		let serialized_state = sudoku_serialize::serialize(&init_state);
+
+		Some(serialized_state)
+	}
+
     fn start_game(&mut self, saved_state: Option<(i32, Vec<u8>)>) {
 		if let Some((session_id, state_serialized)) = saved_state {
 			self.set_state(&state_serialized, session_id);

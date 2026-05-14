@@ -67,6 +67,13 @@ impl State {
 		}
 	}
 
+	pub fn init(&self) -> Self {
+		let mut init_state = State::new(self.size);
+		init_state.board = self.board.clone();
+
+		init_state
+	}
+
 	pub fn val(&self, y: i32, x: i32) -> CellContents {
 		let y = y as usize;
 		let x = x as usize;
