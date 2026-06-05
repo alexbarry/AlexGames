@@ -1,6 +1,8 @@
 package net.alexbarry.alexgames
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -68,6 +70,25 @@ class LocalClientWebView : Fragment() {
                 super.onPageFinished(view, url)
                 Log.i(TAG, "onPageFinished");
                 webview.evaluateJavascript("set_header_visible(false);", null);
+            }
+
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): Boolean {
+                val uri = request?.url ?: return false
+                // The game is served from the local asset host. Send any
+                // other link out to the system so it opens in a browser
+                // instead of loading over the game.
+                if (uri.host == "appassets.androidplatform.net") {
+                    return false
+                }
+                return try {
+                    view?.context?.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    true
+                } catch (e: ActivityNotFoundException) {
+                    false
+                }
             }
 
             override fun shouldInterceptRequest(
