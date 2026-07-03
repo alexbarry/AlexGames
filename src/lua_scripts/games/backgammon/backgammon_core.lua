@@ -12,17 +12,17 @@ local combinations = require("libs/combinations")
 --
 --    1 1 1
 --    2 1 0 9 8 7    6 5 4 3 2 1
---    b - - - w - || b - - - - b
---    b - - - w - || b - - - - b  <-- (black start)
---    b - - - w - || b - - - - -
---    b - - - - - || b - - - - -
---    b - - - - - || b - - - - -
+--    b - - - w - || w - - - - b
+--    b - - - w - || w - - - - b  <-- (black start)
+--    b - - - w - || w - - - - -
+--    b - - - - - || w - - - - -
+--    b - - - - - || w - - - - -
 --                ||
---    w - - - - - || w - - - - -
---    w - - - - - || w - - - - -
---    w - - - b - || w - - - - -
---    w - - - b - || w - - - - w  <-- (white start)
---    w - - - b - || w - - - - w
+--    w - - - - - || b - - - - -
+--    w - - - - - || b - - - - -
+--    w - - - b - || b - - - - -
+--    w - - - b - || b - - - - w  <-- (white start)
+--    w - - - b - || b - - - - w
 --    1 1 1 1 1 1    1 2 2 2 2 2
 --    3 4 5 6 7 8    9 0 1 2 3 4
 --
@@ -374,12 +374,12 @@ function core.new_game()
 
 	state.board[1][ 1] = make_pieces(core.PLAYER_BLACK, 5)
 	state.board[1][ 5] = make_pieces(core.PLAYER_WHITE, 3)
-	state.board[1][ 7] = make_pieces(core.PLAYER_BLACK, 5)
+	state.board[1][ 7] = make_pieces(core.PLAYER_WHITE, 5)
 	state.board[1][12] = make_pieces(core.PLAYER_BLACK, 2)
 
 	state.board[2][ 1] = make_pieces(core.PLAYER_WHITE, 5)
 	state.board[2][ 5] = make_pieces(core.PLAYER_BLACK, 3)
-	state.board[2][ 7] = make_pieces(core.PLAYER_WHITE, 5)
+	state.board[2][ 7] = make_pieces(core.PLAYER_BLACK, 5)
 	state.board[2][12] = make_pieces(core.PLAYER_WHITE, 2)
 
 	return state
