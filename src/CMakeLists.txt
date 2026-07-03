@@ -78,6 +78,7 @@ else()
 	execute_process(COMMAND git clone https://github.com/nih-at/libzip.git ${LIBZIP_DIR})
 endif()
 
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build libzip as static lib" FORCE)
 add_subdirectory(${PROJECT_ROOT}/third_party/libzip/ libzip_out)
 # TODO not sure how to suppress CMP0063 from including libzip
 # cmake_policy(CXX_VISIBILITY_PRESENT NEW)
