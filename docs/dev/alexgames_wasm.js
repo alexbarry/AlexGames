@@ -9,8 +9,7 @@ var createMyModule = (() => {
   // In EXPORT_ES6 mode we can just use 'import.meta.url'.
   var _scriptName = globalThis.document?.currentScript?.src;
   return async function(moduleArg = {}) {
-    var moduleRtn;
-
+    var Module = moduleArg;
 // include: shell.js
 // include: minimum_runtime_check.js
 (function() {
@@ -69,7 +68,6 @@ var createMyModule = (() => {
 // after the generated code, you will need to define   var Module = {};
 // before the code. Then that object will be used in the code, and you
 // can continue to use Module afterwards as well.
-var Module = moduleArg;
 
 // Determine the runtime environment we are in. You can customize this by
 // setting the ENVIRONMENT setting at compile time (see settings.js).
@@ -84,7 +82,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpz_03od_c.js
+// include: /tmp/tmp1wu46kf7.js
 
   if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
   Module['expectedDataFileDownloads']++;
@@ -211,11 +209,6 @@ Module['FS_createPath']("/preload/libs", "multiplayer", true, true);
 Module['FS_createPath']("/preload/libs", "serialize", true, true);
 Module['FS_createPath']("/preload/libs", "ui", true, true);
 
-    for (var file of metadata['files']) {
-      var name = file['filename']
-      Module['addRunDependency'](`fp ${name}`);
-    }
-
       async function processPackageData(arrayBuffer) {
         assert(arrayBuffer, 'Loading data file failed.');
         assert(arrayBuffer.constructor.name === ArrayBuffer.name, 'bad input to processPackageData ' + arrayBuffer.constructor.name);
@@ -227,7 +220,6 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
             var data = byteArray.subarray(file['start'], file['end']);
             // canOwn this data in the filesystem, it is a slice into the heap that will never change
         Module['FS_createDataFile'](name, null, data, true, true, true);
-        Module['removeRunDependency'](`fp ${name}`);
           }
           Module['removeRunDependency']('datafile_alexgames_wasm.data');
       }
@@ -239,10 +231,11 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
       if (!fetched) {
         fetched = await fetchPromise;
       }
-      processPackageData(fetched);
+      await processPackageData(fetched);
 
     }
-    if (Module['calledRun']) {
+    // Detect whether the module JS file has already been loaded.
+    if (Module['FS_createPath']) {
       runWithFS(Module);
     } else {
       if (!Module['preRun']) Module['preRun'] = [];
@@ -254,24 +247,24 @@ Module['FS_createPath']("/preload/libs", "ui", true, true);
 
   })();
 
-// end include: /tmp/tmpz_03od_c.js
-// include: /tmp/tmpb0z544tc.js
+// end include: /tmp/tmp1wu46kf7.js
+// include: /tmp/tmpm0jlwbqd.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpb0z544tc.js
-// include: /tmp/tmp6jr98_qy.js
+  // end include: /tmp/tmpm0jlwbqd.js
+// include: /tmp/tmpupsm3t56.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmp6jr98_qy.js
+  // end include: /tmp/tmpupsm3t56.js
 
 
-var arguments_ = [];
+var programArgs = [];
 var thisProgram = './this.program';
 var quit_ = (status, toThrow) => {
   throw toThrow;
@@ -327,7 +320,7 @@ readAsync = async (filename, binary = true) => {
     thisProgram = process.argv[1].replace(/\\/g, '/');
   }
 
-  arguments_ = process.argv.slice(2);
+  programArgs = process.argv.slice(2);
 
   quit_ = (status, toThrow) => {
     process.exitCode = status;
@@ -546,15 +539,31 @@ function dbg(...args) {
 })();
 
 function consumedModuleProp(prop) {
-  if (!Object.getOwnPropertyDescriptor(Module, prop)) {
-    Object.defineProperty(Module, prop, {
-      configurable: true,
-      set() {
-        abort(`Attempt to set \`Module.${prop}\` after it has already been processed.  This can happen, for example, when code is injected via '--post-js' rather than '--pre-js'`);
-
+  var value = Module[prop];
+  var msg = `Attempt to modify \`Module.${prop}\` after it has already been processed.  This can happen, for example, when code is injected via '--post-js' rather than '--pre-js'`;
+  if (Array.isArray(value)) {
+    value = new Proxy(value, {
+      set(target, key, val) {
+        abort(msg);
+        return false;
+      },
+      defineProperty(target, key, descriptor) {
+        abort(msg);
+        return false;
+      },
+      deleteProperty(target, key) {
+        abort(msg);
+        return false;
       }
     });
   }
+  Object.defineProperty(Module, prop, {
+    configurable: true,
+    get() { return value; },
+    set() {
+      abort(msg);
+    }
+  });
 }
 
 function makeInvalidEarlyAccess(name) {
@@ -605,16 +614,29 @@ function unexportedRuntimeSymbol(sym) {
 }
 
 // end include: runtime_debug.js
-var readyPromiseResolve, readyPromiseReject;
-
 // Memory management
 
 var runtimeInitialized = false;
 
 
 
+// When ALLOW_MEMORY_GROWTH is enabled, the conversion from Wasm
+// memory to ArrayBuffer requires some additional logic.
+function getMemoryBuffer() {
+  try {
+    // This method may be missing or could fail with `Memory must have a maximum`
+    var b = wasmMemory.toResizableBuffer();
+    return b;
+    
+  } catch {}
+  return wasmMemory.buffer;
+}
+
 function updateMemoryViews() {
-  var b = wasmMemory.buffer;
+  // If we already have a heap that is resizeable/growable buffer we don't
+  // need to do anything in updateMemoryViews.
+  if (HEAP8?.buffer?.resizable) return;
+  var b = getMemoryBuffer();
   HEAP8 = new Int8Array(b);
   HEAP16 = new Int16Array(b);
   HEAPU8 = new Uint8Array(b);
@@ -634,11 +656,10 @@ assert(globalThis.Int32Array && globalThis.Float64Array && Int32Array.prototype.
        'JS engine does not provide full typed array support');
 
 function preRun() {
-  if (Module['preRun']) {
-    if (typeof Module['preRun'] == 'function') Module['preRun'] = [Module['preRun']];
-    while (Module['preRun'].length) {
-      addOnPreRun(Module['preRun'].shift());
-    }
+  var preRun = Module['preRun'];
+  if (preRun) {
+    if (typeof preRun == 'function') preRun = [preRun];
+    onPreRuns.push(...preRun);
   }
   consumedModuleProp('preRun');
   // Begin ATPRERUNS hooks
@@ -662,17 +683,17 @@ TTY.init();
   // Begin ATPOSTCTORS hooks
   FS.ignorePermissions = false;
   // End ATPOSTCTORS hooks
+
+  checkStackCookie();
 }
 
 function postRun() {
   checkStackCookie();
-   // PThreads reuse the runtime from the main thread.
 
-  if (Module['postRun']) {
-    if (typeof Module['postRun'] == 'function') Module['postRun'] = [Module['postRun']];
-    while (Module['postRun'].length) {
-      addOnPostRun(Module['postRun'].shift());
-    }
+  var postRun = Module['postRun'];
+  if (postRun) {
+    if (typeof postRun == 'function') postRun = [postRun];
+    onPostRuns.push(...postRun);
   }
   consumedModuleProp('postRun');
 
@@ -710,21 +731,19 @@ function abort(what) {
   /** @suppress {checkTypes} */
   var e = new WebAssembly.RuntimeError(what);
 
-  readyPromiseReject?.(e);
   // Throw the error whether or not MODULARIZE is set because abort is used
   // in code paths apart from instantiation where an exception is expected
   // to be thrown when abort is called.
   throw e;
 }
 
-function createExportWrapper(name, nargs) {
+function createExportWrapper(name, func, nargs) {
+  assert(func);
   return (...args) => {
     assert(runtimeInitialized, `native function \`${name}\` called before runtime initialization`);
-    var f = wasmExports[name];
-    assert(f, `exported native function \`${name}\` not found`);
     // Only assert for too many arguments. Too few can be valid since the missing arguments will be zero filled.
     assert(args.length <= nargs, `native function \`${name}\` called with ${args.length} args but expects ${nargs}`);
-    return f(...args);
+    return func(...args);
   };
 }
 
@@ -735,9 +754,6 @@ function findWasmBinary() {
 }
 
 function getBinarySync(file) {
-  if (file == wasmBinaryFile && wasmBinary) {
-    return new Uint8Array(wasmBinary);
-  }
   if (readBinary) {
     return readBinary(file);
   }
@@ -820,8 +836,7 @@ async function createWasm() {
   // Load the wasm module and create an instance of using native support in the JS engine.
   // handle a generated wasm instance, receiving its exports and
   // performing other necessary setup
-  /** @param {WebAssembly.Module=} module*/
-  function receiveInstance(instance, module) {
+  function receiveInstance(instance) {
     wasmExports = instance.exports;
 
     assignWasmExports(wasmExports);
@@ -854,15 +869,14 @@ async function createWasm() {
   // performing.
   // Also pthreads and wasm workers initialize the wasm instance through this
   // path.
-  if (Module['instantiateWasm']) {
-    return new Promise((resolve, reject) => {
+  var instantiateWasm = Module['instantiateWasm'];
+  if (instantiateWasm) {
+    return new Promise((resolve) => {
       try {
-        Module['instantiateWasm'](info, (inst, mod) => {
-          resolve(receiveInstance(inst, mod));
-        });
+        instantiateWasm(info, (inst) => resolve(receiveInstance(inst)));
       } catch(e) {
         err(`Module.instantiateWasm callback failed with error: ${e}`);
-        reject(e);
+        throw e;
       }
     });
   }
@@ -1064,6 +1078,14 @@ async function createWasm() {
   
   var UTF8Decoder = globalThis.TextDecoder && new TextDecoder();
   
+  
+    /**
+   * heapOrArray is either a regular array, or a JavaScript typed array view.
+   * @param {number} idx
+   * @param {number=} maxBytesToRead
+   * @param {boolean=} ignoreNul
+   * @return {number}
+   */
   var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
       var maxIdx = idx + maxBytesToRead;
       if (ignoreNul) return maxIdx;
@@ -1341,7 +1363,7 @@ var initRandomFill = () => {
     // This block is not needed on v19+ since crypto.getRandomValues is builtin
     if (ENVIRONMENT_IS_NODE) {
       var nodeCrypto = require('node:crypto');
-      return (view) => nodeCrypto.randomFillSync(view);
+      return (view) => (nodeCrypto.randomFillSync(view), 0);
     }
 
     return (view) => (crypto.getRandomValues(view), 0);
@@ -2150,10 +2172,11 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       }
     };
   
+  var dependenciesPromise = null;
+  var resolveRunDependencies = async () => dependenciesPromise;
   var runDependencies = 0;
   
   
-  var dependenciesFulfilled = null;
   
   var runDependencyTracking = {
   };
@@ -2167,21 +2190,23 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       assert(id, 'removeRunDependency requires an ID');
       assert(runDependencyTracking[id]);
       delete runDependencyTracking[id];
-      if (runDependencies == 0) {
+      if (!runDependencies) {
         if (runDependencyWatcher !== null) {
           clearInterval(runDependencyWatcher);
           runDependencyWatcher = null;
         }
-        if (dependenciesFulfilled) {
-          var callback = dependenciesFulfilled;
-          dependenciesFulfilled = null;
-          callback(); // can add another dependenciesFulfilled
-        }
+        dependenciesPromise.resolve();
       }
     };
   
   
+  
   var addRunDependency = (id) => {
+      if (!runDependencies) {
+        var resolve;
+        dependenciesPromise = new Promise((r) => resolve = r);
+        dependenciesPromise.resolve = resolve;
+      }
       runDependencies++;
   
       Module['monitorRunDependencies']?.(runDependencies);
@@ -3408,8 +3433,8 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         return stream.stream_ops.ioctl(stream, cmd, arg);
       },
   readFile(path, opts = {}) {
-        opts.flags = opts.flags || 0;
-        opts.encoding = opts.encoding || 'binary';
+        opts.flags = opts.flags ?? 0;
+        opts.encoding = opts.encoding ?? 'binary';
         if (opts.encoding !== 'utf8' && opts.encoding !== 'binary') {
           abort(`Invalid encoding type "${opts.encoding}"`);
         }
@@ -3425,7 +3450,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
         return buf;
       },
   writeFile(path, data, opts = {}) {
-        opts.flags = opts.flags || 577;
+        opts.flags = opts.flags ?? 577;
         var stream = FS.open(path, opts.flags, opts.mode);
         data = FS_fileDataToTypedArray(data);
         FS.write(stream, data, 0, data.byteLength, undefined, opts.canOwn);
@@ -3762,8 +3787,8 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   
             // Function to get a range from the remote URL.
             var doXHR = (from, to) => {
-              if (from > to) abort("invalid range (" + from + ", " + to + ") or no bytes requested!");
-              if (to > datalength-1) abort("only " + datalength + " bytes available! programmer error!");
+              if (from > to) abort(`invalid range (${from}, ${to}) or no bytes requested!`);
+              if (to > datalength-1) abort(`only ${datalength} bytes available! programmer error!`);
   
               // TODO: Use mozResponseArrayBuffer, responseStream, etc. if available.
               var xhr = new XMLHttpRequest();
@@ -3781,7 +3806,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
               if (xhr.response !== undefined) {
                 return new Uint8Array(/** @type{Array<number>} */(xhr.response || []));
               }
-              return intArrayFromString(xhr.responseText || '', true);
+              return intArrayFromString(xhr.responseText ?? '', true);
             };
             var lazyArray = this;
             lazyArray.setDataGetter((chunkNum) => {
@@ -3954,7 +3979,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
           // MAP_PRIVATE calls need not to be synced back to underlying fs
           return 0;
         }
-        var buffer = HEAPU8.slice(addr, addr + len);
+        var buffer = HEAPU8.subarray(addr, addr + len);
         FS.msync(stream, buffer, offset, len, flags);
       },
   getStreamFromFD(fd) {
@@ -4439,6 +4464,9 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   
   
       var date = new Date(time * 1000);
+      if (isNaN(date.getTime())) {
+        return 1;
+      }
       HEAP32[((tmPtr)>>2)] = date.getUTCSeconds();
       HEAP32[(((tmPtr)+(4))>>2)] = date.getUTCMinutes();
       HEAP32[(((tmPtr)+(8))>>2)] = date.getUTCHours();
@@ -4449,6 +4477,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       var start = Date.UTC(date.getUTCFullYear(), 0, 1, 0, 0, 0, 0);
       var yday = ((date.getTime() - start) / (1000 * 60 * 60 * 24))|0;
       HEAP32[(((tmPtr)+(28))>>2)] = yday;
+      return 0;
     ;
   }
 
@@ -4470,6 +4499,9 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   
   
       var date = new Date(time*1000);
+      if (isNaN(date.getTime())) {
+        return 1;
+      }
       HEAP32[((tmPtr)>>2)] = date.getSeconds();
       HEAP32[(((tmPtr)+(4))>>2)] = date.getMinutes();
       HEAP32[(((tmPtr)+(8))>>2)] = date.getHours();
@@ -4488,6 +4520,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       var winterOffset = start.getTimezoneOffset();
       var dst = (summerOffset != winterOffset && date.getTimezoneOffset() == Math.min(winterOffset, summerOffset))|0;
       HEAP32[(((tmPtr)+(32))>>2)] = dst;
+      return 0;
     ;
   }
 
@@ -4517,14 +4550,18 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       var dstOffset = Math.min(winterOffset, summerOffset); // DST is in December in South
       if (dst < 0) {
         // Attention: some regions don't have DST at all.
-        HEAP32[(((tmPtr)+(32))>>2)] = Number(summerOffset != winterOffset && dstOffset == guessedOffset);
+        dst = Number(summerOffset != winterOffset && dstOffset == guessedOffset);
       } else if ((dst > 0) != (dstOffset == guessedOffset)) {
         var nonDstOffset = Math.max(winterOffset, summerOffset);
         var trueOffset = dst > 0 ? dstOffset : nonDstOffset;
         // Don't try setMinutes(date.getMinutes() + ...) -- it's messed up.
         date.setTime(date.getTime() + (trueOffset - guessedOffset)*60000);
+        if (isNaN(date.getTime())) {
+          return -1;
+        }
       }
   
+      HEAP32[(((tmPtr)+(32))>>2)] = dst;
       HEAP32[(((tmPtr)+(24))>>2)] = date.getDay();
       var yday = ydayFromDate(date)|0;
       HEAP32[(((tmPtr)+(28))>>2)] = yday;
@@ -4678,7 +4715,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       2147483648;
   
   var alignMemory = (size, alignment) => {
-      assert(alignment, "alignment argument is required");
+      assert(alignment, 'alignment argument is required');
       return Math.ceil(size / alignment) * alignment;
     };
   
@@ -4752,7 +4789,7 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
   var ENV = {
   };
   
-  var getExecutableName = () => thisProgram || './this.program';
+  var getExecutableName = () => thisProgram;
   var getEnvStrings = () => {
       if (!getEnvStrings.strings) {
         // Default values.
@@ -4829,7 +4866,6 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
       // if exit() was called explicitly, warn the user if the runtime isn't actually being shut down
       if (keepRuntimeAlive() && !implicit) {
         var msg = `program exited (with status: ${status}), but keepRuntimeAlive() is set (counter=${runtimeKeepaliveCounter}) due to an async operation, so halting execution but not exiting the runtime or preventing further async execution (you can use emscripten_force_exit, if you want to force a true shutdown)`;
-        readyPromiseReject?.(msg);
         err(msg);
       }
   
@@ -5098,15 +5134,14 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
 
   // Begin ATMODULES hooks
   if (Module['noExitRuntime']) noExitRuntime = Module['noExitRuntime'];
-if (Module['preloadPlugins']) preloadPlugins = Module['preloadPlugins'];
+
 if (Module['print']) out = Module['print'];
 if (Module['printErr']) err = Module['printErr'];
-if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   // End ATMODULES hooks
 
   checkIncomingModuleAPI();
 
-  if (Module['arguments']) arguments_ = Module['arguments'];
+  if (Module['arguments']) programArgs = Module['arguments'];
   if (Module['thisProgram']) thisProgram = Module['thisProgram'];
 
   // Assertions on removed incoming Module JS APIs.
@@ -5125,10 +5160,13 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   assert(typeof Module['wasmMemory'] == 'undefined', 'Use of `wasmMemory` detected.  Use -sIMPORTED_MEMORY to define wasmMemory externally');
   assert(typeof Module['INITIAL_MEMORY'] == 'undefined', 'Detected runtime INITIAL_MEMORY setting.  Use -sIMPORTED_MEMORY to define wasmMemory dynamically');
 
-  if (Module['preInit']) {
-    if (typeof Module['preInit'] == 'function') Module['preInit'] = [Module['preInit']];
-    while (Module['preInit'].length > 0) {
-      Module['preInit'].shift()();
+  var preInit = Module['preInit'];
+  if (preInit) {
+    if (typeof preInit == 'function') Module['preInit'] = preInit = [preInit];
+    // Written as a loop so that preInit functions that themselves add more
+    // preInit functions.  Is this actually needed?
+    while (preInit.length > 0) {
+      preInit.shift()();
     }
   }
   consumedModuleProp('preInit');
@@ -5257,6 +5295,7 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'registerPreMainLoop',
   'getPromise',
   'makePromise',
+  'addPromise',
   'idsToPromises',
   'makePromiseCallback',
   'incrementUncaughtExceptionCount',
@@ -5282,6 +5321,7 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'colorChannelsInGlTextureFormat',
   'emscriptenWebGLGetTexPixelData',
   'emscriptenWebGLGetUniform',
+  'webglGetProgramUniformLocation',
   'webglGetUniformLocation',
   'webglPrepareUniformLocationsBeforeFirstUse',
   'webglGetLeftBracePos',
@@ -5557,9 +5597,29 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('onRealloc');
   ignoredModuleProp('onFree');
   ignoredModuleProp('onSbrkGrow');
+  ignoredModuleProp('onCOSCacheHit');
+  ignoredModuleProp('onCOSCacheMiss');
+  ignoredModuleProp('onCOSStore');
+  ignoredModuleProp('GL_MAX_TEXTURE_IMAGE_UNITS');
+  ignoredModuleProp('SDL_canPlayWithWebAudio');
+  ignoredModuleProp('SDL_numSimultaneouslyQueuedBuffers');
+  ignoredModuleProp('freePreloadedMediaOnUse');
+  ignoredModuleProp('preinitializedWebGLContext');
+  ignoredModuleProp('keyboardListeningElement');
+  ignoredModuleProp('doNotCaptureKeyboard');
+  ignoredModuleProp('extraStackTrace');
+  ignoredModuleProp('preloadPlugins');
+  ignoredModuleProp('preMainLoop');
+  ignoredModuleProp('postMainLoop');
+  ignoredModuleProp('forcedAspectRatio');
+  ignoredModuleProp('mainScriptUrlOrBlob');
+  ignoredModuleProp('onFullScreen');
+  ignoredModuleProp('INITIAL_MEMORY');
+  ignoredModuleProp('wasmMemory');
+  ignoredModuleProp('wasmBinary');
 }
 var ASM_CONSTS = {
-  1259769: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
+  1253305: ($0, $1) => { let s = UTF8ToString($0, $1); let freq = Number(s); return freq; }
 };
 function js_draw_graphic_raw(img_id_ptr,y,x,width,height,angle_degrees,flip_y,flip_x,brightness_percent,invert) { let img_id = UTF8ToString(img_id_ptr); let params = { "angle_degrees": angle_degrees, "flip_y": !!flip_y, "flip_x": !!flip_x, "brightness_percent": brightness_percent, "invert": !!invert, }; draw_graphic(gfx, img_id, y, x, width, height, params); }
 function js_draw_text(text_ptr,text_len,colour_ptr,colour_len,y,x,size,align) { let text_str = UTF8ToString(text_ptr, text_len); let colour_str = UTF8ToString(colour_ptr, colour_len); draw_text(gfx, text_str, colour_str, y, x, size, align); }
@@ -5710,55 +5770,55 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['__cxa_get_exception_ptr'] != 'undefined', 'missing Wasm export: __cxa_get_exception_ptr');
   assert(typeof wasmExports['memory'] != 'undefined', 'missing Wasm export: memory');
   assert(typeof wasmExports['__indirect_function_table'] != 'undefined', 'missing Wasm export: __indirect_function_table');
-  _get_game_count = Module['_get_game_count'] = createExportWrapper('get_game_count', 0);
-  _get_game_name = Module['_get_game_name'] = createExportWrapper('get_game_name', 1);
-  _start_game = Module['_start_game'] = createExportWrapper('start_game', 4);
-  _update = Module['_update'] = createExportWrapper('update', 2);
-  _handle_user_string_input = Module['_handle_user_string_input'] = createExportWrapper('handle_user_string_input', 4);
-  _handle_user_clicked = Module['_handle_user_clicked'] = createExportWrapper('handle_user_clicked', 3);
-  _handle_mousemove = Module['_handle_mousemove'] = createExportWrapper('handle_mousemove', 4);
-  _handle_mouse_evt = Module['_handle_mouse_evt'] = createExportWrapper('handle_mouse_evt', 5);
-  _handle_wheel_changed = Module['_handle_wheel_changed'] = createExportWrapper('handle_wheel_changed', 3);
-  _handle_key_evt = Module['_handle_key_evt'] = createExportWrapper('handle_key_evt', 3);
-  _handle_touch_evt = Module['_handle_touch_evt'] = createExportWrapper('handle_touch_evt', 5);
-  _handle_gamepad_evt = Module['_handle_gamepad_evt'] = createExportWrapper('handle_gamepad_evt', 5);
-  _handle_msg_received = Module['_handle_msg_received'] = createExportWrapper('handle_msg_received', 5);
-  _handle_btn_clicked = Module['_handle_btn_clicked'] = createExportWrapper('handle_btn_clicked', 2);
-  _handle_popup_btn_clicked = Module['_handle_popup_btn_clicked'] = createExportWrapper('handle_popup_btn_clicked', 4);
-  _handle_game_option_evt = Module['_handle_game_option_evt'] = createExportWrapper('handle_game_option_evt', 4);
-  _malloc = Module['_malloc'] = createExportWrapper('malloc', 1);
-  _free = Module['_free'] = createExportWrapper('free', 1);
-  _start_game_b64 = Module['_start_game_b64'] = createExportWrapper('start_game_b64', 4);
-  _get_state = Module['_get_state'] = createExportWrapper('get_state', 3);
-  _get_init_state = Module['_get_init_state'] = createExportWrapper('get_init_state', 3);
-  _lua_run_cmd = Module['_lua_run_cmd'] = createExportWrapper('lua_run_cmd', 3);
-  _destroy_game = Module['_destroy_game'] = createExportWrapper('destroy_game', 1);
-  _new_file = Module['_new_file'] = createExportWrapper('new_file', 2);
-  _write_to_file = Module['_write_to_file'] = createExportWrapper('write_to_file', 4);
-  _close_file = Module['_close_file'] = createExportWrapper('close_file', 2);
-  _dump_file = Module['_dump_file'] = createExportWrapper('dump_file', 2);
-  _unzip_file = Module['_unzip_file'] = createExportWrapper('unzip_file', 3);
-  _init_game_api = Module['_init_game_api'] = createExportWrapper('init_game_api', 2);
-  _update_dict = Module['_update_dict'] = createExportWrapper('update_dict', 0);
-  _strerror = createExportWrapper('strerror', 1);
-  _fflush = createExportWrapper('fflush', 1);
+  _get_game_count = Module['_get_game_count'] = createExportWrapper('get_game_count', wasmExports['get_game_count'], 0);
+  _get_game_name = Module['_get_game_name'] = createExportWrapper('get_game_name', wasmExports['get_game_name'], 1);
+  _start_game = Module['_start_game'] = createExportWrapper('start_game', wasmExports['start_game'], 4);
+  _update = Module['_update'] = createExportWrapper('update', wasmExports['update'], 2);
+  _handle_user_string_input = Module['_handle_user_string_input'] = createExportWrapper('handle_user_string_input', wasmExports['handle_user_string_input'], 4);
+  _handle_user_clicked = Module['_handle_user_clicked'] = createExportWrapper('handle_user_clicked', wasmExports['handle_user_clicked'], 3);
+  _handle_mousemove = Module['_handle_mousemove'] = createExportWrapper('handle_mousemove', wasmExports['handle_mousemove'], 4);
+  _handle_mouse_evt = Module['_handle_mouse_evt'] = createExportWrapper('handle_mouse_evt', wasmExports['handle_mouse_evt'], 5);
+  _handle_wheel_changed = Module['_handle_wheel_changed'] = createExportWrapper('handle_wheel_changed', wasmExports['handle_wheel_changed'], 3);
+  _handle_key_evt = Module['_handle_key_evt'] = createExportWrapper('handle_key_evt', wasmExports['handle_key_evt'], 3);
+  _handle_touch_evt = Module['_handle_touch_evt'] = createExportWrapper('handle_touch_evt', wasmExports['handle_touch_evt'], 5);
+  _handle_gamepad_evt = Module['_handle_gamepad_evt'] = createExportWrapper('handle_gamepad_evt', wasmExports['handle_gamepad_evt'], 5);
+  _handle_msg_received = Module['_handle_msg_received'] = createExportWrapper('handle_msg_received', wasmExports['handle_msg_received'], 5);
+  _handle_btn_clicked = Module['_handle_btn_clicked'] = createExportWrapper('handle_btn_clicked', wasmExports['handle_btn_clicked'], 2);
+  _handle_popup_btn_clicked = Module['_handle_popup_btn_clicked'] = createExportWrapper('handle_popup_btn_clicked', wasmExports['handle_popup_btn_clicked'], 4);
+  _handle_game_option_evt = Module['_handle_game_option_evt'] = createExportWrapper('handle_game_option_evt', wasmExports['handle_game_option_evt'], 4);
+  _malloc = Module['_malloc'] = createExportWrapper('malloc', wasmExports['malloc'], 1);
+  _free = Module['_free'] = createExportWrapper('free', wasmExports['free'], 1);
+  _start_game_b64 = Module['_start_game_b64'] = createExportWrapper('start_game_b64', wasmExports['start_game_b64'], 4);
+  _get_state = Module['_get_state'] = createExportWrapper('get_state', wasmExports['get_state'], 3);
+  _get_init_state = Module['_get_init_state'] = createExportWrapper('get_init_state', wasmExports['get_init_state'], 3);
+  _lua_run_cmd = Module['_lua_run_cmd'] = createExportWrapper('lua_run_cmd', wasmExports['lua_run_cmd'], 3);
+  _destroy_game = Module['_destroy_game'] = createExportWrapper('destroy_game', wasmExports['destroy_game'], 1);
+  _new_file = Module['_new_file'] = createExportWrapper('new_file', wasmExports['new_file'], 2);
+  _write_to_file = Module['_write_to_file'] = createExportWrapper('write_to_file', wasmExports['write_to_file'], 4);
+  _close_file = Module['_close_file'] = createExportWrapper('close_file', wasmExports['close_file'], 2);
+  _dump_file = Module['_dump_file'] = createExportWrapper('dump_file', wasmExports['dump_file'], 2);
+  _unzip_file = Module['_unzip_file'] = createExportWrapper('unzip_file', wasmExports['unzip_file'], 3);
+  _init_game_api = Module['_init_game_api'] = createExportWrapper('init_game_api', wasmExports['init_game_api'], 2);
+  _update_dict = Module['_update_dict'] = createExportWrapper('update_dict', wasmExports['update_dict'], 0);
+  _strerror = createExportWrapper('strerror', wasmExports['strerror'], 1);
+  _fflush = createExportWrapper('fflush', wasmExports['fflush'], 1);
   _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'];
   _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'];
-  _htonl = createExportWrapper('htonl', 1);
-  _htons = createExportWrapper('htons', 1);
-  _ntohs = createExportWrapper('ntohs', 1);
-  _setThrew = createExportWrapper('setThrew', 2);
-  __emscripten_tempret_set = createExportWrapper('_emscripten_tempret_set', 1);
+  _htonl = createExportWrapper('htonl', wasmExports['htonl'], 1);
+  _htons = createExportWrapper('htons', wasmExports['htons'], 1);
+  _ntohs = createExportWrapper('ntohs', wasmExports['ntohs'], 1);
+  _setThrew = createExportWrapper('setThrew', wasmExports['setThrew'], 2);
+  __emscripten_tempret_set = createExportWrapper('_emscripten_tempret_set', wasmExports['_emscripten_tempret_set'], 1);
   _emscripten_stack_init = wasmExports['emscripten_stack_init'];
   _emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'];
   __emscripten_stack_restore = wasmExports['_emscripten_stack_restore'];
   __emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'];
   _emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'];
-  ___cxa_decrement_exception_refcount = createExportWrapper('__cxa_decrement_exception_refcount', 1);
-  ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_exception_refcount', 1);
-  ___get_exception_message = createExportWrapper('__get_exception_message', 3);
-  ___cxa_can_catch = createExportWrapper('__cxa_can_catch', 3);
-  ___cxa_get_exception_ptr = createExportWrapper('__cxa_get_exception_ptr', 1);
+  ___cxa_decrement_exception_refcount = createExportWrapper('__cxa_decrement_exception_refcount', wasmExports['__cxa_decrement_exception_refcount'], 1);
+  ___cxa_increment_exception_refcount = createExportWrapper('__cxa_increment_exception_refcount', wasmExports['__cxa_increment_exception_refcount'], 1);
+  ___get_exception_message = createExportWrapper('__get_exception_message', wasmExports['__get_exception_message'], 3);
+  ___cxa_can_catch = createExportWrapper('__cxa_can_catch', wasmExports['__cxa_can_catch'], 3);
+  ___cxa_get_exception_ptr = createExportWrapper('__cxa_get_exception_ptr', wasmExports['__cxa_get_exception_ptr'], 1);
   memory = wasmMemory = wasmExports['memory'];
   __indirect_function_table = wasmTable = wasmExports['__indirect_function_table'];
 }
@@ -6283,54 +6343,37 @@ function stackCheckInit() {
   writeStackCookie();
 }
 
-function run() {
-
-  if (runDependencies > 0) {
-    dependenciesFulfilled = run;
-    return;
-  }
+async function run() {
+  assert(!calledRun);
+  calledRun = true;
 
   stackCheckInit();
 
   preRun();
 
-  // a preRun added a dependency, run will be called later
-  if (runDependencies > 0) {
-    dependenciesFulfilled = run;
-    return;
+  if (runDependencies) {
+    await resolveRunDependencies();
   }
 
-  function doRun() {
-    // run may have just been called through dependencies being fulfilled just in this very frame,
-    // or while the async setStatus time below was happening
-    assert(!calledRun);
-    calledRun = true;
-    Module['calledRun'] = true;
-
-    if (ABORT) return;
-
-    initRuntime();
-
-    readyPromiseResolve?.(Module);
-    Module['onRuntimeInitialized']?.();
-    consumedModuleProp('onRuntimeInitialized');
-
-    assert(!Module['_main'], 'compiled without a main, but one is present. if you added it from JS, use Module["onRuntimeInitialized"]');
-
-    postRun();
+  var setStatus = Module['setStatus'];
+  if (setStatus) {
+    setStatus('Running...');
+    // Yield to the event loop to allow the browser to paint "Running..."
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    // Then we want to clear the status text, but only after the rest of this function runs.
+    setTimeout(setStatus, 1, '');
   }
 
-  if (Module['setStatus']) {
-    Module['setStatus']('Running...');
-    setTimeout(() => {
-      setTimeout(() => Module['setStatus'](''), 1);
-      doRun();
-    }, 1);
-  } else
-  {
-    doRun();
-  }
-  checkStackCookie();
+  if (ABORT) return;
+
+  initRuntime();
+
+  Module['onRuntimeInitialized']?.();
+  consumedModuleProp('onRuntimeInitialized');
+
+  assert(!Module['_main'], 'compiled without a main, but one is present. if you added it from JS, use Module["onRuntimeInitialized"]');
+
+  postRun();
 }
 
 function checkUnflushedContent() {
@@ -6376,28 +6419,14 @@ var wasmExports;
 
 // In modularize mode the generated code is within a factory function so we
 // can use await here (since it's not top-level-await).
-wasmExports = await (createWasm());
-
-run();
+wasmExports = await createWasm();
+await run();
 
 // end include: postamble.js
 
 // include: postamble_modularize.js
 // In MODULARIZE mode we wrap the generated code in a factory function
 // and return either the Module itself, or a promise of the module.
-//
-// We assign to the `moduleRtn` global here and configure closure to see
-// this as an extern so it won't get minified.
-
-if (runtimeInitialized)  {
-  moduleRtn = Module;
-} else {
-  // Set up the promise that indicates the Module is initialized
-  moduleRtn = new Promise((resolve, reject) => {
-    readyPromiseResolve = resolve;
-    readyPromiseReject = reject;
-  });
-}
 
 // Assertion for attempting to access module properties on the incoming
 // moduleArg.  In the past we used this object as the prototype of the module
@@ -6418,7 +6447,7 @@ for (const prop of Object.keys(Module)) {
 
 
 
-    return moduleRtn;
+    return Module;
   };
 })();
 
