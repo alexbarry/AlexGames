@@ -67,6 +67,30 @@ impl State {
         }
     }
 
+    pub fn set_to_almost_winning(&mut self) {
+        let mut deck = cards::new_deck();
+        deck.reverse();
+
+        self.set_cards(&State::new());
+
+        while deck.len() > 1 {
+            let card = deck.pop().unwrap();
+            let suit_idx = match card.suit {
+                cards::Suit::Clubs => 0,
+                cards::Suit::Spades => 1,
+                cards::Suit::Diamonds => 2,
+                cards::Suit::Hearts => 3,
+            };
+            self.goals[suit_idx].push(card);
+        }
+        let mut col_idx = 0;
+        while !deck.is_empty() {
+            let card = deck.pop().unwrap();
+            self.play_area[col_idx].push(card);
+            col_idx = (col_idx + 1) % PLAY_AREA_COLUMN_COUNT;
+        }
+    }
+
     pub fn can_pickup_play_area(&self, col_idx: usize, col_pos: usize) -> PlayAreaPickupStatus {
         if self.play_area[col_idx].len() < col_pos {
             return PlayAreaPickupStatus::NoCards;
