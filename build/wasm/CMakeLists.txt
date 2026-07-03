@@ -42,6 +42,8 @@ execute_process(COMMAND mkdir -p ${ALEXGAMES_ZLIB_LIB_DIR})
 #	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
 #)
 #
+
+message("Running emcmake cmake -DZLIB_BUILD_SHARED=OFF ${ALEXGAMES_ZLIB_SRC}")
 execute_process(
 	COMMAND emcmake cmake
 		-DZLIB_BUILD_SHARED=OFF
@@ -49,6 +51,7 @@ execute_process(
 	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
 )
 
+message("Running cmake --build .")
 execute_process(
 	COMMAND cmake --build .
 	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
