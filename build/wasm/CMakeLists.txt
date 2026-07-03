@@ -37,13 +37,15 @@ else()
 endif()
 execute_process(COMMAND mkdir -p ${ALEXGAMES_ZLIB_LIB_DIR})
 
+#execute_process(
+#	COMMAND "${ALEXGAMES_ZLIB_SRC}/configure"
+#	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
+#)
+#
 execute_process(
-	COMMAND "${ALEXGAMES_ZLIB_SRC}/configure"
-	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
-)
-
-execute_process(
-	COMMAND emcmake cmake ${ALEXGAMES_ZLIB_SRC}
+	COMMAND emcmake cmake
+		-DZLIB_BUILD_SHARED=OFF
+		${ALEXGAMES_ZLIB_SRC}
 	WORKING_DIRECTORY ${ALEXGAMES_ZLIB_LIB_DIR}
 )
 
