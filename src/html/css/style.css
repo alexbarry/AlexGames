@@ -235,10 +235,7 @@
 .options_toggle {
 	height: 48px;
 	display: flex;
-}
-
-.options_toggle > label {
-	align-content: center;
+	align-items: center;
 }
 
 /* Shown when a new game is loaded */
