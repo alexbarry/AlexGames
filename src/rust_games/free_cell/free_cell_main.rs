@@ -333,7 +333,7 @@ impl AlexGamesApi for AlexGamesFreeCell {
                 self.session_id = Some(self.callbacks.get_new_session_id());
                 self.game_state.new_game();
                 self.draw_state.reset_state();
-                self.game_won_yet = true;
+                self.game_won_yet = false;
                 self.save_state();
                 self.draw_state();
             }
