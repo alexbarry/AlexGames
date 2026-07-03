@@ -426,6 +426,32 @@ impl CardDraw {
 
 pub fn new_deck() -> Vec<Card> {
     let mut deck: Vec<Card> = Vec::new();
+    for suit_num in 0..=3 {
+        for rank_num in 1..=13 {
+            let rank = num_to_rank(rank_num);
+            let suit = num_to_suit(suit_num);
+            let card = Card {
+                rank: rank,
+                suit: suit,
+            };
+            assert!(
+                num_to_card(card_to_num(&card)).unwrap() == card,
+                "error serializing {:?}",
+                card
+            );
+            deck.push(card);
+        }
+    }
+    return deck;
+}
+
+// Sorting by suit first is more typical,
+// but I inadvertently did it this way before, so
+// I'm keeping this as a legacy method to avoid changing
+// anything (e.g. if I re-used the same seed, I want it
+// to generate the same game)
+pub fn new_deck_sorted_rank_first() -> Vec<Card> {
+    let mut deck: Vec<Card> = Vec::new();
     for rank_num in 1..=13 {
         for suit_num in 0..=3 {
             let rank = num_to_rank(rank_num);

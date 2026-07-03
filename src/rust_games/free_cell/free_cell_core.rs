@@ -48,7 +48,13 @@ impl State {
     }
 
     pub fn new_game(&mut self) {
-        let mut deck = cards::new_deck();
+        // Change this to just "new_deck" if I ever make changes
+        // that result in the same seed generating a different
+        // game.
+        // Though this could be changed any time, since
+        // seeds aren't used yet. But I don't want to make
+        // a change like that in an otherwise mostly no-op commit
+        let mut deck = cards::new_deck_sorted_rank_first();
         cards::shuffle_deck(&mut deck);
 
         self.set_cards(&State::new());
