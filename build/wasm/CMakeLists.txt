@@ -145,7 +145,11 @@ list(APPEND EMCC_LINK_OPTS "-Wno-unused-main")
 
 list(APPEND EMCC_LINK_OPTS
 	"-Werror"
-	"-s ALLOW_MEMORY_GROWTH=1"
+
+	# Disabling this as a workaround for:
+	#     Failed to execute 'decode' on 'TextDecoder': The provided ArrayBuffer value must not be resizable
+	# But I think I can re-enable it if I just pass an upper limit to my UTF8ToString calls.
+	"-s ALLOW_MEMORY_GROWTH=0"
 
 	# tested in a few games on 2023-09-24. It will likely need to grow a lot once
 	# the dictionary is loaded into WASM memory.
